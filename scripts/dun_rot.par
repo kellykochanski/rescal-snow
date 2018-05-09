@@ -1,0 +1,72 @@
+## PARAMETER FILE
+## DUNE model with transitions of avalanches and rotations
+
+Model = DUN
+
+#Bin_file = DUN_50_200_200.bin
+Csp_file = DUN_50_200_200.csp
+#Hpp_file = HPP.bin
+H = 50
+L = 200
+D = 200
+
+## Initial time
+Time = 0.0
+#Temps = 5.111400e+03
+
+## Erosion rate
+Lambda_E = 4
+
+## Deposition rate
+Lambda_C = 2
+
+## Diffusion rate
+Lambda_D = 0.02
+#Lambda_D = 0.0
+
+## Injection rate
+#Lambda_I = 0.1
+
+## Gravity
+Lambda_G = 1000
+
+## Mode of avalanches
+Ava_mode = TRANS
+
+## Avalanches parameters
+Lambda_A = 1
+
+## Delay between avalanches
+Ava_delay = 10.0
+
+## Angle of avalanches (degrees)
+Ava_angle = 35.0
+
+## Height limit in avalanches (cells)
+Ava_h_lim = 1
+#Ava_h_lim = 3
+
+## Rotation parameters
+Rot_mode = OVERLAP
+#Rot_mode = DISK
+Rot_angle = -90
+#Rot_angle = 60
+Rot_delay = 500
+#Rot_delay = 400
+Rot_ncycl = 100
+
+## Initial number of flow cycles without transitions
+Init_ncycl = 100
+
+## Global flow forcing coefficient
+#Lgca_gfor = 0.002
+
+## Delay between flow cycles
+Lgca_delay = 2.0
+
+## Flow reset after rotation
+Lgca_reset = YES
+
+## Speedup of the stabilization of the flow
+Lgca_speedup = 1000
+

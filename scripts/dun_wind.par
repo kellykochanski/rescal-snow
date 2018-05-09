@@ -1,0 +1,86 @@
+## PARAMETER FILE
+## DUNE model with transitions of avalanches
+
+Model = DUN
+
+#Bin_file = DUN_50_200_200.bin
+Csp_file = DUN_50_200_200.csp
+#Hpp_file = HPP.bin
+H = 40
+L = 200
+D = 100
+
+## CSP template (genesis)
+#Csp_template = CUSTOM
+Csp_template = LAYER(5)
+#Csp_template = CONE
+
+## Wind data file
+Wind_file = wind/sample
+#Wind_file = wind/strong_wind
+#Wind_file = wind/low_wind
+#Wind_file = wind/rotate5
+
+## Boundary conditions
+Boundary = PERIODIC
+
+## Physical parameters file
+Phys_prop_file = real_data/desert_earth.prop
+
+## Qsat data file
+Qsat_file = real_data/PDF.data
+
+## Initial time
+Time = 0.0
+
+## Erosion rate
+Lambda_E = 4
+
+## Deposition rate
+Lambda_C = 2
+
+## Diffusion rate
+Lambda_D = 0.02
+#Lambda_D = 0.0
+
+## Injection rate
+Lambda_I = 0.1
+
+## Gravity
+Lambda_G = 1000
+
+## Mode of avalanches
+Ava_mode = TRANS
+
+## Avalanches rate in TRANS mode
+Lambda_A = 1
+
+## Delay between avalanches
+Ava_delay = 10.0
+
+## Angle of avalanches (degrees)
+Ava_angle = 35.0
+
+## Height limit in avalanches (cells)
+Ava_h_lim = 1
+#Ava_h_lim = 3
+
+## Global flow forcing coefficient
+#Lgca_gfor = 0.002
+
+## Delay between flow cycles
+#Lgca_delay = 2.0
+
+## Rotation parameters
+Rot_mode = OVERLAP
+Rot_ncycl = 100
+
+## Initial number of flow cycles without transitions
+Init_ncycl = 100
+
+## Flow reset after rotation
+Lgca_reset = YES
+
+## Speedup of the stabilization of the flow
+Lgca_speedup = 1000
+

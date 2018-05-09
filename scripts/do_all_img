@@ -1,0 +1,44 @@
+#!/bin/bash
+#####################################################
+# copy the last image of each simulation into the images
+# directory and name it after its original directory
+#####################################################
+
+RESCAL_LOG_FILE="RESCAL.log"
+nb_dir=$(find . -mindepth 1 -maxdepth 1 -type d | wc -l)
+echo "number of directories: $nb_dir"
+
+if [ $nb_dir = 0 ]; then
+  echo "nothing to do"
+  exit
+fi
+
+list_dir=$(ls -d */ | tr -d '/')
+#echo list_dir = $list_dir
+
+if [ ! -e images ]; then
+  echo "creating the images directory"
+  mkdir images
+fi
+
+i=0
+
+for dir in $list_dir ; 
+do
+  if [ $dir = "images" ] || [ -e images/${dir}.png ] || [ ! -e ${dir}/${RESCAL_LOG_FILE} ]; then
+    continue
+  fi
+  echo dir = $dir
+  model=$(awk '/model/ {print $1; exit}' ${dir}/${RESCAL_LOG_FILE})
+  echo model = $model
+  img=$(ls -1 ${dir}/${model}*.png 2>/dev/null | tail -1)
+  #echo img = $img
+  if [ -e "$img" ];  then
+    echo "creating ${dir}.png"
+    cp $img images/${dir}.png
+    ((i++))
+  fi
+done
+
+echo "done : $i image(s)"
+

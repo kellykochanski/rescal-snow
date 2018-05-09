@@ -1,0 +1,23 @@
+#!/bin/bash
+
+## Delete files from previous simulation before running a new simulation
+
+to_be_deleted=$(ls *.png *.bin *.csp *.log *.gz *.data *.vel *.car 2>/dev/null )
+
+if [ "$to_be_deleted" == "" ] ; then
+  #echo "no file to delete"
+  exit
+fi
+
+if [ "$1" == "-f" ] || [ -e ".clean_yes" ] ; then
+  ans="yes"
+else
+  echo -n 'Deleting files of types *.(png|bin|csp|log|gz|data|vel|car) in current directory [n|y] ? '
+  read ans
+fi
+
+if [ "$ans" != "n" ] && [ "$ans" != "N" ] && [ "$ans" != "no" ] ; then
+  rm $to_be_deleted
+fi
+
+

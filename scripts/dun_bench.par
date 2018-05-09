@@ -1,0 +1,86 @@
+## PARAMETER FILE
+## DUNE model with transitions of avalanches and lattice gas
+## Fast stabilization of the flow
+
+Model = DUN
+
+Csp_file = DUN_50_200_200.csp
+H = 50
+L = 200
+D = 200
+
+#Seed = 123
+
+## CSP template (genesis)
+Csp_template = LAYER
+
+## Boundary conditions
+Boundary = PERIODIC
+
+## Initial time
+Time = 0.0
+
+## Physical parameters file
+Phys_prop_file = real_data/desert_earth.prop
+
+## Qsat data file
+Qsat_file = real_data/PDF.data
+
+## Erosion rate
+Lambda_E = 4
+
+## Deposition rate
+Lambda_C = 2
+
+## Transport rate
+Lambda_T = 6
+
+## Diffusion rate
+Lambda_D = 0.02
+Lambda_D_mob = 0
+
+## Injection rate
+Lambda_I = 0.1
+
+## Gravity
+Lambda_G = 1000
+
+## Mode of avalanches
+Ava_mode = TRANS
+
+## Avalanches rate in TRANS mode
+Lambda_A = 1
+
+## Delay between avalanches
+Ava_delay = 10.0
+
+## Duration of avalanches
+Ava_duration = 1.0
+
+## Angle of avalanches (degrees)
+Ava_angle = 35.0
+
+## Height limit in avalanches (cells)
+Ava_h_lim = 1
+
+## Activation of lattice gas
+Use_lgca = YES
+
+## Global flow forcing coefficient
+#Lgca_gfor = 0.002
+
+## Delay between flow cycles
+Lgca_delay = 1.0
+
+## Initial number of flow cycles without transitions
+Init_ncycl = 100
+
+## Speedup of the stabilization of the flow
+Lgca_speedup = 1000
+
+## Min shear stress value
+#Tau_min = 100
+
+## Max shear stress value
+#Tau_max = 1100
+

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+###################################
+## Diffusion
+## (define DIF model in defs.h)
+###################################
+
+## remove all previously generated files
+#./clean -f
+./clean
+
+if [ ! -e genesis ]; then
+  ln -s ../src/genesis .
+fi
+if [ ! -e rescal ]; then
+  ln -s ../src/rescal .
+fi
+
+## parameters file (input)
+PAR_FILE="dif.par"
+
+## general log files (output)
+GENESIS_LOG_FILE="GENESIS.log"
+RESCAL_LOG_FILE="RESCAL.log"
+
+## generation of binary cellular space 
+./genesis -f $PAR_FILE -s 2000 > $GENESIS_LOG_FILE
+
+## generation of png images, data files and info logs, then stop after 30 minutes
+nice ./rescal $PAR_FILE -info -dpng 10 -dcsp 5 -stop 30 >> $RESCAL_LOG_FILE
+
+

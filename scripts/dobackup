@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# make an archive from the sources
+
+src_rep="../src"
+src_tar='ReSCAL.tar'
+rep=$PWD
+
+cd $src_rep
+echo "making $src_tar"
+make -f makefile.default backup
+echo "moving $src_tar to $rep"
+mv $src_tar $rep
+

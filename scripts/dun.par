@@ -1,0 +1,66 @@
+## PARAMETER FILE
+## DUNE model with transitions of avalanches and lattice gas
+
+Model = DUN
+
+#Bin_file = TE_50_200_200.bin
+#Bin_file = DUN_50_200_200.bin
+Csp_file = DUN_50_200_200.csp
+#Hpp_file = HPP.bin
+H = 50
+L = 200
+D = 200
+
+## Initial time
+Time = 0.0
+
+## Physical parameters file
+Phys_prop_file = real_data/desert_earth.prop
+
+## Qsat data file
+Qsat_file = real_data/PDF.data
+
+## Erosion rate
+Lambda_E = 4
+
+## Deposition rate
+Lambda_C = 2
+
+## Transport rate
+Lambda_T = 6
+
+## Diffusion rate
+Lambda_D = 0.02
+#Lambda_D = 0.0
+
+## Injection rate
+Lambda_I = 0.1
+
+## Gravity
+Lambda_G = 1000
+
+## Mode of avalanches
+Ava_mode = TRANS
+
+## Avalanches rate in TRANS mode
+Lambda_A = 1
+
+## Delay between avalanches
+Ava_delay = 10.0
+
+## Duration of avalanches
+Ava_duration = 1.0
+
+## Angle of avalanches (degrees)
+Ava_angle = 35.0
+
+## Height limit in avalanches (cells)
+Ava_h_lim = 1
+#Ava_h_lim = 3
+
+## Global flow forcing coefficient
+#Lgca_gfor = 0.002
+
+## Delay between flow cycles
+Lgca_delay = 2.0
+

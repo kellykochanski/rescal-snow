@@ -1,0 +1,47 @@
+#!/bin/bash
+
+###################################
+## Star dune simulation
+###################################
+
+## remove all previously generated files
+#./clean -f
+./clean
+
+## make an archive from the sources
+#./dobackup > BACKUP.log
+
+
+if [ ! -e genesis ]; then
+  ln -s ../src/genesis .
+fi
+if [ ! -e rescal ]; then
+  ln -s ../src/rescal .
+fi
+
+## parameters file (input)
+PAR_FILE="dun_star.par"
+
+## general log files (output)
+GENESIS_LOG_FILE="GENESIS.log"
+RESCAL_LOG_FILE="RESCAL.log"
+
+### number of OpenMP threads
+export OMP_NUM_THREADS=2
+echo OMP_NUM_THREADS=$OMP_NUM_THREADS
+
+## generation of binary cellular space 
+## with python code
+#./genesis.py -f $PAR_FILE > $GENESIS_LOG_FILE
+## or with C code
+./genesis -f $PAR_FILE -s 2000 > $GENESIS_LOG_FILE
+
+## default execution with light shading, horizontal and vertical cross sections and velocity of the flow
+#nice ./rescal $PAR_FILE -h 10 -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
+
+## generation of png images, csp files and info logs
+nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel -vss -info -dpng 200t0 -dcsp 2000t0 -stop 10000t0 -fr 10 >> $RESCAL_LOG_FILE
+
+## plot probability function between shear stress and erosion
+#./plot_cgv
+
