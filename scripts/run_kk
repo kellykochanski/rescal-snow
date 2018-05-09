@@ -3,6 +3,9 @@
 ###################################
 ## Dune simulation
 ###################################
+## KK made this script to run using the 
+## parameters in dun_kk.par.
+## Other users: run with ./run not ./run_kk
 
 ## remove all previously generated files
 #./clean -f
@@ -31,6 +34,7 @@ fi
 #PAR_FILE="dun_col.par"
 #PAR_FILE="dun_scale.par"
 PAR_FILE="dun_kk.par"
+#PAR_FILE="slice_kk.par"
 echo PAR_FILE=$PAR_FILE
 
 ### number of OpenMP threads

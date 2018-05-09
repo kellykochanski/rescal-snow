@@ -100,8 +100,7 @@ void init_template(int type, char *name, char *desc, int nb_args, ...)
 
 //available CSP template types
 #ifdef MODEL_DUN
-enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY};
-#elif defined(MODEL_RIV)
+enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FOthickness#elif defined(MODEL_RIV)
 enum CSP_TEMPLATES {CSP_CUSTOM, CSP_SLOPE};
 #else
 enum CSP_TEMPLATES {CSP_CUSTOM};
@@ -135,6 +134,7 @@ void init_template_list()
   init_template(CSP_SRC_DISK, "SRC_DISK", "SRC_DISK(w=40, x=100, y=D/2):\tcircular source of sand on the ground with width <w> and centered on (x,y)", 3, 40.0, 100.0, 0.0);
   init_template(CSP_SRC_DISK_CEIL, "SRC_DISK_CEIL", "SRC_DISK_CEIL(w=40, x=100, y=D/2):\tcircular source of sand in the ceiling with width <w> and centered on (x,y)", 3, 40.0, 100.0, 0.0);
   init_template(CSP_SMILEY, "SMILEY", "SMILEY:\t\t\t:-)", 0);
+  init_template(CSP_FORSTEP, "FORSTEP", "FORSTEP(h=0.15, hg=0.1, n=2):\tset of integer <n> solid forward-facing steps each <h> cells high, coated with a thickness <hg> of grains", 3, 0.15, 0.1, 2.0);
 #elif defined(MODEL_RIV)
   init_template(CSP_SLOPE, "SLOPE", "SLOPE(r=1.0):\t\tsloping ground of ratio <r>", 1, 1.0);
 #endif
@@ -264,7 +264,7 @@ void genesis()
   float di, dj, dk;
   float Ldx, Ldy, Ldz;
   float pente = 2.0;
-  float h, w, rc;
+  float h, w, rc, n, hg;
   int xmin, xmax, ymin, ymax;
   float x, y, z;
 
@@ -508,6 +508,19 @@ void genesis()
              || (cos(PI*(i-L/2)/L)*cos(PI*(k-D/2)/D)<0.8 && cos(PI*(i-L/2)/L)*cos(PI*(k-D/2)/D)>0.75&&k>3*D/5)))
                aux->celltype = GR;
         }
+        else if (csp_template.type == CSP_FORSTEP){
+	  //CSP_BACKSTEP: set of forward-facing steps
+          h = csp_template.args[0]; // height of each step
+	  n = csp_template.args[1]; // number of steps
+	  hg = csp_template.args[2]; // thickness of space that is granular
+	  for( float step = -1.0; step < n; step = step + 1.0 ){
+            float m_s;
+            m_s = n*h/L;
+	    if ( (i>=L*step/n) && (i<L*(step+1.0)/n) && 
+	      (j>=(H-(h-m_s*(i-L*step/n)))) ) aux->celltype = DUM;
+	    if (j<= hg) aux->celltype = GR;
+	  }
+	}
         else{
           //CSP_CUSTOM
           //if (0) //pas de grain
