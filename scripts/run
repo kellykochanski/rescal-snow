@@ -29,7 +29,8 @@ fi
 #PAR_FILE="dun_coarsening.par"
 #PAR_FILE="dun_star.par"
 #PAR_FILE="dun_col.par"
-PAR_FILE="dun_scale.par"
+#PAR_FILE="dun_scale.par"
+PAR_FILE="dun_kk.par"
 echo PAR_FILE=$PAR_FILE
 
 ### number of OpenMP threads
