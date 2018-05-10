@@ -100,7 +100,8 @@ void init_template(int type, char *name, char *desc, int nb_args, ...)
 
 //available CSP template types
 #ifdef MODEL_DUN
-enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FOthickness#elif defined(MODEL_RIV)
+enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
+#elif defined(MODEL_RIV)
 enum CSP_TEMPLATES {CSP_CUSTOM, CSP_SLOPE};
 #else
 enum CSP_TEMPLATES {CSP_CUSTOM};
@@ -109,6 +110,7 @@ enum CSP_TEMPLATES {CSP_CUSTOM};
 //initialization of available templates
 void init_template_list()
 {
+  printf("KK in genesis.c");
   init_template(CSP_CUSTOM, "CUSTOM", "CUSTOM:\t\t\tno template", 0);
 #ifdef MODEL_DUN
   init_template(CSP_LAYER, "LAYER", "LAYER(h=1.0):\t\t\tsand layer of height <h>", 1, 1.0);
@@ -191,7 +193,8 @@ int parse_template()
 void genesis_parse()
 {
   if (model_name && strcmp(model_name, MOD_NAME)){
-    WarnPrintf("ERROR: Wrong model name %s in parameter file. Check model in defs.h and rebuild all.\n", model_name);
+    WarnPrintf("ERROR: Wrong model name %s in parameter file (caught in genesis.c). Check model in defs.h and rebuild all.\n", model_name);
+    WarnPrintf("KKprint %s MOD_NAME", MOD_NAME);
     exit(-2);
   }
 

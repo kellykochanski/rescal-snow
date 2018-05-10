@@ -472,7 +472,7 @@ callbacks.o: callbacks.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/gtk-2.0/gtk/gtkpreview.h \
  /usr/include/gtk-2.0/gtk/gtktipsquery.h defs.h macros.h entry.h \
  callbacks.h interface.h rescal.h format.h view.h cells.h doublets.h \
- transitions.h space.h surface.h simul.h trace.h lgca.h
+ transitions.h space.h surface.h simul.h trace.h
 
 /usr/include/stdio.h:
 
@@ -1615,5 +1615,3 @@ surface.h:
 simul.h:
 
 trace.h:
-
-lgca.h:
