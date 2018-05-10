@@ -368,7 +368,7 @@ void init_modele()
   //model_parse();
 
   if (model_name && strcmp(model_name, MOD_NAME)){
-    ErrPrintf("ERROR: Wrong model name %s in parameter file. Check model in defs.h and rebuild all.\n", model_name);
+    ErrPrintf("ERROR: Wrong model name %s in parameter file (caught in models.c). Check model in defs.h and rebuild all.\n", model_name);
     exit(-2);
   }
 
@@ -411,6 +411,14 @@ void init_modele()
 
   //printf("ReSCAL - %s model\n",MOD_NAME);
 
+
+/*****************************************************************************/
+/******************************** SNO model **********************************/
+/*****************************************************************************/
+// KK 08/May/2018
+#ifdef MODEL_SNO
+  WarnPrintf("Warning (models.c): MODEL_SNO has not yet been implemented.")
+#endif 
 
 /*****************************************************************************/
 /********************************* DUN model *********************************/
