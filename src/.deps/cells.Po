@@ -15,7 +15,7 @@ cells.o: cells.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
  /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h \
  /usr/include/bits/string.h /usr/include/bits/string2.h defs.h macros.h \
- cells.h space.h surface.h trace.h
+ cells.h space.h surface.h trace.h lgca.h
 
 /usr/include/stdio.h:
 
@@ -98,3 +98,5 @@ space.h:
 surface.h:
 
 trace.h:
+
+lgca.h:
