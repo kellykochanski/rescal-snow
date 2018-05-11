@@ -112,7 +112,7 @@ int use_lgca = 1;
 int use_lgca = 0;
 #endif // LGCA
 
-#ifdef MODEL_DUN
+#ifdef MODEL_DUN || MODEL_SNO
 float lambda_E, lambda_C, lambda_D, lambda_G, lambda_J;
 float lambda_D_mob;
 float lambda_T = -1;
@@ -193,7 +193,7 @@ float prob_asv_D, prob_asv_L, prob_asv_C;  //asservissement des transitions vis-
 
 
 /// callbacks for the regulation of transitions
-#ifdef MODEL_DUN
+#ifdef MODEL_DUN || MODEL_SNO
 Callback_regul callback_bord_dun; //automatic reinjection of sand grains
 Callback_regul callback_injection_coef; //regulation of the injection of sand grains
 #endif
@@ -249,7 +249,7 @@ void params_modele()
 #endif // CELL_COLOR
 
   /// declare parameters
-#ifdef MODEL_DUN
+#ifdef MODEL_DUN || MODEL_SNO
   parameter("Lambda_E", "erosion rate", &lambda_E, PARAM_FLOAT, "MODEL");
   parameter("Lambda_C", "deposition rate", &lambda_C, PARAM_FLOAT, "MODEL");
   parameter("Lambda_T", "transport rate", &lambda_T, PARAM_FLOAT, "MODEL");
@@ -417,13 +417,15 @@ void init_modele()
 /*****************************************************************************/
 // KK 08/May/2018
 #ifdef MODEL_SNO
+
   WarnPrintf("Warning (models.c): MODEL_SNO has not yet been implemented.")
-#endif 
+
+#endif
 
 /*****************************************************************************/
 /********************************* DUN model *********************************/
 /*****************************************************************************/
-#ifdef MODEL_DUN
+#ifdef MODEL_DUN || MODEL_SNO
 
 /* Parameters:
   lambda_E   	erosion
@@ -605,7 +607,9 @@ void init_modele()
     //temporal regulation of the reinjection rate
     //trans_regul(2, callback_injection_coef);
   }
+#endif //MODEL_DUN or MODEL_SNO
 
+#ifdef MODEL_DUN
   /***** vegetation *****/
 #ifdef USE_VEGETATION
 //#define VEG_VARIANT 1 /// VEG state is considered as vegetation without grain
@@ -1226,7 +1230,7 @@ void init_modele()
 }
 
 
-#ifdef MODEL_DUN
+#ifdef MODEL_DUN || MODEL_SNO
 
 float coef_injection = 1.0; //regulation de l'injection de grain
 
@@ -1270,7 +1274,7 @@ int callback_injection_coef(void *data)
   return 0;
 }
 
-#endif  //MODEL_DUN
+#endif  //MODEL_DUN or MODEL_SNO
 
 #ifdef AVALANCHES
 

@@ -1666,7 +1666,8 @@ int simul_csp()
 #else
     /// default lgca delay derived from transition rates
     double lambda_max=0;
-    for(i=0; i<nb_trans_db; i++){
+    // KK: i returned "undeclared error" from rescal1.6, declared it as int.
+    for(int i=0; i<nb_trans_db; i++){
       if (t_trans[i].intensite > lambda_max) lambda_max = t_trans[i].intensite;
     }
     lgca_delay = 1.0 / lambda_max;

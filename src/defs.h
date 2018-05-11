@@ -113,7 +113,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 // KK 10 May 2018
 #ifdef MODEL_SNO
 /// name of the model
-#define MOD_NAME "DUN"
+#define MOD_NAME "SNO"
 #define MOD_DESC "simulation of snow surface under fluid flow"
 
 /// cell states
@@ -131,7 +131,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 #define GRC   11 // grain, no cohesion (used only graphically)
 
 //names of cell states
-#define ETATS {"GR", "GRJ", "GRH", "EAUC", "VEG", "BORD", "DUM", "IN", "OUT", "TUNNEL"
+#define ETATS {"GR", "GRJ", "GRH", "EAUC", "VEG", "BORD", "DUM", "IN", "OUT", "TUNNEL"}
 
 // phases of cell states
 #define PHASES { SOLID, SOLID, SOLID, FLUID, SOLID, SOLID, SOLID, SOLID, SOLID, SOLID }
@@ -147,6 +147,8 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 #define WIND_DATA //option for importing wind data from a file (with ROTATIONS option)
 #define TIME_SCALE //option for computing the time scale (using additional physical parameters)
 #define CELL_TIME GR //save time for each cell of type GR
+
+#endif
 
 /// ===================== DUN MODEL =====================
 #ifdef MODEL_DUN
