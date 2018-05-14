@@ -130,6 +130,9 @@ float lambda_T_col = -1;
 float lambda_D_col = -1;
 float lambda_D_mob_col = -1;
 #endif
+#endif // DUN or SNO
+
+#ifdef MODEL_DUN // options for dun but not sno model
 #ifdef USE_VEGETATION
 int use_veg = 1;
 float lambda_V_up;
@@ -140,7 +143,16 @@ float lambda_V_nuc;
 float lambda_V_nuc_air;
 float lambda_V_swarm;
 #endif
+#endif // DUN
+
+#ifdef MODEL_SNO // options for sno but not dun model
+#ifdef COHESION
+float lambda_S = 3;
+#ifdef CELL_COLOR
+float lambda_C_col = -1;
 #endif
+#endif // cohesion
+#endif // SNO
 
 #ifdef MODEL_AVA
 float lambda_I = 0.1;
@@ -273,6 +285,9 @@ void params_modele()
   parameter("Lambda_D_col", "diffusion rate for white grains (Lambda_D by default)", &lambda_D_col, PARAM_FLOAT, "COLOR");
   parameter("Lambda_D_mob_col", "diffusion rate for white mobile grains (Lambda_D_mob by default)", &lambda_D_mob_col, PARAM_FLOAT, "COLOR");
 #endif
+#endif // sno or dun
+
+#ifdef MODEL_DUN
 #ifdef USE_VEGETATION
   param_family("VEGETATION", "Vegetation parameters");
   parameter("Use_vegetation", "use vegetated cells and transitions (YES|NO) - YES by default", &use_veg, PARAM_BOOLEAN, "VEGETATION");
@@ -285,8 +300,15 @@ void params_modele()
   parameter("Lambda_V_swarm", "vegetation swarming rate", &lambda_V_swarm, PARAM_FLOAT, "VEGETATION");
 #endif
   //parameter("Lambda_J", "non-utilisé", &lambda_J, PARAM_FLOAT);
+#endif // dun
 
+#ifdef MODEL_SNO
+#ifdef COHESION
+  parameter("Lambda_S", "Factor decrease in erosion rate if particle is sintered (3 by default)", &lambda_S, PARAM_FLOAT, "MODEL");
 #endif
+#endif //sno
+
+
 #ifdef MODEL_AVA
   parameter("Lambda_I", "injection rate - optional", &lambda_I, PARAM_FLOAT, "MODEL");
 #endif //MODEL_AVA
@@ -418,9 +440,29 @@ void init_modele()
 // KK 08/May/2018
 #ifdef MODEL_SNO
 
-  WarnPrintf("Warning (models.c): MODEL_SNO has not yet been implemented.")
+/* Parameters:
+ * lambda_S   ratio of erosion of loose to sintered snow (>=1)
+*/
+  double vert_erosion = 100000.0; // ratio of horizontal:vertical erosion
+  				 // value take from sand dun
 
+#ifdef COHESION
+  /****** erosion of cohesive (sintered) grains ******/
+  // grains turn from GRV (cohesive) into GRJ (moving)
+  // when they land, they will be loose (GR), their cohesive bonds broken
+  trans_ref(101, EST_OUEST, EAUC, GRV, EAUC, GRJ, lambda_E*lambda_S );
+  trans_ref(102, VERTICAL,  EAUC, GRV, GRJ, EAUC, lambda_E*lambda_S/vert_erosion );
+  
+
+  // KK TODO -- allow loose grains (GR) to turn cohesive (GRV)
+  // This requires a grain to transition in place, does not appear to be implemented yet
+
+#ifdef CELL_COLOR
+  // Erosion of colored cohesive grains not yet implemented - KK TODO
+#endif 
 #endif
+
+#endif //sno
 
 /*****************************************************************************/
 /********************************* DUN model *********************************/
@@ -550,6 +592,7 @@ void init_modele()
 
 #ifdef AVALANCHES
   /***** avalanches *****/
+  // KK TODO - should cohesive grains (GRV) ever avalanche?
   if (ava_trans){
     /*if (LNS > 1){
       trans_ref(14, HORIZONTAL, GR, EAUC, EAUC, GR, lambda_A);
@@ -609,7 +652,7 @@ void init_modele()
   }
 #endif //MODEL_DUN or MODEL_SNO
 
-#ifdef MODEL_DUN
+#ifdef MODEL_DUN //but no snow
   /***** vegetation *****/
 #ifdef USE_VEGETATION
 //#define VEG_VARIANT 1 /// VEG state is considered as vegetation without grain
@@ -725,6 +768,17 @@ void init_modele()
 #endif //USE_VEGETATION
 
 #endif //MODEL_DUN
+
+#ifdef MODEL_SNO // snow but not sand dunes
+  /************cohesion******************/
+#ifdef COHESION // GRV grains are cohered to neighbors
+  WarnPrintf("Cohesion is turned on, but still in development (KK, models.c)");
+#endif //cohesion
+#ifdef SINTER // time-dependent increase in cohesion
+  WarnPrintf("Sintering is turned on, but not yet implemented(KK, models.c)");
+#endif // sinter
+#endif // MODEL SNO
+
 
 
 /*****************************************************************************/

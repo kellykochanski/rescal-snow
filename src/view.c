@@ -327,7 +327,9 @@ void view_palette(int *colors)
   palette[GR]   = 0x00ffffff; // white grain
   palette[GRJ]  = 0x00ff0000; // red mobile grain
   palette[GRV]  = 0x00adcbe3; // light-blue hardened grain
+#ifdef BR
   palette[BR]   = 0x00000000; // black bedrock
+#endif
   palette[DUM]  = 0x00000000; // black DUM/neutral
   palette[IN]   = 0x00ffdc73; // yellow input
   palette[OUT]  = 0x00ffbf00; // dark yellow output
@@ -415,15 +417,10 @@ void view_palette(int *colors)
   for(i=0; i<MAX_CELL; i++){
     cel_shade_index[i] = -1;
   }
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   visible[EAUC] = 0; /// EAUC cells not visible
   if (opt_ls | opt_al | opt_lal) visible[GRJ] = 0; /// GRJ cells not visible
 #endif // MODEL_DUN
-
-#ifdef MODEL_SNO
-  visible[EAUC] = 0; // EAUC cells not visible
-  if (opt_ls | opt_al | opt_lal) visible[GRJ] = 0; // jumping GRJ cells not visible
-#endif // MODEL_SNO
 
 #ifdef MODEL_AVA
   visible[AIR] = 0; /// AIR cells not visible
@@ -435,12 +432,9 @@ void view_palette(int *colors)
 
   /// number of shadings
   nb_shades = 1;
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   nb_shades++;
 #endif // MODEL_DUN
-#ifdef MODEL_SNO
-  nb_shades++;
-#endif // MODEL_SNO
 #ifdef CELL_COLOR
   nb_shades++;
 #endif
@@ -460,19 +454,12 @@ void view_palette(int *colors)
   init_shading(index, nb_values, 0x00400000, 0x00ffc37f); //brown shading
   cel_shade_index[ALTI] = index;
 
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
    /// DUM shading
   index++;
   init_shading(index, nb_values, 0x00101010, 0x00909090); //dark grey shading
   cel_shade_index[DUM] = index;
 #endif // defined
-
-#ifdef MODEL_SNO
-  // DUM shading
-  index ++;
-  init_shading(index, nb_values, 0x0036454f, 0x00708090); //blue-grey shading
-  cel_shade_index[DUM] = index;
-#endif
 
 #ifdef CELL_COLOR
   /// "colored" cells
