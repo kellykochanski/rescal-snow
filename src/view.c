@@ -301,7 +301,6 @@ void view_palette(int *colors)
   start=0;
 
 #if defined(MODEL_DUN)
-
 //#define GRC GRV //colored grain
 
   palette[GR] = 0x00400000; //0x00000000; //grain
@@ -321,6 +320,19 @@ void view_palette(int *colors)
   palette[OUT] = 0x009f0000; //output of sand
   palette[EAUT] = 0x000000ff; //turbulence
   palette[GRC] = 0x00ffffff; //colored grain
+
+#elif defined(MODEL_SNO)
+  palette[EAUC] = 0x00e5d0ff; // light purple fluid
+  palette[EAUT] = 0x00bf8bff; // mid-purple turbulence
+  palette[GR]   = 0x00ffffff; // white grain
+  palette[GRJ]  = 0x00ff0000; // red mobile grain
+  palette[GRV]  = 0x00adcbe3; // light-blue hardened grain
+  palette[BR]   = 0x00000000; // black bedrock
+  palette[DUM]  = 0x00000000; // black DUM/neutral
+  palette[IN]   = 0x00ffdc73; // yellow input
+  palette[OUT]  = 0x00ffbf00; // dark yellow output
+  palette[GRC]  = 0x00ffc0cb; // pink colored grain
+  palette[BORD] = 0x00c0c0c0; // grey boundary
 
 #elif defined(MODEL_AVA)
 
@@ -408,6 +420,11 @@ void view_palette(int *colors)
   if (opt_ls | opt_al | opt_lal) visible[GRJ] = 0; /// GRJ cells not visible
 #endif // MODEL_DUN
 
+#ifdef MODEL_SNO
+  visible[EAUC] = 0; // EAUC cells not visible
+  if (opt_ls | opt_al | opt_lal) visible[GRJ] = 0; // jumping GRJ cells not visible
+#endif // MODEL_SNO
+
 #ifdef MODEL_AVA
   visible[AIR] = 0; /// AIR cells not visible
 #endif // MODEL_DUN
@@ -421,6 +438,9 @@ void view_palette(int *colors)
 #ifdef MODEL_DUN
   nb_shades++;
 #endif // MODEL_DUN
+#ifdef MODEL_SNO
+  nb_shades++;
+#endif // MODEL_SNO
 #ifdef CELL_COLOR
   nb_shades++;
 #endif
@@ -446,6 +466,13 @@ void view_palette(int *colors)
   init_shading(index, nb_values, 0x00101010, 0x00909090); //dark grey shading
   cel_shade_index[DUM] = index;
 #endif // defined
+
+#ifdef MODEL_SNO
+  // DUM shading
+  index ++;
+  init_shading(index, nb_values, 0x0036454f, 0x00708090); //blue-grey shading
+  cel_shade_index[DUM] = index;
+#endif
 
 #ifdef CELL_COLOR
   /// "colored" cells

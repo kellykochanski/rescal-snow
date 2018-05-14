@@ -2,23 +2,18 @@
 ## High mobility DUNE model with transitions of avalanches and lattice gas
 ## A cone of sand will evolve into a barchan
 
-# KK created this to play with the parameters of the dune model.
-# Don't use this, might be broken. 
-# Make and modify a copy of dun.par 
-
 Model = DUN
 
 Csp_file = DUN.csp
 #H = 50
-H = 80
+H = 20
 #L = 400
-L = 400
+L = 200
 #D = 200
-D = 50
+D = 100
 
 ## CSP template (genesis)
-#Csp_template = FORSTEP(10.0, 4.0, 10.0)
-CSP_template = RCONE 
+Csp_template = RCONE
 
 ## Boundary conditions
 Boundary = REINJECTION
@@ -72,7 +67,7 @@ Lambda_D = 0.06
 Lambda_I = 1
 
 ## Gravity
-Lambda_G = 1000 #1000
+Lambda_G = 1000
 
 ## Mode of avalanches
 Ava_mode = TRANS
@@ -87,7 +82,7 @@ Lambda_A = 1
 #Ava_duration = 1.0
 
 ## Angle of avalanches (degrees)
-Ava_angle = 35.0 #35.0
+Ava_angle = 35.0
 
 ## Height limit in avalanches (cells)
 Ava_h_lim = 1

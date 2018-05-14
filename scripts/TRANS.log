@@ -1,14 +1,39 @@
 
 # TRANSITIONS
 
-NB_TRANS_DB = 0
+NB_TRANS_DB = 21
+TR( 0): EAST_WEST, [EAUC, GR] -> [EAUC, GRJ], 4.000000000 {chk[2]+,time_corr}
+TR( 1): VERTICAL, [EAUC, GR] -> [GRJ, EAUC], 0.000040000 {chk[2]+,time_corr} <TRANSPORT>
+TR( 2): VERTICAL, [GR, EAUC] -> [EAUC, GR], 1000.000000000 <TRANSPORT>
+TR( 3): VERTICAL, [GRJ, EAUC] -> [EAUC, GRJ], 150.000000000 <TRANSPORT>
+TR( 4): VERTICAL, [EAUC, GRJ] -> [GRJ, EAUC], 6.000000000 <TRANSPORT>
+TR( 5): EAST_WEST, [GRJ, EAUC] -> [EAUC, GRJ], 30.000000000 <TRANSPORT>
+TR( 6): EAST_WEST, [GRJ, GR] -> [GRJ, GR], 30.000000000
+TR( 7): EAST_WEST, [GRJ, EAUC] -> [GR, EAUC], 2.000000000
+TR( 8): EAST_WEST, [GRJ, GR] -> [GR, GR], 2.000000000
+TR( 9): EAST_WEST, [GRJ, DUM] -> [GR, DUM], 2.000000000
+TR(10): EAST_WEST, [GR, GRJ] -> [GR, GR], 6.000000000
+TR(11): NORTH_SOUTH, [GR, EAUC] -> [EAUC, GR], 0.059999999 {chk[1]+,time_corr} <TRANSPORT>
+TR(12): NORTH_SOUTH, [EAUC, GR] -> [GR, EAUC], 0.059999999 {chk[2]+,time_corr} <TRANSPORT>
+TR(13): EAST_WEST, [GR, EAUC] -> [EAUC, GR], 1.000000000 {chk[1]+,time_no_evol} <TRANSPORT>
+TR(14): EAST_WEST, [EAUC, GR] -> [GR, EAUC], 1.000000000 {chk[2]+,time_no_evol} <TRANSPORT>
+TR(15): EAST_WEST, [GRJ, BORD] -> [EAUC, BORD], 20.000000000
+TR(16): EAST_WEST, [GR, BORD] -> [EAUC, BORD], 20.000000000
+TR(17): VERTICAL, [IN, EAUC] -> [IN, GR], 1.000000000 {regul}
+TR(18): VERTICAL, [EAUC, IN] -> [GRJ, IN], 1.000000000
+TR(19): NORTH_SOUTH, [GR, EAUC] -> [EAUC, GR], 1.000000000 {chk[1]+,time_no_evol} <TRANSPORT>
+TR(20): NORTH_SOUTH, [EAUC, GR] -> [GR, EAUC], 1.000000000 {chk[2]+,time_no_evol} <TRANSPORT>
 
 NB_TRANS_CEL = 0
 
 # LINKED TRANSITIONS
 
-NB_LINKS = 0
+NB_LINKS = 4
+LT( 0): 0[2] -> 4, 0.500000000
+LT( 1): 4[1] -> 5, 1.000000000
+LT( 2): 1[1] -> 5, 1.000000000
+LT( 3): 6[1] -> 4, 1.000000000
 
 # NUMBER OF OCCURRENCES
 
-    
+         TR( 0)        BLK     TR( 1)        BLK     TR( 2)     TR( 3)     TR( 4)     TR( 5)     TR( 6)     TR( 7)     TR( 8)     TR( 9)     TR(10)     TR(11)        BLK     TR(12)        BLK     TR(13)        BLK     TR(14)        BLK     TR(15)     TR(16)     TR(17)     TR(18)     TR(19)        BLK     TR(20)        BLK     LT( 0)     LT( 1)     LT( 2)     LT( 3)

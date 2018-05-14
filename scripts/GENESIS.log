@@ -1,13 +1,13 @@
 genesis
 DUN model
-args: -f dun_kk.par -s 2000 
-read parameters file : dun_kk.par
+args: -f dun_small.par -s 2000 
+read parameters file : dun_small.par
 Model = DUN
 Csp_file = DUN.csp
-H = 80
-L = 400
-D = 50
-Csp_template = FORSTEP(10.0,4.0,10.0)
+H = 20
+L = 200
+D = 100
+Csp_template = RCONE
 Boundary = REINJECTION
 WARNING: unkown parameter - Time
 WARNING: unkown parameter - Phys_prop_file
@@ -35,13 +35,14 @@ WARNING: unkown parameter - Tau_min
 WARNING: unkown parameter - Tau_max
 WARNING: unkown parameter - Centering_delay
 read_parameters : 32 parametres lus
-csp_template.name = FORSTEP
-csp_template.type = 18
-csp_template.args[0] = 10.000000
-csp_template.args[1] = 4.000000
-csp_template.args[2] = 10.000000
+csp_template.name = RCONE
+csp_template.type = 6
+csp_template.args[0] = 0.660000
+csp_template.args[1] = 0.400000
+csp_template.args[2] = 0.500000
+csp_template.args[3] = 0.500000
 random seed: 2000
-allocation TE : 1.60 Mo
+allocation TE : 400000
 format csp
 writing CSP data : DUN.csp
 header size: 80
