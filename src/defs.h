@@ -55,7 +55,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 /// ======================================================
 
 /// common options
-#define OPENMP		//use OpenMP parallelization (on lattice gas)
+// #define OPENMP		//use OpenMP parallelization (on lattice gas)
 #define GUI		//graphical interface
 #define CYCLAGE_HOR     //enable horizontal cycling
 #define INFO_CEL        //log the number of cells
@@ -70,7 +70,8 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 #define REORIENT_AUTO   //automatic reorientation when saving (images of) the cellular space
 #define CSP_MUTEX       //mutual exclusion on the cellular space (no transition while saving data)
 //#define GTK_OLD_SYNTAX  //compile with old version of GTK+2.x (obsolete)
-#define PARALLEL_AUTOMATA //enable concurrent execution of stochastic engine and lattice gas  (non-deterministic only, not working on MacOS X)
+// #define PARALLEL_AUTOMATA //enable concurrent execution of stochastic engine and lattice gas  (non-deterministic only, not working on MacOS X)
+
 
 #if !defined(_OPENMP) || defined(__CYGWIN32__)
 #undef OPENMP
