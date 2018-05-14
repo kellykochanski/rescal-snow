@@ -27,7 +27,9 @@
 #include <memory.h>
 #include <assert.h>
 #include <math.h>
+#ifdef OPENMP
 #include <omp.h>
+#endif
 #ifdef __AVX__
 #include <stdio.h>
 #include <immintrin.h>
