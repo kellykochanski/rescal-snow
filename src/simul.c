@@ -210,7 +210,7 @@ void params_simul()
   parameter("Time", "initial physical time - optional", &init_time, PARAM_DOUBLE, "GENERAL");
 
 #ifdef CYCLAGE_HOR
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   parameter("Boundary", "boundary conditions (PERIODIC|OPEN|OUT|CLOSE|REINJECTION), PERIODIC by default", &boundary_str, PARAM_STRING, "GENERAL");
 #else
   parameter("Boundary", "boundary conditions (PERIODIC|OPEN|CLOSE), PERIODIC by default", &boundary_str, PARAM_STRING, "GENERAL");
@@ -1660,7 +1660,7 @@ int simul_csp()
 #ifdef LGCA
   double lgca_time_threshold = csp_time;
   if (use_lgca && !lgca_delay){
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
     lgca_delay = 1.0/NB_MVT_EO; //1.0;
     //lgca_delay = 1.5/NB_MVT_EO; //1.0;
 #else

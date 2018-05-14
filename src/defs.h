@@ -41,7 +41,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 /// ======================================================
 
 /// choice of a model
-#define MODEL_DUN    //Dune morphodynamics
+//#define MODEL_DUN    //Dune morphodynamics
 //#define MODEL_AVA    //Avalanches
 //#define MODEL_CMB    //Core-mantle boundary
 //#define MODEL_ICB    //Innercore-core boundary
@@ -50,7 +50,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 //#define MODEL_DIF    //Diffusion
 //#define MODEL_D2G    //Diffusion 2d with gravity
 //#define MODEL_LIFE   //Stochastic game of life (2D)
-//#define MODEL_SNO    //Snow bedform morphodynamics
+#define MODEL_SNO    //Snow bedform morphodynamics
 
 /// ======================================================
 
@@ -112,46 +112,20 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 
 /// ===================== SNO MODEL =====================
 // KK 10 May 2018
+// Most cell types are inherited from the DUN MODEL (below)
 #ifdef MODEL_SNO
 /// name of the model
 #define MOD_NAME "SNO"
-#define MOD_DESC "simulation of snow surface under fluid flow"
+#define MOD_DESC "simulation of snow surface under air flow"
 
-/// cell states
-#define GR    0 //grain, no cohesion
-#define GRJ   1 //grain, mobile
-#define GRV   2 //grain, cohesive/hardened
-#define EAUC  3 //air
-#define VEG   4 //vegetation
-#define BORD  5 //boundary
-#define DUM   6 //neutral (e.g. bedrock)
-#define IN    7 //input of snow
-#define OUT   8 // output of snow
-#define TUNNEL  9 // tunnel to another cellular space (with PARALLEL option)
-#define EAUT    10 // (used graphically, no transitions)
-#define GRC   11 // grain, no cohesion (used only graphically)
-
-//names of cell states
-#define ETATS {"GR", "GRJ", "GRV", "EAUC", "VEG", "BORD", "DUM", "IN", "OUT", "TUNNEL"}
-
-// phases of cell states
-#define PHASES { SOLID, SOLID, SOLID, FLUID, SOLID, SOLID, SOLID, SOLID, SOLID, SOLID }
-
-/// specific options of the model
-#define ALTI GR //compute elevation map for cells of type GR
-#define AVALANCHES
-#define ROTATIONS
-#define CENTERING_AUTO //automatic centering
-#define LIENS_TRANSITIONS //correlations of transitions
-#define LGCA //lattice gas
-#define CGV //compute shear stress (with LGCA option)
-#define WIND_DATA //option for importing wind data from a file (with ROTATIONS option)
-#define TIME_SCALE //option for computing the time scale (using additional physical parameters)
-//#define CELL_TIME GR //save time for each cell of type GR
+// specific options of the model (more options available under DUN MODEL)
+#define COHESION // enable some grains (GRV) to be harder to remove than others
+#define SINTER   // time-dependent hardening - not yet implemented
 
 #endif
 
 /// ===================== DUN MODEL =====================
+//  Most properties of dunes - except name and vegetation - are inherited by SNO MODEL
 #ifdef MODEL_DUN
 
 /// name of the model
@@ -159,7 +133,9 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 
 /// description
 #define MOD_DESC "simulation of sand dunes under fluid flow"
+#endif // MODEL_DUN
 
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
 /// cell states
 #define GR    0 //grain
 #define GRJ   1 //mobile grain
@@ -205,7 +181,8 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 //#define DUMP_AUTOCORREL //computation of the auto-correlation in height (when using WAVES_2D template)
 //#define APPEL_MCC //external matlab application
 //#define USE_VEGETATION //option for using cells in VEG state
-#endif
+
+#endif // DUN or SNO
 
 /// ===================== AVA MODEL =====================
 #ifdef MODEL_AVA

@@ -261,7 +261,7 @@ void genesis()
 /*****************************************************************************/
 /********************************* DUN model *********************************/
 /*****************************************************************************/
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   float di, dj, dk;
   float Ldx, Ldy, Ldz;
   float pente = 2.0;
@@ -514,11 +514,17 @@ void genesis()
           h = csp_template.args[0]; // height of each step
 	  n = csp_template.args[1]; // number of steps
 	  hg = csp_template.args[2]; // thickness of space that is granular
+	  float b = h; // thickness of solid layer below steps
 	  for( float step = -1.0; step < n; step = step + 1.0 ){
             float m_s;
             m_s = n*h/L;
+#ifdef GRV  // if cohesive grain (GRV) defined, make cohesive steps
 	    if ( (i>=L*step/n) && (i<L*(step+1.0)/n) && 
-	      (j>=(H-(h-m_s*(i-L*step/n)))) ) aux->celltype = DUM;
+	      (j>=(H-b-(h-m_s*(i-L*step/n)))) ) aux->celltype = GRV;
+#else       // else make solid unerodible (DUM) steps
+	    if ( (i>=L*step/n) && (i<L*(step+1.0)/m) &&
+	      (j>=(H-b-(h-m_s*(i-L*step/n)))) ) aux->celltype = DUM; 
+#endif
 	    if (j<= hg) aux->celltype = GR;
 	  }
 	}
