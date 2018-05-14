@@ -1,8 +1,8 @@
 genesis
-DUN model
+SNO model
 args: -f dun_small.par -s 2000 
 read parameters file : dun_small.par
-Model = DUN
+Model = SNO
 Csp_file = DUN.csp
 H = 20
 L = 200
@@ -33,8 +33,7 @@ WARNING: unkown parameter - Init_ncycl
 WARNING: unkown parameter - Lgca_speedup
 WARNING: unkown parameter - Tau_min
 WARNING: unkown parameter - Tau_max
-WARNING: unkown parameter - Centering_delay
-read_parameters : 32 parametres lus
+read_parameters : 31 parametres lus
 csp_template.name = RCONE
 csp_template.type = 6
 csp_template.args[0] = 0.660000

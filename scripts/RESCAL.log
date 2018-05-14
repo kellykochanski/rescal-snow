@@ -1,5 +1,5 @@
 ReSCAL 1.6 (2016-10)
-DUN model - simulation of sand dunes under fluid flow
+SNO model - simulation of snow surface under fluid flow
 format of numerical values: C 
 size of long: 8 bytes (64b)
 size of cell: 1 byte(s)
@@ -48,7 +48,7 @@ GRAPHICAL OPTIONS
 Please see README file for instructions (also see http://www.ipgp.fr/rescal).
 deterministic execution
 read parameters file : dun_small.par
-Model = DUN
+Model = SNO
 Csp_file = DUN.csp
 H = 20
 L = 200
@@ -79,8 +79,7 @@ Init_ncycl = 150
 Lgca_speedup = 1000
 Tau_min = 0
 Tau_max = 1000
-Centering_delay = 200
-read_parameters : 32 parametres lus
+read_parameters : 31 parametres lus
 WARNING: parameter Bin_file not found
 WARNING: parameter Seed not found
 WARNING: parameter Lambda_D_mob not found
@@ -95,13 +94,14 @@ WARNING: parameter Rot_mode not found
 WARNING: parameter Rot_angle not found
 WARNING: parameter Rot_delay not found
 WARNING: parameter Rot_ncycl not found
+WARNING: parameter Centering_delay not found
 WARNING: parameter Wind_file not found
 WARNING: parameter Hpp_file not found
 WARNING: parameter Lgca_gfor not found
 WARNING: parameter Lgca_reset not found
 reading CSP metadata
 size of header: 80
-chunk MODL: DUN
+chunk MODL: SNO
 chunk SIZE: 20 x 200 x 100
 chunk CELL: 1
 chunk TIME: 0.000000
@@ -115,10 +115,9 @@ reading CSP data : DUN.csp
 szcell = 1
 csp_cell_size = 1
 couloir : LN = 1   LS = 100   LNS = 100   nb_pv = 100
-h_ceil = 1
-h_floor = 1
-transitions sur le bord
-reinjection de grains
+h_ceil = 0
+h_floor = 0
+Warning (models.c): MODEL_SNO has not yet been implemented.transitions sur le bord
 decouplage des doublets horizontaux : passe 0
 decouplage de la transition horizontale 13 [ GR, EAUC ] -> [ EAUC, GR ]
 decouplage du doublet horizontal 15 [ GR , EAUC ] en un doublet est-ouest 8 et un doublet nord-sud 13
@@ -129,9 +128,9 @@ decouplage du doublet horizontal 16 [ EAUC , GR ] en un doublet est-ouest 0 et u
 decouplage du doublet horizontal 15 [ GR , EAUC ] en un doublet est-ouest 8 et un doublet nord-sud 13
 decouplage des liens contenant la transition 14
 decouplage des doublets horizontaux : passe 1
-nombre de transitions = 21
-allocation db_pos : 2637312
-total de la memoire allouee : 9.92 Mo
+nombre de transitions = 19
+allocation db_pos : 2307648
+total de la memoire allouee : 9.59 Mo
 allocation alti : 41208
 calcul des normales 2d et 3d
 init_collisions
@@ -153,29 +152,29 @@ brouillage flux sur le bord gauche
 rebonds realistes PLAF_REAL
 allocation CelMvt : 177760
 allocation CelMvt2 : 177760
-total de la memoire allouee : 10.73 Mo
+total de la memoire allouee : 10.40 Mo
 reset lattice gas
 speedup of the lattice gas: 1000
-nb_mvt_in = 106672
+nb_mvt_in = 0
 rescal_init: end
 abs_cv = 101
 prof_cv = 51
 rot_mode = 1
 allocation image : 55552
-total de la memoire allouee : 10.79 Mo
+total de la memoire allouee : 10.46 Mo
 create_window: start
 on_action_info_activate : 1
 create_window: end
 nb_shades=2
 nb_values=121
 allocation csp_tmp (rotation) : 453288
-write CSP: DUN0000.csp, csp_time = 0.000000 (t0)
-writing CSP data : DUN0000.csp
+write CSP: SNO0000.csp, csp_time = 0.000000 (t0)
+writing CSP data : SNO0000.csp
 header size: 80
 view_dump_init
-view_dump_png: writing file DUN0000-00.png
-flash_delay_avg = 2.898812
-frame_delay = 14.494061
+view_dump_png: writing file SNO0000-00.png
+flash_delay_avg = 2.825999
+frame_delay = 14.129996
 debut de la simulation ...
 csp_time = 0.000000
 simul_time_scale: read physical parameters file real_data/desert_earth.prop
@@ -193,78 +192,349 @@ number of rows: 501
 ustar=3.296306
 time_scale = 1775.11
 lgca_delay = 1.000000
-mass center: ( 100.500 , 16.599 , 50.500 ) - orientation: 0.000
-allocation auxmap (translation) : 453288
-translation: ( 1 , 1 ) - orientation: 0.000 - resultant: ( 1.000 , 1.000 ) - time: 0.000000
-reset lattice gas
-speedup of the lattice gas: 1000
 flow stabilization : 150 cycles
 allocation Velx : 16400
 allocation Vely : 16400
 allocation Velx_time : 820000
 allocation Vely_time : 820000
-total de la memoire allouee : 13.37 Mo
+total de la memoire allouee : 12.59 Mo
 allocation Velx_interp : 1.81 Mo
 allocation Vely_interp : 1.81 Mo
-total de la memoire allouee : 17.00 Mo
-end of flow stabilization : meanvel = 481.801025   maxvel = 1287.627319
+total de la memoire allouee : 16.22 Mo
+end of flow stabilization : meanvel = 0.000000   maxvel = 0.000000
 grdvc_min = 1.000000
-grdvc = 321.906830
+grdvc = 0.000000
 grdvc_max = 1000.000000
 calcule_grad_vel : dist0_grdv = 0.000000   dist_grdv = 10.000000
 calcul coef_cgv pour correction du pas de temps
 check_ava : ava_h_lim = 1
 check_ava : ava_angle = 35.000000
 calcule_norm3d_cel_pente_max_interp : r = 3.000000   r0 = 2
-view_dump_png: writing file DUN0000-01.png
-affichage : 13.77 fps
-view_dump_png: writing file DUN0000-02.png
-csp_time = 100.000023
-time spent in stochastic engine : 1.70 sec (85.7 %)
-time spent in lattice gas : 0.29 sec (14.3 %)
-view_dump_png: writing file DUN0000-03.png
-width=225, height=248
+view_dump_png: writing file SNO0000-01.png
+csp_time = 100.053490
+time spent in stochastic engine : 0.47 sec (64.3 %)
+time spent in lattice gas : 0.26 sec (35.7 %)
+affichage : 13.84 fps
+csp_time = 200.001589
+time spent in stochastic engine : 0.78 sec (60.4 %)
+time spent in lattice gas : 0.51 sec (39.6 %)
+view_dump_png: writing file SNO0000-02.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (264.471233)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (265.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (266.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (267.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (268.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (269.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (270.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (271.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (272.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (273.000000)
+view_dump_png: writing file SNO0000-03.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (274.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (275.000000)
+width=230, height=248
 allocation image_zoom : 83328
-view_dump_png: writing file DUN0000-04.png
-mass center: ( 83.948 , 18.966 , 50.293 ) - orientation: 0.000
-translation: ( 17 , 1 ) - orientation: 0.000 - resultant: ( 18.000 , 2.000 ) - time: 200.000004
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file DUN0000-05.png
-end of flow stabilization : meanvel = 483.945648   maxvel = 1037.752319
-csp_time = 200.000004
-time spent in stochastic engine : 3.45 sec (79.3 %)
-time spent in lattice gas : 0.90 sec (20.7 %)
-view_dump_png: writing file DUN0000-06.png
-view_dump_png: writing file DUN0000-07.png
-csp_time = 300.000015
-time spent in stochastic engine : 5.05 sec (81.1 %)
-time spent in lattice gas : 1.18 sec (18.9 %)
-view_dump_png: writing file DUN0000-08.png
-mass center: ( 80.438 , 18.929 , 53.111 ) - orientation: 0.000
-translation: ( 21 , -2 ) - orientation: 0.000 - resultant: ( 39.000 , 0.000 ) - time: 400.000020
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file DUN0000-09.png
-end of flow stabilization : meanvel = 485.539032   maxvel = 1041.889160
-csp_time = 400.000020
-time spent in stochastic engine : 6.65 sec (80.0 %)
-time spent in lattice gas : 1.66 sec (20.0 %)
-view_dump_png: writing file DUN0000-10.png
-view_dump_png: writing file DUN0000-11.png
-csp_time = 500.000017
-time spent in stochastic engine : 8.25 sec (80.9 %)
-time spent in lattice gas : 1.94 sec (19.1 %)
-view_dump_png: writing file DUN0000-12.png
-mass center: ( 89.414 , 18.968 , 51.949 ) - orientation: 0.000
-translation: ( 12 , -1 ) - orientation: 0.000 - resultant: ( 51.000 , -1.000 ) - time: 600.000044
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file DUN0000-13.png
-end of flow stabilization : meanvel = 484.777893   maxvel = 1109.109985
-csp_time = 600.000044
-time spent in stochastic engine : 9.87 sec (80.3 %)
-time spent in lattice gas : 2.42 sec (19.7 %)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (276.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (277.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (278.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (279.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (280.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (281.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (282.000000)
+view_dump_png: writing file SNO0000-04.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (283.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (284.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (285.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (286.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (287.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (288.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (289.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (290.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (291.000000)
+view_dump_png: writing file SNO0000-05.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (292.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (293.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (294.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (295.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (296.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (297.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (298.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (299.000000)
+csp_time = 300.000000
+time spent in stochastic engine : 4.63 sec (85.7 %)
+time spent in lattice gas : 0.77 sec (14.3 %)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (300.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (301.000000)
+view_dump_png: writing file SNO0000-06.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (302.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (303.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (304.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (305.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (306.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (307.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (308.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (309.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (310.000000)
+view_dump_png: writing file SNO0000-07.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (311.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (312.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (313.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (314.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (315.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (316.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (317.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (318.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (319.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (320.000000)
+view_dump_png: writing file SNO0000-08.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (321.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (322.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (323.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (324.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (325.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (326.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (327.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (328.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (329.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (330.000000)
+view_dump_png: writing file SNO0000-09.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (331.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (332.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (333.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (334.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (335.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (336.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (337.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (338.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (339.000000)
+view_dump_png: writing file SNO0000-10.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (340.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (341.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (342.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (343.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (344.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (345.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (346.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (347.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (348.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (349.000000)
+view_dump_png: writing file SNO0000-11.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (350.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (351.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (352.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (353.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (354.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (355.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (356.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (357.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (358.000000)
+view_dump_png: writing file SNO0000-12.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (359.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (360.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (361.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (362.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (363.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (364.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (365.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (366.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (367.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (368.000000)
+view_dump_png: writing file SNO0000-13.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (369.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (370.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (371.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (372.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (373.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (374.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (375.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (376.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (377.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (378.000000)
+view_dump_png: writing file SNO0000-14.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (379.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (380.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (381.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (382.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (383.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (384.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (385.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (386.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (387.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (388.000000)
+view_dump_png: writing file SNO0000-15.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (389.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (390.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (391.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (392.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (393.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (394.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (395.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (396.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (397.000000)
+view_dump_png: writing file SNO0000-16.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (398.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (399.000000)
+csp_time = 400.000000
+time spent in stochastic engine : 14.79 sec (93.5 %)
+time spent in lattice gas : 1.03 sec (6.5 %)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (400.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (401.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (402.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (403.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (404.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (405.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (406.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (407.000000)
+view_dump_png: writing file SNO0000-17.png
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (408.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (409.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (410.000000)
+simul_trans: too many blocked transitions (453288)
+simul_csp: time evolution forced (411.000000)

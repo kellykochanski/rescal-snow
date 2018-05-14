@@ -1,7 +1,7 @@
 
 # DOUBLETS
 
-NB_TYPE_DOUBLET = 24
+NB_TYPE_DOUBLET = 20
 DB( 0): EAST_WEST, [EAUC, GR] active
 DB( 1): EAST_WEST, [EAUC, GRJ] 
 DB( 2): VERTICAL, [EAUC, GR] active
@@ -22,12 +22,8 @@ DB(16): HORIZONTAL, [EAUC, GR]
 DB(17): EAST_WEST, [GRJ, BORD] active
 DB(18): EAST_WEST, [EAUC, BORD] 
 DB(19): EAST_WEST, [GR, BORD] active
-DB(20): VERTICAL, [IN, EAUC] active
-DB(21): VERTICAL, [IN, GR] 
-DB(22): VERTICAL, [EAUC, IN] active
-DB(23): VERTICAL, [GRJ, IN] 
 
 # NUMBER OF ACTIVE DOUBLETS
 
-          DB( 0)     DB( 2)     DB( 3)     DB( 4)     DB( 5)     DB( 6)     DB( 7)     DB( 8)     DB(10)     DB(12)     DB(13)     DB(14)     DB(17)     DB(19)     DB(20)     DB(22)
-0000:        220       1044          0          0          0          0          0        220          0          0        220        220          0          0        100          0
+          DB( 0)     DB( 2)     DB( 3)     DB( 4)     DB( 5)     DB( 6)     DB( 7)     DB( 8)     DB(10)     DB(12)     DB(13)     DB(14)     DB(17)     DB(19)
+0000:          0          0          0          0          0          0          0          0          0          0          0          0          0       2000
