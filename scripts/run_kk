@@ -33,9 +33,10 @@ fi
 #PAR_FILE="dun_star.par"
 #PAR_FILE="dun_col.par"
 #PAR_FILE="dun_scale.par"
-#PAR_FILE="dun_kk.par"
+PAR_FILE="dun_kk.par"
+
 #PAR_FILE="slice_kk.par"
-PAR_FILE="riv_sur.par"
+#PAR_FILE="riv_sur.par"
 echo PAR_FILE=$PAR_FILE
 
 ### number of OpenMP threads
@@ -56,7 +57,7 @@ RESCAL_LOG_FILE="RESCAL.log"
 #nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
 
 ## generation of png images, CSP files and info logs, then stop after 30 minutes
-nice ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10 -dcsp 5 -stop 30 >> $RESCAL_LOG_FILE
+./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 1 -dcsp 5 -stop 2 -nv >> $RESCAL_LOG_FILE
 
 ## generation of png images with delay in t0 unit
 #nice ./rescal $PAR_FILE -cv0 -ls 45 -vel -vss -info -dpng 100t0 >> $RESCAL_LOG_FILE

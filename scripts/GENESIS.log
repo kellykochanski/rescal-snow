@@ -1,4 +1,4 @@
-KK in genesis.cgenesis
+genesis
 DUN model
 args: -f dun_kk.par -s 2000 
 read parameters file : dun_kk.par

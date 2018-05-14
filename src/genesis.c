@@ -99,7 +99,7 @@ void init_template(int type, char *name, char *desc, int nb_args, ...)
 //
 
 //available CSP template types
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
 enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
 #elif defined(MODEL_RIV)
 enum CSP_TEMPLATES {CSP_CUSTOM, CSP_SLOPE};
@@ -110,9 +110,8 @@ enum CSP_TEMPLATES {CSP_CUSTOM};
 //initialization of available templates
 void init_template_list()
 {
-  printf("KK in genesis.c");
   init_template(CSP_CUSTOM, "CUSTOM", "CUSTOM:\t\t\tno template", 0);
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   init_template(CSP_LAYER, "LAYER", "LAYER(h=1.0):\t\t\tsand layer of height <h>", 1, 1.0);
 #ifdef CELL_COLOR
   init_template(CSP_LAYER_COL, "LAYER_COL", "LAYER_COL(h=1.0, d=0.5):\tbinary sand layer (two colors of grain) of height <h> and density <d> for white color", 2, 1.0, 0.5);
@@ -194,7 +193,6 @@ void genesis_parse()
 {
   if (model_name && strcmp(model_name, MOD_NAME)){
     WarnPrintf("ERROR: Wrong model name %s in parameter file (caught in genesis.c). Check model in defs.h and rebuild all.\n", model_name);
-    WarnPrintf("KKprint %s MOD_NAME", MOD_NAME);
     exit(-2);
   }
 
@@ -512,7 +510,7 @@ void genesis()
                aux->celltype = GR;
         }
         else if (csp_template.type == CSP_FORSTEP){
-	  //CSP_BACKSTEP: set of forward-facing steps
+	  //CSP_FORSTEP: set of forward-facing steps
           h = csp_template.args[0]; // height of each step
 	  n = csp_template.args[1]; // number of steps
 	  hg = csp_template.args[2]; // thickness of space that is granular
