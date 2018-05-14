@@ -41,7 +41,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 /// ======================================================
 
 /// choice of a model
-//#define MODEL_DUN    //Dune morphodynamics
+#define MODEL_DUN    //Dune morphodynamics
 //#define MODEL_AVA    //Avalanches
 //#define MODEL_CMB    //Core-mantle boundary
 //#define MODEL_ICB    //Innercore-core boundary
@@ -50,7 +50,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 //#define MODEL_DIF    //Diffusion
 //#define MODEL_D2G    //Diffusion 2d with gravity
 //#define MODEL_LIFE   //Stochastic game of life (2D)
-#define MODEL_SNO    //Snow bedform morphodynamics
+//#define MODEL_SNO    //Snow bedform morphodynamics
 
 /// ======================================================
 
@@ -120,7 +120,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 /// cell states
 #define GR    0 //grain, no cohesion
 #define GRJ   1 //grain, mobile
-#define GRH   2 //grain, cohesive/hardened
+#define GRV   2 //grain, cohesive/hardened
 #define EAUC  3 //air
 #define VEG   4 //vegetation
 #define BORD  5 //boundary
@@ -132,7 +132,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 #define GRC   11 // grain, no cohesion (used only graphically)
 
 //names of cell states
-#define ETATS {"GR", "GRJ", "GRH", "EAUC", "VEG", "BORD", "DUM", "IN", "OUT", "TUNNEL"}
+#define ETATS {"GR", "GRJ", "GRV", "EAUC", "VEG", "BORD", "DUM", "IN", "OUT", "TUNNEL"}
 
 // phases of cell states
 #define PHASES { SOLID, SOLID, SOLID, FLUID, SOLID, SOLID, SOLID, SOLID, SOLID, SOLID }
@@ -147,7 +147,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 #define CGV //compute shear stress (with LGCA option)
 #define WIND_DATA //option for importing wind data from a file (with ROTATIONS option)
 #define TIME_SCALE //option for computing the time scale (using additional physical parameters)
-#define CELL_TIME GR //save time for each cell of type GR
+//#define CELL_TIME GR //save time for each cell of type GR
 
 #endif
 

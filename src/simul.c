@@ -313,10 +313,10 @@ void simul_parse()
       boundary = BC_CLOSE;
     }
     else if (!strcmp(boundary_str, "REINJECTION")){
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
       boundary = BC_REINJECTION;
 #else
-      ErrPrintf("Incorrect value for Boundary : %s, not compatible with model %s\n", boundary_str, MOD_NAME);
+      ErrPrintf("Incorrect value for Boundary : %s, not compatible with model %s\n (as defined in simul.c)", boundary_str, MOD_NAME);
       exit(-2);
 #endif
     }
