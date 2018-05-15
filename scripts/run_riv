@@ -19,9 +19,9 @@ fi
 ## parameters file (input)
 #PAR_FILE="riv.par"
 #PAR_FILE="riv2.par"
-#PAR_FILE="riv_cone.par"
+PAR_FILE="riv_cone.par"
 #PAR_FILE="riv_sur.par"
-PAR_FILE="erosion.par"
+#PAR_FILE="erosion.par"
 echo PAR_FILE=$PAR_FILE
 
 ## general log files (output)

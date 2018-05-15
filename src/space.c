@@ -228,7 +228,7 @@ void cree_terre()
       }
     }
   }
-#elif defined(MODEL_DUN)
+#elif defined(MODEL_DUN) || defined(MODEL_SNO)
   for(k=0; k < D; k++){ // profondeur
     for(j=0; j < H; j++){ // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
@@ -496,7 +496,7 @@ void init_color()
   for(k=1; k < D-1; k++) // profondeur
     for(j=1; j < H-1; j++) // hauteur
       for(i=1; i < L-1; i++){ //largeur
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
     TE[k*HL+j*L+i].color = 0;
     //TE[k*HL+j*L+i].color = (((TE[k*HL+j*L+i].celltype == GR) || (TE[k*HL+j*L+i].celltype == GRJ)) && (k<L/2) /*(j<H-5)*/ /*(i<L/2)*/) ? 1 : 0;
     //TE[k*HL+j*L+i].color = (((TE[k*HL+j*L+i].celltype == GR) || (TE[k*HL+j*L+i].celltype == GRJ)) && (drand48()<0.5)) ? 1 : 0;
@@ -639,7 +639,7 @@ int check_no_cell_dir(int ix, void *data)
   return !check_cell_dir(ix, data);
 }
 
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
 // callback de controle en fonction de la cellule a l'ouest
 int check_grain_seul(int index, void *data)
 {
@@ -857,7 +857,7 @@ void translation(int dx, int dz)
           else{
             if ((i0>=1) && (i0<L-1) && (k0>=1) && (k0<D-1))
               *aux2 = *(TE+i0+j*L+k0*HL);
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
             else
               aux2->celltype = EAUC;
 #endif
@@ -1174,7 +1174,7 @@ void rotation(float angle, char mode, char flags)
             k0 = Round(dk0 - si*di + co*dk);
             //aux2->celltype = (TE+i0+j*L+k0*HL)->celltype;
             *aux2 = TE[i0+j*L+k0*HL];
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
               //if (aux2->celltype == DUM) aux2->celltype = EAUC; //modif oli
 #endif
           }
@@ -1312,7 +1312,7 @@ void rotation(float angle, char mode, char flags)
             if (no_trace) aux2->color = 0;
 #endif
 
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
             if (aux2->celltype == DUM) aux2->celltype = EAUC;
 #endif
           }

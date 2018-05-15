@@ -1,33 +1,36 @@
 
 # DOUBLETS
 
-NB_TYPE_DOUBLET = 24
-DB( 0): EAST_WEST, [EAUC, GR] active
+NB_TYPE_DOUBLET = 26
+DB( 0): EAST_WEST, [EAUC, GRV] active
 DB( 1): EAST_WEST, [EAUC, GRJ] 
-DB( 2): VERTICAL, [EAUC, GR] active
+DB( 2): VERTICAL, [EAUC, GRV] active
 DB( 3): VERTICAL, [GRJ, EAUC] active
-DB( 4): VERTICAL, [GR, EAUC] active
-DB( 5): VERTICAL, [EAUC, GRJ] active
-DB( 6): EAST_WEST, [GRJ, EAUC] active
-DB( 7): EAST_WEST, [GRJ, GR] active
-DB( 8): EAST_WEST, [GR, EAUC] active
-DB( 9): EAST_WEST, [GR, GR] 
-DB(10): EAST_WEST, [GRJ, DUM] active
-DB(11): EAST_WEST, [GR, DUM] 
-DB(12): EAST_WEST, [GR, GRJ] active
-DB(13): NORTH_SOUTH, [GR, EAUC] active
-DB(14): NORTH_SOUTH, [EAUC, GR] active
-DB(15): HORIZONTAL, [GR, EAUC] 
-DB(16): HORIZONTAL, [EAUC, GR] 
-DB(17): EAST_WEST, [GRJ, BORD] active
-DB(18): EAST_WEST, [EAUC, BORD] 
-DB(19): EAST_WEST, [GR, BORD] active
-DB(20): VERTICAL, [IN, EAUC] active
-DB(21): VERTICAL, [IN, GR] 
-DB(22): VERTICAL, [EAUC, IN] active
-DB(23): VERTICAL, [GRJ, IN] 
+DB( 4): EAST_WEST, [EAUC, GR] active
+DB( 5): VERTICAL, [EAUC, GR] active
+DB( 6): VERTICAL, [GR, EAUC] active
+DB( 7): VERTICAL, [EAUC, GRJ] active
+DB( 8): EAST_WEST, [GRJ, EAUC] active
+DB( 9): EAST_WEST, [GRJ, GR] active
+DB(10): EAST_WEST, [GR, EAUC] active
+DB(11): EAST_WEST, [GR, GR] 
+DB(12): EAST_WEST, [GRJ, DUM] active
+DB(13): EAST_WEST, [GR, DUM] 
+DB(14): EAST_WEST, [GR, GRJ] active
+DB(15): NORTH_SOUTH, [GR, EAUC] active
+DB(16): NORTH_SOUTH, [EAUC, GR] active
+DB(17): HORIZONTAL, [GR, EAUC] 
+DB(18): HORIZONTAL, [EAUC, GR] 
+DB(19): EAST_WEST, [GRJ, BORD] active
+DB(20): EAST_WEST, [EAUC, BORD] 
+DB(21): EAST_WEST, [GR, BORD] active
+DB(22): VERTICAL, [IN, EAUC] active
+DB(23): VERTICAL, [IN, GR] 
+DB(24): VERTICAL, [EAUC, IN] active
+DB(25): VERTICAL, [GRJ, IN] 
 
 # NUMBER OF ACTIVE DOUBLETS
 
-          DB( 0)     DB( 2)     DB( 3)     DB( 4)     DB( 5)     DB( 6)     DB( 7)     DB( 8)     DB(10)     DB(12)     DB(13)     DB(14)     DB(17)     DB(19)     DB(20)     DB(22)
-0000:          0          0          0      20000          0          0          0          0          0          0          0          0          0        500          0          0
+          DB( 0)     DB( 2)     DB( 3)     DB( 4)     DB( 5)     DB( 6)     DB( 7)     DB( 8)     DB( 9)     DB(10)     DB(12)     DB(14)     DB(15)     DB(16)     DB(19)     DB(21)     DB(22)     DB(24)
+0000:       2800      20000          0          0          0      20000          0          0          0          0          0          0          0          0          0         20          0          0
+0001:          0        925       1572       4728      17696         56       1657       1542        448       5326          0         88       4290       7046          5          2         20          0
