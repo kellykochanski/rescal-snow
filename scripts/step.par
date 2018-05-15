@@ -6,19 +6,18 @@
 # Don't use this, might be broken. 
 # Make and modify a copy of dun.par 
 
-Model = DUN
+Model = SNO
 
 Csp_file = DUN.csp
 #H = 50
-H = 80
+H = 60
 #L = 400
-L = 400
+L = 1000
 #D = 200
-D = 50
+D = 20
 
 ## CSP template (genesis)
-#Csp_template = FORSTEP(10.0, 4.0, 10.0)
-CSP_template = RCONE 
+Csp_template = FORSTEP(20.0, 8.0, 1)
 
 ## Boundary conditions
 Boundary = REINJECTION
@@ -36,6 +35,9 @@ Qsat_file = real_data/PDF.data
 ## Erosion rate
 Lambda_E = 4
 
+## Erosion ratio for cohesive snow
+Lambda_S = 500
+
 ## Deposition rate
 Lambda_C = 2
 
@@ -45,8 +47,8 @@ Lambda_T = 30
 
 ## Coefficient for the vertical transport of mobile grains
 #Coef_A = 0
-Coef_A = 0.2
-#Coef_A = 1
+#Coef_A = 0.2
+Coef_A = 1.6
 
 ## Coefficient for the deposition against an obstacle
 #Coef_B = 10

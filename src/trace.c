@@ -21,6 +21,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+// KK TODO --- several #ifdef statements here say MODELE_DUN, MODELE_AVA, etc
+// This looks like a typo which should say MODEL_DUN, MODEL_AVA, etc
+// Not yet corrected because not sure if this is compensated for elsewhere.
+
 
 //mode TRACE_SRC : generation du bassin versant d'un point de sortie
 //mode TRACE_AIRE : calcul de l'aire drainee (~debit) en chaque point (2D)
@@ -438,7 +442,7 @@ void trace_trans_init()
 {
   LogPrintf("init trace_trans\n");
 
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
 /*
   //AllocMemory(trace_diffusion, int, L*D);
   AllocMemory(trace_erosion, int, L*D);
@@ -469,7 +473,7 @@ void trace_trans(int tr, int ix)
   int x, y, z, ind;
   Calcule_xyz(ix, x, y, z);
   ind = x + z*L;
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   /*if (tr <= 3)
     trace_diffusion[ind]++;*/
   /*if (tr == 0)
@@ -497,7 +501,7 @@ void trace_trans_blocked(int tr, int ix)
   int x, y, z, ind;
   Calcule_xyz(ix, x, y, z);
   ind = x + z*L;
-#ifdef MODELE_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   if (tr == 0)
     trace_chk_erosion[ind]++;
 #endif
@@ -1204,7 +1208,7 @@ void trace_flux(int tr, int ix)
   int step = 1;
   ptr = &t_trans[tr];
   int type_cel1=t_doub[ptr->depart].one;
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   if (type_cel1 == EAUC){
     step = -1;
   }

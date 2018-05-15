@@ -170,7 +170,7 @@ void change_cel()
       }
 }
 
-//#ifdef MODEL_DUN
+//#if defined(MODEL_DUN) || defined(MODEL_SNO)
 void rotation()
 // in : TE0
 // out : TE
@@ -238,7 +238,7 @@ void rotation_cyclic()
           while (k0>=D) k0-=D;
           *aux = TE0[i0+j*L+k0*HL];
 
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
           if (aux->celltype == DUM) aux->celltype = EAUC;
 #endif
         }
@@ -292,7 +292,7 @@ void translation()
   for(k=0; k < D; k++) // profondeur
     for(j=0; j < H; j++) // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
         //aux->celldata = (i<L-d_eo)? (aux+d_eo)->celldata : (aux->celldata == DUM)? DUM : EAUC;
         //if ((i>=L-d_eo) && (j==H-2)) aux->celldata = (drand48() < 0.2) ? GR : EAUC; //sable
         //if (i>=L-d_eo) aux->celldata = DUM;//(j<=H-3)? EAUC : DUM;
@@ -326,7 +326,7 @@ void translation_alldir()
   for(k=0; k < D; k++) // profondeur
     for(j=0; j < H; j++) // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
           if ((i+d_eo >= 0) && (i+d_eo < L) && (k+d_ns >= 0) && (k+d_ns < D)){
           if (aux->celltype != IN) *aux = *(TE0+d_eo+i+j*L+(k+d_ns)*HL);
         }
@@ -353,7 +353,7 @@ void translation_cyclic()
   for(k=0; k < D; k++) // profondeur
     for(j=0; j < H; j++) // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
         //aux->celltype = (i<L-d_eo)? (aux+d_eo)->celltype : (aux->celltype == DUM)? DUM : EAUC;
         //if ((i>=L-d_eo) && (j==H-2)) aux->celltype = (drand48() < 0.2) ? GR : EAUC; //sable
         //if (i>=L-d_eo) aux->celltype = DUM;//(j<=H-3)? EAUC : DUM;
@@ -384,7 +384,7 @@ void translation_cyclic_ns()
   for(k=0; k < D; k++) // profondeur
     for(j=0; j < H; j++) // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
         if (k < D-d_ns){
           if (aux->celltype != IN) *aux = *(TE0+i+j*L+(k+d_ns)*HL);
         }
@@ -418,7 +418,7 @@ void transcale1()
         ii = (i*coef1)+d_eo;
         jj = H-1-((H-1-j)*coef1);
         kk = Pd2+((k-Pd2)*coef1)+d_ns;
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
         if (((ii>0) && (ii<L) && (jj>0) && (jj<H) && (kk>0) && (kk<D)))
           *aux = *(TE0+ii+jj*L+kk*HL);
         else
@@ -459,7 +459,7 @@ void transcale2()
         ii = (i*coef2)+d_eo;
         jj = H-1-((H-1-j)*coef2);
         kk = Pd2+((k-Pd2)*coef2)+d_ns;
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
         if (aux->celltype != GR){
           if (((ii>0) && (ii<L) && (jj>0) && (kk>0) && (kk<D)))
             *aux = *(TE0+ii+jj*L+kk*HL);
@@ -496,7 +496,7 @@ void rescale_height()
       for(i=0; i < L; i++, aux++){ //largeur
         j0 = j*H0/H;
         *aux = *(TE0+i+j0*L0+k*HL0);
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
         if ((H < H0) && ((j == 0) || (j == H-1)))
           ResetCell(aux, DUM);
 #endif
@@ -527,7 +527,7 @@ void change_height()
   for(k=0; k < D; k++) // profondeur
     for(j=0; j < H; j++) // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
         if (H0-H+j > 0)
           *aux = *(TE0+i+(H0-H+j)*L+k*HL0);
         else if ((TE0+i+k*HL0+L)->celltype == DUM)
@@ -566,7 +566,7 @@ void add_layers()
   HL = H*L;
   HLD = HL*D;
 
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   typ = EAUC;
 #else
   typ = 2;//MOINS;

@@ -6,7 +6,7 @@
 # Don't use this, might be broken. 
 # Make and modify a copy of dun.par 
 
-Model = DUN
+Model = SNO
 
 Csp_file = DUN.csp
 #H = 50
@@ -17,8 +17,7 @@ L = 400
 D = 50
 
 ## CSP template (genesis)
-#Csp_template = FORSTEP(10.0, 4.0, 10.0)
-CSP_template = RCONE 
+Csp_template = FORSTEP(10.0, 4.0, 10.0)
 
 ## Boundary conditions
 Boundary = REINJECTION

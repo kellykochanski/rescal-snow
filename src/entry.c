@@ -447,7 +447,7 @@ void show_general_options()
 #ifdef PARALLEL_AUTOMATA
   printf("  -pat \t\t parallel computation of lattice-gas and stochastic automata with threading\n");
 #endif
-//#ifdef MODEL_DUN
+//#if defined(MODEL_DUN) || defined(MODEL_SNO)
 //  printf("  -ro <n> : rotation d'angle aleatoire toutes les <n> minutes\n");
 //#endif
 #ifdef PARALLEL

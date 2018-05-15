@@ -41,7 +41,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 /// ======================================================
 
 /// choice of a model
-#define MODEL_DUN    //Dune morphodynamics
+//#define MODEL_DUN    //Dune morphodynamics
 //#define MODEL_AVA    //Avalanches
 //#define MODEL_CMB    //Core-mantle boundary
 //#define MODEL_ICB    //Innercore-core boundary
@@ -50,11 +50,12 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 //#define MODEL_DIF    //Diffusion
 //#define MODEL_D2G    //Diffusion 2d with gravity
 //#define MODEL_LIFE   //Stochastic game of life (2D)
+#define MODEL_SNO    //Snow bedform morphodynamics
 
 /// ======================================================
 
 /// common options
-#define OPENMP		//use OpenMP parallelization (on lattice gas)
+// #define OPENMP		//use OpenMP parallelization (on lattice gas)
 #define GUI		//graphical interface
 #define CYCLAGE_HOR     //enable horizontal cycling
 #define INFO_CEL        //log the number of cells
@@ -69,7 +70,8 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 #define REORIENT_AUTO   //automatic reorientation when saving (images of) the cellular space
 #define CSP_MUTEX       //mutual exclusion on the cellular space (no transition while saving data)
 //#define GTK_OLD_SYNTAX  //compile with old version of GTK+2.x (obsolete)
-#define PARALLEL_AUTOMATA //enable concurrent execution of stochastic engine and lattice gas  (non-deterministic only, not working on MacOS X)
+// #define PARALLEL_AUTOMATA //enable concurrent execution of stochastic engine and lattice gas  (non-deterministic only, not working on MacOS X)
+
 
 #if !defined(_OPENMP) || defined(__CYGWIN32__)
 #undef OPENMP
@@ -108,7 +110,22 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 //#define ROTATIONS
 #endif
 
+/// ===================== SNO MODEL =====================
+// KK 10 May 2018
+// Most cell types are inherited from the DUN MODEL (below)
+#ifdef MODEL_SNO
+/// name of the model
+#define MOD_NAME "SNO"
+#define MOD_DESC "simulation of snow surface under air flow"
+
+// specific options of the model (more options available under DUN MODEL)
+#define COHESION // enable some grains (GRV) to be harder to remove than others
+#define SINTER   // time-dependent hardening - not yet implemented
+
+#endif
+
 /// ===================== DUN MODEL =====================
+//  Most properties of dunes - except name and vegetation - are inherited by SNO MODEL
 #ifdef MODEL_DUN
 
 /// name of the model
@@ -116,7 +133,9 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 
 /// description
 #define MOD_DESC "simulation of sand dunes under fluid flow"
+#endif // MODEL_DUN
 
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
 /// cell states
 #define GR    0 //grain
 #define GRJ   1 //mobile grain
@@ -162,7 +181,8 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 //#define DUMP_AUTOCORREL //computation of the auto-correlation in height (when using WAVES_2D template)
 //#define APPEL_MCC //external matlab application
 //#define USE_VEGETATION //option for using cells in VEG state
-#endif
+
+#endif // DUN or SNO
 
 /// ===================== AVA MODEL =====================
 #ifdef MODEL_AVA

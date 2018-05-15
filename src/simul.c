@@ -210,7 +210,7 @@ void params_simul()
   parameter("Time", "initial physical time - optional", &init_time, PARAM_DOUBLE, "GENERAL");
 
 #ifdef CYCLAGE_HOR
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   parameter("Boundary", "boundary conditions (PERIODIC|OPEN|OUT|CLOSE|REINJECTION), PERIODIC by default", &boundary_str, PARAM_STRING, "GENERAL");
 #else
   parameter("Boundary", "boundary conditions (PERIODIC|OPEN|CLOSE), PERIODIC by default", &boundary_str, PARAM_STRING, "GENERAL");
@@ -313,10 +313,10 @@ void simul_parse()
       boundary = BC_CLOSE;
     }
     else if (!strcmp(boundary_str, "REINJECTION")){
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
       boundary = BC_REINJECTION;
 #else
-      ErrPrintf("Incorrect value for Boundary : %s, not compatible with model %s\n", boundary_str, MOD_NAME);
+      ErrPrintf("Incorrect value for Boundary : %s, not compatible with model %s\n (as defined in simul.c)", boundary_str, MOD_NAME);
       exit(-2);
 #endif
     }
@@ -1660,13 +1660,14 @@ int simul_csp()
 #ifdef LGCA
   double lgca_time_threshold = csp_time;
   if (use_lgca && !lgca_delay){
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
     lgca_delay = 1.0/NB_MVT_EO; //1.0;
     //lgca_delay = 1.5/NB_MVT_EO; //1.0;
 #else
     /// default lgca delay derived from transition rates
     double lambda_max=0;
-    for(i=0; i<nb_trans_db; i++){
+    // KK: i returned "undeclared error" from rescal1.6, declared it as int.
+    for(int i=0; i<nb_trans_db; i++){
       if (t_trans[i].intensite > lambda_max) lambda_max = t_trans[i].intensite;
     }
     lgca_delay = 1.0 / lambda_max;

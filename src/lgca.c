@@ -27,7 +27,9 @@
 #include <memory.h>
 #include <assert.h>
 #include <math.h>
+#ifdef OPENMP
 #include <omp.h>
+#endif
 #ifdef __AVX__
 #include <stdio.h>
 #include <immintrin.h>
@@ -265,7 +267,7 @@ void init_collisions()
     if (NbMvt[k]) //TODO
       NbMvt0[k] = NbMvt[k];
     else //approximation
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
       NbMvt0[k] = Ncel[EAUC]*DENSITE/CLNS;
 #else
       NbMvt0[k] = Ncel[MOINS]*DENSITE/CLNS;

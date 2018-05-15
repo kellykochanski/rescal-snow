@@ -19,9 +19,9 @@ lgca.o: lgca.c /usr/include/stdio.h /usr/include/features.h \
  /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h \
  /usr/include/bits/huge_vall.h /usr/include/bits/inf.h \
  /usr/include/bits/nan.h /usr/include/bits/mathdef.h \
- /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/omp.h defs.h macros.h \
- param.h cells.h space.h surface.h transitions.h lgca.h trace.h simul.h
+ /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h defs.h \
+ macros.h param.h cells.h space.h surface.h transitions.h lgca.h trace.h \
+ simul.h
 
 /usr/include/stdio.h:
 
@@ -114,8 +114,6 @@ lgca.o: lgca.c /usr/include/stdio.h /usr/include/features.h \
 /usr/include/bits/mathcalls.h:
 
 /usr/include/bits/mathinline.h:
-
-/usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/omp.h:
 
 defs.h:
 

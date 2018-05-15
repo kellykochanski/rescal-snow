@@ -34,10 +34,9 @@ fi
 #PAR_FILE="dun_col.par"
 #PAR_FILE="dun_scale.par"
 #PAR_FILE="dun_kk.par"
-PAR_FILE="dun_small.par"
+#PAR_FILE="dun_small.par"
+PAR_FILE="step.par"
 
-#PAR_FILE="slice_kk.par"
-#PAR_FILE="riv_sur.par"
 echo PAR_FILE=$PAR_FILE
 
 ### number of OpenMP threads

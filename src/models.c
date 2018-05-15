@@ -112,7 +112,7 @@ int use_lgca = 1;
 int use_lgca = 0;
 #endif // LGCA
 
-#ifdef MODEL_DUN
+#if defined(MODEL_SNO) || defined(MODEL_DUN)
 float lambda_E, lambda_C, lambda_D, lambda_G, lambda_J;
 float lambda_D_mob;
 float lambda_T = -1;
@@ -130,6 +130,9 @@ float lambda_T_col = -1;
 float lambda_D_col = -1;
 float lambda_D_mob_col = -1;
 #endif
+#endif // DUN or SNO
+
+#ifdef MODEL_DUN // options for dun but not sno model
 #ifdef USE_VEGETATION
 int use_veg = 1;
 float lambda_V_up;
@@ -140,7 +143,16 @@ float lambda_V_nuc;
 float lambda_V_nuc_air;
 float lambda_V_swarm;
 #endif
+#endif // DUN
+
+#ifdef MODEL_SNO // options for sno but not dun model
+#ifdef COHESION
+float lambda_S = 3;
+#ifdef CELL_COLOR
+float lambda_C_col = -1;
 #endif
+#endif // cohesion
+#endif // SNO
 
 #ifdef MODEL_AVA
 float lambda_I = 0.1;
@@ -193,7 +205,7 @@ float prob_asv_D, prob_asv_L, prob_asv_C;  //asservissement des transitions vis-
 
 
 /// callbacks for the regulation of transitions
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
 Callback_regul callback_bord_dun; //automatic reinjection of sand grains
 Callback_regul callback_injection_coef; //regulation of the injection of sand grains
 #endif
@@ -249,7 +261,7 @@ void params_modele()
 #endif // CELL_COLOR
 
   /// declare parameters
-#ifdef MODEL_DUN
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
   parameter("Lambda_E", "erosion rate", &lambda_E, PARAM_FLOAT, "MODEL");
   parameter("Lambda_C", "deposition rate", &lambda_C, PARAM_FLOAT, "MODEL");
   parameter("Lambda_T", "transport rate", &lambda_T, PARAM_FLOAT, "MODEL");
@@ -273,6 +285,9 @@ void params_modele()
   parameter("Lambda_D_col", "diffusion rate for white grains (Lambda_D by default)", &lambda_D_col, PARAM_FLOAT, "COLOR");
   parameter("Lambda_D_mob_col", "diffusion rate for white mobile grains (Lambda_D_mob by default)", &lambda_D_mob_col, PARAM_FLOAT, "COLOR");
 #endif
+#endif // sno or dun
+
+#ifdef MODEL_DUN
 #ifdef USE_VEGETATION
   param_family("VEGETATION", "Vegetation parameters");
   parameter("Use_vegetation", "use vegetated cells and transitions (YES|NO) - YES by default", &use_veg, PARAM_BOOLEAN, "VEGETATION");
@@ -285,8 +300,15 @@ void params_modele()
   parameter("Lambda_V_swarm", "vegetation swarming rate", &lambda_V_swarm, PARAM_FLOAT, "VEGETATION");
 #endif
   //parameter("Lambda_J", "non-utilisé", &lambda_J, PARAM_FLOAT);
+#endif // dun
 
+#ifdef MODEL_SNO
+#ifdef COHESION
+  parameter("Lambda_S", "Factor decrease in erosion rate if particle is sintered (3 by default)", &lambda_S, PARAM_FLOAT, "MODEL");
 #endif
+#endif //sno
+
+
 #ifdef MODEL_AVA
   parameter("Lambda_I", "injection rate - optional", &lambda_I, PARAM_FLOAT, "MODEL");
 #endif //MODEL_AVA
@@ -368,7 +390,7 @@ void init_modele()
   //model_parse();
 
   if (model_name && strcmp(model_name, MOD_NAME)){
-    ErrPrintf("ERROR: Wrong model name %s in parameter file. Check model in defs.h and rebuild all.\n", model_name);
+    ErrPrintf("ERROR: Wrong model name %s in parameter file (caught in models.c). Check model in defs.h and rebuild all.\n", model_name);
     exit(-2);
   }
 
@@ -413,9 +435,39 @@ void init_modele()
 
 
 /*****************************************************************************/
+/******************************** SNO model **********************************/
+/*****************************************************************************/
+// KK 08/May/2018
+#ifdef MODEL_SNO
+
+/* Parameters:
+ * lambda_S   ratio of erosion of loose to sintered snow (>=1)
+*/
+  double vert_erosion = 100000.0; // ratio of horizontal:vertical erosion
+  				 // value take from sand dun
+
+#ifdef COHESION
+  /****** erosion of cohesive (sintered) grains ******/
+  // grains turn from GRV (cohesive) into GRJ (moving)
+  // when they land, they will be loose (GR), their cohesive bonds broken
+  trans_ref(101, EST_OUEST, EAUC, GRV, EAUC, GRJ, lambda_E*lambda_S );
+  trans_ref(102, VERTICAL,  EAUC, GRV, GRJ, EAUC, lambda_E*lambda_S/vert_erosion );
+  
+
+  // KK TODO -- allow loose grains (GR) to turn cohesive (GRV)
+  // This requires a grain to transition in place, does not appear to be implemented yet
+
+#ifdef CELL_COLOR
+  // Erosion of colored cohesive grains not yet implemented - KK TODO
+#endif 
+#endif
+
+#endif //sno
+
+/*****************************************************************************/
 /********************************* DUN model *********************************/
 /*****************************************************************************/
-#ifdef MODEL_DUN
+#if defined(MODEL_SNO) || defined(MODEL_DUN)
 
 /* Parameters:
   lambda_E   	erosion
@@ -540,6 +592,7 @@ void init_modele()
 
 #ifdef AVALANCHES
   /***** avalanches *****/
+  // KK TODO - should cohesive grains (GRV) ever avalanche?
   if (ava_trans){
     /*if (LNS > 1){
       trans_ref(14, HORIZONTAL, GR, EAUC, EAUC, GR, lambda_A);
@@ -597,7 +650,9 @@ void init_modele()
     //temporal regulation of the reinjection rate
     //trans_regul(2, callback_injection_coef);
   }
+#endif //MODEL_DUN or MODEL_SNO
 
+#ifdef MODEL_DUN //but no snow
   /***** vegetation *****/
 #ifdef USE_VEGETATION
 //#define VEG_VARIANT 1 /// VEG state is considered as vegetation without grain
@@ -713,6 +768,17 @@ void init_modele()
 #endif //USE_VEGETATION
 
 #endif //MODEL_DUN
+
+#ifdef MODEL_SNO // snow but not sand dunes
+  /************cohesion******************/
+#ifdef COHESION // GRV grains are cohered to neighbors
+  WarnPrintf("Cohesion is turned on, but still in development (KK, models.c)");
+#endif //cohesion
+#ifdef SINTER // time-dependent increase in cohesion
+  WarnPrintf("Sintering is turned on, but not yet implemented(KK, models.c)");
+#endif // sinter
+#endif // MODEL SNO
+
 
 
 /*****************************************************************************/
@@ -1218,7 +1284,7 @@ void init_modele()
 }
 
 
-#ifdef MODEL_DUN
+#if defined(MODEL_SNO) || defined(MODEL_DUN)
 
 float coef_injection = 1.0; //regulation de l'injection de grain
 
@@ -1262,7 +1328,7 @@ int callback_injection_coef(void *data)
   return 0;
 }
 
-#endif  //MODEL_DUN
+#endif  //MODEL_DUN or MODEL_SNO
 
 #ifdef AVALANCHES
 

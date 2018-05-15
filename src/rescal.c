@@ -135,6 +135,10 @@ void rescal_init(char *param_filename)
   //dump_cgv();
 #endif
 
+#if defined(MODEL_SNO) && defined(LGCA)
+  //dump_cgv();
+#endif
+
 #ifdef SURRECTIONS
   //regul_niveau();
 #endif
