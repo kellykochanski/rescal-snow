@@ -147,11 +147,13 @@ float lambda_V_swarm;
 
 #ifdef MODEL_SNO // options for sno but not dun model
 #ifdef COHESION
-float lambda_S = 3;
-#ifdef CELL_COLOR
-float lambda_C_col = -1;
-#endif
+// how much harder is it to erode GRV than GR grains
+float lambda_F = 3.0;
 #endif // cohesion
+#ifdef SINTER
+// how fast do grains sinter into place
+float lambda_S;
+#endif // sinter
 #endif // SNO
 
 #ifdef MODEL_AVA
@@ -304,7 +306,10 @@ void params_modele()
 
 #ifdef MODEL_SNO
 #ifdef COHESION
-  parameter("Lambda_S", "Factor decrease in erosion rate if particle is sintered (3 by default)", &lambda_S, PARAM_FLOAT, "MODEL");
+  parameter("Lambda_F", "Factor decrease in erosion rate if particle is sintered (3 by default)", &lambda_F, PARAM_FLOAT, "MODEL");
+#endif
+#ifdef SINTER
+  parameter("Lambda_S", "Sintering rate (turns loose grains into cohesive)", &lambda_S, PARAM_FLOAT, "MODEL");
 #endif
 #endif //sno
 
@@ -438,28 +443,38 @@ void init_modele()
 /******************************** SNO model **********************************/
 /*****************************************************************************/
 // KK 08/May/2018
+// Snow also inherits many transitions from DUN model (below)
 #ifdef MODEL_SNO
 
+  /************cohesion******************/
 /* Parameters:
- * lambda_S   ratio of erosion of loose to sintered snow (>=1)
+ * lambda_F   ratio of erosion of loose to sintered snow (>=1)
+ * lambda_S   rate of sintering (turns loose snow into sintered snow)
 */
   double vert_erosion = 100000.0; // ratio of horizontal:vertical erosion
-  				 // value take from sand dun
+  				 // value taken from sand dun
 
 #ifdef COHESION
+  WarnPrintf("Cohesion is turned on, but still in development (KK, models.c) \n");
   /****** erosion of cohesive (sintered) grains ******/
   // grains turn from GRV (cohesive) into GRJ (moving)
   // when they land, they will be loose (GR), their cohesive bonds broken
-  trans_ref(101, EST_OUEST, EAUC, GRV, EAUC, GRJ, lambda_E*lambda_S );
-  trans_ref(102, VERTICAL,  EAUC, GRV, GRJ, EAUC, lambda_E*lambda_S/vert_erosion );
-  
+  trans_ref(101, EST_OUEST, EAUC, GRV, EAUC, GRJ, lambda_E*lambda_F );
+  trans_ref(102, VERTICAL,  EAUC, GRV, GRJ, EAUC, lambda_E*lambda_F/vert_erosion );
+#endif
 
-  // KK TODO -- allow loose grains (GR) to turn cohesive (GRV)
+#ifdef SINTER
+  WarnPrintf("Sintering is turned on, but is still in development (KK, models.c) \n");
+  // KK -- loose grains (GR) to turn cohesive (GRV)
   // This requires a grain to transition in place, does not appear to be implemented yet
+  // Loose grains (GR) sitting on solids (DUM, BORD, GRV, sinter into place at rate lambda_S:
+  trans_ref(103, VERTICAL,  GR, DUM,  GRV, DUM,  lambda_S);
+  trans_ref(104, VERTICAL,  GR, BORD, GRV, BORD, lambda_S);
+  trans_ref(104, VERTICAL,  GR, GRV,  GRV, GRV,  lambda_S);
+#endif
 
-#ifdef CELL_COLOR
+#if defined(CELL_COLOR) && defined(COHESION)
   // Erosion of colored cohesive grains not yet implemented - KK TODO
-#endif 
 #endif
 
 #endif //sno
@@ -769,15 +784,6 @@ void init_modele()
 
 #endif //MODEL_DUN
 
-#ifdef MODEL_SNO // snow but not sand dunes
-  /************cohesion******************/
-#ifdef COHESION // GRV grains are cohered to neighbors
-  WarnPrintf("Cohesion is turned on, but still in development (KK, models.c)");
-#endif //cohesion
-#ifdef SINTER // time-dependent increase in cohesion
-  WarnPrintf("Sintering is turned on, but not yet implemented(KK, models.c)");
-#endif // sinter
-#endif // MODEL SNO
 
 
 

@@ -10,18 +10,18 @@ Model = SNO
 
 Csp_file = DUN.csp
 #H = 50
-H = 60
+H = 100
 #L = 400
-L = 1000
+L = 200
 #D = 200
-D = 20
+D = 150
 
 ## CSP template (genesis)
-Csp_template = FORSTEP(20.0, 8.0, 1)
+Csp_template = FORSTEP(20.0, 1.0, 2, 1)
 
 ## Boundary conditions
-Boundary = REINJECTION
-#Boundary = OPEN
+#Boundary = REINJECTION
+Boundary = PERIODIC
 
 ## Initial time
 Time = 0.0
@@ -36,7 +36,10 @@ Qsat_file = real_data/PDF.data
 Lambda_E = 4
 
 ## Erosion ratio for cohesive snow
-Lambda_S = 500
+Lambda_F = 500
+
+## Sintering rate
+Lambda_S = 0.1
 
 ## Deposition rate
 Lambda_C = 2
@@ -48,7 +51,8 @@ Lambda_T = 30
 ## Coefficient for the vertical transport of mobile grains
 #Coef_A = 0
 #Coef_A = 0.2
-Coef_A = 1.6
+#Coef_A = 1
+Coef_A = 2.6
 
 ## Coefficient for the deposition against an obstacle
 #Coef_B = 10
