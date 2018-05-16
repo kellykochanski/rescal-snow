@@ -133,8 +133,6 @@ int get_trans(char ref)
   }
   return i;
 }
-
-
 void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char cel_arrivee_1, char cel_arrivee_2, double intensite)
 {
   if (intensite<0){
@@ -143,10 +141,13 @@ void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char
   }
 
   if (classe == ISOTROPE){
-    //transition isotrope
+    // transition isotrope
+    // KK -- this ISOTROPE clause creates a set of vertical and horizontal conditions which have the
+    // net effect of an isotropic (every-direction) transition.
     char sym = (cel_depart_1 == cel_depart_2) && (cel_arrivee_1 == cel_arrivee_2);
     if (H > 3){
       trans_ref( -1, VERTICAL, cel_depart_1, cel_depart_2, cel_arrivee_1, cel_arrivee_2, intensite);
+      // 1 transition if cells are same type, 2 if they are different
       if (!sym) trans_ref( -1, VERTICAL, cel_depart_2, cel_depart_1, cel_arrivee_2, cel_arrivee_1, intensite);
     }
     trans_ref( -1, HORIZONTAL, cel_depart_1, cel_depart_2, cel_arrivee_1, cel_arrivee_2, intensite);
@@ -191,7 +192,7 @@ void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char
     t_trans[nb_trans_db].time_mode = TIME_EVOL;
     nb_trans_db++;
   }
-}
+} //trans_ref
 
 void trans(char classe, char cel_depart_1, char cel_depart_2, char cel_arrivee_1, char cel_arrivee_2, double intensite)
 {
