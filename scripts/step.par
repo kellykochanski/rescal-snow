@@ -10,14 +10,15 @@ Model = SNO
 
 Csp_file = DUN.csp
 #H = 50
-H = 100
+H = 200
 #L = 400
-L = 200
+L = 480
 #D = 200
-D = 150
+D = 50
 
 ## CSP template (genesis)
-Csp_template = FORSTEP(20.0, 1.0, 2, 1)
+#Csp_template = FORSTEP(height of steps, number of steps, initial thickness of loose grains, TRUE/FALSE perturb step with sine wave)
+Csp_template = FORSTEP(20.0, 5.0, 0.1, 1)
 
 ## Boundary conditions
 #Boundary = REINJECTION
@@ -39,7 +40,7 @@ Lambda_E = 4
 Lambda_F = 500
 
 ## Sintering rate
-Lambda_S = 0.1
+Lambda_S = 0.2
 
 ## Deposition rate
 Lambda_C = 2
@@ -52,7 +53,7 @@ Lambda_T = 30
 #Coef_A = 0
 #Coef_A = 0.2
 #Coef_A = 1
-Coef_A = 2.6
+Coef_A = 1.6
 
 ## Coefficient for the deposition against an obstacle
 #Coef_B = 10

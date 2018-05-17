@@ -1,0 +1,51 @@
+genesis
+SNO model
+args: -f step.par -s 2000 
+read parameters file : step.par
+Model = SNO
+Csp_file = DUN.csp
+H = 200
+L = 480
+D = 50
+Csp_template = FORSTEP(20.0,5.0,0.1,1)
+Boundary = PERIODIC
+WARNING: unkown parameter - Time
+WARNING: unkown parameter - Phys_prop_file
+WARNING: unkown parameter - Qsat_file
+WARNING: unkown parameter - Lambda_E
+WARNING: unkown parameter - Lambda_F
+WARNING: unkown parameter - Lambda_S
+WARNING: unkown parameter - Lambda_C
+WARNING: unkown parameter - Lambda_T
+WARNING: unkown parameter - Coef_A
+WARNING: unkown parameter - Coef_B
+WARNING: unkown parameter - Coef_C
+WARNING: unkown parameter - Prob_link_ET
+WARNING: unkown parameter - Prob_link_TT
+WARNING: unkown parameter - High_mobility
+WARNING: unkown parameter - Lambda_D
+WARNING: unkown parameter - Lambda_I
+WARNING: unkown parameter - Lambda_G
+WARNING: unkown parameter - Ava_mode
+WARNING: unkown parameter - Lambda_A
+WARNING: unkown parameter - Ava_angle
+WARNING: unkown parameter - Ava_h_lim
+WARNING: unkown parameter - Lgca_delay
+WARNING: unkown parameter - Init_ncycl
+WARNING: unkown parameter - Lgca_speedup
+WARNING: unkown parameter - Tau_min
+WARNING: unkown parameter - Tau_max
+WARNING: unkown parameter - Centering_delay
+read_parameters : 34 parametres lus
+csp_template.name = FORSTEP
+csp_template.type = 18
+csp_template.args[0] = 20.000000
+csp_template.args[1] = 5.000000
+csp_template.args[2] = 0.100000
+csp_template.args[3] = 1.000000
+random seed: 2000
+allocation TE : 4.80 Mo
+format csp
+writing CSP data : DUN.csp
+header size: 80
+genesis : done
