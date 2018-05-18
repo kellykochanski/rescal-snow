@@ -10,15 +10,16 @@ Model = SNO
 
 Csp_file = DUN.csp
 #H = 50
-H = 200
+H = 110
 #L = 400
-L = 480
+L = 2000
 #D = 200
-D = 50
+D = 150
 
 ## CSP template (genesis)
 #Csp_template = FORSTEP(height of steps, number of steps, initial thickness of loose grains, TRUE/FALSE perturb step with sine wave)
-Csp_template = FORSTEP(20.0, 5.0, 0.1, 1)
+#Csp_template = FORSTEP(20.0, 5.0, 0.1, 1)
+Csp_template = LAYER(40)
 
 ## Boundary conditions
 #Boundary = REINJECTION
@@ -37,10 +38,10 @@ Qsat_file = real_data/PDF.data
 Lambda_E = 4
 
 ## Erosion ratio for cohesive snow
-Lambda_F = 500
+Lambda_F = 400
 
-## Sintering rate
-Lambda_S = 0.2
+## Sintering rate - PARAMETER TO VARY
+Lambda_S = 0.1
 
 ## Deposition rate
 Lambda_C = 2

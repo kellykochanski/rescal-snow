@@ -4,10 +4,10 @@ args: -f step.par -s 2000
 read parameters file : step.par
 Model = SNO
 Csp_file = DUN.csp
-H = 200
-L = 480
-D = 50
-Csp_template = FORSTEP(20.0,5.0,0.1,1)
+H = 70
+L = 100
+D = 80
+Csp_template = LAYER(30)
 Boundary = PERIODIC
 WARNING: unkown parameter - Time
 WARNING: unkown parameter - Phys_prop_file
@@ -37,14 +37,11 @@ WARNING: unkown parameter - Tau_min
 WARNING: unkown parameter - Tau_max
 WARNING: unkown parameter - Centering_delay
 read_parameters : 34 parametres lus
-csp_template.name = FORSTEP
-csp_template.type = 18
-csp_template.args[0] = 20.000000
-csp_template.args[1] = 5.000000
-csp_template.args[2] = 0.100000
-csp_template.args[3] = 1.000000
+csp_template.name = LAYER
+csp_template.type = 1
+csp_template.args[0] = 30.000000
 random seed: 2000
-allocation TE : 4.80 Mo
+allocation TE : 560000
 format csp
 writing CSP data : DUN.csp
 header size: 80

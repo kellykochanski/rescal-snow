@@ -5,8 +5,8 @@ size of long: 8 bytes (64b)
 size of cell: 1 byte(s)
 lattice gas enabled
 support for periodic boundary conditions
-args: step.par -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 5 -dcsp 5 -stop 45 
-stop delay: 45
+args: step.par -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 5t0 -dcsp 5 -stop 2000t0 
+stop delay: 2000t0
 
 usage: rescal PARAMETERS_FILE [OPTIONS]
        rescal -h
@@ -50,17 +50,17 @@ deterministic execution
 read parameters file : step.par
 Model = SNO
 Csp_file = DUN.csp
-H = 200
-L = 480
-D = 50
+H = 70
+L = 100
+D = 80
 WARNING: unkown parameter - Csp_template
 Boundary = PERIODIC
 Time = 0.0
 Phys_prop_file = real_data/desert_earth.prop
 Qsat_file = real_data/PDF.data
 Lambda_E = 4
-Lambda_F = 500
-Lambda_S = 0.2
+Lambda_F = 400
+Lambda_S = 0.1
 Lambda_C = 2
 Lambda_T = 30
 Coef_A = 1.6
@@ -105,81 +105,93 @@ cyclage horizontal
 reading CSP metadata
 size of header: 80
 chunk MODL: SNO
-chunk SIZE: 200 x 480 x 50
+chunk SIZE: 70 x 100 x 80
 chunk CELL: 1
 chunk TIME: 0.000000
-size of cellular space with bounds (HxLxD): 202 x 482 x 52
-allocation TE : 5.06 Mo
-allocation RefDB_Type : 15.19 Mo
-allocation RefDB_Ind : 60.76 Mo
-total de la memoire allouee : 81.02 Mo
+size of cellular space with bounds (HxLxD): 72 x 102 x 82
+allocation TE : 602208
+allocation RefDB_Type : 1.81 Mo
+allocation RefDB_Ind : 7.23 Mo
+total de la memoire allouee : 9.65 Mo
 random seed: 273676
 reading CSP data : DUN.csp
 szcell = 1
 csp_cell_size = 1
-couloir : LN = 1   LS = 50   LNS = 50   nb_pv = 50
+couloir : LN = 1   LS = 80   LNS = 80   nb_pv = 80
 h_ceil = 1
 h_floor = 1
 Cohesion is turned on, but still in development (KK, models.c) 
 Sintering is turned on, but is still in development (KK, models.c) 
 decouplage des doublets horizontaux : passe 0
-decouplage de la transition horizontale 18 [ GR, EAUC ] -> [ EAUC, GR ]
-decouplage du doublet horizontal 23 [ GR , EAUC ] en un doublet est-ouest 16 et un doublet nord-sud 21
-decouplage du doublet horizontal 24 [ EAUC , GR ] en un doublet est-ouest 10 et un doublet nord-sud 22
-decouplage des liens contenant la transition 18
-decouplage de la transition horizontale 19 [ EAUC, GR ] -> [ GR, EAUC ]
-decouplage du doublet horizontal 24 [ EAUC , GR ] en un doublet est-ouest 10 et un doublet nord-sud 22
-decouplage du doublet horizontal 23 [ GR , EAUC ] en un doublet est-ouest 16 et un doublet nord-sud 21
+decouplage de la transition horizontale 19 [ GR, EAUC ] -> [ EAUC, GR ]
+decouplage du doublet horizontal 25 [ GR , EAUC ] en un doublet est-ouest 18 et un doublet nord-sud 23
+decouplage du doublet horizontal 26 [ EAUC , GR ] en un doublet est-ouest 12 et un doublet nord-sud 24
 decouplage des liens contenant la transition 19
+decouplage de la transition horizontale 20 [ EAUC, GR ] -> [ GR, EAUC ]
+decouplage du doublet horizontal 26 [ EAUC , GR ] en un doublet est-ouest 12 et un doublet nord-sud 24
+decouplage du doublet horizontal 25 [ GR , EAUC ] en un doublet est-ouest 18 et un doublet nord-sud 23
+decouplage des liens contenant la transition 20
 decouplage des doublets horizontaux : passe 1
-nombre de transitions = 22
-allocation db_pos : 3408704
-total de la memoire allouee : 84.45 Mo
-allocation alti : 50128
+nombre de transitions = 23
+allocation db_pos : 1204416
+total de la memoire allouee : 10.86 Mo
+reallocation db_pos[10] : 33456 doublets
+reallocation db_pos : 133824
+reallocation db_pos[10] : 66912 doublets
+reallocation db_pos : 267648
+reallocation db_pos[10] : 133824 doublets
+reallocation db_pos : 535296
+reallocation db_pos[10] : 267648 doublets
+reallocation db_pos : 1.07 Mo
+allocation alti : 16728
 calcul des normales 2d et 3d
 init_collisions
 NB_MVT_VER = 1
 NB_MVT_EO = 1
 DIST_MVT_NS = 5
 CLN = 0
-CLS = 9
-CH = 202
-CLEO = 482
-CLNS = 10
+CLS = 15
+CH = 72
+CLEO = 102
+CLNS = 16
 VSTEP_H = 5
 VSTEP_L = 5
 VSTEP_TIME = 50
-VH = 41
-VL = 97
+VH = 15
+VL = 21
 forcage global du flux, intensite = 0.001000
 rebonds realistes PLAF_REAL
-allocation CelMvt : 1.95 Mo
-allocation CelMvt2 : 1.95 Mo
-total de la memoire allouee : 88.90 Mo
+allocation CelMvt : 235008
+allocation CelMvt2 : 235008
+total de la memoire allouee : 11.51 Mo
 reset lattice gas
 speedup of the lattice gas: 1000
-nb_mvt_in = 1073751
+nb_mvt_in = 91204
 rescal_init: end
-abs_cv = 241
-prof_cv = 26
+abs_cv = 51
+prof_cv = 41
 rot_mode = 1
-allocation image : 347472
-total de la memoire allouee : 89.25 Mo
+allocation image : 53592
+total de la memoire allouee : 11.57 Mo
 create_window: start
 on_action_info_activate : 1
 create_window: end
 nb_shades=2
 nb_values=121
-allocation csp_tmp (rotation) : 5.06 Mo
+allocation csp_tmp (rotation) : 602208
 write CSP: SNO0000.csp, csp_time = 0.000000 (t0)
 writing CSP data : SNO0000.csp
 header size: 80
 view_dump_init
-view_dump_png: writing file SNO0000-00.png
-flash_delay_avg = 51.040886
-frame_delay = 255.204437
+flash_delay_avg = 3.003812
+frame_delay = 15.019059
 debut de la simulation ...
 csp_time = 0.000000
+stop_time = 2000.500000
+dump_delay_png = 5.000000 (t0)
+time_threshold = -0.000000
+dump_delay = 5.000000 (t0)
+view_dump_png: writing file SNO00000_t0.png
 simul_time_scale: read physical parameters file real_data/desert_earth.prop
 kappa=0.400000
 z_0=0.001000
@@ -195,844 +207,210 @@ number of rows: 501
 ustar=3.296306
 time_scale = 1775.11
 lgca_delay = 1.000000
-mass center: ( 240.500 , 2.000 , 21.000 ) - orientation: 0.000
-allocation auxmap (translation) : 5.06 Mo
-translation: ( 1 , 5 ) - orientation: 0.000 - resultant: ( 1.000 , 5.000 ) - time: 0.000000
+mass center: ( 50.500 , 54.500 , 40.500 ) - orientation: 0.000
+allocation auxmap (translation) : 602208
+translation: ( 1 , 1 ) - orientation: 0.000 - resultant: ( 1.000 , 1.000 ) - time: 0.000000
 reset lattice gas
 speedup of the lattice gas: 1000
 flow stabilization : 150 cycles
-allocation Velx : 159080
-allocation Vely : 159080
-allocation Velx_time : 7.95 Mo
-allocation Vely_time : 7.95 Mo
-total de la memoire allouee : 115.60 Mo
-affichage : 2.50 fps
-allocation Velx_interp : 20.25 Mo
-allocation Vely_interp : 20.25 Mo
-total de la memoire allouee : 156.11 Mo
-end of flow stabilization : meanvel = 549.297729   maxvel = 1213.479736
+allocation Velx : 20160
+allocation Vely : 20160
+allocation Velx_time : 1.01 Mo
+allocation Vely_time : 1.01 Mo
+total de la memoire allouee : 14.83 Mo
+allocation Velx_interp : 2.41 Mo
+allocation Vely_interp : 2.41 Mo
+total de la memoire allouee : 19.65 Mo
+end of flow stabilization : meanvel = 379.649139   maxvel = 1144.231201
 grdvc_min = 1.000000
-grdvc = 303.369934
+grdvc = 286.057800
 grdvc_max = 1000.000000
 calcule_grad_vel : dist0_grdv = 0.000000   dist_grdv = 10.000000
 calcul coef_cgv pour correction du pas de temps
 check_ava : ava_h_lim = 1
 check_ava : ava_angle = 35.000000
 calcule_norm3d_cel_pente_max_interp : r = 3.000000   r0 = 2
-view_dump_png: writing file SNO0000-05.png
-view_dump_png: writing file SNO0000-10.png
-view_dump_png: writing file SNO0000-15.png
-view_dump_png: writing file SNO0000-20.png
-view_dump_png: writing file SNO0000-25.png
-view_dump_png: writing file SNO0000-30.png
-view_dump_png: writing file SNO0000-35.png
-view_dump_png: writing file SNO0000-40.png
-csp_time = 100.000002
-time spent in stochastic engine : 37.37 sec (92.3 %)
-time spent in lattice gas : 3.14 sec (7.7 %)
-view_dump_png: writing file SNO0000-45.png
-view_dump_png: writing file SNO0000-50.png
-view_dump_png: writing file SNO0000-55.png
-view_dump_png: writing file SNO0001-00.png
-view_dump_png: writing file SNO0001-05.png
-view_dump_png: writing file SNO0001-10.png
-mass center: ( 219.578 , 152.528 , 26.497 ) - orientation: 0.000
-translation: ( 21 , 0 ) - orientation: 0.000 - resultant: ( 22.000 , 5.000 ) - time: 200.000003
+view_dump_png: writing file SNO00001_t0.png
+reallocation db_pos[8] : 33456 doublets
+reallocation db_pos : 133824
+view_dump_png: writing file SNO00002_t0.png
+affichage : 11.24 fps
+view_dump_png: writing file SNO00003_t0.png
+width=170, height=308
+allocation image_zoom : 53592
+view_dump_png: writing file SNO00004_t0.png
+reallocation db_pos[8] : 66912 doublets
+reallocation db_pos : 267648
+view_dump_png: writing file SNO00005_t0.png
+view_dump_png: writing file SNO00006_t0.png
+view_dump_png: writing file SNO00007_t0.png
+view_dump_png: writing file SNO00008_t0.png
+view_dump_png: writing file SNO00009_t0.png
+view_dump_png: writing file SNO00010_t0.png
+view_dump_png: writing file SNO00011_t0.png
+view_dump_png: writing file SNO00012_t0.png
+view_dump_png: writing file SNO00013_t0.png
+view_dump_png: writing file SNO00014_t0.png
+view_dump_png: writing file SNO00015_t0.png
+view_dump_png: writing file SNO00016_t0.png
+view_dump_png: writing file SNO00017_t0.png
+view_dump_png: writing file SNO00018_t0.png
+view_dump_png: writing file SNO00019_t0.png
+view_dump_png: writing file SNO00020_t0.png
+csp_time = 100.000030
+time spent in stochastic engine : 9.36 sec (96.2 %)
+time spent in lattice gas : 0.37 sec (3.8 %)
+view_dump_png: writing file SNO00021_t0.png
+view_dump_png: writing file SNO00022_t0.png
+view_dump_png: writing file SNO00023_t0.png
+width=175, height=308
+reallocation image_zoom : 80388
+view_dump_png: writing file SNO00024_t0.png
+view_dump_png: writing file SNO00025_t0.png
+view_dump_png: writing file SNO00026_t0.png
+view_dump_png: writing file SNO00027_t0.png
+view_dump_png: writing file SNO00028_t0.png
+view_dump_png: writing file SNO00029_t0.png
+view_dump_png: writing file SNO00030_t0.png
+view_dump_png: writing file SNO00031_t0.png
+view_dump_png: writing file SNO00032_t0.png
+view_dump_png: writing file SNO00033_t0.png
+view_dump_png: writing file SNO00034_t0.png
+view_dump_png: writing file SNO00035_t0.png
+view_dump_png: writing file SNO00036_t0.png
+view_dump_png: writing file SNO00037_t0.png
+view_dump_png: writing file SNO00038_t0.png
+view_dump_png: writing file SNO00039_t0.png
+view_dump_png: writing file SNO00040_t0.png
+mass center: ( 48.264 , 39.837 , 40.530 ) - orientation: 0.000
+translation: ( 3 , 0 ) - orientation: 0.000 - resultant: ( 4.000 , 1.000 ) - time: 200.000002
 reset lattice gas
 speedup of the lattice gas: 1000
 flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 551.823853   maxvel = 1180.742554
-csp_time = 200.000003
-time spent in stochastic engine : 64.54 sec (88.6 %)
-time spent in lattice gas : 8.30 sec (11.4 %)
-view_dump_png: writing file SNO0001-15.png
-view_dump_png: writing file SNO0001-20.png
-view_dump_png: writing file SNO0001-25.png
-view_dump_png: writing file SNO0001-30.png
-view_dump_png: writing file SNO0001-35.png
-view_dump_png: writing file SNO0001-40.png
-view_dump_png: writing file SNO0001-45.png
-csp_time = 300.000004
-time spent in stochastic engine : 97.67 sec (89.5 %)
-time spent in lattice gas : 11.42 sec (10.5 %)
-view_dump_png: writing file SNO0001-50.png
-view_dump_png: writing file SNO0001-55.png
-view_dump_png: writing file SNO0002-00.png
-view_dump_png: writing file SNO0002-05.png
-view_dump_png: writing file SNO0002-10.png
-mass center: ( 239.340 , 151.405 , 26.198 ) - orientation: 0.000
-translation: ( 2 , 0 ) - orientation: 0.000 - resultant: ( 24.000 , 5.000 ) - time: 400.000002
+end of flow stabilization : meanvel = 305.346649   maxvel = 1145.261597
+csp_time = 200.000002
+time spent in stochastic engine : 18.52 sec (94.9 %)
+time spent in lattice gas : 0.99 sec (5.1 %)
+view_dump_png: writing file SNO00041_t0.png
+view_dump_png: writing file SNO00042_t0.png
+view_dump_png: writing file SNO00043_t0.png
+view_dump_png: writing file SNO00044_t0.png
+view_dump_png: writing file SNO00045_t0.png
+view_dump_png: writing file SNO00046_t0.png
+view_dump_png: writing file SNO00047_t0.png
+view_dump_png: writing file SNO00048_t0.png
+view_dump_png: writing file SNO00049_t0.png
+view_dump_png: writing file SNO00050_t0.png
+view_dump_png: writing file SNO00051_t0.png
+view_dump_png: writing file SNO00052_t0.png
+view_dump_png: writing file SNO00053_t0.png
+view_dump_png: writing file SNO00054_t0.png
+view_dump_png: writing file SNO00055_t0.png
+view_dump_png: writing file SNO00056_t0.png
+view_dump_png: writing file SNO00057_t0.png
+view_dump_png: writing file SNO00058_t0.png
+view_dump_png: writing file SNO00059_t0.png
+view_dump_png: writing file SNO00060_t0.png
+csp_time = 300.000010
+time spent in stochastic engine : 26.87 sec (95.2 %)
+time spent in lattice gas : 1.35 sec (4.8 %)
+view_dump_png: writing file SNO00061_t0.png
+view_dump_png: writing file SNO00062_t0.png
+view_dump_png: writing file SNO00063_t0.png
+view_dump_png: writing file SNO00064_t0.png
+view_dump_png: writing file SNO00065_t0.png
+view_dump_png: writing file SNO00066_t0.png
+view_dump_png: writing file SNO00067_t0.png
+view_dump_png: writing file SNO00068_t0.png
+view_dump_png: writing file SNO00069_t0.png
+view_dump_png: writing file SNO00070_t0.png
+view_dump_png: writing file SNO00071_t0.png
+view_dump_png: writing file SNO00072_t0.png
+view_dump_png: writing file SNO00073_t0.png
+view_dump_png: writing file SNO00074_t0.png
+view_dump_png: writing file SNO00075_t0.png
+view_dump_png: writing file SNO00076_t0.png
+view_dump_png: writing file SNO00077_t0.png
+view_dump_png: writing file SNO00078_t0.png
+view_dump_png: writing file SNO00079_t0.png
+view_dump_png: writing file SNO00080_t0.png
+mass center: ( 50.863 , 39.950 , 40.148 ) - orientation: 0.000
+translation: ( 0 , 1 ) - orientation: 0.000 - resultant: ( 4.000 , 2.000 ) - time: 400.000007
 reset lattice gas
 speedup of the lattice gas: 1000
 flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 546.785767   maxvel = 1240.085938
-csp_time = 400.000002
-time spent in stochastic engine : 124.82 sec (88.3 %)
-time spent in lattice gas : 16.58 sec (11.7 %)
-view_dump_png: writing file SNO0002-15.png
-view_dump_png: writing file SNO0002-20.png
-view_dump_png: writing file SNO0002-25.png
-view_dump_png: writing file SNO0002-30.png
-width=685, height=508
-allocation image_zoom : 521208
-view_dump_png: writing file SNO0002-35.png
-view_dump_png: writing file SNO0002-40.png
-view_dump_png: writing file SNO0002-45.png
-csp_time = 500.000002
-time spent in stochastic engine : 158.30 sec (88.9 %)
-time spent in lattice gas : 19.68 sec (11.1 %)
-view_dump_png: writing file SNO0002-50.png
-view_dump_png: writing file SNO0002-55.png
-view_dump_png: writing file SNO0003-00.png
-view_dump_png: writing file SNO0003-05.png
-view_dump_png: writing file SNO0003-10.png
-view_dump_png: writing file SNO0003-15.png
-view_dump_png: writing file SNO0003-20.png
-mass center: ( 242.271 , 151.335 , 25.762 ) - orientation: 0.000
-translation: ( -1 , 0 ) - orientation: 0.000 - resultant: ( 23.000 , 5.000 ) - time: 600.000017
+end of flow stabilization : meanvel = 308.582062   maxvel = 1157.317993
+csp_time = 400.000007
+time spent in stochastic engine : 33.50 sec (94.4 %)
+time spent in lattice gas : 1.97 sec (5.6 %)
+view_dump_png: writing file SNO00081_t0.png
+view_dump_png: writing file SNO00082_t0.png
+view_dump_png: writing file SNO00083_t0.png
+view_dump_png: writing file SNO00084_t0.png
+view_dump_png: writing file SNO00085_t0.png
+view_dump_png: writing file SNO00086_t0.png
+view_dump_png: writing file SNO00087_t0.png
+view_dump_png: writing file SNO00088_t0.png
+view_dump_png: writing file SNO00089_t0.png
+view_dump_png: writing file SNO00090_t0.png
+view_dump_png: writing file SNO00091_t0.png
+view_dump_png: writing file SNO00092_t0.png
+view_dump_png: writing file SNO00093_t0.png
+view_dump_png: writing file SNO00094_t0.png
+view_dump_png: writing file SNO00095_t0.png
+view_dump_png: writing file SNO00096_t0.png
+view_dump_png: writing file SNO00097_t0.png
+view_dump_png: writing file SNO00098_t0.png
+view_dump_png: writing file SNO00099_t0.png
+view_dump_png: writing file SNO00100_t0.png
+csp_time = 500.000007
+time spent in stochastic engine : 41.65 sec (94.7 %)
+time spent in lattice gas : 2.34 sec (5.3 %)
+view_dump_png: writing file SNO00101_t0.png
+view_dump_png: writing file SNO00102_t0.png
+view_dump_png: writing file SNO00103_t0.png
+view_dump_png: writing file SNO00104_t0.png
+view_dump_png: writing file SNO00105_t0.png
+view_dump_png: writing file SNO00106_t0.png
+view_dump_png: writing file SNO00107_t0.png
+view_dump_png: writing file SNO00108_t0.png
+view_dump_png: writing file SNO00109_t0.png
+view_dump_png: writing file SNO00110_t0.png
+view_dump_png: writing file SNO00111_t0.png
+view_dump_png: writing file SNO00112_t0.png
+view_dump_png: writing file SNO00113_t0.png
+view_dump_png: writing file SNO00114_t0.png
+view_dump_png: writing file SNO00115_t0.png
+view_dump_png: writing file SNO00116_t0.png
+view_dump_png: writing file SNO00117_t0.png
+view_dump_png: writing file SNO00118_t0.png
+view_dump_png: writing file SNO00119_t0.png
+view_dump_png: writing file SNO00120_t0.png
+mass center: ( 50.593 , 39.835 , 40.135 ) - orientation: 0.000
+translation: ( 0 , 1 ) - orientation: 0.000 - resultant: ( 4.000 , 3.000 ) - time: 600.000025
 reset lattice gas
 speedup of the lattice gas: 1000
 flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 538.315491   maxvel = 1273.434692
-csp_time = 600.000017
-time spent in stochastic engine : 187.68 sec (88.2 %)
-time spent in lattice gas : 25.02 sec (11.8 %)
-view_dump_png: writing file SNO0003-25.png
-view_dump_png: writing file SNO0003-30.png
-view_dump_png: writing file SNO0003-35.png
-view_dump_png: writing file SNO0003-40.png
-view_dump_png: writing file SNO0003-45.png
-view_dump_png: writing file SNO0003-50.png
-view_dump_png: writing file SNO0003-55.png
-view_dump_png: writing file SNO0004-00.png
-csp_time = 700.000004
-time spent in stochastic engine : 223.06 sec (88.8 %)
-time spent in lattice gas : 28.12 sec (11.2 %)
-view_dump_png: writing file SNO0004-05.png
-view_dump_png: writing file SNO0004-10.png
-view_dump_png: writing file SNO0004-15.png
-view_dump_png: writing file SNO0004-20.png
-view_dump_png: writing file SNO0004-25.png
-view_dump_png: writing file SNO0004-30.png
-view_dump_png: writing file SNO0004-35.png
-mass center: ( 256.013 , 150.652 , 25.808 ) - orientation: 0.000
-translation: ( -15 , 0 ) - orientation: 0.000 - resultant: ( 8.000 , 5.000 ) - time: 800.000000
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 528.480286   maxvel = 1319.813965
-csp_time = 800.000000
-time spent in stochastic engine : 253.72 sec (88.4 %)
-time spent in lattice gas : 33.35 sec (11.6 %)
-view_dump_png: writing file SNO0004-40.png
-view_dump_png: writing file SNO0004-45.png
-write CSP: SNO0005.csp, csp_time = 827.544901 (t0)
-writing CSP data : SNO0005.csp
-view_dump_png: writing file SNO0004-50.png
-view_dump_png: writing file SNO0004-55.png
-view_dump_png: writing file SNO0005-00.png
-view_dump_png: writing file SNO0005-05.png
-view_dump_png: writing file SNO0005-10.png
-view_dump_png: writing file SNO0005-15.png
-csp_time = 900.000000
-time spent in stochastic engine : 290.20 sec (88.8 %)
-time spent in lattice gas : 36.45 sec (11.2 %)
-view_dump_png: writing file SNO0005-20.png
-view_dump_png: writing file SNO0005-25.png
-view_dump_png: writing file SNO0005-30.png
-view_dump_png: writing file SNO0005-35.png
-view_dump_png: writing file SNO0005-40.png
-view_dump_png: writing file SNO0005-45.png
-view_dump_png: writing file SNO0005-50.png
-mass center: ( 263.863 , 151.298 , 25.858 ) - orientation: 0.000
-translation: ( -23 , 0 ) - orientation: 0.000 - resultant: ( -15.000 , 5.000 ) - time: 1000.000003
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0005-55.png
-end of flow stabilization : meanvel = 526.429932   maxvel = 1280.575317
-csp_time = 1000.000003
-time spent in stochastic engine : 322.58 sec (88.6 %)
-time spent in lattice gas : 41.67 sec (11.4 %)
-view_dump_png: writing file SNO0006-00.png
-view_dump_png: writing file SNO0006-05.png
-view_dump_png: writing file SNO0006-10.png
-view_dump_png: writing file SNO0006-15.png
-view_dump_png: writing file SNO0006-20.png
-view_dump_png: writing file SNO0006-25.png
-view_dump_png: writing file SNO0006-30.png
-view_dump_png: writing file SNO0006-35.png
-view_dump_png: writing file SNO0006-40.png
-view_dump_png: writing file SNO0006-45.png
-view_dump_png: writing file SNO0006-50.png
-view_dump_png: writing file SNO0006-55.png
-view_dump_png: writing file SNO0007-00.png
-view_dump_png: writing file SNO0007-05.png
-mass center: ( 254.850 , 150.931 , 25.776 ) - orientation: 0.000
-translation: ( -14 , 0 ) - orientation: 0.000 - resultant: ( -29.000 , 5.000 ) - time: 1200.000007
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0007-10.png
-end of flow stabilization : meanvel = 521.778687   maxvel = 1317.334106
-view_dump_png: writing file SNO0007-15.png
-view_dump_png: writing file SNO0007-20.png
-view_dump_png: writing file SNO0007-25.png
-view_dump_png: writing file SNO0007-30.png
-view_dump_png: writing file SNO0007-35.png
-view_dump_png: writing file SNO0007-40.png
-view_dump_png: writing file SNO0007-45.png
-view_dump_png: writing file SNO0007-50.png
-view_dump_png: writing file SNO0007-55.png
-view_dump_png: writing file SNO0008-00.png
-view_dump_png: writing file SNO0008-05.png
-view_dump_png: writing file SNO0008-10.png
-view_dump_png: writing file SNO0008-15.png
-view_dump_png: writing file SNO0008-20.png
-mass center: ( 226.252 , 150.275 , 25.886 ) - orientation: 0.000
-translation: ( 15 , 0 ) - orientation: 0.000 - resultant: ( -14.000 , 5.000 ) - time: 1400.000001
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0008-25.png
-end of flow stabilization : meanvel = 516.720703   maxvel = 1321.314819
-view_dump_png: writing file SNO0008-30.png
-view_dump_png: writing file SNO0008-35.png
-view_dump_png: writing file SNO0008-40.png
-view_dump_png: writing file SNO0008-45.png
-view_dump_png: writing file SNO0008-50.png
-view_dump_png: writing file SNO0008-55.png
-view_dump_png: writing file SNO0009-00.png
-view_dump_png: writing file SNO0009-05.png
-view_dump_png: writing file SNO0009-10.png
-view_dump_png: writing file SNO0009-15.png
-view_dump_png: writing file SNO0009-20.png
-view_dump_png: writing file SNO0009-25.png
-view_dump_png: writing file SNO0009-30.png
-view_dump_png: writing file SNO0009-35.png
-mass center: ( 224.859 , 149.164 , 25.691 ) - orientation: 0.000
-translation: ( 16 , 0 ) - orientation: 0.000 - resultant: ( 2.000 , 5.000 ) - time: 1600.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0009-40.png
-end of flow stabilization : meanvel = 511.223389   maxvel = 1383.968628
-view_dump_png: writing file SNO0009-45.png
-write CSP: SNO0010.csp, csp_time = 1624.613669 (t0)
-writing CSP data : SNO0010.csp
-view_dump_png: writing file SNO0009-50.png
-view_dump_png: writing file SNO0009-55.png
-view_dump_png: writing file SNO0010-00.png
-view_dump_png: writing file SNO0010-05.png
-view_dump_png: writing file SNO0010-10.png
-view_dump_png: writing file SNO0010-15.png
-view_dump_png: writing file SNO0010-20.png
-view_dump_png: writing file SNO0010-25.png
-view_dump_png: writing file SNO0010-30.png
-view_dump_png: writing file SNO0010-35.png
-view_dump_png: writing file SNO0010-40.png
-view_dump_png: writing file SNO0010-45.png
-view_dump_png: writing file SNO0010-50.png
-mass center: ( 233.347 , 148.279 , 25.748 ) - orientation: 0.000
-translation: ( 8 , 0 ) - orientation: 0.000 - resultant: ( 10.000 , 5.000 ) - time: 1800.000005
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 503.367462   maxvel = 1476.176514
-view_dump_png: writing file SNO0010-55.png
-view_dump_png: writing file SNO0011-00.png
-view_dump_png: writing file SNO0011-05.png
-view_dump_png: writing file SNO0011-10.png
-view_dump_png: writing file SNO0011-15.png
-view_dump_png: writing file SNO0011-20.png
-view_dump_png: writing file SNO0011-25.png
-view_dump_png: writing file SNO0011-30.png
-view_dump_png: writing file SNO0011-35.png
-view_dump_png: writing file SNO0011-40.png
-view_dump_png: writing file SNO0011-45.png
-view_dump_png: writing file SNO0011-50.png
-view_dump_png: writing file SNO0011-55.png
-view_dump_png: writing file SNO0012-00.png
-view_dump_png: writing file SNO0012-05.png
-mass center: ( 235.165 , 149.545 , 25.817 ) - orientation: 0.000
-translation: ( 6 , 0 ) - orientation: 0.000 - resultant: ( 16.000 , 5.000 ) - time: 2000.000000
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 505.942657   maxvel = 1434.771729
-view_dump_png: writing file SNO0012-10.png
-view_dump_png: writing file SNO0012-15.png
-view_dump_png: writing file SNO0012-20.png
-view_dump_png: writing file SNO0012-25.png
-view_dump_png: writing file SNO0012-30.png
-view_dump_png: writing file SNO0012-35.png
-view_dump_png: writing file SNO0012-40.png
-view_dump_png: writing file SNO0012-45.png
-view_dump_png: writing file SNO0012-50.png
-view_dump_png: writing file SNO0012-55.png
-view_dump_png: writing file SNO0013-00.png
-view_dump_png: writing file SNO0013-05.png
-view_dump_png: writing file SNO0013-10.png
-view_dump_png: writing file SNO0013-15.png
-view_dump_png: writing file SNO0013-20.png
-mass center: ( 258.902 , 150.423 , 25.412 ) - orientation: 0.000
-translation: ( -18 , 1 ) - orientation: 0.000 - resultant: ( -2.000 , 6.000 ) - time: 2200.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 500.870972   maxvel = 1448.537598
-view_dump_png: writing file SNO0013-25.png
-view_dump_png: writing file SNO0013-30.png
-view_dump_png: writing file SNO0013-35.png
-view_dump_png: writing file SNO0013-40.png
-view_dump_png: writing file SNO0013-45.png
-view_dump_png: writing file SNO0013-50.png
-view_dump_png: writing file SNO0013-55.png
-view_dump_png: writing file SNO0014-00.png
-view_dump_png: writing file SNO0014-05.png
-view_dump_png: writing file SNO0014-10.png
-view_dump_png: writing file SNO0014-15.png
-view_dump_png: writing file SNO0014-20.png
-view_dump_png: writing file SNO0014-25.png
-view_dump_png: writing file SNO0014-30.png
-view_dump_png: writing file SNO0014-35.png
-mass center: ( 238.469 , 151.187 , 25.316 ) - orientation: 0.000
-translation: ( 3 , 1 ) - orientation: 0.000 - resultant: ( 1.000 , 7.000 ) - time: 2400.000001
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0014-40.png
-end of flow stabilization : meanvel = 493.665283   maxvel = 1469.488647
-view_dump_png: writing file SNO0014-45.png
-write CSP: SNO0015.csp, csp_time = 2421.171643 (t0)
-writing CSP data : SNO0015.csp
-view_dump_png: writing file SNO0014-50.png
-view_dump_png: writing file SNO0014-55.png
-view_dump_png: writing file SNO0015-00.png
-view_dump_png: writing file SNO0015-05.png
-view_dump_png: writing file SNO0015-10.png
-view_dump_png: writing file SNO0015-15.png
-view_dump_png: writing file SNO0015-20.png
-view_dump_png: writing file SNO0015-25.png
-view_dump_png: writing file SNO0015-30.png
-view_dump_png: writing file SNO0015-35.png
-view_dump_png: writing file SNO0015-40.png
-view_dump_png: writing file SNO0015-45.png
-view_dump_png: writing file SNO0015-50.png
-view_dump_png: writing file SNO0015-55.png
-mass center: ( 233.919 , 149.599 , 25.445 ) - orientation: 0.000
-translation: ( 7 , 1 ) - orientation: 0.000 - resultant: ( 8.000 , 8.000 ) - time: 2600.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 489.808044   maxvel = 1487.777588
-view_dump_png: writing file SNO0016-00.png
-view_dump_png: writing file SNO0016-05.png
-view_dump_png: writing file SNO0016-10.png
-view_dump_png: writing file SNO0016-15.png
-view_dump_png: writing file SNO0016-20.png
-view_dump_png: writing file SNO0016-25.png
-view_dump_png: writing file SNO0016-30.png
-view_dump_png: writing file SNO0016-35.png
-view_dump_png: writing file SNO0016-40.png
-view_dump_png: writing file SNO0016-45.png
-view_dump_png: writing file SNO0016-50.png
-view_dump_png: writing file SNO0016-55.png
-view_dump_png: writing file SNO0017-00.png
-view_dump_png: writing file SNO0017-05.png
-mass center: ( 262.182 , 148.337 , 25.424 ) - orientation: 0.000
-translation: ( -21 , 1 ) - orientation: 0.000 - resultant: ( -13.000 , 9.000 ) - time: 2800.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0017-10.png
-end of flow stabilization : meanvel = 486.572693   maxvel = 1442.681519
-view_dump_png: writing file SNO0017-15.png
-view_dump_png: writing file SNO0017-20.png
-view_dump_png: writing file SNO0017-25.png
-view_dump_png: writing file SNO0017-30.png
-view_dump_png: writing file SNO0017-35.png
-view_dump_png: writing file SNO0017-40.png
-view_dump_png: writing file SNO0017-45.png
-view_dump_png: writing file SNO0017-50.png
-view_dump_png: writing file SNO0017-55.png
-view_dump_png: writing file SNO0018-00.png
-view_dump_png: writing file SNO0018-05.png
-view_dump_png: writing file SNO0018-10.png
-view_dump_png: writing file SNO0018-15.png
-view_dump_png: writing file SNO0018-20.png
-mass center: ( 260.712 , 147.949 , 25.574 ) - orientation: 0.000
-translation: ( -20 , 0 ) - orientation: 0.000 - resultant: ( -33.000 , 9.000 ) - time: 3000.000001
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 490.065063   maxvel = 1357.121948
-view_dump_png: writing file SNO0018-25.png
-view_dump_png: writing file SNO0018-30.png
-view_dump_png: writing file SNO0018-35.png
-view_dump_png: writing file SNO0018-40.png
-view_dump_png: writing file SNO0018-45.png
-view_dump_png: writing file SNO0018-50.png
-view_dump_png: writing file SNO0018-55.png
-view_dump_png: writing file SNO0019-00.png
-view_dump_png: writing file SNO0019-05.png
-view_dump_png: writing file SNO0019-10.png
-view_dump_png: writing file SNO0019-15.png
-view_dump_png: writing file SNO0019-20.png
-view_dump_png: writing file SNO0019-25.png
-view_dump_png: writing file SNO0019-30.png
-view_dump_png: writing file SNO0019-35.png
-mass center: ( 265.790 , 146.833 , 25.264 ) - orientation: 0.000
-translation: ( -25 , 1 ) - orientation: 0.000 - resultant: ( -58.000 , 10.000 ) - time: 3200.000003
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 488.103760   maxvel = 1369.201538
-view_dump_png: writing file SNO0019-40.png
-view_dump_png: writing file SNO0019-45.png
-write CSP: SNO0020.csp, csp_time = 3230.020939 (t0)
-writing CSP data : SNO0020.csp
-view_dump_png: writing file SNO0019-50.png
-view_dump_png: writing file SNO0019-55.png
-view_dump_png: writing file SNO0020-00.png
-view_dump_png: writing file SNO0020-05.png
-view_dump_png: writing file SNO0020-10.png
-view_dump_png: writing file SNO0020-15.png
-view_dump_png: writing file SNO0020-20.png
-view_dump_png: writing file SNO0020-25.png
-view_dump_png: writing file SNO0020-30.png
-view_dump_png: writing file SNO0020-35.png
-view_dump_png: writing file SNO0020-40.png
-view_dump_png: writing file SNO0020-45.png
-mass center: ( 269.356 , 145.836 , 25.636 ) - orientation: 0.000
-translation: ( -28 , 0 ) - orientation: 0.000 - resultant: ( -86.000 , 10.000 ) - time: 3400.000000
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0020-50.png
-end of flow stabilization : meanvel = 481.426514   maxvel = 1411.072266
-view_dump_png: writing file SNO0020-55.png
-view_dump_png: writing file SNO0021-00.png
-view_dump_png: writing file SNO0021-05.png
-view_dump_png: writing file SNO0021-10.png
-view_dump_png: writing file SNO0021-15.png
-view_dump_png: writing file SNO0021-20.png
-view_dump_png: writing file SNO0021-25.png
-view_dump_png: writing file SNO0021-30.png
-view_dump_png: writing file SNO0021-35.png
-view_dump_png: writing file SNO0021-40.png
-view_dump_png: writing file SNO0021-45.png
-view_dump_png: writing file SNO0021-50.png
-view_dump_png: writing file SNO0021-55.png
-view_dump_png: writing file SNO0022-00.png
-mass center: ( 268.498 , 145.559 , 25.575 ) - orientation: 0.000
-translation: ( -27 , 0 ) - orientation: 0.000 - resultant: ( -113.000 , 10.000 ) - time: 3600.000001
-view_dump_png: writing file SNO0022-05.png
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 480.732513   maxvel = 1452.258911
-view_dump_png: writing file SNO0022-10.png
-view_dump_png: writing file SNO0022-15.png
-view_dump_png: writing file SNO0022-20.png
-view_dump_png: writing file SNO0022-25.png
-view_dump_png: writing file SNO0022-30.png
-view_dump_png: writing file SNO0022-35.png
-view_dump_png: writing file SNO0022-40.png
-view_dump_png: writing file SNO0022-45.png
-view_dump_png: writing file SNO0022-50.png
-view_dump_png: writing file SNO0022-55.png
-view_dump_png: writing file SNO0023-00.png
-view_dump_png: writing file SNO0023-05.png
-view_dump_png: writing file SNO0023-10.png
-view_dump_png: writing file SNO0023-15.png
-mass center: ( 258.541 , 144.974 , 25.401 ) - orientation: 0.000
-translation: ( -18 , 1 ) - orientation: 0.000 - resultant: ( -131.000 , 11.000 ) - time: 3800.000001
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 480.588898   maxvel = 1505.733765
-view_dump_png: writing file SNO0023-20.png
-view_dump_png: writing file SNO0023-25.png
-view_dump_png: writing file SNO0023-30.png
-view_dump_png: writing file SNO0023-35.png
-view_dump_png: writing file SNO0023-40.png
-view_dump_png: writing file SNO0023-45.png
-view_dump_png: writing file SNO0023-50.png
-view_dump_png: writing file SNO0023-55.png
-view_dump_png: writing file SNO0024-00.png
-view_dump_png: writing file SNO0024-05.png
-view_dump_png: writing file SNO0024-10.png
-view_dump_png: writing file SNO0024-15.png
-view_dump_png: writing file SNO0024-20.png
-mass center: ( 262.395 , 144.733 , 25.628 ) - orientation: 0.000
-translation: ( -21 , 0 ) - orientation: 0.000 - resultant: ( -152.000 , 11.000 ) - time: 4000.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0024-25.png
-end of flow stabilization : meanvel = 474.208862   maxvel = 1475.762817
-view_dump_png: writing file SNO0024-30.png
-view_dump_png: writing file SNO0024-35.png
-view_dump_png: writing file SNO0024-40.png
-view_dump_png: writing file SNO0024-45.png
-write CSP: SNO0025.csp, csp_time = 4064.150703 (t0)
-writing CSP data : SNO0025.csp
-view_dump_png: writing file SNO0024-50.png
-view_dump_png: writing file SNO0024-55.png
-view_dump_png: writing file SNO0025-00.png
-view_dump_png: writing file SNO0025-05.png
-view_dump_png: writing file SNO0025-10.png
-view_dump_png: writing file SNO0025-15.png
-view_dump_png: writing file SNO0025-20.png
-view_dump_png: writing file SNO0025-25.png
-view_dump_png: writing file SNO0025-30.png
-mass center: ( 259.017 , 142.698 , 25.802 ) - orientation: 0.000
-translation: ( -18 , 0 ) - orientation: 0.000 - resultant: ( -170.000 , 11.000 ) - time: 4200.000000
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 472.035248   maxvel = 1479.573242
-view_dump_png: writing file SNO0025-35.png
-view_dump_png: writing file SNO0025-40.png
-view_dump_png: writing file SNO0025-45.png
-view_dump_png: writing file SNO0025-50.png
-view_dump_png: writing file SNO0025-55.png
-view_dump_png: writing file SNO0026-00.png
-view_dump_png: writing file SNO0026-05.png
-view_dump_png: writing file SNO0026-10.png
-view_dump_png: writing file SNO0026-15.png
-view_dump_png: writing file SNO0026-20.png
-view_dump_png: writing file SNO0026-25.png
-view_dump_png: writing file SNO0026-30.png
-view_dump_png: writing file SNO0026-35.png
-mass center: ( 243.089 , 144.050 , 25.261 ) - orientation: 0.000
-translation: ( -2 , 1 ) - orientation: 0.000 - resultant: ( -172.000 , 12.000 ) - time: 4400.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 470.183044   maxvel = 1571.455688
-view_dump_png: writing file SNO0026-40.png
-view_dump_png: writing file SNO0026-45.png
-view_dump_png: writing file SNO0026-50.png
-view_dump_png: writing file SNO0026-55.png
-view_dump_png: writing file SNO0027-00.png
-view_dump_png: writing file SNO0027-05.png
-view_dump_png: writing file SNO0027-10.png
-view_dump_png: writing file SNO0027-15.png
-view_dump_png: writing file SNO0027-20.png
-view_dump_png: writing file SNO0027-25.png
-view_dump_png: writing file SNO0027-30.png
-view_dump_png: writing file SNO0027-35.png
-view_dump_png: writing file SNO0027-40.png
-view_dump_png: writing file SNO0027-45.png
-mass center: ( 264.251 , 143.279 , 25.659 ) - orientation: 0.000
-translation: ( -23 , 0 ) - orientation: 0.000 - resultant: ( -195.000 , 12.000 ) - time: 4600.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 474.369019   maxvel = 1471.788330
-view_dump_png: writing file SNO0027-50.png
-view_dump_png: writing file SNO0027-55.png
-view_dump_png: writing file SNO0028-00.png
-view_dump_png: writing file SNO0028-05.png
-view_dump_png: writing file SNO0028-10.png
-view_dump_png: writing file SNO0028-15.png
-view_dump_png: writing file SNO0028-20.png
-view_dump_png: writing file SNO0028-25.png
-view_dump_png: writing file SNO0028-30.png
-view_dump_png: writing file SNO0028-35.png
-view_dump_png: writing file SNO0028-40.png
-view_dump_png: writing file SNO0028-45.png
-view_dump_png: writing file SNO0028-50.png
-mass center: ( 242.467 , 145.067 , 25.574 ) - orientation: 0.000
-translation: ( -1 , 0 ) - orientation: 0.000 - resultant: ( -196.000 , 12.000 ) - time: 4800.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 472.190308   maxvel = 1468.620117
-view_dump_png: writing file SNO0028-55.png
-view_dump_png: writing file SNO0029-00.png
-view_dump_png: writing file SNO0029-05.png
-view_dump_png: writing file SNO0029-10.png
-view_dump_png: writing file SNO0029-15.png
-view_dump_png: writing file SNO0029-20.png
-view_dump_png: writing file SNO0029-25.png
-view_dump_png: writing file SNO0029-30.png
-view_dump_png: writing file SNO0029-35.png
-view_dump_png: writing file SNO0029-40.png
-view_dump_png: writing file SNO0029-45.png
-write CSP: SNO0030.csp, csp_time = 4965.998520 (t0)
-writing CSP data : SNO0030.csp
-view_dump_png: writing file SNO0029-50.png
-view_dump_png: writing file SNO0029-55.png
-mass center: ( 254.444 , 145.162 , 25.513 ) - orientation: 0.000
-translation: ( -13 , 0 ) - orientation: 0.000 - resultant: ( -209.000 , 12.000 ) - time: 5000.000001
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0030-00.png
-end of flow stabilization : meanvel = 472.549774   maxvel = 1481.347046
-view_dump_png: writing file SNO0030-05.png
-view_dump_png: writing file SNO0030-10.png
-view_dump_png: writing file SNO0030-15.png
-view_dump_png: writing file SNO0030-20.png
-view_dump_png: writing file SNO0030-25.png
-view_dump_png: writing file SNO0030-30.png
-view_dump_png: writing file SNO0030-35.png
-view_dump_png: writing file SNO0030-40.png
-view_dump_png: writing file SNO0030-45.png
-view_dump_png: writing file SNO0030-50.png
-view_dump_png: writing file SNO0030-55.png
-view_dump_png: writing file SNO0031-00.png
-view_dump_png: writing file SNO0031-05.png
-mass center: ( 266.381 , 142.764 , 25.641 ) - orientation: 0.000
-translation: ( -25 , 0 ) - orientation: 0.000 - resultant: ( -234.000 , 12.000 ) - time: 5200.000005
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0031-10.png
-end of flow stabilization : meanvel = 469.518646   maxvel = 1491.604858
-view_dump_png: writing file SNO0031-15.png
-view_dump_png: writing file SNO0031-20.png
-view_dump_png: writing file SNO0031-25.png
-view_dump_png: writing file SNO0031-30.png
-view_dump_png: writing file SNO0031-35.png
-view_dump_png: writing file SNO0031-40.png
-view_dump_png: writing file SNO0031-45.png
-view_dump_png: writing file SNO0031-50.png
-view_dump_png: writing file SNO0031-55.png
-view_dump_png: writing file SNO0032-00.png
-view_dump_png: writing file SNO0032-05.png
-view_dump_png: writing file SNO0032-10.png
-view_dump_png: writing file SNO0032-15.png
-mass center: ( 249.374 , 142.792 , 25.378 ) - orientation: 0.000
-translation: ( -8 , 1 ) - orientation: 0.000 - resultant: ( -242.000 , 13.000 ) - time: 5400.000000
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 473.796478   maxvel = 1565.327393
-view_dump_png: writing file SNO0032-20.png
-view_dump_png: writing file SNO0032-25.png
-view_dump_png: writing file SNO0032-30.png
-view_dump_png: writing file SNO0032-35.png
-view_dump_png: writing file SNO0032-40.png
-view_dump_png: writing file SNO0032-45.png
-view_dump_png: writing file SNO0032-50.png
-view_dump_png: writing file SNO0032-55.png
-view_dump_png: writing file SNO0033-00.png
-view_dump_png: writing file SNO0033-05.png
-view_dump_png: writing file SNO0033-10.png
-view_dump_png: writing file SNO0033-15.png
-view_dump_png: writing file SNO0033-20.png
-view_dump_png: writing file SNO0033-25.png
-mass center: ( 270.563 , 143.109 , 25.591 ) - orientation: 0.000
-translation: ( -30 , 0 ) - orientation: 0.000 - resultant: ( -272.000 , 13.000 ) - time: 5600.000005
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 470.059296   maxvel = 1435.121216
-view_dump_png: writing file SNO0033-30.png
-view_dump_png: writing file SNO0033-35.png
-view_dump_png: writing file SNO0033-40.png
-view_dump_png: writing file SNO0033-45.png
-view_dump_png: writing file SNO0033-50.png
-view_dump_png: writing file SNO0033-55.png
-view_dump_png: writing file SNO0034-00.png
-view_dump_png: writing file SNO0034-05.png
-view_dump_png: writing file SNO0034-10.png
-view_dump_png: writing file SNO0034-15.png
-view_dump_png: writing file SNO0034-20.png
-view_dump_png: writing file SNO0034-25.png
-view_dump_png: writing file SNO0034-30.png
-mass center: ( 248.456 , 143.973 , 25.449 ) - orientation: 0.000
-translation: ( -7 , 1 ) - orientation: 0.000 - resultant: ( -279.000 , 14.000 ) - time: 5800.000001
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 474.751160   maxvel = 1499.801636
-view_dump_png: writing file SNO0034-35.png
-view_dump_png: writing file SNO0034-40.png
-view_dump_png: writing file SNO0034-45.png
-write CSP: SNO0035.csp, csp_time = 5837.617666 (t0)
-writing CSP data : SNO0035.csp
-view_dump_png: writing file SNO0034-50.png
-view_dump_png: writing file SNO0034-55.png
-view_dump_png: writing file SNO0035-00.png
-view_dump_png: writing file SNO0035-05.png
-view_dump_png: writing file SNO0035-10.png
-view_dump_png: writing file SNO0035-15.png
-view_dump_png: writing file SNO0035-20.png
-view_dump_png: writing file SNO0035-25.png
-view_dump_png: writing file SNO0035-30.png
-view_dump_png: writing file SNO0035-35.png
-view_dump_png: writing file SNO0035-40.png
-mass center: ( 266.384 , 143.613 , 25.880 ) - orientation: 0.000
-translation: ( -25 , 0 ) - orientation: 0.000 - resultant: ( -304.000 , 14.000 ) - time: 6000.000004
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 471.209442   maxvel = 1449.844849
-view_dump_png: writing file SNO0035-45.png
-view_dump_png: writing file SNO0035-50.png
-view_dump_png: writing file SNO0035-55.png
-view_dump_png: writing file SNO0036-00.png
-view_dump_png: writing file SNO0036-05.png
-view_dump_png: writing file SNO0036-10.png
-view_dump_png: writing file SNO0036-15.png
-view_dump_png: writing file SNO0036-20.png
-view_dump_png: writing file SNO0036-25.png
-view_dump_png: writing file SNO0036-30.png
-view_dump_png: writing file SNO0036-35.png
-view_dump_png: writing file SNO0036-40.png
-view_dump_png: writing file SNO0036-45.png
-mass center: ( 256.827 , 144.117 , 25.020 ) - orientation: 0.000
-translation: ( -16 , 1 ) - orientation: 0.000 - resultant: ( -320.000 , 15.000 ) - time: 6200.000001
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 468.868347   maxvel = 1490.327515
-view_dump_png: writing file SNO0036-50.png
-view_dump_png: writing file SNO0036-55.png
-view_dump_png: writing file SNO0037-00.png
-view_dump_png: writing file SNO0037-05.png
-view_dump_png: writing file SNO0037-10.png
-view_dump_png: writing file SNO0037-15.png
-view_dump_png: writing file SNO0037-20.png
-view_dump_png: writing file SNO0037-25.png
-view_dump_png: writing file SNO0037-30.png
-view_dump_png: writing file SNO0037-35.png
-view_dump_png: writing file SNO0037-40.png
-view_dump_png: writing file SNO0037-45.png
-view_dump_png: writing file SNO0037-50.png
-mass center: ( 263.129 , 144.239 , 25.242 ) - orientation: 0.000
-translation: ( -22 , 1 ) - orientation: 0.000 - resultant: ( -342.000 , 16.000 ) - time: 6400.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0037-55.png
-end of flow stabilization : meanvel = 471.107727   maxvel = 1510.031738
-view_dump_png: writing file SNO0038-00.png
-view_dump_png: writing file SNO0038-05.png
-view_dump_png: writing file SNO0038-10.png
-view_dump_png: writing file SNO0038-15.png
-view_dump_png: writing file SNO0038-20.png
-view_dump_png: writing file SNO0038-25.png
-view_dump_png: writing file SNO0038-30.png
-view_dump_png: writing file SNO0038-35.png
-view_dump_png: writing file SNO0038-40.png
-view_dump_png: writing file SNO0038-45.png
-view_dump_png: writing file SNO0038-50.png
-view_dump_png: writing file SNO0038-55.png
-view_dump_png: writing file SNO0039-00.png
-mass center: ( 260.386 , 144.651 , 25.357 ) - orientation: 0.000
-translation: ( -19 , 1 ) - orientation: 0.000 - resultant: ( -361.000 , 17.000 ) - time: 6600.000007
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0039-05.png
-end of flow stabilization : meanvel = 475.082886   maxvel = 1492.003052
-view_dump_png: writing file SNO0039-10.png
-view_dump_png: writing file SNO0039-15.png
-view_dump_png: writing file SNO0039-20.png
-view_dump_png: writing file SNO0039-25.png
-view_dump_png: writing file SNO0039-30.png
-view_dump_png: writing file SNO0039-35.png
-view_dump_png: writing file SNO0039-40.png
-view_dump_png: writing file SNO0039-45.png
-write CSP: SNO0040.csp, csp_time = 6719.115808 (t0)
-writing CSP data : SNO0040.csp
-view_dump_png: writing file SNO0039-50.png
-view_dump_png: writing file SNO0039-55.png
-view_dump_png: writing file SNO0040-00.png
-view_dump_png: writing file SNO0040-05.png
-view_dump_png: writing file SNO0040-10.png
-mass center: ( 249.255 , 144.551 , 25.281 ) - orientation: 0.000
-translation: ( -8 , 1 ) - orientation: 0.000 - resultant: ( -369.000 , 18.000 ) - time: 6800.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 470.842407   maxvel = 1472.446289
-view_dump_png: writing file SNO0040-15.png
-view_dump_png: writing file SNO0040-20.png
-view_dump_png: writing file SNO0040-25.png
-view_dump_png: writing file SNO0040-30.png
-view_dump_png: writing file SNO0040-35.png
-view_dump_png: writing file SNO0040-40.png
-view_dump_png: writing file SNO0040-45.png
-view_dump_png: writing file SNO0040-50.png
-view_dump_png: writing file SNO0040-55.png
-view_dump_png: writing file SNO0041-00.png
-view_dump_png: writing file SNO0041-05.png
-view_dump_png: writing file SNO0041-10.png
-view_dump_png: writing file SNO0041-15.png
-mass center: ( 263.110 , 144.471 , 25.407 ) - orientation: 0.000
-translation: ( -22 , 1 ) - orientation: 0.000 - resultant: ( -391.000 , 19.000 ) - time: 7000.000001
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-view_dump_png: writing file SNO0041-20.png
-end of flow stabilization : meanvel = 473.151184   maxvel = 1560.041626
-view_dump_png: writing file SNO0041-25.png
-view_dump_png: writing file SNO0041-30.png
-view_dump_png: writing file SNO0041-35.png
-view_dump_png: writing file SNO0041-40.png
-view_dump_png: writing file SNO0041-45.png
-view_dump_png: writing file SNO0041-50.png
-view_dump_png: writing file SNO0041-55.png
-view_dump_png: writing file SNO0042-00.png
-view_dump_png: writing file SNO0042-05.png
-view_dump_png: writing file SNO0042-10.png
-view_dump_png: writing file SNO0042-15.png
-view_dump_png: writing file SNO0042-20.png
-view_dump_png: writing file SNO0042-25.png
-mass center: ( 255.526 , 143.939 , 25.568 ) - orientation: 0.000
-translation: ( -15 , 0 ) - orientation: 0.000 - resultant: ( -406.000 , 19.000 ) - time: 7200.000016
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 473.534332   maxvel = 1584.463623
-view_dump_png: writing file SNO0042-30.png
-view_dump_png: writing file SNO0042-35.png
-view_dump_png: writing file SNO0042-40.png
-view_dump_png: writing file SNO0042-45.png
-view_dump_png: writing file SNO0042-50.png
-view_dump_png: writing file SNO0042-55.png
-view_dump_png: writing file SNO0043-00.png
-view_dump_png: writing file SNO0043-05.png
-view_dump_png: writing file SNO0043-10.png
-view_dump_png: writing file SNO0043-15.png
-view_dump_png: writing file SNO0043-20.png
-view_dump_png: writing file SNO0043-25.png
-view_dump_png: writing file SNO0043-30.png
-mass center: ( 264.559 , 144.419 , 25.017 ) - orientation: 0.000
-translation: ( -24 , 1 ) - orientation: 0.000 - resultant: ( -430.000 , 20.000 ) - time: 7400.000000
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 469.375458   maxvel = 1491.396973
-view_dump_png: writing file SNO0043-35.png
-view_dump_png: writing file SNO0043-40.png
-view_dump_png: writing file SNO0043-45.png
-view_dump_png: writing file SNO0043-50.png
-view_dump_png: writing file SNO0043-55.png
-view_dump_png: writing file SNO0044-00.png
-view_dump_png: writing file SNO0044-05.png
-view_dump_png: writing file SNO0044-10.png
-view_dump_png: writing file SNO0044-15.png
-view_dump_png: writing file SNO0044-20.png
-view_dump_png: writing file SNO0044-25.png
-view_dump_png: writing file SNO0044-30.png
-mass center: ( 261.835 , 144.368 , 25.637 ) - orientation: 0.000
-translation: ( -21 , 0 ) - orientation: 0.000 - resultant: ( -451.000 , 20.000 ) - time: 7600.000002
-reset lattice gas
-speedup of the lattice gas: 1000
-flow stabilization : 150 cycles
-end of flow stabilization : meanvel = 474.694946   maxvel = 1461.071533
-view_dump_png: writing file SNO0044-35.png
-write CSP: SNO0045.csp, csp_time = 7617.578750 (t0)
-writing CSP data : SNO0045.csp
-view_dump_png: writing file SNO0044-40.png
-view_dump_png: writing file SNO0044-45.png
-view_dump_png: writing file SNO0044-50.png
-time to quit !
+end of flow stabilization : meanvel = 309.517578   maxvel = 1140.195190
+csp_time = 600.000025
+time spent in stochastic engine : 47.53 sec (94.1 %)
+time spent in lattice gas : 2.96 sec (5.9 %)
+view_dump_png: writing file SNO00121_t0.png
+view_dump_png: writing file SNO00122_t0.png
+view_dump_png: writing file SNO00123_t0.png
+view_dump_png: writing file SNO00124_t0.png
+view_dump_png: writing file SNO00125_t0.png
+view_dump_png: writing file SNO00126_t0.png
+view_dump_png: writing file SNO00127_t0.png
+view_dump_png: writing file SNO00128_t0.png
+view_dump_png: writing file SNO00129_t0.png
+view_dump_png: writing file SNO00130_t0.png
+view_dump_png: writing file SNO00131_t0.png
+view_dump_png: writing file SNO00132_t0.png
+view_dump_png: writing file SNO00133_t0.png
+view_dump_png: writing file SNO00134_t0.png
+view_dump_png: writing file SNO00135_t0.png
+view_dump_png: writing file SNO00136_t0.png
+view_dump_png: writing file SNO00137_t0.png
+view_dump_png: writing file SNO00138_t0.png
+view_dump_png: writing file SNO00139_t0.png
