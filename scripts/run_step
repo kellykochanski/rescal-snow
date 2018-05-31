@@ -35,7 +35,8 @@ fi
 #PAR_FILE="dun_scale.par"
 #PAR_FILE="dun_kk.par"
 #PAR_FILE="dun_small.par"
-PAR_FILE="step.par"
+#PAR_FILE="step.par"
+PAR_FILE="sno_cone.par"
 
 echo PAR_FILE=$PAR_FILE
 
