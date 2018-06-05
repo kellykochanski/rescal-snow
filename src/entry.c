@@ -29,7 +29,8 @@
 
 #define _MAIN_
 #include <locale.h>
-#include <gtk/gtk.h>
+//GTK-JBK
+//#include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,7 +42,8 @@
 #include "param.h"
 #include "cells.h"
 #include "simul.h"
-#include "interface.h"
+//GTK interface-JBK
+//#include "interface.h"
 #include "callbacks.h"
 //#include "monitor.h"
 #include "view.h"
@@ -70,9 +72,14 @@ int arch=0;
 float frame_delay=0;
 unsigned char opt_h=0, opt_hm=0, opt_nv=0, opt_info=0,  opt_dcsp=0, opt_dbin=0, opt_stop=0, opt_quit=0;
 unsigned char flag_no_input=0;
-gint dcsp_delay, dbin_delay, stop_delay;
 unsigned char opt_dpng=0, opt_djpeg=0;
-gint dpng_delay=0, djpeg_delay=0;
+
+//converted from gint to int-JBK
+//gint dcsp_delay, dbin_delay, stop_delay;
+//gint dpng_delay=0, djpeg_delay=0;
+int dcsp_delay, dbin_delay, stop_delay;
+int dpng_delay=0, djpeg_delay=0;
+
 
 int main (int argc, char *argv[])
 {
@@ -111,7 +118,10 @@ int main (int argc, char *argv[])
 
   flag_no_input = (*argv[1] == '-');
 
-  gtk_set_locale();
+  
+  //GTK to be removed-JBK
+  //gtk_set_locale();
+
 #ifdef NUM_MODE
   LogPrintf("format of numerical values: %s \n", NUM_MODE);
   setlocale(LC_NUMERIC, NUM_MODE);
@@ -123,9 +133,13 @@ int main (int argc, char *argv[])
   if (sizeof(long)==8) arch = W64;
   LogPrintf("size of long: %ld bytes (%s)\n", sizeof(long), (arch==W32)?"32b":"64b");
   LogPrintf("size of cell: %lu byte(s)\n", sizeof(Cell));
+
+//this isn't accesible with the GTK free version-JBK
 #ifndef GUI
   LogPrintf("graphical interface disabled\n");
 #endif
+
+
 #ifdef USE_GD
   LogPrintf("use of libgd\n");
 #endif
@@ -195,6 +209,8 @@ int main (int argc, char *argv[])
   else
     LogPrintf("non-deterministic execution\n");
 
+//Major GTK section to be removed-JBK
+  /*/
   if (!opt_nv){
 #if (GLIB_MAJOR_VERSION <= 2) && (GLIB_MINOR_VERSION<32)
     g_thread_init(NULL); /// deprecated function since glib 2.32
@@ -202,29 +218,38 @@ int main (int argc, char *argv[])
     gdk_threads_init();
     gtk_init (&argc, &argv);
   }
+   */
   /*else gtk_init_check (&argc, &argv);*/
-
+	
   rescal_init(argv[1]);
   view_init(argc, argv);
   callbacks_init();
 
   //if (opt_nv) rescal(0);
 
+//This is some more GTK code that isn't needed-JBK
+/*
 #ifdef GUI
   if (!opt_nv) {
     create_window();
     gcallback_flash(0);
   }
 #endif
+*/
 
   if (opt_info) {
     log_info();
     dp_info = (DumpPar){DUMP_LOG, 1};
+    //GTK output-JBK
+    /*  
     g_timeout_add_seconds(60, gcallback_dump, &dp_info); //toutes les minutes
     //g_timeout_add_seconds(1, gcallback_dump, &dp_info); //toutes les secondes
-  }
+  */
+   }
 
-  if (opt_dcsp) {
+//Removed for GTK dependinces-JBK
+//TODO Remove GTK Dependinces by channging callback dump, and g_timeout-JBK
+/*  if (opt_dcsp) {
     //dump_terre(DUMP_CSP, dcsp_delay);
     dp_csp = (DumpPar){DUMP_CSP, dcsp_delay};
     gcallback_dump(&dp_csp);
@@ -237,7 +262,7 @@ int main (int argc, char *argv[])
     gcallback_dump(&dp_bin);
     g_timeout_add_seconds(dbin_delay*60, gcallback_dump, &dp_bin);
   }
-
+*/
 #if defined(USE_LIBPNG) || defined(USE_GD)
   view_dump_init();
 #endif
@@ -245,26 +270,34 @@ int main (int argc, char *argv[])
   if (opt_dpng) {
     dump_image_inter(dpng_delay, "png");
     dp_png = (DumpPar){DUMP_PNG, dpng_delay};
-    g_timeout_add_seconds(dpng_delay, gcallback_dump, &dp_png);
+    
+    //TODO remove GTK dependince from timeout_add-JBK
+    //g_timeout_add_seconds(dpng_delay, gcallback_dump, &dp_png);
   }
   if (opt_djpeg) {
     dump_image_inter(djpeg_delay, "jpeg");
     dp_jpeg = (DumpPar){DUMP_JPEG, djpeg_delay};
-    g_timeout_add_seconds(djpeg_delay, gcallback_dump, &dp_jpeg);
+    
+    //TODO remove GTK dependince from timeout_add-JBK
+    //g_timeout_add_seconds(djpeg_delay, gcallback_dump, &dp_jpeg);
   }
 
   if (opt_stop) {
-    g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, stop_delay*60+15, gcallback_stop, 0, NULL);
+    //TODO remove GTK dependince from timeout_add-JBK
+    //g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, stop_delay*60+15, gcallback_stop, 0, NULL);
+
     //gtk_timeout_add(stop_delay*60000+15000, callback_stop, 0);
   }
   if (opt_quit){
-    g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, 1, gcallback_quit, 0, NULL);
+    //TODO remove GTK dependince from timeout_add-JBK
+    //g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, 1, gcallback_quit, 0, NULL);
   }
 
   int nRetVal;
   pthread_t pth;
   nRetVal = pthread_create( &pth, 0, rescal_thread, 0);
-
+  pthread_join(pth,0); //TODO: THIS IS TEMP CODE-JBK
+  //**** This was already commented out? ***-JBK
   /*
   GThread *pth;
   GError *err = NULL;
@@ -273,8 +306,10 @@ int main (int argc, char *argv[])
   */
 
   //gtk_idle_add(idle, NULL);
+  //*************************************
 
-  gtk_main ();
+  //More GTK that's not needed-JBK
+  //gtk_main ();
 
 #ifdef LOG_FILE
   fclose(log_file);
@@ -464,6 +499,9 @@ void usage_no_input()
   printf("Try '-h' option for usage\n");
 }
 
+
+//TODO convert this to non GTK?-JBK
+/*
 //#ifdef GTK_OLD_SYNTAX
 #if GTK2 && (GTK_MINOR_VERSION<14)
 void g_timeout_add_seconds(int nsec, GtkFunction gcallback_dump, gpointer data)
@@ -476,3 +514,5 @@ void g_timeout_add_seconds_full(int prior, int nsec, GtkFunction gcallback_dump,
   gtk_timeout_add(nsec*1000, gcallback_dump, data);
 }
 #endif
+*/
+
