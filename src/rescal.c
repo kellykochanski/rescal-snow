@@ -158,7 +158,7 @@ int rescal()
 #endif
     //monitor_signal();
     LogPrintf("debut de la simulation ...\n");
-    push_status("running",0);
+//     push_status("running",0);
     start = 1;
   }
 
@@ -177,7 +177,7 @@ int rescal()
   if (stop){
     LogPrintf("fin de la simulation\n");
     fin_simul = 1;
-    pop_status(0);
+//     pop_status(0);
   }
 
   return 0;

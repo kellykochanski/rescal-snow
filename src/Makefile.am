@@ -54,8 +54,6 @@ rescal_SOURCES = \
   drand48.c \
   entry.c \
   entry.h \
-  interface.c \
-  interface.h \
   rescal.c \
   rescal.h
 

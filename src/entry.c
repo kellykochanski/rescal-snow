@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -80,7 +81,6 @@ unsigned char opt_dpng=0, opt_djpeg=0;
 int dcsp_delay, dbin_delay, stop_delay;
 int dpng_delay=0, djpeg_delay=0;
 
-
 int main (int argc, char *argv[])
 {
   DumpPar dp_info, dp_csp, dp_bin, dp_png, dp_jpeg;
@@ -118,7 +118,7 @@ int main (int argc, char *argv[])
 
   flag_no_input = (*argv[1] == '-');
 
-  
+
   //GTK to be removed-JBK
   //gtk_set_locale();
 
@@ -220,10 +220,12 @@ int main (int argc, char *argv[])
   }
    */
   /*else gtk_init_check (&argc, &argv);*/
-	
+
   rescal_init(argv[1]);
   view_init(argc, argv);
+#ifdef GUI
   callbacks_init();
+#endif
 
   //if (opt_nv) rescal(0);
 
@@ -241,7 +243,7 @@ int main (int argc, char *argv[])
     log_info();
     dp_info = (DumpPar){DUMP_LOG, 1};
     //GTK output-JBK
-    /*  
+    /*
     g_timeout_add_seconds(60, gcallback_dump, &dp_info); //toutes les minutes
     //g_timeout_add_seconds(1, gcallback_dump, &dp_info); //toutes les secondes
   */
@@ -268,27 +270,25 @@ int main (int argc, char *argv[])
 #endif
 
   if (opt_dpng) {
-    dump_image_inter(dpng_delay, "png");
-    dp_png = (DumpPar){DUMP_PNG, dpng_delay};
-    
-    //TODO remove GTK dependince from timeout_add-JBK
+    set_ss_timeout(dpng_delay, "png");
     //g_timeout_add_seconds(dpng_delay, gcallback_dump, &dp_png);
   }
   if (opt_djpeg) {
-    dump_image_inter(djpeg_delay, "jpeg");
-    dp_jpeg = (DumpPar){DUMP_JPEG, djpeg_delay};
-    
-    //TODO remove GTK dependince from timeout_add-JBK
+    set_ss_timeout(djpeg_delay, "jpeg");
     //g_timeout_add_seconds(djpeg_delay, gcallback_dump, &dp_jpeg);
   }
 
   if (opt_stop) {
+    pthread_t pth;
+    pthread_create(&pth, 0, do_stop, (void*)(intptr_t)(stop_delay*60));
     //TODO remove GTK dependince from timeout_add-JBK
     //g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, stop_delay*60+15, gcallback_stop, 0, NULL);
 
     //gtk_timeout_add(stop_delay*60000+15000, callback_stop, 0);
   }
-  if (opt_quit){
+  if (opt_quit) {
+    pthread_t pth;
+    pthread_create(&pth, 0, do_quit, 0);
     //TODO remove GTK dependince from timeout_add-JBK
     //g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, 1, gcallback_quit, 0, NULL);
   }

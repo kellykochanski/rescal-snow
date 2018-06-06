@@ -29,7 +29,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <sys/time.h>
-#include <gtk/gtk.h>
+//#include <gtk/gtk.h>
 #include "defs.h"
 #include "macros.h"
 #include "entry.h"
@@ -75,12 +75,12 @@ extern int rot_mode;
 extern int mode_par;    //mode parallele
 extern int proc_id;     //numero de process en mode parallele (0 = serveur)
 #endif
-extern GtkWidget *drawingarea;
+
 #ifdef GUI
+extern GtkWidget *drawingarea;
 extern GtkWidget *window;
 extern GtkLabel *label;
 extern GtkStatusbar *statusbar;
-#endif
 
 gint area_w, area_h;
 gint timer=0;
@@ -89,6 +89,12 @@ gint rescal_paused=0;     //semaphore (pour la mise en pause)
 volatile gint dump_wait=0;         //semaphore (pour la sauvegarde)
 gint mouse_flag=0;
 GdkGC *gc=NULL;
+#else
+int end_of_rescal=0;
+int rescal_paused=0;
+volatile int dump_wait=0;
+#endif
+
 pthread_mutex_t mutex_pause;
 pthread_cond_t cond_pause;
 pthread_mutex_t mutex_display;
@@ -97,6 +103,165 @@ pthread_barrier_t lgca_barrier;
 pthread_t thread_id_lgca;
 #endif // LGCA
 
+int elapsed(double *sec)
+{
+  //extern int gettimeofday();
+  struct timeval t;
+  struct timezone tz;
+
+  int stat;
+  stat = gettimeofday(&t, &tz);
+  *sec = (double)(t.tv_sec + t.tv_usec/1000000.0);
+  return(stat);
+}
+
+void *rescal_thread(void *data) {
+  sleep(1);
+  rescal();
+  end_of_rescal = 1;
+  pthread_exit(0);
+  return 0;
+}
+
+#ifdef PARALLEL_AUTOMATA
+
+void *lgca_thread(void *data) {
+  while (1) {
+    simul_lgca();
+    pthread_barrier_wait(&lgca_barrier);
+    //LogPrintf("LGCA-barrier\n");
+  }
+  pthread_exit(0);
+  return 0;
+}
+
+
+void wait_lgca_thread()
+{
+  //  extern pthread_barrier_t lgca_barrier;
+  //  extern pthread_t thread_id_lgca;
+  static int nRetVal = -1;
+
+  /// wait for the end of lgca cycle
+  if (nRetVal == 0) {pthread_barrier_wait(&lgca_barrier); /*LogPrintf("CSP-barrier\n");*/}
+
+  /// start lgca thread
+  if (nRetVal == -1){
+    pthread_barrier_init(&lgca_barrier,NULL,2);
+    nRetVal = pthread_create( &thread_id_lgca, 0, lgca_thread, 0);
+    if (nRetVal != 0) {ErrPrintf("ERROR: cannot create lgca_thread\n"); exit(-1);}
+  }
+}
+
+#endif
+
+void do_thread_sched()
+{
+  int unlocked=0;
+
+  if (dump_wait){
+    //push_status("writing",0); //do not work !?
+    //LogPrintf("dump_wait=%d   unlock\n", dump_wait);
+    //update_window();
+    unlocked=1;
+    unlock_csp(0);
+    while (dump_wait) sched_yield();
+  }
+  if (rescal_paused){
+//     push_status("paused",0);
+    LogPrintf("paused\n");
+    if (!unlocked){
+      unlocked=1;
+      unlock_csp(0);
+    }
+    pthread_cond_wait(&cond_pause, &mutex_pause);
+    LogPrintf("resume\n");
+//     pop_status(0);
+  }
+  if (unlocked){
+    lock_csp(0);
+    unlocked=0;
+    //pop_status(0);
+    //LogPrintf("dump_wait=%d   lock\n", dump_wait);
+  }
+}
+
+void log_info()
+{
+  //lock_csp(0);
+  dump_time();
+  #ifdef INFO_CEL
+  log_cell();
+  #endif
+  #ifdef INFO_DBL
+  dump_db_info();
+  #endif
+  #ifdef INFO_TRANS
+  dump_trans_info();
+  #endif
+  #ifdef PARALLEL
+  if (mode_par) dump_msg_info();
+  #endif
+  #if defined(TRACE_TRANS) || defined(TRACE3D_CEL) || defined(TRACE_FLUX)
+  trace_dump(1);
+  #endif
+  #ifdef LGCA
+  if (use_lgca){
+    dump_densite();
+    #ifndef STABILITY_ANALYSIS
+    dump_vel();
+    #endif
+    #ifdef CGV
+    dump_cgv_coef();
+    #endif
+  }
+  #endif // LGCA
+  //unlock_csp(0);
+}
+
+void* do_png(void* delay) {
+  while (1) {
+    dump_image_inter((intptr_t) delay, "png");
+    sleep((intptr_t) delay);
+  }
+  return 0;
+}
+
+void* do_jpeg(void* delay) {
+  while (1) {
+    dump_image_inter((intptr_t) delay, "jpeg");
+    sleep((intptr_t) delay);
+  }
+  return 0;
+}
+
+void set_ss_timeout(int delay, const char* type) {
+  pthread_t pth;
+  if (type == "png") {
+    pthread_create(&pth, 0, do_png,  (void*)(intptr_t) delay);
+  } else if (type == "jpeg") {
+    pthread_create(&pth, 0, do_jpeg, (void*)(intptr_t) delay);
+  }
+}
+
+void* do_stop(void* arg) {
+  sleep((intptr_t) arg);
+  LogPrintf("time to quit !\n");
+  //push_status("stopping ...", 0);
+  exit(-1);
+  return 0;
+}
+
+void* do_quit(void* arg) {
+  sleep(1);
+  if (opt_quit && end_of_rescal) {
+    LogPrintf("quit\n");
+    exit(-1);
+  }
+  return 0;
+}
+
+#ifdef GUI
 void callbacks_init()
 {
   view_img_size(&area_w, &area_h);
@@ -137,18 +302,6 @@ void unlock_display(int log_flag)
   if (log_flag) LogPrintf("display unlocked\n");
 }
 
-int elapsed(double *sec)
-{
-  //extern int gettimeofday();
-  struct timeval t;
-  struct timezone tz;
-
-  int stat;
-  stat = gettimeofday(&t, &tz);
-  *sec = (double)(t.tv_sec + t.tv_usec/1000000.0);
-  return(stat);
-}
-
 double get_flash_delay(gpointer  data)
 {
   int i;
@@ -159,7 +312,6 @@ double get_flash_delay(gpointer  data)
   elapsed(&t1);
   return (t1-t0)/10.0;
 }
-
 
 void timer_init() {
   //GtkWidget  *drawingarea = lookup_widget(GTK_WIDGET (widget), "drawingarea1");
@@ -176,81 +328,6 @@ void timer_init() {
   LogPrintf("frame_delay = %f\n", frame_delay);
   timer = gtk_timeout_add(frame_delay, gcallback_flash, 0);
 }
-
-
-void *rescal_thread(void *data) {
-  sleep(1);
-  rescal();
-  end_of_rescal = 1;
-  pthread_exit(0);
-  return 0;
-}
-
-#ifdef PARALLEL_AUTOMATA
-
-void *lgca_thread(void *data) {
-  while (1) {
-    simul_lgca();
-    pthread_barrier_wait(&lgca_barrier);
-    //LogPrintf("LGCA-barrier\n");
-  }
-  pthread_exit(0);
-  return 0;
-}
-
-
-void wait_lgca_thread()
-{
-//  extern pthread_barrier_t lgca_barrier;
-//  extern pthread_t thread_id_lgca;
-  static int nRetVal = -1;
-
-  /// wait for the end of lgca cycle
-  if (nRetVal == 0) {pthread_barrier_wait(&lgca_barrier); /*LogPrintf("CSP-barrier\n");*/}
-
-  /// start lgca thread
-  if (nRetVal == -1){
-    pthread_barrier_init(&lgca_barrier,NULL,2);
-    nRetVal = pthread_create( &thread_id_lgca, 0, lgca_thread, 0);
-    if (nRetVal != 0) {ErrPrintf("ERROR: cannot create lgca_thread\n"); exit(-1);}
-  }
-}
-
-#endif
-
-void log_info()
-{
-  //lock_csp(0);
-  dump_time();
-#ifdef INFO_CEL
-  log_cell();
-#endif
-#ifdef INFO_DBL
-  dump_db_info();
-#endif
-#ifdef INFO_TRANS
-  dump_trans_info();
-#endif
-#ifdef PARALLEL
-  if (mode_par) dump_msg_info();
-#endif
-#if defined(TRACE_TRANS) || defined(TRACE3D_CEL) || defined(TRACE_FLUX)
-  trace_dump(1);
-#endif
-#ifdef LGCA
-  if (use_lgca){
-    dump_densite();
-#ifndef STABILITY_ANALYSIS
-    dump_vel();
-#endif
-#ifdef CGV
-    dump_cgv_coef();
-#endif
-  }
-#endif // LGCA
-  //unlock_csp(0);
-}
-
 
 gboolean gcallback_dump (gpointer data){
   static int cpt=0;
@@ -335,39 +412,6 @@ gboolean gcallback_dump (gpointer data){
   return !end_of_rescal;
 }
 
-
-void do_thread_sched()
-{
-  int unlocked=0;
-
-  if (dump_wait){
-    //push_status("writing",0); //do not work !?
-    //LogPrintf("dump_wait=%d   unlock\n", dump_wait);
-    //update_window();
-    unlocked=1;
-    unlock_csp(0);
-    while (dump_wait) sched_yield();
-  }
-  if (rescal_paused){
-    push_status("paused",0);
-    LogPrintf("paused\n");
-    if (!unlocked){
-      unlocked=1;
-      unlock_csp(0);
-    }
-    pthread_cond_wait(&cond_pause, &mutex_pause);
-    LogPrintf("resume\n");
-    pop_status(0);
-  }
-  if (unlocked){
-    lock_csp(0);
-    unlocked=0;
-    //pop_status(0);
-    //LogPrintf("dump_wait=%d   lock\n", dump_wait);
-  }
-}
-
-
 gboolean gcallback_stop (gpointer  data)
 {
   LogPrintf("time to quit !\n");
@@ -386,7 +430,6 @@ gboolean gcallback_quit (gpointer data)
   return 1;
 }
 
-#ifdef GUI
 /// Display text area
 gboolean gcallback_text (gpointer  data)
 {
@@ -486,7 +529,6 @@ gboolean gcallback_text (gpointer  data)
 
   return TRUE;
 }
-#endif // GUI
 
 /// Display image area
 gboolean gcallback_flash (gpointer  data)
@@ -539,14 +581,10 @@ gboolean gcallback_flash (gpointer  data)
 
   unlock_display(0);
 
-#ifdef GUI
   gcallback_text(data);
-#endif //GUI
 
   return TRUE;
 }
-
-#ifdef GUI
 
 void on_drawingarea1_expose_event(GtkObject *object, gpointer user_data)
 {

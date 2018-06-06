@@ -1531,7 +1531,7 @@ void simul_profile_lgca(int lgca_flag)
 void flow_stabilization(int nb_cyc)
 {
   int i;
-  char str_status[100];
+//   char str_status[100];
   char flag_interp=0;
 
 #ifdef CGV
@@ -1540,7 +1540,7 @@ void flow_stabilization(int nb_cyc)
 #endif
 
   LogPrintf("flow stabilization : %d cycles\n", nb_cyc);
-  push_status("flow stabilization (0%)",0);
+//   push_status("flow stabilization (0%)",0);
   lgca_ready = 0;
 
   for (i=0; i<nb_cyc; i++) {
@@ -1552,16 +1552,16 @@ void flow_stabilization(int nb_cyc)
     flag_interp = (i == nb_cyc-1);
     compute_vel(flag_interp);
     if (!opt_nv){
-      sprintf(str_status, "flow stabilization (%d%%)", (100*i)/nb_cyc);
-      pop_status(0);
-      push_status(str_status,0);
+//       sprintf(str_status, "flow stabilization (%d%%)", (100*i)/nb_cyc);
+//       pop_status(0);
+//       push_status(str_status,0);
     }
     do_thread_sched();
   }
   lgca_stabilize_flag = 0;
   lgca_ready = 1;
   LogPrintf("end of flow stabilization : meanvel = %f   maxvel = %f\n",meanvel,maxvel);
-  pop_status(0);
+//   pop_status(0);
 }
 
 void simul_lgca()
@@ -1611,7 +1611,7 @@ void simul_stop()
     if (simul_dump_flag) simul_dump();
     LogPrintf("csp_time=%g\n", csp_time);
     LogPrintf("time to quit\n");
-    push_status("stopping ...", 0);
+//     push_status("stopping ...", 0);
     sleep(1);
     exit(0);
   }
@@ -1965,7 +1965,9 @@ void simul_dump()
     elapsed(&t1);
 
     if (!t0 || (t1-t0 >= 0.1)){
+#ifdef GUI
       lock_display(0);
+#endif
 
 #ifdef REORIENT_AUTO
       reorient_flag = 1;
@@ -2006,7 +2008,9 @@ void simul_dump()
       reorient_flag = 0;
 #endif
 
+#ifdef GUI
       unlock_display(0);
+#endif
 
       t0 = t1;
 

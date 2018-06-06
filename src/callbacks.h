@@ -60,4 +60,10 @@ gboolean on_drawingarea1_button_press_event(GtkWidget *widget, GdkEventButton *e
 void on_window_destroy (GtkObject *object, gpointer user_data);
 #endif
 
+void* do_png(void* delay);
+void* do_jpeg(void* delay);
+void set_ss_timeout(int delay, const char* type);
+void* do_stop(void* arg);
+void* do_quit(void* arg);
+
 

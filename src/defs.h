@@ -55,7 +55,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 
 /// common options
 #define OPENMP		//use OpenMP parallelization (on lattice gas)
-#define GUI		//graphical interface
+//#define GUI		//graphical interface
 #define CYCLAGE_HOR     //enable horizontal cycling
 #define INFO_CEL        //log the number of cells
 #define INFO_DBL        //log the number of active doublets

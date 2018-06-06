@@ -14,10 +14,10 @@ AM_INIT_AUTOMAKE
 AC_PROG_CC
 
 # Checks for libraries.
-PKG_CHECK_MODULES([GTK], [gtk+-2.0])
-PKG_CHECK_MODULES([GLIB], [glib-2.0])
-PKG_CHECK_MODULES([GMODULE], [gmodule-2.0])
-PKG_CHECK_MODULES([GTHREAD], [gthread-2.0])
+#PKG_CHECK_MODULES([GTK], [gtk+-2.0])
+#PKG_CHECK_MODULES([GLIB], [glib-2.0])
+#PKG_CHECK_MODULES([GMODULE], [gmodule-2.0])
+#PKG_CHECK_MODULES([GTHREAD], [gthread-2.0])
 AC_CHECK_LIB([pthread], [pthread_create], [], AC_MSG_ERROR([Required library pthread not found. Install pthread development package and try again.]))
 AC_CHECK_LIB([png], [png_write_row], [], AC_MSG_ERROR([Required library libpng not found. Install libpng development package and try again.]))
 #AC_CHECK_LIB([gd], [gdImageCreate], [], AC_MSG_ERROR([Required library gd not found. Install gd development package and try again.]))
