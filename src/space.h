@@ -17,9 +17,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <stdint.h>
 
 typedef struct vector_3d{
   float x;
@@ -48,28 +50,28 @@ enum SUR_MODES {SUR_MODE_UNIFORM, SUR_MODE_CONE, SUR_MODE_TECTO};
 
 void init_terre();
 //void wait_csp_ready();
-void lock_csp(int log_flag);
-void unlock_csp(int log_flag);
+void lock_csp(int32_t log_flag);
+void unlock_csp(int32_t log_flag);
 void cree_terre();
 #ifdef PARALLEL
 void cree_tunnels();
 #endif
 void apocalypse();
-//int lecture_terre(char *nom);
-void cellule_terre(unsigned char type, int ix);
-int hcycle(int ix);
-int get_cell_east(int ix);
-int get_cell_west(int ix);
-int get_cell_south(int ix);
-int get_cell_north(int ix);
-int get_cell_down(int ix);
-int get_cell_up(int ix);
-int get_cell_dir(int ix, char dir);
+//int32_t lecture_terre(int8_t *nom);
+void cellule_terre(uint8_t type, int32_t ix);
+int32_t hcycle(int32_t ix);
+int32_t get_cell_east(int32_t ix);
+int32_t get_cell_west(int32_t ix);
+int32_t get_cell_south(int32_t ix);
+int32_t get_cell_north(int32_t ix);
+int32_t get_cell_down(int32_t ix);
+int32_t get_cell_up(int32_t ix);
+int32_t get_cell_dir(int32_t ix, int8_t dir);
 #if CELL_DATA
-//void init_cell_data(CellData data, int ix);
-//void get_cell_data(CellData data, int ix);
-void swap_cell_data(int ix, int ix2);
-void copy_cell_data(int ix, int ix2);
+//void init_cell_data(CellData data, int32_t ix);
+//void get_cell_data(CellData data, int32_t ix);
+void swap_cell_data(int32_t ix, int32_t ix2);
+void copy_cell_data(int32_t ix, int32_t ix2);
 #endif
 void init_color();
 void init_lissage();
@@ -79,22 +81,22 @@ void calcule_couloir();
 void compute_v_walls();
 void compute_h_ceil();
 void compute_h_floor();
-Vec3 compute_mass_center(int type);
+Vec3 compute_mass_center(int32_t type);
 
-int check_alti(int ix, void *data);
-int check_cell_dir(int ix, void *data);
-int check_grain_seul(int index, void *data);
+int32_t check_alti(int32_t ix, void *data);
+int32_t check_cell_dir(int32_t ix, void *data);
+int32_t check_grain_seul(int32_t index, void *data);
 
 #ifdef SURRECTIONS
-int surrection();
+int32_t surrection();
 #endif
-void translation(int dx, int dz);
+void translation(int32_t dx, int32_t dz);
 void rotate_map(float angle);
-void rotation(float angle, char mode, char flags);
-void rotation90(int n);
+void rotation(float angle, int8_t mode, int8_t flags);
+void rotation90(int32_t n);
 
-void dump_terre(char dump_type, int cpt, int unit);
+void dump_terre(int8_t dump_type, int32_t cpt, int32_t unit);
 void dump_rugosi();
 #ifdef DUMP_SIGNATURE
-void dump_signature(int ii);
+void dump_signature(int32_t ii);
 #endif

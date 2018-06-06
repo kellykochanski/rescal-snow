@@ -17,14 +17,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <stdint.h>
 
 #ifdef __GTK_H__
 GtkWidget* create_window(void);
 void update_window();
 #endif
 
-void push_status(char* str, int id);
-void pop_status(int id);
+void push_status(char* str, int32_t id);
+void pop_status(int32_t id);

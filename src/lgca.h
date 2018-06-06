@@ -17,10 +17,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
 
 #ifdef LGCA
 
@@ -60,7 +61,7 @@
 #define MVT_FAST (MVT_EB | MVT_EH | MVT_OB | MVT_OH) //vitesses rapides
 #define MVT_ALLDIR (MVT_SLOW | MVT_FAST) //toute direction
 
-typedef unsigned short MvtField;
+typedef uint16_t MvtField;
 
 #define SIZE_MVT_FIELD 1024 	//(1<<(8*sizeof(MvtField)))
 
@@ -91,22 +92,22 @@ typedef unsigned short MvtField;
 /*
 #define Calcul_cix(index, cind) \
 {                           \
-  int x,y,z;                  \
+  int32_t x,y,z;                  \
   Calcule_xyz(index, x, y, z); \
   cind = x*NB_MVT_EO + y*CLEO + ((z-LN)/DIST_MVT_NS)*CHL; \
 }
 */
 #define Calcule_cix(index, cix) \
 { \
-  int z = (int)index/HL; \
-  int xy = index - z*HL; \
-  int cz = (int)(z - LN)/DIST_MVT_NS; \
+  int32_t z = (int)index/HL; \
+  int32_t xy = index - z*HL; \
+  int32_t cz = (int)(z - LN)/DIST_MVT_NS; \
   cix = cz*CHL + xy*NB_MVT_EO; \
 }
 
 #define Calcule_cxyz(index, cx, cy, cz) \
 {                           \
-  int x,y,z;                  \
+  int32_t x,y,z;                  \
   Calcule_xyz(index, x, y, z); \
   cx = x*NB_MVT_EO; \
   cy = y; \
@@ -116,34 +117,34 @@ typedef unsigned short MvtField;
 void params_collisions();
 void init_collisions();
 void init_mvt();
-void out_of_space_mvt(int reset_mvt);
+void out_of_space_mvt(int32_t reset_mvt);
 void collisions_mod_terre();
-int mvt(int ii);
-int mvt_solid(int ii);
-int mvt_bas(int ii);
-int mvt_haut(int ii);
-int mvt_est(int ii);
-int mvt_ouest(int ii);
+int32_t mvt(int32_t ii);
+int32_t mvt_solid(int32_t ii);
+int32_t mvt_bas(int32_t ii);
+int32_t mvt_haut(int32_t ii);
+int32_t mvt_est(int32_t ii);
+int32_t mvt_ouest(int32_t ii);
 //Callback_check check_mvt_bas;
 //Callback_check check_mvt_haut;
 //Callback_check check_mvt_ouest;
 //Callback_check check_mvt_est;
-int check_mvt_solid(int index, void *data);
-int check_mvt_bas(int index, void *data);
-int check_mvt_haut(int index, void *data);
-int check_mvt_est(int index, void *data);
-int check_mvt_ouest(int index, void *data);
-int check_mvt_est_et_bas(int index, void *data);
-int check_mvt_EB(int index, void *data);
-int check_no_mvt_est_et_bas(int index, void *data);
-int check_mvt_mean_bas(int index, void *data);
-int check_mvt_mean_est(int index, void *data);
-int check_no_mvt_mean_bas(int index, void *data);
-void collisions_modcell(int type, int index);
+int32_t check_mvt_solid(int32_t index, void *data);
+int32_t check_mvt_bas(int32_t index, void *data);
+int32_t check_mvt_haut(int32_t index, void *data);
+int32_t check_mvt_est(int32_t index, void *data);
+int32_t check_mvt_ouest(int32_t index, void *data);
+int32_t check_mvt_est_et_bas(int32_t index, void *data);
+int32_t check_mvt_EB(int32_t index, void *data);
+int32_t check_no_mvt_est_et_bas(int32_t index, void *data);
+int32_t check_mvt_mean_bas(int32_t index, void *data);
+int32_t check_mvt_mean_est(int32_t index, void *data);
+int32_t check_no_mvt_mean_bas(int32_t index, void *data);
+void collisions_modcell(int32_t type, int32_t index);
 void do_collisions();
 void do_propagations();
-void compute_vel(char flag_interp);
-void dump_mvt(int cpt, int unit);
+void compute_vel(int8_t flag_interp);
+void dump_mvt(int32_t cpt, int32_t unit);
 void dump_densite();
 void dump_vel();
 void dump_signature_mvt();

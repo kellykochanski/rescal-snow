@@ -17,18 +17,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
 
 #ifdef _MAIN_
-long total_memory=0;  //taille totale de memoire allouee
+int64_t total_memory=0;  //taille totale de memoire allouee
 #ifdef LOG_FILE
 FILE *log_file=NULL;
 #endif
 #else
-extern long total_memory;
+extern int64_t total_memory;
 #ifdef LOG_FILE
 extern FILE *log_file;
 #endif
@@ -81,8 +82,8 @@ extern FILE *log_file;
 #define ResetMemory(adr,type,taille) memset(adr,0,sizeof(type)*taille);
 
 #define PrintMemory(var,type,taille,flag) \
-  long taille_mem = sizeof(type)*taille; \
-  char *str = flag ? "re" : ""; \
+  int64_t taille_mem = sizeof(type)*taille; \
+  int8_t *str = flag ? "re" : ""; \
   if (taille_mem >= 1000000) \
     LogPrintf("%sallocation %s : %.2f Mo\n", str, var, (float)taille_mem/1000000) \
   else \
@@ -124,7 +125,7 @@ extern FILE *log_file;
 
 #define Calcule_xyz(index, x, y, z) \
 {                           \
-  int res;                  \
+  int32_t res;                  \
   z = (int)index/HL;        \
   res = index - z*HL;       \
   y = (int)res/L;           \

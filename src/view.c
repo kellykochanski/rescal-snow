@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -27,6 +27,7 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -38,61 +39,61 @@
 #include "transitions.h"
 #include "lgca.h"
 
-extern int prog;    //main prog
-extern int H, L, D, HL, HLD;       // les dimensions de la terre
-extern int L_bounds, D_bounds;
-extern int LEO, LN, LS, LNS, HLN;    //largeur est-ouest, limite nord, limite sud, largeur nord-sud
+extern int32_t prog;    //main prog
+extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
+extern int32_t L_bounds, D_bounds;
+extern int32_t LEO, LN, LS, LNS, HLN;    //largeur est-ouest, limite nord, limite sud, largeur nord-sud
 extern Cell  *TE;	           // la 'terre'
-extern const unsigned char Phase[MAX_CELL];	//phase (fluide ou solide) des types de cellules
+extern const uint8_t Phase[MAX_CELL];	//phase (fluide ou solide) des types de cellules
 #ifdef ALTI
-extern short *alti; // elevations locales du terrain
+extern int16_t *alti; // elevations locales du terrain
 extern Vec2 *norm2d;
 extern Vec3 *norm3d;          // normale 3d a la surface definie par alti
 #endif
-extern char *psol;                    // indicateur des plans solides verticaux est-ouest
-extern char *csol;
-extern int h_ceil;  //epaisseur du plafond
-extern int h_floor;
+extern int8_t *psol;                    // indicateur des plans solides verticaux est-ouest
+extern int8_t *csol;
+extern int32_t h_ceil;  //epaisseur du plafond
+extern int32_t h_floor;
 #ifdef LGCA
-extern int VH, VL, VHL, CLNS ;	// dimensions du tableau des vitesses
-//extern int *Velx, *Vely;	//vitesses locales moyennees
-extern int *Velx_sum, *Vely_sum;	//vitesses locales additives
+extern int32_t VH, VL, VHL, CLNS ;	// dimensions du tableau des vitesses
+//extern int32_t *Velx, *Vely;	//vitesses locales moyennees
+extern int32_t *Velx_sum, *Vely_sum;	//vitesses locales additives
 extern float *Velx_interp, *Vely_interp;	//vitesses locales interpolees
-extern int use_lgca;
-extern int lgca_ready;
+extern int32_t use_lgca;
+extern int32_t lgca_ready;
 #endif
 #ifdef USE_VEGETATION
-extern int use_veg;
+extern int32_t use_veg;
 #endif
-extern char *rot_map;        // periodic mapping of the rotating space
-extern int rot_mode;
+extern int8_t *rot_map;        // periodic mapping of the rotating space
+extern int32_t rot_mode;
 
-unsigned char opt_ch=0;
-unsigned char opt_cv=0;
-unsigned char opt_lc=0;
-unsigned char opt_tr=0;
-unsigned char opt_al=0;
-unsigned char opt_lal=0;
-unsigned char opt_vel=0;
-unsigned char opt_vss=0;
-unsigned char opt_ls=0;
-int hh=0;
-int khh=0;
-int abs_cv=0, prof_cv=0;
-unsigned char reorient_flag=0;
-unsigned char horizontal_display=0;
+uint8_t opt_ch=0;
+uint8_t opt_cv=0;
+uint8_t opt_lc=0;
+uint8_t opt_tr=0;
+uint8_t opt_al=0;
+uint8_t opt_lal=0;
+uint8_t opt_vel=0;
+uint8_t opt_vss=0;
+uint8_t opt_ls=0;
+int32_t hh=0;
+int32_t khh=0;
+int32_t abs_cv=0, prof_cv=0;
+uint8_t reorient_flag=0;
+uint8_t horizontal_display=0;
 
-unsigned char visible[MAX_CELL];  //visibilite des cellules par type
+uint8_t visible[MAX_CELL];  //visibilite des cellules par type
 #ifdef CELL_COLOR
-char colored[MAX_CELL];  //affichage de la couleur par type
+int8_t colored[MAX_CELL];  //affichage de la couleur par type
 #endif
-unsigned char *image=NULL;
-unsigned char *image_end=NULL;
-int nb_shades=1;
-int col_shade_index=0;
-int img_w, img_h;
+uint8_t *image=NULL;
+uint8_t *image_end=NULL;
+int32_t nb_shades=1;
+int32_t col_shade_index=0;
+int32_t img_w, img_h;
 Shade shades[NB_SHADE_MAX];
-int cel_shade_index[MAX_CELL];  //correspondance celltype --> shade
+int32_t cel_shade_index[MAX_CELL];  //correspondance celltype --> shade
 
 //direction of the incident light source
 float light_elevation = 45; // in degrees, from the horizon
@@ -100,19 +101,19 @@ float light_azimuth = -90; //in degrees, clockwise from north
 Vec3 light;
 
 //display mode of the current orientation
-int vdir_mode = VDIR_NONE;
+int32_t vdir_mode = VDIR_NONE;
 
 //intervalle pour les pointilles
-int ilc = 2;
+int32_t ilc = 2;
 
 //zooming variables
-int zoom_offset_x = 0;
-int zoom_offset_y = 0;
+int32_t zoom_offset_x = 0;
+int32_t zoom_offset_y = 0;
 float zoom_coef = 1.0;
 
 void set_light_xyz();
 
-void bad_options(char *opt)
+void bad_options(int8_t *opt)
 {
   ErrPrintf("erreur lecture option : %s\n", opt);
 
@@ -147,10 +148,10 @@ void show_view_options()
   fflush(stdout);
 }
 
-int view_init(int argc, char *argv[])
+int32_t view_init(int32_t argc, int8_t *argv[])
 {
-  int i;
-  unsigned char typ;
+  int32_t i;
+  uint8_t typ;
 
   hh = H>>1;
   memset(visible, 1, MAX_CELL);
@@ -162,8 +163,8 @@ int view_init(int argc, char *argv[])
       prof_cv = D>>1;
     }
     else if (!strcmp(argv[i],"-cv")){
-      char c;
-      int n=0;
+      int8_t c;
+      int32_t n=0;
       opt_cv = 1;
       if (i+1<argc) n = sscanf(argv[++i], "%d%c%d", &abs_cv, &c, &prof_cv);
       //LogPrintf("n=%d\n",n);
@@ -252,7 +253,7 @@ int view_init(int argc, char *argv[])
 #endif
 
   if (!image){
-    /*image = (unsigned char *) malloc(img_w*img_h);
+    /*image = (uint8_t *) malloc(img_w*img_h);
   	if (!image){
           ErrPrintf("erreur malloc image (img_w = %d   img_h = %d)\n", img_w, img_h);
 		  exit(-4);
@@ -266,13 +267,13 @@ int view_init(int argc, char *argv[])
   return 0;
 }
 
-void view_img_size(int *pL, int *pH)
+void view_img_size(int32_t *pL, int32_t *pH)
 {
   *pL = img_w;
   *pH = img_h;
 }
 
-void init_shading(int index, int nb_values, int col0, int col1)
+void init_shading(int32_t index, int32_t nb_values, int32_t col0, int32_t col1)
 {
   assert(index < MAX_CELL);
   shades[index].col0 = col0; //dark brown
@@ -282,17 +283,17 @@ void init_shading(int index, int nb_values, int col0, int col1)
   assert(shades[index].start + nb_values <256);
 }
 
-unsigned char view_shading(int n, float val)
+uint8_t view_shading(int32_t n, float val)
 {
   return shades[n].start + val*(shades[n].nb_val-1);
 }
 
 
-void view_palette(int *colors)
+void view_palette(int32_t *colors)
 {
-  static int start=1;
-  static int palette[256];
-  int i;
+  static int32_t start=1;
+  static int32_t palette[256];
+  int32_t i;
 
   if (start==0){
     memcpy(colors, palette, 256*sizeof(int));
@@ -395,8 +396,8 @@ void view_palette(int *colors)
 
 #ifdef ALTI
   /// color palette for shadings
-  unsigned char red, green, blue;
-  int r0, g0, b0, r1, g1, b1;
+  uint8_t red, green, blue;
+  int32_t r0, g0, b0, r1, g1, b1;
   float coef;
 
   //ResetMemory(cel_shade_index, int, MAX_CELL);
@@ -431,12 +432,12 @@ void view_palette(int *colors)
   nb_shades+=2;
 #endif
 
-  int nb_values = (255 - MAX_CELL - 1)/nb_shades;
+  int32_t nb_values = (255 - MAX_CELL - 1)/nb_shades;
   LogPrintf("nb_shades=%d\n", nb_shades);
   LogPrintf("nb_values=%d\n", nb_values);
 
   /// default shading
-  int index=0;
+  int32_t index=0;
   init_shading(index, nb_values, 0x00400000, 0x00ffc37f); //brown shading
   cel_shade_index[ALTI] = index;
 
@@ -500,19 +501,19 @@ void view_palette(int *colors)
 
 
 // draw line
-void view_line(unsigned char *pix0, int dx, int dy, unsigned char color)
+void view_line(uint8_t *pix0, int32_t dx, int32_t dy, uint8_t color)
 {
-  int sdx,sdy,px,py,dxabs,dyabs,i;
+  int32_t sdx,sdy,px,py,dxabs,dyabs,i;
   float slope;
-  unsigned char *pix;
+  uint8_t *pix;
 
   /*if (dx*dx+dy*dy > 0){
     LogPrintf("view_line() dx = %d, dy = %d\n", dx, dy);
   }*/
 
   //horizontal clipping
-  int ipix = (int)(pix0 - image);
-  int xpix = ipix % img_w;
+  int32_t ipix = (int)(pix0 - image);
+  int32_t xpix = ipix % img_w;
   Check_min_max(dx, -xpix, img_w-1-xpix);
 
   dxabs = abs(dx);
@@ -547,10 +548,10 @@ void view_line(unsigned char *pix0, int dx, int dy, unsigned char color)
 }
 
 // draw filled rectangle
-void view_rect(unsigned char *pix0, int width, int height, unsigned char color)
+void view_rect(uint8_t *pix0, int32_t width, int32_t height, uint8_t color)
 {
-  unsigned char *pix;
-  int y;
+  uint8_t *pix;
+  int32_t y;
 
   assert(pix0 + (height-1)*img_w + width <= image_end);
 
@@ -562,10 +563,10 @@ void view_rect(unsigned char *pix0, int width, int height, unsigned char color)
     memset(pix, color, width);
 }
 
-int view_alti(int i, int j, int low_flag)
+int32_t view_alti(int32_t i, int32_t j, int32_t low_flag)
 {
   Cell *pt;
-  int k;
+  int32_t k;
 
   pt = TE + i + j*HL;
   if (!low_flag){
@@ -576,7 +577,7 @@ int view_alti(int i, int j, int low_flag)
   }
   else{
     /// find highest visible cell starting from the bottom
-    int kmin=0;
+    int32_t kmin=0;
     if (opt_ch) kmin=khh;
     k=H-1-h_floor;
     while ((k > kmin) && visible[(pt+(k-1)*L)->celltype]) k--;
@@ -585,7 +586,7 @@ int view_alti(int i, int j, int low_flag)
   return k;
 }
 
-unsigned char view_color(Cell *pt)
+uint8_t view_color(Cell *pt)
 {
 #if defined(CELL_COLOR) && defined(GRC)
   return (pt->color) ? GRC : pt->celltype;
@@ -624,12 +625,12 @@ float view_light(VECNORM *ptn)
   return ldiff;
 }
 
-unsigned char * view()
+uint8_t * view()
 {
   Cell *pt;
-  unsigned char *pix, *cur_image;
-  int i,j,k,typ;
-  int shade_index;
+  uint8_t *pix, *cur_image;
+  int32_t i,j,k,typ;
+  int32_t shade_index;
 
   pix = cur_image = image;
 
@@ -753,9 +754,9 @@ unsigned char * view()
     if ((vdir_mode != VDIR_NONE) && (LNS>1)){
       /// representation of current orientation
       extern float csp_angle;
-      int Hd2 = H/2;
-      int l1 = Hd2;
-      int l2 = l1/2;
+      int32_t Hd2 = H/2;
+      int32_t l1 = Hd2;
+      int32_t l2 = l1/2;
       float alpha = 0.0;
       if (vdir_mode == VDIR_NORTH){
         //TODO
@@ -784,7 +785,7 @@ unsigned char * view()
 
 #ifdef LGCA
 //#if 0
-  unsigned char *img_col = cur_image;//image + img_w*(img_h-H);
+  uint8_t *img_col = cur_image;//image + img_w*(img_h-H);
   if (use_lgca){
     if (opt_vel) cur_image += H*img_w;
     if (horizontal_display)
@@ -796,8 +797,8 @@ unsigned char * view()
     /// basic rendering (vertical vs horizontal) of lgca particles
     if (opt_vel){
     //if (0){
-      unsigned char *pix0;
-      int index, vcol;
+      uint8_t *pix0;
+      int32_t index, vcol;
       pix0 = img_col;
       index = HL*prof_cv;//(CLNS-1);//(CLNS>>1);
       for(i=0; (i<HL) ; i++, index++, pix0++){
@@ -811,8 +812,8 @@ unsigned char * view()
     /// mean velocity (interpolation) of the flow in a vertical plane
     if (opt_vel && Velx_interp && Vely_interp){
       if ((prof_cv>=LN) && (prof_cv<=LS)){
-        unsigned char *pix0;
-        int index, sol_flag;
+        uint8_t *pix0;
+        int32_t index, sol_flag;
         float vcol;
         float vcolmax = sqrtf(2)*VSTEP_H*VSTEP_L*VSTEP_TIME;
         pix0 = img_col;
@@ -834,14 +835,14 @@ unsigned char * view()
 
     /// rendering of the velocity field with arrows (vertical plane)
     if ((opt_vel >= 2) && Velx_interp && Vely_interp){
-      int iv, jv;
+      int32_t iv, jv;
       float *pvx0, *pvy0, *pvx, *pvy;
-      unsigned char *pix0;
-      //int fv=VSTEP*VSTEP_TIME*NB_MVT_EO*NB_MVT_VER/4;
-      int fv=VSTEP_H*VSTEP_L*VSTEP_TIME/20;
-      int planz = (int)(prof_cv-LN+1)/DIST_MVT_NS; //(CLNS>>1); //LNS-1;//(CLNS>>1);
+      uint8_t *pix0;
+      //int32_t fv=VSTEP*VSTEP_TIME*NB_MVT_EO*NB_MVT_VER/4;
+      int32_t fv=VSTEP_H*VSTEP_L*VSTEP_TIME/20;
+      int32_t planz = (int)(prof_cv-LN+1)/DIST_MVT_NS; //(CLNS>>1); //LNS-1;//(CLNS>>1);
       Check_min_max(planz, 0, CLNS-1);
-      //int fy=2*VSTEP_TIME*NB_MVT_EO*NB_MVT_VER;
+      //int32_t fy=2*VSTEP_TIME*NB_MVT_EO*NB_MVT_VER;
       //memset(img_col, BORD, HL);
       pvx0 = Velx_interp+planz*HL;
       pvy0 = Vely_interp+planz*HL;
@@ -858,7 +859,7 @@ unsigned char * view()
             view_line(pix, (*pvx)/fv, (*pvy)/fv, GRC);
       /*if ((iv>0) && (jv>0)){
         //calcul vorticite
-            int vort = (*pvy) - (*(pvy-1)) - ((*pvx) - (*(pvx-VL)));
+            int32_t vort = (*pvy) - (*(pvy-1)) - ((*pvx) - (*(pvx-VL)));
             if (vort > 10) *pix = *(pix+1) = *(pix+L) = *(pix+L+1) = MOINS;
             else if (vort < -10) *pix = *(pix+1) = *(pix+L) = *(pix+L+1) = DUM;
             }*/
@@ -868,8 +869,8 @@ unsigned char * view()
     }
 #else
       /// basic rendering (east vs west) of lgca particles
-      unsigned char *pix0;
-      int ii0, ii, x, y;
+      uint8_t *pix0;
+      int32_t ii0, ii, x, y;
       pix0 = img_col;
       ii0 = (HL*NB_MVT_EO)*(int)((prof_cv-LN)/DIST_MVT_NS);//+(L*NB_MVT_EO*0.15);
       //ii0 = (HL*NB_MVT_EO)*(L>>1)+(L*(NB_MVT_EO-1));
@@ -893,7 +894,7 @@ unsigned char * view()
       ln = dist_grdv;
 #endif
       VECNORM *pn;
-      short *alt, x, y, z, stepx;
+      int16_t *alt, x, y, z, stepx;
       z = prof_cv-LN;
       stepx = 10;//10; //VSTEP*2; //*2;
       alt = alti+z*LEO+(stepx>>1);
@@ -954,10 +955,10 @@ unsigned char * view()
         //view_rect(cur_image + LS*img_w, L, D-1-LS, BORD);
         /*if (opt_lc && (prof_cv>=LN) && (prof_cv<=LS)){
           //ligne de coupe
-          //extern int CHL;
-          //int cx, cy, cz;
+          //extern int32_t CHL;
+          //int32_t cx, cy, cz;
           //Calcule_cxyz(HL*prof_cv+1, cx, cy, cz);
-          //int cz = (int)(prof_cv-LN)/DIST_MVT_NS;
+          //int32_t cz = (int)(prof_cv-LN)/DIST_MVT_NS;
           //memset(cur_image+img_w+img_w*cz*DIST_MVT_NS, COUPE, L);
           //memset(cur_image+img_w*(1+prof_cv-LN), COUPE, L);
           pix = cur_image+img_w*(prof_cv-LN);
@@ -976,7 +977,7 @@ unsigned char * view()
       float ln=10;
       ln = dist_grdv;
       Vec3 *pn;
-      short x, z, stepx, stepz;
+      int16_t x, z, stepx, stepz;
       stepx = 10;
       stepz = 10;
       for(z=(stepz>>1); z<LNS; z+=stepz){
@@ -1020,13 +1021,13 @@ unsigned char * view()
 }
 
 /// Update the position of horizontal/vertical cross sections
-int update_cv(int x, int y, int flag)
+int32_t update_cv(int32_t x, int32_t y, int32_t flag)
 {
-  int ret=0;
-  int dist=5; //max distance to catch the line
-  static int flagx=0;
-  static int flagy=0;
-  static int flagz=0;
+  int32_t ret=0;
+  int32_t dist=5; //max distance to catch the line
+  static int32_t flagx=0;
+  static int32_t flagy=0;
+  static int32_t flagz=0;
 
   if (!opt_cv || !opt_lc) return ret;
 
@@ -1071,15 +1072,15 @@ void reset_zoom()
   zoom_offset_y = 0;
 }
 
-unsigned char* view_zoom(int width, int height, float coef)
+unsigned char* view_zoom(int32_t width, int32_t height, float coef)
 {
-  static unsigned char *image_zoom = NULL;
-  static int zoom_size = 0;
-  int zoom_w = Min(img_w*coef, width);
-  int zoom_h = Min(img_h*coef, height);
-  int size = width*height;
-  unsigned char *pix;
-  int i, j, imin, imax, jmin, jmax, i0, j0;
+  static uint8_t *image_zoom = NULL;
+  static int32_t zoom_size = 0;
+  int32_t zoom_w = Min(img_w*coef, width);
+  int32_t zoom_h = Min(img_h*coef, height);
+  int32_t size = width*height;
+  uint8_t *pix;
+  int32_t i, j, imin, imax, jmin, jmax, i0, j0;
 
   if (zoom_size < size){
     LogPrintf("width=%d, height=%d\n", width, height);
@@ -1123,8 +1124,8 @@ png_color* png_palette;
 
 void view_dump_init()
 {
-  int colors[256];
-  int i;
+  int32_t colors[256];
+  int32_t i;
 
   LogPrintf("view_dump_init\n");
 
@@ -1140,10 +1141,10 @@ void view_dump_init()
   }
 }
 
-void view_dump_png(char *filename)
+void view_dump_png(int8_t *filename)
 {
-  unsigned char *pix;
-  int j;
+  uint8_t *pix;
+  int32_t j;
 
   LogPrintf("view_dump_png: writing file %s\n", filename);
 
@@ -1200,7 +1201,7 @@ void view_dump_png(char *filename)
   fclose(fp);
 }
 
-void dump_image(char *filename, char *format)
+void dump_image(int8_t *filename, int8_t *format)
 {
   if (!strcmp(format,"png"))
     view_dump_png(filename);
@@ -1215,12 +1216,12 @@ void dump_image(char *filename, char *format)
 #include <gd.h>
 
 gdImagePtr gd_img=NULL;
-int gd_col[256];
+int32_t gd_col[256];
 
 void view_dump_init()
 {
-  int colors[256];
-  int i, red, green, blue;
+  int32_t colors[256];
+  int32_t i, red, green, blue;
 
   gd_img = gdImageCreate(img_w, img_h);
 
@@ -1236,8 +1237,8 @@ void view_dump_init()
 
 void view_gd()
 {
-  unsigned char *pix;
-  int i, j;
+  uint8_t *pix;
+  int32_t i, j;
 
   assert(gd_img);
 
@@ -1248,7 +1249,7 @@ void view_gd()
       gdImageSetPixel(gd_img, i, j, gd_col[*pix++]);
 }
 
-void view_dump_png(char *nom)
+void view_dump_png(int8_t *nom)
 {
   FILE *fp;
 
@@ -1262,7 +1263,7 @@ void view_dump_png(char *nom)
   fclose(fp);
 }
 
-void view_dump_jpeg(char *nom)
+void view_dump_jpeg(int8_t *nom)
 {
   FILE *fp;
 
@@ -1276,7 +1277,7 @@ void view_dump_jpeg(char *nom)
   fclose(fp);
 }
 
-void dump_image(char *filename, char *format)
+void dump_image(int8_t *filename, int8_t *format)
 {
   if (!strcmp(format,"png"))
     view_dump_png(filename);
@@ -1289,7 +1290,7 @@ void dump_image(char *filename, char *format)
 #include <gtk/gtk.h>
 extern GtkWidget *drawingarea;
 
-void dump_image(char *filename, char *format)
+void dump_image(int8_t *filename, int8_t *format)
 {
   //LogPrintf("dump_image: %s - %s\n",filename,format);
   GdkPixbuf *pixbuf = gdk_pixbuf_get_from_drawable(NULL,drawingarea->window,NULL,0,0,0,0,img_w,img_h);
@@ -1298,18 +1299,18 @@ void dump_image(char *filename, char *format)
 
 #endif //USE_GD
 
-void dump_image_inter(int inter, char *format)
+void dump_image_inter(int32_t inter, int8_t *format)
 {
-  static int cpt_inter=0;
-  static int cpt_snap=0;
-  static char nom[100];
-  static char str[100];
-  static char flag_sec=0;
-  int nmin;
-  //char *ext;
+  static int32_t cpt_inter=0;
+  static int32_t cpt_snap=0;
+  static int8_t nom[100];
+  static int8_t str[100];
+  static int8_t flag_sec=0;
+  int32_t nmin;
+  //int8_t *ext;
 
 #ifdef PARALLEL
-  extern int proc_id;
+  extern int32_t proc_id;
   sprintf(str,"_%d",proc_id);
 #else
   *str = 0;

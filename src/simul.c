@@ -20,7 +20,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <memory.h>
 #include <math.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -51,34 +52,34 @@
 #include "interface.h"
 #include "view.h"
 
-extern unsigned char opt_info, opt_nv;
-extern int H, L, D, HL, HLD;       // les dimensions de la terre
-extern int LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
+extern uint8_t opt_info, opt_nv;
+extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
+extern int32_t LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
 extern Cell  *TE;	           // la 'terre'
-extern int *db_pos[];                   // les tableaux contenant la position des doublets actifs
+extern int32_t *db_pos[];                   // les tableaux contenant la position des doublets actifs
 extern Doublet t_doub[MAX_DB];               // la description des doublets
-extern int Ncel[];                       // nombre de cellules par type
-extern int Ndb[];                        // nombre doublets actifs par type
-extern int nb_trans_db, nb_trans_cel, nb_trans; // nombre de transitions de 2 cellules, d'1 cellule et au total
+extern int32_t Ncel[];                       // nombre de cellules par type
+extern int32_t Ndb[];                        // nombre doublets actifs par type
+extern int32_t nb_trans_db, nb_trans_cel, nb_trans; // nombre de transitions de 2 cellules, d'1 cellule et au total
 extern TransitionDb t_trans[];            // la description des transitions de doublets
 extern TransitionCel t_trans_cel[];           // la description des transitions de cellules
 extern LienTransDb   t_lien[];        // la description des liens de correlation entre transitions de 2 cellules
-extern int nb_liens;             // nombre de liens entre transitions
-extern const char *classes_db[];        // noms des classes de doublet
-extern const char *etats[];             // les noms des types de cellules
+extern int32_t nb_liens;             // nombre de liens entre transitions
+extern const int8_t *classes_db[];        // noms des classes de doublet
+extern const int8_t *etats[];             // les noms des types de cellules
 #ifdef INFO_TRANS
-extern int cpt_lien[];      // compteur des correlations effectives
+extern int32_t cpt_lien[];      // compteur des correlations effectives
 #endif
-extern int direction[];             // conversion classe de transition -> direction
-extern char *rot_map;        // periodic mapping of the rotating space
+extern int32_t direction[];             // conversion classe de transition -> direction
+extern int8_t *rot_map;        // periodic mapping of the rotating space
 extern Pos2 *rot_map_pos;        // periodic mapping of the rotating space
-extern int use_lgca;
+extern int32_t use_lgca;
 #ifdef LGCA
-extern int lgca_reset;
-extern int lgca_speedup;
-extern int col_iter;    //nombre de cycles de collisions
-extern int CLEO;
-extern char *nom_fic_mvt;
+extern int32_t lgca_reset;
+extern int32_t lgca_speedup;
+extern int32_t col_iter;    //nombre de cycles de collisions
+extern int32_t CLEO;
+extern int8_t *nom_fic_mvt;
 extern float maxvel, meanvel;
 #ifdef CGV
 extern float grdvc_max; //seuil max pour le controle de l'erosion en fonction du gradient de vitesse
@@ -95,7 +96,7 @@ extern float lambda_A_unstable;
 extern float color_coef;         // coefficient associe a la callback check_color
 #endif
 #ifdef PARALLEL
-extern int mode_par;    //mode parallele
+extern int32_t mode_par;    //mode parallele
 #endif
 
 #ifdef REFDB_PTR
@@ -109,10 +110,10 @@ extern RefDoublets_Ind *RefDB_Ind;       // references des cellules de la terre 
 extern float cgv_coef;
 #endif
 
-extern int vdir_mode; //display mode of the current orientation
-extern unsigned char reorient_flag;
+extern int32_t vdir_mode; //display mode of the current orientation
+extern uint8_t reorient_flag;
 
-unsigned long int iter=0, md_iter=0;  // nombre d'iterations (unites, milliards d'unites)
+uint64_t iter=0, md_iter=0;  // nombre d'iterations (unites, milliards d'unites)
 double init_time=0.0;                 // initial time
 double csp_time=0.0;                  // time variable for the cellular space
 double stop_time=0.0;                 // stopping time
@@ -120,28 +121,28 @@ double stop_time=0.0;                 // stopping time
 #ifdef TIME_SCALE
 double real_time=0.0;       // real time with time scale
 #endif
-char end_of_simul=0;
-int cpt_trans_blocked[MAX_TRANSITIONS_DB];  //nombre de transitions blockees
+int8_t end_of_simul=0;
+int32_t cpt_trans_blocked[MAX_TRANSITIONS_DB];  //nombre de transitions blockees
 double PII, PII_time;     //probabilités totales
 double PI_ij[MAX_TRANSITIONS];                  // les PI_ij
 double cum[MAX_TRANSITIONS];     //probabilites cumulees
-char *boundary_str = NULL;
+int8_t *boundary_str = NULL;
 #ifdef CYCLAGE_HOR
-int boundary = BC_PERIODIC;  //boundary conditions
-int pbc_mode = 1; //periodic boundary conditions
+int32_t boundary = BC_PERIODIC;  //boundary conditions
+int32_t pbc_mode = 1; //periodic boundary conditions
 #else
-int boundary = BC_REINJECTION;  //boundary conditions
-int pbc_mode = 0; //periodic boundary conditions
+int32_t boundary = BC_REINJECTION;  //boundary conditions
+int32_t pbc_mode = 0; //periodic boundary conditions
 #endif
-int ava_mode = AVA_SYNC;  //mode d'avalanches
-char *ava_mode_str = NULL;
-int ava_trans = 0;        //transitions d'avalanches
-int ava_norm = 0;       //avalanches avec normales
-int ava_h_lim = 1; //10;	// hauteur limite avant avalanche
-int ava_nb_cel_max = 1;  // nb de cellules qui tombent simultanement
+int32_t ava_mode = AVA_SYNC;  //mode d'avalanches
+int8_t *ava_mode_str = NULL;
+int32_t ava_trans = 0;        //transitions d'avalanches
+int32_t ava_norm = 0;       //avalanches avec normales
+int32_t ava_h_lim = 1; //10;	// hauteur limite avant avalanche
+int32_t ava_nb_cel_max = 1;  // nb de cellules qui tombent simultanement
 float ava_delay = 0.0; //delay between avalanches
 float ava_duration = 1.0; //default value for DUN model
-//float ava_delay_long = 0.0; //8000.0;
+//float ava_delay_int64_t = 0.0; //8000.0;
 float ava_angle = 0.0; //angle of avalanches (degrees)
 float ava_angle_col = 0.0; //angle of avalanches (degrees) for colored grains
 float ava_angle_stable = 0.0;
@@ -149,57 +150,57 @@ float ava_angle_unstable = 0.0;
 float ava_angle_stable_col = 0.0;
 float ava_angle_unstable_col = 0.0;
 float lambda_A_stable = 0.0;
-int ava_upwind = 1;
+int32_t ava_upwind = 1;
 //#endif
-unsigned char simul_dump_flag = 0;
-unsigned char csphpp_flag = 0;
+uint8_t simul_dump_flag = 0;
+uint8_t csphpp_flag = 0;
 float dump_delay_png = 0.0;
 float dump_delay_csp = 0.0;
 float stop_delay_t0 = 0.0;
-int mode_pat;
+int32_t mode_pat;
 
 #ifdef SURRECTIONS
 float sur_delay = 0.0;  //10000.0;              // delai entre deux surrections successives (0 = pas de surrection)
-int sur_mode = 0;                // type de surrection (uniforme ou locale)
-char *sur_mode_str=NULL;
+int32_t sur_mode = 0;                // type de surrection (uniforme ou locale)
+int8_t *sur_mode_str=NULL;
 #endif
 
-int rot_mode = ROT_MODE_OVERLAP;  //default rotation mode
+int32_t rot_mode = ROT_MODE_OVERLAP;  //default rotation mode
 #ifdef LGCA
-int rot_mvt_nb_cycles = -1;  //nombre de cycles de stabilisation apres rotation
+int32_t rot_mvt_nb_cycles = -1;  //nombre de cycles de stabilisation apres rotation
 #endif
 #ifdef ROTATIONS
 float rot_angle = 0.0;
 float rot_delay = 0.0;
-char *rot_mode_str=NULL;
+int8_t *rot_mode_str=NULL;
 #endif
 #ifdef CENTERING_AUTO
 float centering_delay = 0.0;
 #endif
 
 #ifdef LGCA
-int init_mvt_nb_cycles = -1;  //nombre de cycles de stabilisation du flux au depart
+int32_t init_mvt_nb_cycles = -1;  //nombre de cycles de stabilisation du flux au depart
 double lgca_delay = 0.0; //delai entre deux cycles de gaz sur reseau
-int lgca_ready = 0;
-int lgca_stabilize_flag = 0;
+int32_t lgca_ready = 0;
+int32_t lgca_stabilize_flag = 0;
 #endif
 //#ifdef WIND_DATA
-char *wind_data_filename = NULL;
+int8_t *wind_data_filename = NULL;
 //#endif
 #ifdef CGV
-char *qsat_data_filename = NULL; //"real_data/PDF.data";
+int8_t *qsat_data_filename = NULL; //"real_data/PDF.data";
 #endif
 #ifdef TIME_SCALE
-char *phys_prop_filename = NULL; //"real_data/desert_earth.prop";
+int8_t *phys_prop_filename = NULL; //"real_data/desert_earth.prop";
 float time_scale = 1.0; //t_0
 #endif
 
 void compute_prob_dist();
-int simul_trans();
-int simul_check(int , int , int );
-void simul_lien_trans(int , int , int );
+int32_t simul_trans();
+int32_t simul_check(int32_t , int32_t , int32_t );
+void simul_lien_trans(int32_t , int32_t , int32_t );
 #ifdef LGCA
-void flow_stabilization(int );
+void flow_stabilization(int32_t );
 #endif
 void simul_stop();
 void simul_dump();
@@ -402,7 +403,7 @@ void init_simul()
 // computation of the probability distribution
 inline void compute_prob_dist()
 {
-  int i;
+  int32_t i;
   double PI_ij_time, ccc;
   TransitionDb *ptr;
   TransitionCel *ptr_cel;
@@ -489,15 +490,15 @@ void simul_time()
 }
 
 
-inline int simul_trans()
+inline int32_t simul_trans()
 {
-  int i, elt, tr;
+  int32_t i, elt, tr;
   double ccc, aleat;
-  int dir;
-  static int cpt_blk=0;
-  int max_blk=HLD;
-  char flag_evol_time=0;
-  char flag_trans_done=0;
+  int32_t dir;
+  static int32_t cpt_blk=0;
+  int32_t max_blk=HLD;
+  int8_t flag_evol_time=0;
+  int8_t flag_trans_done=0;
 
   while ((!flag_trans_done) && (cpt_blk < max_blk)){
 
@@ -517,10 +518,10 @@ inline int simul_trans()
     if (tr < nb_trans_db){
       /// DOUBLET TRANSITION
       //we choose randomly which doublet will undergo the transition
-      int db_depart = t_trans[tr].depart;
+      int32_t db_depart = t_trans[tr].depart;
       elt = (int) floor( drand48() * Ndb[db_depart]);
 
-      int ix = db_pos[db_depart][elt];
+      int32_t ix = db_pos[db_depart][elt];
 
   /*#ifdef TRACE
       if (ii>10) trace_test(ix);
@@ -563,8 +564,8 @@ inline int simul_trans()
 
     else{
       /// CELL TRANSITION
-      static int imax = 0;
-      int ix;
+      static int32_t imax = 0;
+      int32_t ix;
       //LogPrintf("tr = %d   aleat = %f   ccc = %f   PII = %f\n", tr, aleat, ccc, PII);
 
       tr -= nb_trans_db;
@@ -613,7 +614,7 @@ extern float lambda_T;
 void simul_time_scale(float wind_value)
 {
   FILE *fp;
-  static int nb_rows;
+  static int32_t nb_rows;
   static float *tau1_values; //=grdvc_min
   static float *erosion_rates;
   static float *qsat_ratios;
@@ -626,8 +627,8 @@ void simul_time_scale(float wind_value)
   static float ut; //threshold velocity (erosion)
   static float d; //diameter of grain
   static float l_0; //length scale
-  static char start=1;
-  int i;
+  static int8_t start=1;
+  int32_t i;
 
   if (!phys_prop_filename) return;
 
@@ -780,7 +781,7 @@ void simul_time_scale(float wind_value)
     //grdvc_min = 1000;
     //grdvc_max = grdvc_min + 1000.0;
     time_scale = 1e6; //not possible to set the time scale accurately
-    static char first = 1;
+    static int8_t first = 1;
     if (first) {ErrPrintf("Warning: no time scale for wind value %f\n", wind_value); first=0;}
   }
   LogPrintf("time_scale = %g\n", time_scale);
@@ -788,13 +789,13 @@ void simul_time_scale(float wind_value)
 }
 #endif
 
-void simul_correl(int tr1, int ix, int ix2, int dir)
+void simul_correl(int32_t tr1, int32_t ix, int32_t ix2, int32_t dir)
 {
   static double cum2[MAX_LIENS];
-  static int ln[MAX_LIENS], ind[MAX_LIENS];
+  static int32_t ln[MAX_LIENS], ind[MAX_LIENS];
   double ccc, aleat;
-  int i, db, db2, n;
-  int trans2_db_depart;
+  int32_t i, db, db2, n;
+  int32_t trans2_db_depart;
   //determination du doublet de depart
   db = type_doublet(ix, dir);
   db2 = type_doublet(ix2, dir);
@@ -834,7 +835,7 @@ void simul_correl(int tr1, int ix, int ix2, int dir)
     while ((i < n) && (aleat > cum2[i])) i++;
     if (i < n){
       //LogPrintf("Lien %d -> %d\n", tr1, ltr[i]);
-      int tr2 = t_lien[ln[i]].trans2;
+      int32_t tr2 = t_lien[ln[i]].trans2;
       /*if (t_trans[tr2].nb_chk){
         //controle de la transition
         if (!simul_check(tr2, ind[i], dir)) return; //transition bloquee
@@ -850,13 +851,13 @@ void simul_correl(int tr1, int ix, int ix2, int dir)
 }
 
 
-void simul_lien_trans(int tr, int ix, int dir)
+void simul_lien_trans(int32_t tr, int32_t ix, int32_t dir)
 {
-  int ix2;
-  int ix_west, ix2_west;
-  int ix_up, ix2_up;
-  int ix_north, ix2_north;
-  int x,y,z;
+  int32_t ix2;
+  int32_t ix_west, ix2_west;
+  int32_t ix_up, ix2_up;
+  int32_t ix_north, ix2_north;
+  int32_t x,y,z;
   Pos2 *cp;
 
   if (t_trans[tr].classe == VERTICAL){
@@ -882,7 +883,7 @@ void simul_lien_trans(int tr, int ix, int dir)
   else {
     // PREMIERE TRANSITION HORIZONTALE
     ix2 = get_cell_dir(ix, dir);
-    int flag_eo = (dir == EST/*EST_OUEST*/);
+    int32_t flag_eo = (dir == EST/*EST_OUEST*/);
 
     // liens verticaux, doublet bas
     simul_correl(tr, ix, ix2, BAS);
@@ -914,10 +915,10 @@ void simul_lien_trans(int tr, int ix, int dir)
 }
 
 
-int simul_check(int tr, int ix, int dir)
+int32_t simul_check(int32_t tr, int32_t ix, int32_t dir)
 {
-  int i;
-  int chk = 1;
+  int32_t i;
+  int32_t chk = 1;
   DataCheck *pdc;
 
   pdc = t_trans[tr].checks;
@@ -930,7 +931,7 @@ int simul_check(int tr, int ix, int dir)
       chk = pdc->func(ix, (void*)pdc);
     }
     else{ /// callback function on second cell
-      int ix2 = get_cell_dir(ix, dir);
+      int32_t ix2 = get_cell_dir(ix, dir);
       chk = pdc->func(ix2, (void*)pdc);
     }
 
@@ -952,7 +953,7 @@ int simul_check(int tr, int ix, int dir)
 #ifdef SURRECTIONS
 void simul_sur()
 {
-  //static int seuil = HLD*10;  //10000000L;
+  //static int32_t seuil = HLD*10;  //10000000L;
   static float time_threshold = 0.0;
 
   if (sur_delay){
@@ -963,11 +964,11 @@ void simul_sur()
     if (csp_time >= time_threshold){
       //regul_niveau();
       //if (calcule_hmin() > H/10) surrection_locale();
-      //int nsur;
+      //int32_t nsur;
       //for(nsur=0; nsur<3; nsur++){
       //if (calcule_hmin() > 3) surrection();/*(type_sur == SUR_UNI) ? surrection() : surrection_locale();*/
       if (calcule_alti_max(ALTI) < H-3) surrection();/*(type_sur == SUR_UNI) ? surrection() : surrection_locale();*/
-      else { LogPrintf("surrection bloquee, sommet atteint !\n");  }
+      else { LogPrintf("surrection bloquee, sommet atteint32_t !\n");  }
       //}
       time_threshold += sur_delay;
     }
@@ -977,21 +978,21 @@ void simul_sur()
 
 #ifdef ROTATIONS
 //extern double lambda_E;
-extern int Ncel[];           // nombre de cellules par type
+extern int32_t Ncel[];           // nombre de cellules par type
 extern float coef_injection; //regulation de l'injection de grain
 
 void simul_rot()
 {
-  static char start = 1;
+  static int8_t start = 1;
   static float time_threshold = 0.0;
-  static int cpt_rot = 0;
-  static short lg_seq = 5; //2
-  static short seq_rot[] = {0, 1, 2, 3, 4};
-  static short seq_del[] = {1, 1, 1, 1, 1};
+  static int32_t cpt_rot = 0;
+  static int16_t lg_seq = 5; //2
+  static int16_t seq_rot[] = {0, 1, 2, 3, 4};
+  static int16_t seq_del[] = {1, 1, 1, 1, 1};
   static float seq_inj[] = {1.0, 1.0};
-  static int total_seq_rot = 0;
-  static int seq_flag = 0; //flag for using sequences of angles/delays/...
-  int nseq;
+  static int32_t total_seq_rot = 0;
+  static int32_t seq_flag = 0; //flag for using sequences of angles/delays/...
+  int32_t nseq;
   //static double lambda_E_debut = 0.0;
 
   //if (!rot_delay || !rot_angle) return;
@@ -1009,7 +1010,7 @@ void simul_rot()
 #ifdef LGCA
     if (use_lgca){
       LogPrintf("number of lattice-gas stabilization cycles after rotation = %d\n", rot_mvt_nb_cycles);
-      if (rot_mvt_nb_cycles < VSTEP_TIME) ErrPrintf("WARNING: stabilization after rotation is too short ( Rot_ncycl = %d < VSTEP_TIME = %d )\n", rot_mvt_nb_cycles, VSTEP_TIME);
+      if (rot_mvt_nb_cycles < VSTEP_TIME) ErrPrintf("WARNING: stabilization after rotation is too int16_t ( Rot_ncycl = %d < VSTEP_TIME = %d )\n", rot_mvt_nb_cycles, VSTEP_TIME);
     }
 #endif
     //conditions_bords();
@@ -1017,8 +1018,8 @@ void simul_rot()
   }
   if (csp_time >= time_threshold){
     //translation
-    /*int alea_dx = (drand48()-0.5)*L/5;
-    int alea_dz = (drand48()-0.5)*L/5;
+    /*int32_t alea_dx = (drand48()-0.5)*L/5;
+    int32_t alea_dz = (drand48()-0.5)*L/5;
     translation(alea_dx, alea_dz);*/
 
     if (seq_flag){
@@ -1032,8 +1033,8 @@ void simul_rot()
     }
     else{
       //rotation d'angle rot_angle
-      //short alea = 1 + (short)4.0*drand48();
-      //short alea = (drand48()<0.5) ? 1 : 4;
+      //int16_t alea = 1 + (short)4.0*drand48();
+      //int16_t alea = (drand48()<0.5) ? 1 : 4;
       //rotation(alea*rot_angle, rot_mode);
       if (1) //(rot_angle)
         rotation(rot_angle, rot_mode, 0);
@@ -1085,9 +1086,9 @@ void simul_rot()
 #ifdef CENTERING_AUTO
 void simul_centering()
 {
-  static char start = 1;
+  static int8_t start = 1;
   static float time_threshold = 0.0;
-  static int cx0, cz0;
+  static int32_t cx0, cz0;
 
   if (!centering_delay) return;
 
@@ -1101,8 +1102,8 @@ void simul_centering()
 
   if (csp_time >= time_threshold){
     Vec3 center = compute_mass_center(ALTI);
-    int trx = -roundf(center.x - cx0);
-    int trz = -roundf(center.z - cz0);
+    int32_t trx = -roundf(center.x - cx0);
+    int32_t trz = -roundf(center.z - cz0);
     if (trx || trz){
       translation(trx, trz);
 #ifdef LGCA
@@ -1119,10 +1120,10 @@ void simul_centering()
 void simul_ava_sync()
 {
   static float time_threshold = 0.0;
-  static unsigned long iter_0 = 0, md_iter_0;
-  static unsigned long inter_iter_ava = 20000; //200000; //1000000; //nb min de transitions entre 2 avalanches
+  static uint64_t iter_0 = 0, md_iter_0;
+  static uint64_t inter_iter_ava = 20000; //200000; //1000000; //nb min de transitions entre 2 avalanches
   static float ava_delay_sync = 0.0;
-  static char start = 1;
+  static int8_t start = 1;
 
   //if (!lambda_A) return;
 
@@ -1182,31 +1183,31 @@ void simul_ava_sync()
 void simul_ava_dynamics()
 {
   static float time_threshold = 0.0;
-  static char start = 1;
-  static char mode_stable = 1;
+  static int8_t start = 1;
+  static int8_t mode_stable = 1;
 
 #ifdef MODEL_AVA
 // valeurs 2D
-//  static float ava_delay_short = 500.0;
-//  static float ava_delay_long = 4000.0;
+//  static float ava_delay_int16_t = 500.0;
+//  static float ava_delay_int64_t = 4000.0;
 // valeurs 3D
-//  static float ava_delay_short = 1000.0;
-//  static float ava_delay_long = 8000.0;
+//  static float ava_delay_int16_t = 1000.0;
+//  static float ava_delay_int64_t = 8000.0;
 #else
 #ifndef LGCA
 // valeurs 2D
-//  static float ava_delay_short = 4000.0;
-//  static float ava_delay_long = 10000.0;
+//  static float ava_delay_int16_t = 4000.0;
+//  static float ava_delay_int64_t = 10000.0;
 // valeurs 3D
-//  static float ava_delay_short = 1000.0;
-//  static float ava_delay_long = 4000.0;
+//  static float ava_delay_int16_t = 1000.0;
+//  static float ava_delay_int64_t = 4000.0;
 #else
 // valeurs 2D
-//  static float ava_delay_short = 6000.0;
-//  static float ava_delay_long = 12000.0;
+//  static float ava_delay_int16_t = 6000.0;
+//  static float ava_delay_int64_t = 12000.0;
 // valeurs 3D
-//  static float ava_delay_short = 1500.0;
-//  static float ava_delay_long = 3000.0;
+//  static float ava_delay_int16_t = 1500.0;
+//  static float ava_delay_int64_t = 3000.0;
 #endif
 #endif
 
@@ -1287,7 +1288,7 @@ void simul_wind_variability()
   static float time_threshold = 0.0;
   //static float pente_erosion_grdv = 0.0;
   //static float lambda_E_debut = 0.0;
-  static char start = 1;
+  static int8_t start = 1;
 
   if (start){
     time_threshold = delai_vent_max*ceil(csp_time/delai_vent_max); //delai_vent_max*0.5;
@@ -1328,16 +1329,16 @@ void simul_wind_data()
   static float *wind_delays = NULL;
   static float *wind_angles = NULL;
   static float *wind_values = NULL;
-  static int nb_wind=0;
-  static int time_unit=0;
-  static int cpt_wind=0;
+  static int32_t nb_wind=0;
+  static int32_t time_unit=0;
+  static int32_t cpt_wind=0;
   static float time_threshold = 0.0;
   static float angle_dir = 0.0;
   float angle = 0.0;
   //float alpha = 0.0;
   float seq_duration = 0.0;
-  char time_unit_str[128];
-  static char start = 1;
+  int8_t time_unit_str[128];
+  static int8_t start = 1;
 
   if (start){
     LogPrintf("simul_wind_data: read file %s\n", wind_data_filename);
@@ -1373,7 +1374,7 @@ void simul_wind_data()
     }
 
     //read wind data
-    int i;
+    int32_t i;
     AllocMemory(wind_delays, float, nb_wind);
     AllocMemory(wind_angles, float, nb_wind);
     AllocMemory(wind_values, float, nb_wind);
@@ -1493,16 +1494,16 @@ void simul_wind_data()
 
 
 #ifdef LGCA
-extern unsigned char opt_vss;
+extern uint8_t opt_vss;
 extern float *grdv;
 
-void simul_profile_lgca(int lgca_flag)
+void simul_profile_lgca(int32_t lgca_flag)
 {
   static double lgca_elapsed_time = 0.0;
   static double other_elapsed_time = 0.0;
   static double t0 = 0.0;
   static double t1 = 0.0;
-  static int cpt=0;
+  static int32_t cpt=0;
 
   if (cpt>1000) return;
 
@@ -1528,11 +1529,11 @@ void simul_profile_lgca(int lgca_flag)
   }
 }
 
-void flow_stabilization(int nb_cyc)
+void flow_stabilization(int32_t nb_cyc)
 {
-  int i;
-//   char str_status[100];
-  char flag_interp=0;
+  int32_t i;
+//   int8_t str_status[100];
+  int8_t flag_interp=0;
 
 #ifdef CGV
   calcule_alti(ALTI, ALTI_MODE_BAS);
@@ -1544,7 +1545,7 @@ void flow_stabilization(int nb_cyc)
   lgca_ready = 0;
 
   for (i=0; i<nb_cyc; i++) {
-    //int j;
+    //int32_t j;
     //for (j=0; j<100000/L; j++) calcule_alti(GR, ALTI_MODE_BAS); //pour ralentir ...
     do_collisions();
     do_propagations();
@@ -1590,7 +1591,7 @@ void simul_lgca()
 #endif
 
 #ifdef ALTI
-extern unsigned char opt_ls;
+extern uint8_t opt_ls;
 
 void simul_norm_lum()
 {
@@ -1618,10 +1619,10 @@ void simul_stop()
 }
 
 
-int simul_csp()
+int32_t simul_csp()
 {
-  int ii;
-  int res;
+  int32_t ii;
+  int32_t res;
 
   /// start time
   if (param_is_set("Time")) csp_time = init_time;
@@ -1840,7 +1841,7 @@ int simul_csp()
 
 #ifdef DUMP_SIGNATURE
     if (opt_info &&  !(ii & 0x000fffff)){ //toutes les 1048576 transitions
-    	/// save fingerprint of the cellular space (hash function)
+    	/// save fingerprint32_t of the cellular space (hash function)
       dump_signature(ii);
     }
 #endif
@@ -1918,16 +1919,16 @@ void simul_dump()
   static double time_threshold = 0.0;
   static double time_threshold_dpng = 0.0;
   static double time_threshold_dcsp = 0.0;
-  static int cpt_dump = 0;
-  static char name[100];
-  static char str[100];
+  static int32_t cpt_dump = 0;
+  static int8_t name[100];
+  static int8_t str[100];
   static double t0=0, t1=0;
-  static char start=1;
+  static int8_t start=1;
   static double epsilon = 0.1;
 
   if (start){
 #ifdef PARALLEL
-    extern int proc_id;
+    extern int32_t proc_id;
     sprintf(str,"_%d",proc_id);
 #else
     *str = 0;
@@ -2035,12 +2036,12 @@ void simul_dump()
 
 void dump_time()
 {
-  static int cpt = 0;
-  static unsigned long int md_iter_0 = 0, iter_0 = 0;
+  static int32_t cpt = 0;
+  static uint64_t md_iter_0 = 0, iter_0 = 0;
   static double csp_time_0 = 0;
   static double real_time_0 = 0;
-  static int col_iter_0 = 0;
-  long int delta_iter, delta_md_iter;
+  static int32_t col_iter_0 = 0;
+  int64_t delta_iter, delta_md_iter;
 	FILE *fp;
 
   fp = fopen("TIME.log","a");

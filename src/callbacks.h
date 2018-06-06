@@ -17,29 +17,30 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
 
 //#define FLASH_DELAY 50
 
 
 typedef struct dump_parameters {
-  unsigned char type;
-  int delay;
+  uint8_t type;
+  int32_t delay;
 } DumpPar;
 
 typedef struct dump_delay {
-  unsigned char unit;
+  uint8_t unit;
   float val;
 } DumpDelay;
 
 void callbacks_init();
-void lock_display(int log_flag);
-int trylock_display(int log_flag);
-void unlock_display(int log_flag);
-int elapsed(double *sec);
+void lock_display(int32_t log_flag);
+int32_t trylock_display(int32_t log_flag);
+void unlock_display(int32_t log_flag);
+int32_t elapsed(double *sec);
 void timer_init();
 void *rescal_thread(void *data);
 void *lgca_thread(void *data);
@@ -62,7 +63,7 @@ void on_window_destroy (GtkObject *object, gpointer user_data);
 
 void* do_png(void* delay);
 void* do_jpeg(void* delay);
-void set_ss_timeout(int delay, const char* type);
+void set_ss_timeout(int32_t delay, const char* type);
 void* do_stop(void* arg);
 void* do_quit(void* arg);
 
