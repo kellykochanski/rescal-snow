@@ -2,21 +2,19 @@ bin_PROGRAMS = rescal genesis regenesis bin2png csp2png cspinfo csp2bin
 
 VER_GTK = 2
 
-AM_CFLAGS = -I/opt/local/include \
-            -std=gnu99 -DGTK$(VER_GTK) $(GTK_CFLAGS) \
+AM_CFLAGS = -std=gnu99 -I/opt/local/include \
             -DRESCAL_DATA_DIR=\""$(PWD)"\" \
             -DHAVE_CONFIG_H \
             $(AVX_CFLAGS) \
 	    $(OPENMP_CFLAGS) 
 
-AM_LDFLAGS = -L/opt/local/lib 
+AM_LDFLAGS = -L/opt/local/lib
 
-rescal_LDADD = -lm $(GTK_LIBS) $(GMODULE_LIBS) $(GTHREAD_LIBS)
+rescal_LDADD = -lm $(GTK_LIBS) $(GMODULE_LIBS) $(GTHREAD_LIBS) ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
 genesis_LDADD = -lm
 regenesis_LDADD = -lm
-bin2png_LDADD = -lm
-csp2png_LDADD = -lm
-
+bin2png_LDADD = -lm ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
+csp2png_LDADD = -lm ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
 
 common_SOURCES = \
   cells.c \
@@ -46,7 +44,6 @@ common_SOURCES = \
   view.c \
   view.h
 
-
 rescal_SOURCES = \
   $(common_SOURCES) \
   callbacks.c \
@@ -75,7 +72,7 @@ regenesis_SOURCES = \
   format.c \
   format.h \
   regenesis.c
-	
+
 bin2png_SOURCES = \
   $(common_SOURCES) \
   bin2png.c

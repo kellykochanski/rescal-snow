@@ -19,7 +19,7 @@ AC_PROG_CC
 #PKG_CHECK_MODULES([GMODULE], [gmodule-2.0])
 #PKG_CHECK_MODULES([GTHREAD], [gthread-2.0])
 AC_CHECK_LIB([pthread], [pthread_create], [], AC_MSG_ERROR([Required library pthread not found. Install pthread development package and try again.]))
-AC_CHECK_LIB([png], [png_write_row], [], AC_MSG_ERROR([Required library libpng not found. Install libpng development package and try again.]))
+#AC_CHECK_LIB([png], [png_write_row], [], AC_MSG_ERROR([Required library libpng not found. Install libpng development package and try again.]))
 #AC_CHECK_LIB([gd], [gdImageCreate], [], AC_MSG_ERROR([Required library gd not found. Install gd development package and try again.]))
 
 # Checks for header files.
@@ -46,7 +46,9 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor gettimeofday memset pow setlocale sqrt strchr])
 
 #AC_CONFIG_FILES([Makefile rescal/Makefile regenesis/Makefile])
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile lib/Makefile])
+AC_CONFIG_SUBDIRS([lib/libpng-1.6.34])
+AC_CONFIG_COMMANDS([zlib-config], [cd lib/zlib-1.2.11;./configure --static;cd ../../], [])
 AC_OUTPUT
 AC_C_INLINE
 AC_PROG_LN_S
