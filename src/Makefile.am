@@ -1,4 +1,10 @@
-bin_PROGRAMS = rescal genesis regenesis bin2png csp2png cspinfo csp2bin
+bin_PROGRAMS = $(top_builddir)/scripts/rescal \
+               $(top_builddir)/scripts/genesis \
+               $(top_builddir)/scripts/regenesis \
+               $(top_builddir)/scripts/bin2png \
+               $(top_builddir)/scripts/csp2png \
+               $(top_builddir)/scripts/cspinfo \
+               $(top_builddir)/scripts/csp2bin
 
 VER_GTK = 2
 
@@ -10,11 +16,11 @@ AM_CFLAGS = -std=gnu99 -I/opt/local/include \
 
 AM_LDFLAGS = -L/opt/local/lib
 
-rescal_LDADD = -lm $(GTK_LIBS) $(GMODULE_LIBS) $(GTHREAD_LIBS) ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
-genesis_LDADD = -lm
-regenesis_LDADD = -lm
-bin2png_LDADD = -lm ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
-csp2png_LDADD = -lm ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
+__top_builddir__scripts_rescal_LDADD = -lm $(GTK_LIBS) $(GMODULE_LIBS) $(GTHREAD_LIBS) ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
+__top_builddir__scripts_genesis_LDADD = -lm
+__top_builddir__scripts_regenesis_LDADD = -lm
+__top_builddir__scripts_bin2png_LDADD = -lm ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
+__top_builddir__scripts_csp2png_LDADD = -lm ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
 
 common_SOURCES = \
   cells.c \
@@ -44,7 +50,7 @@ common_SOURCES = \
   view.c \
   view.h
 
-rescal_SOURCES = \
+__top_builddir__scripts_rescal_SOURCES = \
   $(common_SOURCES) \
   callbacks.c \
   callbacks.h \
@@ -54,7 +60,7 @@ rescal_SOURCES = \
   rescal.c \
   rescal.h
 
-genesis_SOURCES = \
+__top_builddir__scripts_genesis_SOURCES = \
   defs.h \
   macros.h \
   cells.h \
@@ -65,7 +71,7 @@ genesis_SOURCES = \
   genesis.c \
   genesis.h
 
-regenesis_SOURCES = \
+__top_builddir__scripts_regenesis_SOURCES = \
   defs.h \
   macros.h \
   cells.h \
@@ -73,22 +79,22 @@ regenesis_SOURCES = \
   format.h \
   regenesis.c
 
-bin2png_SOURCES = \
+__top_builddir__scripts_bin2png_SOURCES = \
   $(common_SOURCES) \
   bin2png.c
 
-csp2png_SOURCES = \
+__top_builddir__scripts_csp2png_SOURCES = \
   $(common_SOURCES) \
   csp2png.c
 
-cspinfo_SOURCES = \
+__top_builddir__scripts_cspinfo_SOURCES = \
   format.c \
   format.h \
   cells.h \
   macros.h \
   cspinfo.c
 
-csp2bin_SOURCES = \
+__top_builddir__scripts_csp2bin_SOURCES = \
   defs.h \
   format.c \
   format.h \
