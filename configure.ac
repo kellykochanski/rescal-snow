@@ -46,9 +46,11 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor gettimeofday memset pow setlocale sqrt strchr])
 
 #AC_CONFIG_FILES([Makefile rescal/Makefile regenesis/Makefile])
+
 AC_CONFIG_FILES([Makefile src/Makefile lib/Makefile])
 AC_CONFIG_SUBDIRS([lib/libpng-1.6.34])
-AC_CONFIG_COMMANDS([zlib-config], [cd lib/zlib-1.2.11;./configure --static;cd ../../], [])
+AC_CONFIG_COMMANDS([libpng-config], [cd lib/libpng-1.6.34; env CPPFLAGS="-I. -I../zlib-1.2.11" ./configure --disable-shared --enable-static;cd ../../], [])
+AC_CONFIG_COMMANDS([zlib-config], [cd lib/zlib-1.2.11; env CPPFLAGS="-I." ./configure --static; cd ../../], [])
 AC_OUTPUT
 AC_C_INLINE
 AC_PROG_LN_S

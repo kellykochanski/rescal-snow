@@ -1,5 +1,6 @@
 *.o
 *.Po
+.deps
 autom4te.cache
 config.log
 config.status

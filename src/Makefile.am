@@ -22,6 +22,8 @@ __top_builddir__scripts_regenesis_LDADD = -lm
 __top_builddir__scripts_bin2png_LDADD = -lm ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
 __top_builddir__scripts_csp2png_LDADD = -lm ../lib/libpng-1.6.34/.libs/libpng16.a ../lib/zlib-1.2.11/libz.a
 
+AM_CPPFLAGS = -I$(top_builddir)/lib/libpng-1.6.34/ -I$(top_builddir)/lib/zlib-1.2.11/
+
 common_SOURCES = \
   cells.c \
   cells.h \
