@@ -35,7 +35,8 @@ fi
 #PAR_FILE="dun_scale.par"
 #PAR_FILE="dun_kk.par"
 #PAR_FILE="dun_small.par"
-PAR_FILE="step.par"
+#PAR_FILE="step.par"
+PAR_FILE="sno_cone.par"
 
 echo PAR_FILE=$PAR_FILE
 
@@ -57,7 +58,7 @@ RESCAL_LOG_FILE="RESCAL.log"
 #nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
 
 ## generation of png images, CSP files and info logs, then stop after 30 minutes
-./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 1 -dcsp 5 -stop 2 >> $RESCAL_LOG_FILE
+./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -dcsp 5 -stop 3000t0 >> $RESCAL_LOG_FILE
 
 ## generation of png images with delay in t0 unit
 #nice ./rescal $PAR_FILE -cv0 -ls 45 -vel -vss -info -dpng 100t0 >> $RESCAL_LOG_FILE

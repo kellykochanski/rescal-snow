@@ -134,9 +134,13 @@ int32_t get_trans(int8_t ref)
   }
   return i;
 }
+<<<<<<< HEAD
 
 
 void trans_ref(int8_t ref, int8_t classe, int8_t cel_depart_1, int8_t cel_depart_2, int8_t cel_arrivee_1, int8_t cel_arrivee_2, double intensite)
+=======
+void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char cel_arrivee_1, char cel_arrivee_2, double intensite)
+>>>>>>> f9ab606323a335ab187ee7bea74ca0858f14f134
 {
   if (intensite<0){
     LogPrintf("WARNING: negative transition rate (%f). Transition removed.\n", intensite);
@@ -144,10 +148,13 @@ void trans_ref(int8_t ref, int8_t classe, int8_t cel_depart_1, int8_t cel_depart
   }
 
   if (classe == ISOTROPE){
-    //transition isotrope
+    // transition isotrope
+    // KK -- this ISOTROPE clause creates a set of vertical and horizontal conditions which have the
+    // net effect of an isotropic (every-direction) transition.
     int8_t sym = (cel_depart_1 == cel_depart_2) && (cel_arrivee_1 == cel_arrivee_2);
     if (H > 3){
       trans_ref( -1, VERTICAL, cel_depart_1, cel_depart_2, cel_arrivee_1, cel_arrivee_2, intensite);
+      // 1 transition if cells are same type, 2 if they are different
       if (!sym) trans_ref( -1, VERTICAL, cel_depart_2, cel_depart_1, cel_arrivee_2, cel_arrivee_1, intensite);
     }
     trans_ref( -1, HORIZONTAL, cel_depart_1, cel_depart_2, cel_arrivee_1, cel_arrivee_2, intensite);
@@ -192,7 +199,7 @@ void trans_ref(int8_t ref, int8_t classe, int8_t cel_depart_1, int8_t cel_depart
     t_trans[nb_trans_db].time_mode = TIME_EVOL;
     nb_trans_db++;
   }
-}
+} //trans_ref
 
 void trans(int8_t classe, int8_t cel_depart_1, int8_t cel_depart_2, int8_t cel_arrivee_1, int8_t cel_arrivee_2, double intensite)
 {

@@ -137,7 +137,7 @@ void init_template_list()
   init_template(CSP_SRC_DISK, "SRC_DISK", "SRC_DISK(w=40, x=100, y=D/2):\tcircular source of sand on the ground with width <w> and centered on (x,y)", 3, 40.0, 100.0, 0.0);
   init_template(CSP_SRC_DISK_CEIL, "SRC_DISK_CEIL", "SRC_DISK_CEIL(w=40, x=100, y=D/2):\tcircular source of sand in the ceiling with width <w> and centered on (x,y)", 3, 40.0, 100.0, 0.0);
   init_template(CSP_SMILEY, "SMILEY", "SMILEY:\t\t\t:-)", 0);
-  init_template(CSP_FORSTEP, "FORSTEP", "FORSTEP(h=0.15, hg=0.1, n=2):\tset of integer <n> solid forward-facing steps each <h> cells high, coated with a thickness <hg> of grains", 3, 0.15, 0.1, 2.0);
+  init_template(CSP_FORSTEP, "FORSTEP", "FORSTEP(h=0.15, hg=1, n=2, p=0):\tset of integer <n> solid forward-facing steps each <h> cells high, coated with a thickness <hg> of grains, perturbed in third dimension if p=1 (default p=0)", 4, 0.15, 0.1, 2.0, 0.0);
 #elif defined(MODEL_RIV)
   init_template(CSP_SLOPE, "SLOPE", "SLOPE(r=1.0):\t\tsloping ground of ratio <r>", 1, 1.0);
 #endif
@@ -267,7 +267,7 @@ void genesis()
   float di, dj, dk;
   float Ldx, Ldy, Ldz;
   float pente = 2.0;
-  float h, w, rc, n, hg;
+  float h, w, rc, n, hg, p;
   int32_t xmin, xmax, ymin, ymax;
   float x, y, z;
 
@@ -512,22 +512,28 @@ void genesis()
                aux->celltype = GR;
         }
         else if (csp_template.type == CSP_FORSTEP){
-	  //CSP_FORSTEP: set of forward-facing steps
-          h = csp_template.args[0]; // height of each step
-	  n = csp_template.args[1]; // number of steps
+	  //CSP_FORSTEP: set of forward-facing steps transverse to wind
+          h  = csp_template.args[0]; // height of each step
+	  n  = csp_template.args[1]; // number of steps
 	  hg = csp_template.args[2]; // thickness of space that is granular
-	  float b = h; // thickness of solid layer below steps
+	  p  = csp_template.args[3]; // binary - is step perturbed in 3rd dimension?
+	  float b  = 2.0*h;      // thickness of solid layer below steps
+	  float p0 = p*L/n/20.0; // amplitude of perturbation, if any (0 if p=0)
+	  float l  = D/2.0;      // wavelength of perturbation, if any
 	  for( float step = -1.0; step < n; step = step + 1.0 ){
-            float m_s;
-            m_s = n*h/L;
-#ifdef GRV  // if cohesive grain (GRV) defined, make cohesive steps
-	    if ( (i>=L*step/n) && (i<L*(step+1.0)/n) && 
-	      (j>=(H-b-(h-m_s*(i-L*step/n)))) ) aux->celltype = GRV;
-#else       // else make solid unerodible (DUM) steps
-	    if ( (i>=L*step/n) && (i<L*(step+1.0)/m) &&
-	      (j>=(H-b-(h-m_s*(i-L*step/n)))) ) aux->celltype = DUM; 
+            float m_s = n*h/L;
+	    float i2  = i + p0*sin(2*M_PI*k/l); //apply perturbation
+	    if ( (i2>=L*step/n) 
+			    && (i2<L*(step+1.0)/n) 
+			    && (j>=(H-b-(h-m_s*(i2-L*step/n))))
+	       ) 
+#ifdef GRV  // if possible, make cohesive (GRV) steps
+		    aux->celltype = GRV;
+#else       // else make unerodible (DUM) steps
+		    aux->celltype = DUM; 
 #endif
-	    if (j<= hg) aux->celltype = GR;
+	    if ((hg>=1) && (j<= hg)) aux->celltype = GR;
+	    if ((hg<1)  && (j==1) && (k%(int) round(1/hg)==0)) aux->celltype = GR;
 	  }
 	}
         else{
