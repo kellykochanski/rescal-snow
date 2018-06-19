@@ -17,16 +17,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <stdint.h>
 
 #define DB_INACTIF -1
 #define DB_BORD -2
 #define DB_TUNNEL -3
 
 typedef struct un_doublet{
-  unsigned char classe, one, two, actif;
+  uint8_t classe, one, two, actif;
 } Doublet;
 
 //choix du codage des references aux doublets actifs, stockes dans des tableaux
@@ -35,33 +37,33 @@ typedef struct un_doublet{
 #ifdef REFDB_PTR
 
 //la reference vers les doublets actifs est un pointeur (32 ou 64 bits selon l'architecture de la machine cible)
-typedef int *RefDoublets[3];
+typedef int32_t *RefDoublets[3];
 
 #else
 
 //la reference vers les doublets actifs est codee sur un caractere (8 bits) pour le type, et un entier (32 bits) pour l'index dans le tableau de positions
-typedef char RefDoublets_Type[3];
-typedef int RefDoublets_Ind[3];
+typedef int8_t RefDoublets_Type[3];
+typedef int32_t RefDoublets_Ind[3];
 
 #endif
 
-int init_doublet(int classe, char etat1, char etat2, char actif);
-void split_db_hor(int db_hor, int *db_eo, int *db_ns);
-int type_doublet(int index, int dir);
-void elimine_doublet(int type, int index, int dir);
-void elimine_doublet_est(int index);
-void elimine_doublet_ouest(int index);
-void elimine_doublet_bas(int index);
-void elimine_doublet_haut(int index);
-void elimine_doublet_sud(int index);
-void elimine_doublet_nord(int index);
-void ajoute_doublet(int type, int index, int dir);
-void ajoute_doublet_est(int index);
-void ajoute_doublet_ouest(int index);
-void ajoute_doublet_bas(int index);
-void ajoute_doublet_haut(int index);
-void ajoute_doublet_sud(int index);
-void ajoute_doublet_nord(int index);
+int32_t init_doublet(int32_t classe, int8_t etat1, int8_t etat2, int8_t actif);
+void split_db_hor(int32_t db_hor, int32_t *db_eo, int32_t *db_ns);
+int32_t type_doublet(int32_t index, int32_t dir);
+void elimine_doublet(int32_t type, int32_t index, int32_t dir);
+void elimine_doublet_est(int32_t index);
+void elimine_doublet_ouest(int32_t index);
+void elimine_doublet_bas(int32_t index);
+void elimine_doublet_haut(int32_t index);
+void elimine_doublet_sud(int32_t index);
+void elimine_doublet_nord(int32_t index);
+void ajoute_doublet(int32_t type, int32_t index, int32_t dir);
+void ajoute_doublet_est(int32_t index);
+void ajoute_doublet_ouest(int32_t index);
+void ajoute_doublet_bas(int32_t index);
+void ajoute_doublet_haut(int32_t index);
+void ajoute_doublet_sud(int32_t index);
+void ajoute_doublet_nord(int32_t index);
 void init_db_inv();
 void init_db_pos();
 void fin_db_pos();

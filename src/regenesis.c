@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -27,6 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
+#include <stdint.h>
+
 #include <math.h>
 #include "defs.h"
 #include "macros.h"
@@ -44,17 +46,17 @@
   (adrcell)->celltype = type; \
   }
 
-int H0, L0, D0, HL0, HLD0;       // les dimensions de la terre initiale
-int H, L, D, HL, HLD;       // les dimensions de la terre finale
+int32_t H0, L0, D0, HL0, HLD0;       // les dimensions de la terre initiale
+int32_t H, L, D, HL, HLD;       // les dimensions de la terre finale
 double csp_time=0.0;
-int Hd2, Ld2, Pd2, Hd3, Hd4;
+int32_t Hd2, Ld2, Pd2, Hd3, Hd4;
 Cell  *TE=NULL;             // notre 'terre'
 Cell  *TE0=NULL;             // ancienne 'terre'
-char *csp_filename=NULL; //nom du fichier CSP
-char out_format=DUMP_CSP;  //format en sortie
-int graine = 68374;
+int8_t *csp_filename=NULL; //nom du fichier CSP
+int8_t out_format=DUMP_CSP;  //format en sortie
+int32_t graine = 68374;
 float alpha = 0.0;  // angle de rotation
-char opt_prefix=0;
+int8_t opt_prefix=0;
 
 double drand48();
 void  srand48();
@@ -62,7 +64,7 @@ void  srand48();
 
 void read_terre()
 {
-  int sz;
+  int32_t sz;
   sz = read_csp_header(csp_filename);
 
   out_format = sz ? DUMP_CSP : DUMP_BIN;
@@ -113,20 +115,20 @@ void change_cel()
 // in : TE
 // out : TE
 {
-  int i, j, k, n;
+  int32_t i, j, k, n;
   float di, dj, dk;
-  int Ld2, Pd2, Hd2;
+  int32_t Ld2, Pd2, Hd2;
   float Ldx, Ldy, Ldz;
   Cell *aux;
 
   Ld2 = (int) L/2;
   Pd2 = (int) D/2;
   Hd2 = (int) H/2;
-  int lc = L*0.3;//Ld2; //L*0.75; //Ld2+40; //L/4; //Ld2; //largeur couloir
+  int32_t lc = L*0.3;//Ld2; //L*0.75; //Ld2+40; //L/4; //Ld2; //largeur couloir
   Ldx= Ld2-0.5; //Ld3;//Ld4;
   Ldy= Pd2-0.5; //Ld4; //(int) L/2;
   Ldz= Hd2;
-  int rcyl = Ld2-5; //rayon cylindre
+  int32_t rcyl = Ld2-5; //rayon cylindre
 
   LogPrintf("change_cel\n");
 
@@ -175,8 +177,8 @@ void rotation()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
-  int di, dk, i0, k0;
+  int32_t i, j, k;
+  int32_t di, dk, i0, k0;
   Cell *aux;
 
   //alpha = PI;
@@ -207,8 +209,8 @@ void rotation_cyclic()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
-  int i0, k0;
+  int32_t i, j, k;
+  int32_t i0, k0;
   float di, dk;
   float di0, dk0;
   Cell *aux, *aux0;
@@ -250,13 +252,13 @@ void rotation_cyclic()
   }
 }
 
-void rotation90(int n)
+void rotation90(int32_t n)
 // in : TE0
 // out : TE
 {
   Cell *aux;
-  int i, j, k;
-  int i0, k0;
+  int32_t i, j, k;
+  int32_t i0, k0;
   float a = n*PI/2;
   float co = cos(a);
   float si = sin(a);
@@ -282,11 +284,11 @@ void translation()
 // in : TE
 // out : TE
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   //translation est-ouest
-  int d_eo=L/3; //L/3; //L/4; //L/10; //L/5;
+  int32_t d_eo=L/3; //L/3; //L/4; //L/10; //L/5;
   aux = TE;
   LogPrintf("translation : %d\n", d_eo);
   for(k=0; k < D; k++) // profondeur
@@ -312,13 +314,13 @@ void translation_alldir()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   //translation est-ouest
-  int d_eo=100; //L/3; //L/4; //L/10; //L/5;
+  int32_t d_eo=100; //L/3; //L/4; //L/10; //L/5;
   //translation nord-sud
-  int d_ns=100;
+  int32_t d_ns=100;
 
   LogPrintf("translation : %d , %d\n", d_eo, d_ns);
   cp_TE_TE0();
@@ -341,11 +343,11 @@ void translation_cyclic()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   //translation est-ouest
-  int d_eo=140; //L/3; //L/4; //L/10; //L/5;
+  int32_t d_eo=140; //L/3; //L/4; //L/10; //L/5;
 
   LogPrintf("translation : %d\n", d_eo);
   cp_TE_TE0();
@@ -372,11 +374,11 @@ void translation_cyclic_ns()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   //translation nord_sud
-  int d_ns=220; //L/3; //L/4; //L/10; //L/5;
+  int32_t d_ns=220; //L/3; //L/4; //L/10; //L/5;
 
   LogPrintf("translation : %d\n", d_ns);
   cp_TE_TE0();
@@ -399,14 +401,14 @@ void transcale1()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   //translation + homothetie vers l'ouest
 
-  int d_eo=L/10; //L/8;
-  int ii, jj, kk;
-  int d_ns=0;
+  int32_t d_eo=L/10; //L/8;
+  int32_t ii, jj, kk;
+  int32_t d_ns=0;
   float coef1 = 0.4;
 
   LogPrintf("translation 1 + rescaling\n");
@@ -435,18 +437,18 @@ void transcale2()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   //translation + homothetie vers l'ouest
   //conservation de l'ancienne topographie
 
-  int d_eo=L/8; //L/8;
-  int ii, jj, kk;
-  //int d_ns=2*D/15; //position 1
-  //int d_ns=1.7*D/15;
-  int d_ns=D/15; //position 2
-  //int d_ns=0; //position 3
+  int32_t d_eo=L/8; //L/8;
+  int32_t ii, jj, kk;
+  //int32_t d_ns=2*D/15; //position 1
+  //int32_t d_ns=1.7*D/15;
+  int32_t d_ns=D/15; //position 2
+  //int32_t d_ns=0; //position 3
   float coef2 = 1.5;
 
   LogPrintf("translation 2 + rescaling\n");
@@ -478,7 +480,7 @@ void rescale_height()
 // in : TE0
 // out : TE
 {
-  int i, j, k, j0;
+  int32_t i, j, k, j0;
   Cell *aux;
 
   cp_TE_TE0();
@@ -509,7 +511,7 @@ void change_height()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   cp_TE_TE0();
@@ -551,10 +553,10 @@ void add_layers()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
-  int h1, h2;
+  int32_t i, j, k;
+  int32_t h1, h2;
   Cell *aux;
-  unsigned char typ;
+  uint8_t typ;
 
   cp_TE_TE0();
 
@@ -591,13 +593,13 @@ void change_width()
 // in : TE0
 // out : TE
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   cp_TE_TE0();
 
   //redimensionnement horizontal est-ouest
-  int d;
+  int32_t d;
   L = L0*2; //L0*2;
   Ld2 = L/2;
   HL = H*L;
@@ -628,7 +630,7 @@ void change_depth()
 // in : TE0
 // out : TE
 {
-  int i, j, k, d;
+  int32_t i, j, k, d;
   Cell *aux;
 
   cp_TE_TE0();
@@ -722,7 +724,7 @@ void regenerate_terre()
 
 void dump_terre()
 {
-  char out_filename[256];
+  int8_t out_filename[256];
 
   if (opt_prefix)
     sprintf(out_filename, "Regen_%s", basename(csp_filename));
@@ -752,9 +754,9 @@ void usage()
   exit(-1);
 }
 
-void read_args(int argc, char **argv)
+void read_args(int32_t argc, int8_t **argv)
 {
-  int n;
+  int32_t n;
 
   n = 1;
   while ((n<argc) && (*argv[n]!='-')) n++;
@@ -787,7 +789,7 @@ void read_args(int argc, char **argv)
   }
 }
 
-int main(int argc, char **argv)
+int32_t main(int32_t argc, int8_t **argv)
 {
   LogPrintf("regenesis %s\n", VER_NUM);
 

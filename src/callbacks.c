@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -29,7 +29,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <sys/time.h>
-#include <gtk/gtk.h>
+#include <stdint.h>
+
+//#include <gtk/gtk.h>
 #include "defs.h"
 #include "macros.h"
 #include "entry.h"
@@ -53,42 +55,48 @@
 #include "lgca.h"
 #endif
 
-extern int H, L, D;
+extern int32_t H, L, D;
 extern float frame_delay;
-extern unsigned long int iter, md_iter;
-extern unsigned char opt_quit;
+extern uint64_t iter, md_iter;
+extern uint8_t opt_quit;
 extern double csp_time;
-extern int abs_cv, prof_cv;
-extern unsigned char opt_cv;
-extern int vdir_mode; //display mode of the current orientation
-extern unsigned char reorient_flag;
-extern unsigned char csphpp_flag;
+extern int32_t abs_cv, prof_cv;
+extern uint8_t opt_cv;
+extern int32_t vdir_mode; //display mode of the current orientation
+extern uint8_t reorient_flag;
+extern uint8_t csphpp_flag;
 #ifdef LGCA
-extern int use_lgca;
-extern int col_iter;
+extern int32_t use_lgca;
+extern int32_t col_iter;
 extern float meanvel, maxvel;
 #endif
 #ifdef ROTATIONS
-extern int rot_mode;
+extern int32_t rot_mode;
 #endif
 #ifdef PARALLEL
-extern int mode_par;    //mode parallele
-extern int proc_id;     //numero de process en mode parallele (0 = serveur)
+extern int32_t mode_par;    //mode parallele
+extern int32_t proc_id;     //numero de process en mode parallele (0 = serveur)
 #endif
-extern GtkWidget *drawingarea;
+
 #ifdef GUI
+extern GtkWidget *drawingarea;
 extern GtkWidget *window;
 extern GtkLabel *label;
 extern GtkStatusbar *statusbar;
+
+gint32_t area_w, area_h;
+gint32_t timer=0;
+gint32_t end_of_rescal=0;     //semaphore (pour l'arret des callbacks)
+gint32_t rescal_paused=0;     //semaphore (pour la mise en pause)
+volatile gint32_t dump_wait=0;         //semaphore (pour la sauvegarde)
+gint32_t mouse_flag=0;
+GdkGC *gc=NULL;
+#else
+int32_t end_of_rescal=0;
+int32_t rescal_paused=0;
+volatile int32_t dump_wait=0;
 #endif
 
-gint area_w, area_h;
-gint timer=0;
-gint end_of_rescal=0;     //semaphore (pour l'arret des callbacks)
-gint rescal_paused=0;     //semaphore (pour la mise en pause)
-volatile gint dump_wait=0;         //semaphore (pour la sauvegarde)
-gint mouse_flag=0;
-GdkGC *gc=NULL;
 pthread_mutex_t mutex_pause;
 pthread_cond_t cond_pause;
 pthread_mutex_t mutex_display;
@@ -97,86 +105,17 @@ pthread_barrier_t lgca_barrier;
 pthread_t thread_id_lgca;
 #endif // LGCA
 
-void callbacks_init()
+int32_t elapsed(double *sec)
 {
-  view_img_size(&area_w, &area_h);
-
-#if !defined(CSP_MUTEX) && defined(REORIENT_AUTO)
-  ErrPrintf("ERROR: CSP_MUTEX option is required when REORIENT_AUTO option is set. Please define CSP_MUTEX option.\n");
-  exit(-1);
-#endif
-
-  /* Initialize mutex and condition variable objects */
-  pthread_mutex_init(&mutex_pause, NULL);
-  pthread_cond_init (&cond_pause, NULL);
-  pthread_mutex_init(&mutex_display, NULL);
-}
-
-void lock_display(int log_flag)
-{
-  if (log_flag) LogPrintf("lock display\n");
-  pthread_mutex_lock(&mutex_display);
-  if (log_flag) LogPrintf("display locked\n");
-}
-
-//non blocking function
-int trylock_display(int log_flag)
-{
-  int ret;
-  if (log_flag>0) LogPrintf("try to lock display\n");
-  ret = pthread_mutex_trylock(&mutex_display);
-  if (ret && (log_flag)) LogPrintf("trylock_display failed (%d)!\n",ret); //debug
-  if (log_flag>0) LogPrintf("display locked\n");
-  return ret;
-}
-
-void unlock_display(int log_flag)
-{
-  if (log_flag) LogPrintf("unlock display\n");
-  pthread_mutex_unlock(&mutex_display);
-  if (log_flag) LogPrintf("display unlocked\n");
-}
-
-int elapsed(double *sec)
-{
-  //extern int gettimeofday();
+  //extern int32_t gettimeofday();
   struct timeval t;
   struct timezone tz;
 
-  int stat;
+  int32_t stat;
   stat = gettimeofday(&t, &tz);
   *sec = (double)(t.tv_sec + t.tv_usec/1000000.0);
   return(stat);
 }
-
-double get_flash_delay(gpointer  data)
-{
-  int i;
-  double t0, t1;
-
-  elapsed(&t0);
-  for (i=1; i<10; i++) gcallback_flash(data);
-  elapsed(&t1);
-  return (t1-t0)/10.0;
-}
-
-
-void timer_init() {
-  //GtkWidget  *drawingarea = lookup_widget(GTK_WIDGET (widget), "drawingarea1");
-  if (!frame_delay){
-    float flash_delay = get_flash_delay(drawingarea) * 1000.0;
-    //LogPrintf("frame_delay = %f\n", frame_delay);
-    LogPrintf("flash_delay_avg = %f\n", flash_delay);
-    //if (flash_delay < frame_delay) frame_delay -= flash_delay;
-    //else frame_delay = flash_delay + frame_delay;
-    //if (frame_delay < flash_delay / 2.0) frame_delay = flash_delay / 2.0;
-    frame_delay = flash_delay * 5;
-    if (frame_delay < 10) frame_delay = 10;
-  }
-  LogPrintf("frame_delay = %f\n", frame_delay);
-  timer = gtk_timeout_add(frame_delay, gcallback_flash, 0);
-}
-
 
 void *rescal_thread(void *data) {
   sleep(1);
@@ -201,9 +140,9 @@ void *lgca_thread(void *data) {
 
 void wait_lgca_thread()
 {
-//  extern pthread_barrier_t lgca_barrier;
-//  extern pthread_t thread_id_lgca;
-  static int nRetVal = -1;
+  //  extern pthread_barrier_t lgca_barrier;
+  //  extern pthread_t thread_id_lgca;
+  static int32_t nRetVal = -1;
 
   /// wait for the end of lgca cycle
   if (nRetVal == 0) {pthread_barrier_wait(&lgca_barrier); /*LogPrintf("CSP-barrier\n");*/}
@@ -218,43 +157,183 @@ void wait_lgca_thread()
 
 #endif
 
+void do_thread_sched()
+{
+  int32_t unlocked=0;
+
+  if (dump_wait){
+    //push_status("writing",0); //do not work !?
+    //LogPrintf("dump_wait=%d   unlock\n", dump_wait);
+    //update_window();
+    unlocked=1;
+    unlock_csp(0);
+    while (dump_wait) sched_yield();
+  }
+  if (rescal_paused){
+//     push_status("paused",0);
+    LogPrintf("paused\n");
+    if (!unlocked){
+      unlocked=1;
+      unlock_csp(0);
+    }
+    pthread_cond_wait(&cond_pause, &mutex_pause);
+    LogPrintf("resume\n");
+//     pop_status(0);
+  }
+  if (unlocked){
+    lock_csp(0);
+    unlocked=0;
+    //pop_status(0);
+    //LogPrintf("dump_wait=%d   lock\n", dump_wait);
+  }
+}
+
 void log_info()
 {
   //lock_csp(0);
   dump_time();
-#ifdef INFO_CEL
+  #ifdef INFO_CEL
   log_cell();
-#endif
-#ifdef INFO_DBL
+  #endif
+  #ifdef INFO_DBL
   dump_db_info();
-#endif
-#ifdef INFO_TRANS
+  #endif
+  #ifdef INFO_TRANS
   dump_trans_info();
-#endif
-#ifdef PARALLEL
+  #endif
+  #ifdef PARALLEL
   if (mode_par) dump_msg_info();
-#endif
-#if defined(TRACE_TRANS) || defined(TRACE3D_CEL) || defined(TRACE_FLUX)
+  #endif
+  #if defined(TRACE_TRANS) || defined(TRACE3D_CEL) || defined(TRACE_FLUX)
   trace_dump(1);
-#endif
-#ifdef LGCA
+  #endif
+  #ifdef LGCA
   if (use_lgca){
     dump_densite();
-#ifndef STABILITY_ANALYSIS
+    #ifndef STABILITY_ANALYSIS
     dump_vel();
-#endif
-#ifdef CGV
+    #endif
+    #ifdef CGV
     dump_cgv_coef();
-#endif
+    #endif
   }
-#endif // LGCA
+  #endif // LGCA
   //unlock_csp(0);
 }
 
+void* do_png(void* delay) {
+  while (1) {
+    dump_image_inter((intptr_t) delay, "png");
+    sleep((intptr_t) delay);
+  }
+  return 0;
+}
+
+void* do_jpeg(void* delay) {
+  while (1) {
+    dump_image_inter((intptr_t) delay, "jpeg");
+    sleep((intptr_t) delay);
+  }
+  return 0;
+}
+
+void set_ss_timeout(int32_t delay, const char* type) {
+  pthread_t pth;
+  if (type == "png") {
+    pthread_create(&pth, 0, do_png,  (void*)(intptr_t) delay);
+  } else if (type == "jpeg") {
+    pthread_create(&pth, 0, do_jpeg, (void*)(intptr_t) delay);
+  }
+}
+
+void* do_stop(void* arg) {
+  sleep((intptr_t) arg);
+  LogPrintf("time to quit !\n");
+  //push_status("stopping ...", 0);
+  exit(-1);
+  return 0;
+}
+
+void* do_quit(void* arg) {
+  sleep(1);
+  if (opt_quit && end_of_rescal) {
+    LogPrintf("quit\n");
+    exit(-1);
+  }
+  return 0;
+}
+
+#ifdef GUI
+void callbacks_init()
+{
+  view_img_size(&area_w, &area_h);
+
+#if !defined(CSP_MUTEX) && defined(REORIENT_AUTO)
+  ErrPrintf("ERROR: CSP_MUTEX option is required when REORIENT_AUTO option is set. Please define CSP_MUTEX option.\n");
+  exit(-1);
+#endif
+
+  /* Initialize mutex and condition variable objects */
+  pthread_mutex_init(&mutex_pause, NULL);
+  pthread_cond_init (&cond_pause, NULL);
+  pthread_mutex_init(&mutex_display, NULL);
+}
+
+void lock_display(int32_t log_flag)
+{
+  if (log_flag) LogPrintf("lock display\n");
+  pthread_mutex_lock(&mutex_display);
+  if (log_flag) LogPrintf("display locked\n");
+}
+
+//non blocking function
+int32_t trylock_display(int32_t log_flag)
+{
+  int32_t ret;
+  if (log_flag>0) LogPrintf("try to lock display\n");
+  ret = pthread_mutex_trylock(&mutex_display);
+  if (ret && (log_flag)) LogPrintf("trylock_display failed (%d)!\n",ret); //debug
+  if (log_flag>0) LogPrintf("display locked\n");
+  return ret;
+}
+
+void unlock_display(int32_t log_flag)
+{
+  if (log_flag) LogPrintf("unlock display\n");
+  pthread_mutex_unlock(&mutex_display);
+  if (log_flag) LogPrintf("display unlocked\n");
+}
+
+double get_flash_delay(gpointer  data)
+{
+  int32_t i;
+  double t0, t1;
+
+  elapsed(&t0);
+  for (i=1; i<10; i++) gcallback_flash(data);
+  elapsed(&t1);
+  return (t1-t0)/10.0;
+}
+
+void timer_init() {
+  //GtkWidget  *drawingarea = lookup_widget(GTK_WIDGET (widget), "drawingarea1");
+  if (!frame_delay){
+    float flash_delay = get_flash_delay(drawingarea) * 1000.0;
+    //LogPrintf("frame_delay = %f\n", frame_delay);
+    LogPrintf("flash_delay_avg = %f\n", flash_delay);
+    //if (flash_delay < frame_delay) frame_delay -= flash_delay;
+    //else frame_delay = flash_delay + frame_delay;
+    //if (frame_delay < flash_delay / 2.0) frame_delay = flash_delay / 2.0;
+    frame_delay = flash_delay * 5;
+    if (frame_delay < 10) frame_delay = 10;
+  }
+  LogPrintf("frame_delay = %f\n", frame_delay);
+  timer = gtk_timeout_add(frame_delay, gcallback_flash, 0);
+}
 
 gboolean gcallback_dump (gpointer data){
-  static int cpt=0;
-  //static guint id = 0;
+  static int32_t cpt=0;
+  //static guint32_t id = 0;
   DumpPar  *dp;
   //if (!id) id = gtk_statusbar_get_context_id(statusbar, "gcallback_dump");
   dp = (DumpPar*)data;
@@ -335,39 +414,6 @@ gboolean gcallback_dump (gpointer data){
   return !end_of_rescal;
 }
 
-
-void do_thread_sched()
-{
-  int unlocked=0;
-
-  if (dump_wait){
-    //push_status("writing",0); //do not work !?
-    //LogPrintf("dump_wait=%d   unlock\n", dump_wait);
-    //update_window();
-    unlocked=1;
-    unlock_csp(0);
-    while (dump_wait) sched_yield();
-  }
-  if (rescal_paused){
-    push_status("paused",0);
-    LogPrintf("paused\n");
-    if (!unlocked){
-      unlocked=1;
-      unlock_csp(0);
-    }
-    pthread_cond_wait(&cond_pause, &mutex_pause);
-    LogPrintf("resume\n");
-    pop_status(0);
-  }
-  if (unlocked){
-    lock_csp(0);
-    unlocked=0;
-    //pop_status(0);
-    //LogPrintf("dump_wait=%d   lock\n", dump_wait);
-  }
-}
-
-
 gboolean gcallback_stop (gpointer  data)
 {
   LogPrintf("time to quit !\n");
@@ -386,20 +432,19 @@ gboolean gcallback_quit (gpointer data)
   return 1;
 }
 
-#ifdef GUI
 /// Display text area
 gboolean gcallback_text (gpointer  data)
 {
-  static char start=2;
-  static int last_iter=0;
-  static int cpt=1;
+  static int8_t start=2;
+  static int32_t last_iter=0;
+  static int32_t cpt=1;
   static float speed=0;
   static double t0, t1=0, t3=0;//, e0, e1, e2;
   static float avg_delay=1e10;
-  static char slabel[1024], slabel2[512];
+  static int8_t slabel[1024], slabel2[512];
 #ifdef LGCA
   static float speed_col=0;
-  static int last_col_iter=0;
+  static int32_t last_col_iter=0;
 #endif
 
   elapsed(&t0);
@@ -439,16 +484,16 @@ gboolean gcallback_text (gpointer  data)
   snprintf(slabel2,sizeof(slabel2),"\nReal time = %.3f", real_time);
   strcat(slabel,slabel2);
   */
-  long rt = (long)real_time;
-  int s = rt % 60; //seconds
+  int64_t rt = (long)real_time;
+  int32_t s = rt % 60; //seconds
   rt /= 60;
-  int m = rt % 60; //minuts
+  int32_t m = rt % 60; //minuts
   rt /= 60;
-  int h = rt % 24; //hours
+  int32_t h = rt % 24; //hours
   rt /= 24;
-  int d = rt; //% 365; //days
+  int32_t d = rt; //% 365; //days
   //rt /= 365;
-  //int y = rt; //years
+  //int32_t y = rt; //years
   snprintf(slabel2,sizeof(slabel2),"\nReal time = %dd%02dh%02dm%02ds", d, h, m, s);
   strcat(slabel,slabel2);
 #endif //TIME_SCALE
@@ -462,7 +507,7 @@ gboolean gcallback_text (gpointer  data)
 #endif
 #ifdef REORIENT_AUTO
   extern float csp_angle;
-  static int orientation_flag = 0;
+  static int32_t orientation_flag = 0;
   if (csp_angle) orientation_flag = 1;
   if (orientation_flag){
     snprintf(slabel2,sizeof(slabel2),"\nOrientation = %.2f", csp_angle);
@@ -486,16 +531,15 @@ gboolean gcallback_text (gpointer  data)
 
   return TRUE;
 }
-#endif // GUI
 
 /// Display image area
 gboolean gcallback_flash (gpointer  data)
 {
   static GdkRgbCmap colormap;
-  unsigned char *image_zoom;
+  uint8_t *image_zoom;
   GdkDrawable *drawable;
-  unsigned char *image;
-  int w, h;
+  uint8_t *image;
+  int32_t w, h;
 
   //elapsed(&e0);
   //GtkWidget  *drawingarea = (GtkWidget  *)data;
@@ -539,14 +583,10 @@ gboolean gcallback_flash (gpointer  data)
 
   unlock_display(0);
 
-#ifdef GUI
   gcallback_text(data);
-#endif //GUI
 
   return TRUE;
 }
-
-#ifdef GUI
 
 void on_drawingarea1_expose_event(GtkObject *object, gpointer user_data)
 {
@@ -580,7 +620,7 @@ void on_tool_button_go_clicked (GtkObject *object, gpointer user_data)
 
 void on_action_info_activate (GtkObject *object, gpointer user_data)
 {
-  static char active = 0;
+  static int8_t active = 0;
 
   active = 1-active;
   LogPrintf("on_action_info_activate : %d\n", active);

@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+*.Po
 
 # Precompiled Headers
 *.gch
@@ -41,3 +42,34 @@
 # LC log files
 *.core
 
+# Autoconf, libpng, make and  configure
+*.Po
+.deps
+autom4te.cache
+config.log
+config.status
+configure
+.deps
+oprofile_data
+*.data
+*.csp
+*.png
+*.log
+Makefile
+Makefile.in
+config.h
+config.h.in
+bin2png
+csp2bin
+csp2png
+cspinfo
+genesis
+regenesis
+rescal
+stamp-h1
+zlib.pc
+zconf.h
+lib/libpng-1.6.34/Makefile.in
+lib/libpng-1.6.34/aclocal.m4
+lib/zlib-1.2.11/Makefile
+lib/zlib-1.2.11/zconf.h

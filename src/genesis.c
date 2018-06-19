@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -29,6 +29,8 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <stdint.h>
+
 #include "defs.h"
 #include "macros.h"
 #include "genesis.h"
@@ -37,34 +39,34 @@
 #include "format.h"
 
 
-int prog=PROG_TOOL;
-int  H, L, D, HL, HLD;        // size of cellular space
+int32_t prog=PROG_TOOL;
+int32_t  H, L, D, HL, HLD;        // size of cellular space
 Cell *TE=NULL;          // cellular space
 double csp_time=0.0;
-//int  node = -1;            // node number (with PARALLEL option)
-char *model_name = NULL; //name of model
-char *bin_filename = NULL; //name of BIN file
-char *csp_filename = NULL; //name of CSP file
-char opt_bin = 0;   //raw binary format
-int graine = 68374; //random seed
+//int32_t  node = -1;            // node number (with PARALLEL option)
+int8_t *model_name = NULL; //name of model
+int8_t *bin_filename = NULL; //name of BIN file
+int8_t *csp_filename = NULL; //name of CSP file
+int8_t opt_bin = 0;   //raw binary format
+int32_t graine = 68374; //random seed
 
-char *csp_template_str = NULL; //value of CSP_template parameter
+int8_t *csp_template_str = NULL; //value of CSP_template parameter
 CSP_Template csp_template; //CSP template
 CSP_Template t_templates[MAX_TEMPLATES]; //available templates
-int nb_templates = 0; //number of templates
+int32_t nb_templates = 0; //number of templates
 
-char *boundary_str = NULL;
-int boundary = BC_PERIODIC;  //boundary conditions
+int8_t *boundary_str = NULL;
+int32_t boundary = BC_PERIODIC;  //boundary conditions
 
 double drand48();
 void  srand48();
 
-float* load_surface(char *, int, int);
+float* load_surface(int8_t *, int, int);
 
-void init_template(int type, char *name, char *desc, int nb_args, ...)
+void init_template(int32_t type, int8_t *name, int8_t *desc, int32_t nb_args, ...)
 {
   va_list vl;
-  int i;
+  int32_t i;
 
   t_templates[nb_templates].type = type;
   t_templates[nb_templates].name = name;
@@ -142,11 +144,11 @@ void init_template_list()
   //LogPrintf("init_template_list: %d templates\n", nb_templates);
 }
 
-int parse_template()
+int32_t parse_template()
 {
-  char *ptr;
-  int i;
-  int err=0;
+  int8_t *ptr;
+  int32_t i;
+  int32_t err=0;
 
   //read template name
   ptr = strtok(csp_template_str,"(");
@@ -231,8 +233,8 @@ void genesis_parse()
 
 void genesis()
 {
-  int i, j, k, Hd2, Ld2, Dd2, Dd3, Dd4, Hd4, Hd3;
-  int Ld3, Ld34, Ld4, Ld8;
+  int32_t i, j, k, Hd2, Ld2, Dd2, Dd3, Dd4, Hd4, Hd3;
+  int32_t Ld3, Ld34, Ld4, Ld8;
   Cell *aux;
 
   HL = H*L;
@@ -266,7 +268,7 @@ void genesis()
   float Ldx, Ldy, Ldz;
   float pente = 2.0;
   float h, w, rc, n, hg;
-  int xmin, xmax, ymin, ymax;
+  int32_t xmin, xmax, ymin, ymax;
   float x, y, z;
 
 //// normal mode ////
@@ -276,24 +278,24 @@ void genesis()
   Ldy= /*0.66**/Dd2-0.5; //Ld4; //(int) L/2;
   Ldz= Hd2;
 
-  int ll1 = (int) L*0.2; //L*0.15; //L*0.5;//L*0.1; //10; //0.1 //0.22; //Ld3
-  int ll2 = (int) L*0.2; //0.22; //Ld3
-  int l0 = (int) L/8; //L*0.1; //(L-ll1-ll2)*0.4;//25; //0.45
-  int l1 = (int) l0+ll1*1.3; //pour 2 triangles
-  int l2 = (int)(L-ll1-ll2)*0.25; //0.45
- //int l1 = (int)(L-l0-l2-ll1-ll2);
-  int hh = (int) (H/6);//(100/3); //8+(100/3); //(H/3);//(60/2); //H/6; //H/2;
-  int H0 = H-2; //H-8
-  int hh1 = hh/1.5;
-  int hh2 = hh;
-  int lc = D; //1; //400; //Ld4; //Ld2; //L/10; //Ld4; //largeur du couloir
-  int lcone = lc*0.6; //lc*0.6; //lc/2; //lc*0.6; //lc*2/3;  //Ld2*0.8; //largeur du cone
-  int jcone = H0-lcone/2; //sommet du cone
-  int hcone = Hd3; //Hd2;//2*Hd3; //H-10; //hauteur du cone
- //int h0 = (int) (H-hh)/2;
- //int h2 = H-h0;
-  int rcyl = Ld2-10; //rayon cylindre
-  int hgrain = Hd2; //epaisseur de grains
+  int32_t ll1 = (int) L*0.2; //L*0.15; //L*0.5;//L*0.1; //10; //0.1 //0.22; //Ld3
+  int32_t ll2 = (int) L*0.2; //0.22; //Ld3
+  int32_t l0 = (int) L/8; //L*0.1; //(L-ll1-ll2)*0.4;//25; //0.45
+  int32_t l1 = (int) l0+ll1*1.3; //pour 2 triangles
+  int32_t l2 = (int)(L-ll1-ll2)*0.25; //0.45
+ //int32_t l1 = (int)(L-l0-l2-ll1-ll2);
+  int32_t hh = (int) (H/6);//(100/3); //8+(100/3); //(H/3);//(60/2); //H/6; //H/2;
+  int32_t H0 = H-2; //H-8
+  int32_t hh1 = hh/1.5;
+  int32_t hh2 = hh;
+  int32_t lc = D; //1; //400; //Ld4; //Ld2; //L/10; //Ld4; //largeur du couloir
+  int32_t lcone = lc*0.6; //lc*0.6; //lc/2; //lc*0.6; //lc*2/3;  //Ld2*0.8; //largeur du cone
+  int32_t jcone = H0-lcone/2; //sommet du cone
+  int32_t hcone = Hd3; //Hd2;//2*Hd3; //H-10; //hauteur du cone
+ //int32_t h0 = (int) (H-hh)/2;
+ //int32_t h2 = H-h0;
+  int32_t rcyl = Ld2-10; //rayon cylindre
+  int32_t hgrain = Hd2; //epaisseur de grains
   float periode = 10.0; //periode des ondulations
 #ifdef CELL_COLOR
   float density = 0.5; //density of white grains
@@ -452,8 +454,8 @@ void genesis()
         }
         else if (csp_template.type == CSP_RWALL){
           //CSP_RWALL(rh,rx): north-south wall or DUM cells
-          int h = csp_template.args[0]*H;
-          int x = csp_template.args[1]*L;
+          int32_t h = csp_template.args[0]*H;
+          int32_t x = csp_template.args[1]*L;
           if ((i>=x-1) && (i<=x+1) && (j>=H-h)) aux->celltype = DUM;
         }
         else if (csp_template.type == CSP_WAVES_2D){
@@ -462,7 +464,7 @@ void genesis()
           float per_max = csp_template.args[1];
           float ufd_flag = csp_template.args[2];
           float amp = csp_template.args[3];
-          int mh = (int)csp_template.args[4];
+          int32_t mh = (int)csp_template.args[4];
           if (per_min<=0){ErrPrintf("ERROR: bad parameter in WAVES_2D template, <per_min> must be positive (%f)\n", per_min); exit(-1);}
           if (ufd_flag){
             // uniform frequency distribution
@@ -481,8 +483,8 @@ void genesis()
           //CSP_WAVY_NS_LAYER: north-south sand layer with wavy east boundary for stability analysis
           float per = csp_template.args[0];
           float amp = csp_template.args[1];
-          int hh = (int)csp_template.args[2];
-          int i_wave = (int)(40 + 2 + 0.5*amp*(1+sin(k*2*PI/per)));
+          int32_t hh = (int)csp_template.args[2];
+          int32_t i_wave = (int)(40 + 2 + 0.5*amp*(1+sin(k*2*PI/per)));
           if ((i >= 40) && (i <= i_wave) && (j <= H0) && (j > H0-hh)) aux->celltype = GR; //rangee de sable avec front de forme sinusoidale
         }
         else if (csp_template.type == CSP_TRIANGLES){
@@ -490,7 +492,7 @@ void genesis()
           float lx0 = 0.5*L/csp_template.args[0];
           float lx1 = fmodf(i, lx0*2);
           hh=csp_template.args[1];
-          int mh=csp_template.args[2];
+          int32_t mh=csp_template.args[2];
           if (((lx1<lx0) && (j>H0-mh+hh/2-(hh*lx1/lx0))) || ((lx1>=lx0) && (j>H0-mh+hh/2-(hh*(2*lx0-lx1)/lx0)))) aux->celltype = GR;
         }
         else if ((csp_template.type == CSP_SRC_DISK) || (csp_template.type == CSP_SRC_DISK_CEIL)){
@@ -657,12 +659,12 @@ void genesis()
 //// precomputed mode (height map) ////
 /*
   float* surf;
-  int lx = 800; //799;
-  int ly = 400; //399;
-  int cx = L/2;  //lx/2;
-  int cy = D/2; //L*0.4;  //L/3; //L/2;
-  int ly1 = (L-ly)/2;
-  int ly2 = ly1+ly;
+  int32_t lx = 800; //799;
+  int32_t ly = 400; //399;
+  int32_t cx = L/2;  //lx/2;
+  int32_t cy = D/2; //L*0.4;  //L/3; //L/2;
+  int32_t ly1 = (L-ly)/2;
+  int32_t ly2 = ly1+ly;
   float alpha = 0; //-PI/6.0;
 
   surf = load_surface("data/scale_dune_4.txt", lx, ly);
@@ -672,8 +674,8 @@ void genesis()
     for(j=0; j < H; j++){ // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
         // rotation
-        int i0 = (i-cx)*cos(alpha) + (k-cy)*sin(alpha) + cx;
-        int k0 = (i-cx)*sin(alpha) - (k-cy)*cos(alpha) + cy;
+        int32_t i0 = (i-cx)*cos(alpha) + (k-cy)*sin(alpha) + cx;
+        int32_t k0 = (i-cx)*sin(alpha) - (k-cy)*cos(alpha) + cy;
         if (0)
         //if (k>L*0.8)
         //if ((k<L*0.4) || (k>L*0.6))
@@ -696,7 +698,7 @@ void genesis()
 /********************************* AVA model *********************************/
 /*****************************************************************************/
 #ifdef MODEL_AVA
-  int hc = H*0.4;
+  int32_t hc = H*0.4;
   float Ldx, Ldy;
   float di, dk;
   float tg = tan(PI/6);
@@ -759,10 +761,10 @@ void genesis()
 
 /* Modele experimental 1 (2 plaques)*/
 /*
-        int L1 = L/3;
-        int L2 = L*2/3;
-        int H1 = H/3;
-        int H2 = H*2/3;
+        int32_t L1 = L/3;
+        int32_t L2 = L*2/3;
+        int32_t H1 = H/3;
+        int32_t H2 = H*2/3;
         if ((i>L1) && (i<L2) && (k>L1) && (k<L2) && ((j<=H1) || (j>=H2)))
           aux->celltype = PLUS;
         else if ((i==L1) && (k>=L1) && (k<=L2) && ((j<=H1+5) || (j>=H2-5)))
@@ -780,14 +782,14 @@ void genesis()
 */
 // Modele experimental 2 (sillon diagonal)
  /*
-        int D = H/6;
-        int L1 = (L/4)-D;
-        int L2 = (L/4)+D;
-        int L3 = (3*L/4)-D;
-        int L4 = (3*L/4)+D;
-        int H1 = Hd2-D;
-        int H2 = Hd2+D;
-        int ii = i+k-Ld2; //fenetre courante
+        int32_t D = H/6;
+        int32_t L1 = (L/4)-D;
+        int32_t L2 = (L/4)+D;
+        int32_t L3 = (3*L/4)-D;
+        int32_t L4 = (3*L/4)+D;
+        int32_t H1 = Hd2-D;
+        int32_t H2 = Hd2+D;
+        int32_t ii = i+k-Ld2; //fenetre courante
         if (ii<0) ii += L;
         if (ii>=L) ii -= L;
         if (ii<L1)
@@ -804,9 +806,9 @@ void genesis()
   */
 /* Modele experimental 3 (1 faille oblique)*/
 /*
-        int L1 = (L-Hd2)*0.9;
-        int L2 = (L-Hd2)*1.1;
-        int ii = i+j; // fenetre courante
+        int32_t L1 = (L-Hd2)*0.9;
+        int32_t L2 = (L-Hd2)*1.1;
+        int32_t ii = i+j; // fenetre courante
         if ((ii>L1) && (ii<L2))
           aux->celltype = MOINS;
         else
@@ -823,12 +825,12 @@ void genesis()
         float alpha = 70*PI/180;
         float amp = 1.0;
 
-        int H1 = Hd2-5;
-        int H2 = Hd2+5;
+        int32_t H1 = Hd2-5;
+        int32_t H2 = Hd2+5;
 
         // rotation
-        int i0 = (i-Ld2)*cos(alpha) + (j-Hd2)*sin(alpha) + Ld2;
-        int j0 = (i-Ld2)*sin(alpha) - (j-Hd2)*cos(alpha) + Hd2;
+        int32_t i0 = (i-Ld2)*cos(alpha) + (j-Hd2)*sin(alpha) + Ld2;
+        int32_t j0 = (i-Ld2)*sin(alpha) - (j-Hd2)*cos(alpha) + Hd2;
         if (i0 < 0) i0 += 256;
         if ((j0 > H1+amp*surf1[i0*256+k]) && (j0 < H2-amp*surf2[i0*256+k]))
           aux->celltype = ZERO;
@@ -842,8 +844,8 @@ void genesis()
         if (!surf4) surf4 = load_surface("surf256d.dat", 256, 256);
         amp = 1.0;
 
-        int L1 = (L/3)-5;
-        int L2 = (L/3)+5;
+        int32_t L1 = (L/3)-5;
+        int32_t L2 = (L/3)+5;
 
         if ((k > L1+amp*surf3[i+j*256]) && (k < L2-amp*surf4[i+j*256]))
           aux->celltype = ZERO;
@@ -871,15 +873,15 @@ void genesis()
 /*****************************************************************************/
 #ifdef MODEL_RIV
     float* surf;
-    //int lx = 501;
-    //int ly = 529;
-    //int ly1 = (L-ly)/2;
-    //int ly2 = ly1+ly;
-    int lx = 512; //128;
-    int ly = 512; //128;
-    int ly1 = 0;
-    int ly2 = ly-1; //ly*0.48;
-    int ll = Ld2;
+    //int32_t lx = 501;
+    //int32_t ly = 529;
+    //int32_t ly1 = (L-ly)/2;
+    //int32_t ly2 = ly1+ly;
+    int32_t lx = 512; //128;
+    int32_t ly = 512; //128;
+    int32_t ly1 = 0;
+    int32_t ly2 = ly-1; //ly*0.48;
+    int32_t ll = Ld2;
     float niv = H*0.9;
     //float niv = H-1;
     float hout = H-1;
@@ -944,7 +946,7 @@ void genesis()
   float alphaw[NB_WAV];
   float Hwave[NB_WAV];
   float Fwave[NB_WAV];
-  int iw;
+  int32_t iw;
   for (iw=0; iw<NB_WAV; iw++){
     offsetx[iw] = drand48()*10;
     offsetz[iw] = drand48()*10;
@@ -960,25 +962,25 @@ void genesis()
     for(i=0; i < L; i++){ //largeur
       //float alpha =  1.0 - (float)(i+k)/(L+L); //pente diagonale
       float alpha =  1.0 - (float)(k)/(D);  //pente nord-sud
-      int H1 = 1; //H*0.7; //H*0.1
-      int H2 = H*0.8; //H*0.4
-      //int H1 = Hd2*1.1;
-      //int H2 = Hd2*1.7;
+      int32_t H1 = 1; //H*0.7; //H*0.1
+      int32_t H2 = H*0.8; //H*0.4
+      //int32_t H1 = Hd2*1.1;
+      //int32_t H2 = Hd2*1.7;
       //float hh = H1*alpha + H2*(1-alpha); //sol en pente
       float hh = H2;//H*0.3;
       //float hh = (i<Ld2)? H*0.5 : H*0.9;//H*0.3; //falaise
-      /*int x1 = L/6;
-      int x2 = L*5/6;
-      int z1 = L/6;
-      int z2 = L*5/6;
+      /*int32_t x1 = L/6;
+      int32_t x2 = L*5/6;
+      int32_t z1 = L/6;
+      int32_t z2 = L*5/6;
       if ((i>=x1) && (i<x2) && (k>=z1) && (k<z2)) hh = H*0.1; //rectangle sureleve*/
       //float hh = H*0.2; //H*0.4;
       /*float dd = ((L/2) - i)*((L/2) - i) + ((L/2) - k)*((L/2) - k);
       if (dd < 3000) // bosse centrale;
         hh -= (3000-dd)/120;*/
-      /*int ii = i-k+Ld2; //fenetre pour le sillon
-      int L1 = L*0.1;
-      int L2 = L*0.5;
+      /*int32_t ii = i-k+Ld2; //fenetre pour le sillon
+      int32_t L1 = L*0.1;
+      int32_t L2 = L*0.5;
       if ((ii>L1) && (ii<L2)) //sillon diagonal
         hh += 3;*/
 #ifdef WAVES
@@ -988,7 +990,7 @@ void genesis()
       }
 #endif
       //hh += H*0.1*drand48();  //bruit blanc
-      //int L34 = L*0.75;
+      //int32_t L34 = L*0.75;
       //if ((i-L34)*(i-L34)+(k-L34)*(k-L34)<100) //encoche circulaire
       //  hh=H;
       //if ((i+k<L/2) || ((L-i+k)<L/2) || ((L-k+i)<L/2))  //carre en diagonal
@@ -1031,8 +1033,8 @@ void genesis()
   for(k=0; k < D; k++) // profondeur
     for(j=0; j < H; j++) // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
-        int H1 = H*0.4;
-        int H2 = H*0.8;
+        int32_t H1 = H*0.4;
+        int32_t H2 = H*0.8;
         if ((j==H1) && (i<1) && (k<1))
           aux->celltype = IN;
         else
@@ -1091,11 +1093,11 @@ void genesis()
 }
 
 
-float* load_surface(char *nom, int lx, int ly)
+float* load_surface(int8_t *nom, int32_t lx, int32_t ly)
 {
   FILE *f;
   float *altimap, *pt_al;
-  int i, j;
+  int32_t i, j;
 
   LogPrintf("lecture surface %s\n", nom);
 
@@ -1118,14 +1120,14 @@ float* load_surface(char *nom, int lx, int ly)
 }
 
 
-void dump_terre(int parx, int pary)
+void dump_terre(int32_t parx, int32_t pary)
 {
   FILE *fp;
-  char str[256], *filename;
+  int8_t str[256], *filename;
   Cell *pt;
-  int i, j;
-  char *buf, *aux, *ext;
-  int dump_type;
+  int32_t i, j;
+  int8_t *buf, *aux, *ext;
+  int32_t dump_type;
 
 
   if ((parx == 1) && (pary == 1)){
@@ -1159,9 +1161,9 @@ void dump_terre(int parx, int pary)
     write_csp(dump_type, filename);
   }
   else{ //mode parallele (raw binary format) //TODO: csp format
-    int LX = L / parx;
-    int LY = D / pary;
-    int tx, ty, tn, k;
+    int32_t LX = L / parx;
+    int32_t LY = D / pary;
+    int32_t tx, ty, tn, k;
     LogPrintf("LX = %d\nLY = %d\n", LX, LY);
     buf = (char*)malloc(sizeof(char)*LX*H);
     for(tn=0, ty=0; ty<pary; ty++){
@@ -1193,11 +1195,11 @@ void dump_terre(int parx, int pary)
   }
 }
 
-void dump_par_conf(int parx, int pary)
+void dump_par_conf(int32_t parx, int32_t pary)
 {
   FILE *fp;
-  int i, j, pid;
-  char nom[64];
+  int32_t i, j, pid;
+  int8_t nom[64];
 
   pid = 0;
 
@@ -1248,7 +1250,7 @@ void usage()
   param_usage();
 
   printf("\nCSP TEMPLATES (%d)\n", nb_templates);
-  for(int i=0; i<nb_templates; i++) printf("  %s\n", t_templates[i].desc);
+  for(int32_t i=0; i<nb_templates; i++) printf("  %s\n", t_templates[i].desc);
 
   printf("\nOPTIONS\n");
   printf("  -bin   \traw binary output\n");
@@ -1263,10 +1265,10 @@ void usage()
 
 
 
-int main(int argc, char **argv)
+int32_t main(int32_t argc, int8_t **argv)
 {
-  int i, n=1, parx = 1, pary = 1;
-  unsigned char opt_par = 0;
+  int32_t i, n=1, parx = 1, pary = 1;
+  uint8_t opt_par = 0;
 
 #ifdef LOG_FILE
   log_file = fopen("GENESIS.log","w");
@@ -1287,7 +1289,7 @@ int main(int argc, char **argv)
   LogPrintf("\n");
 
   if (!strcmp(argv[n],"-f")){
-    char *ext;
+    int8_t *ext;
     // read parameters
     read_parameters(argv[++n]);
     //assert(filename && strlen(bin_filename)>=4);

@@ -20,7 +20,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -44,16 +45,16 @@
 #endif
 #include "trace.h"
 
-extern const char *etats[];             // les noms des types de cellules
+extern const int8_t *etats[];             // les noms des types de cellules
 extern Doublet t_doub[];                // la description des doublets
-extern int nb_type_db;                  // nombre de types de doublets
+extern int32_t nb_type_db;                  // nombre de types de doublets
 extern Cell  *TE;	                  // la 'terre'
-extern int H, L, D, HL, HLD;               // les dimensions de la terre
+extern int32_t H, L, D, HL, HLD;               // les dimensions de la terre
 extern Doublet t_doub[];                // la description des doublets
-extern const char *classes_db[];        // noms des classes de doublet
-extern int LNS;       //largeur nord-sud
-extern int pbc_mode;  //periodic boundary conditions
-extern char *rot_map;        // periodic mapping of the rotating space
+extern const int8_t *classes_db[];        // noms des classes de doublet
+extern int32_t LNS;       //largeur nord-sud
+extern int32_t pbc_mode;  //periodic boundary conditions
+extern int8_t *rot_map;        // periodic mapping of the rotating space
 extern Pos2 *rot_map_pos;        // periodic mapping of the rotating space
 #ifdef REFDB_PTR
 extern RefDoublets *RefDB;      // references des cellules vers les doublets actifs
@@ -61,28 +62,28 @@ extern RefDoublets *RefDB;      // references des cellules vers les doublets act
 extern RefDoublets_Type *RefDB_Type;       // references des cellules de la terre vers les doublets actifs
 extern RefDoublets_Ind *RefDB_Ind;       // references des cellules de la terre vers les doublets actifs
 #endif
-extern int *db_pos[];                   // les tableaux contenant la position des doublets actifs
+extern int32_t *db_pos[];                   // les tableaux contenant la position des doublets actifs
 
 #ifdef PARALLEL
-extern int mode_par;    //mode parallele
+extern int32_t mode_par;    //mode parallele
 #endif
 
 TransitionDb    t_trans[MAX_TRANSITIONS_DB];             // la description des transitions de 2 cellules
 TransitionCel   t_trans_cel[MAX_TRANSITIONS_CEL];           // la description des transitions d'1 cellule
-int           nb_trans_db = 0, nb_trans_cel = 0, nb_trans = 0;         // nombre de transitions de 2 cellules, d'1 cellule et au total
+int32_t           nb_trans_db = 0, nb_trans_cel = 0, nb_trans = 0;         // nombre de transitions de 2 cellules, d'1 cellule et au total
 LienTransDb   t_lien[MAX_LIENS];        // la description des liens de correlation entre transitions de 2 cellules
-int           nb_liens = 0;             // nombre de liens entre transitions
-int           cpt_lien[MAX_LIENS];      // compteur des correlations effectives
-int           cpt_trans_db[MAX_TRANSITIONS_DB];       // compteur de transitions effectives de doublet
-int           cpt_trans_cel[MAX_TRANSITIONS_CEL];     // compteur de transitions effectives de cellule
-int           direction[3];             // conversion classe de transition -> direction
-int           orientation[6];
+int32_t           nb_liens = 0;             // nombre de liens entre transitions
+int32_t           cpt_lien[MAX_LIENS];      // compteur des correlations effectives
+int32_t           cpt_trans_db[MAX_TRANSITIONS_DB];       // compteur de transitions effectives de doublet
+int32_t           cpt_trans_cel[MAX_TRANSITIONS_CEL];     // compteur de transitions effectives de cellule
+int32_t           direction[3];             // conversion classe de transition -> direction
+int32_t           orientation[6];
 
-void split_link_hor(int tr0, int tr);
+void split_link_hor(int32_t tr0, int32_t tr);
 
 void init_transitions()
 {
-  int i;
+  int32_t i;
 
   //nb_trans_db = 0;
   //nb_trans_cel = 0;
@@ -121,9 +122,9 @@ void init_transitions()
   orientation[NORD] = NORD_SUD;
 }
 
-int get_trans(char ref)
+int32_t get_trans(int8_t ref)
 {
-  int i;
+  int32_t i;
 
   i = 0;
   while ((i < nb_trans_db) && (t_trans[i].reference != ref)) i++;
@@ -135,7 +136,7 @@ int get_trans(char ref)
 }
 
 
-void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char cel_arrivee_1, char cel_arrivee_2, double intensite)
+void trans_ref(int8_t ref, int8_t classe, int8_t cel_depart_1, int8_t cel_depart_2, int8_t cel_arrivee_1, int8_t cel_arrivee_2, double intensite)
 {
   if (intensite<0){
     LogPrintf("WARNING: negative transition rate (%f). Transition removed.\n", intensite);
@@ -144,7 +145,7 @@ void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char
 
   if (classe == ISOTROPE){
     //transition isotrope
-    char sym = (cel_depart_1 == cel_depart_2) && (cel_arrivee_1 == cel_arrivee_2);
+    int8_t sym = (cel_depart_1 == cel_depart_2) && (cel_arrivee_1 == cel_arrivee_2);
     if (H > 3){
       trans_ref( -1, VERTICAL, cel_depart_1, cel_depart_2, cel_arrivee_1, cel_arrivee_2, intensite);
       if (!sym) trans_ref( -1, VERTICAL, cel_depart_2, cel_depart_1, cel_arrivee_2, cel_arrivee_1, intensite);
@@ -157,10 +158,10 @@ void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char
   if ((classe == HORIZONTAL) && (LNS==1)) classe = EST_OUEST; //2D
 
   if (intensite || (ref != -1)){
-    char cel1_flag = (char)(cel_depart_1 != cel_arrivee_1);
-    char cel2_flag = (char)(cel_depart_2 != cel_arrivee_2);
-    char transport_flag = (cel_depart_1 == cel_arrivee_2) && (cel_depart_2 == cel_arrivee_1);
-    char inout_flag = (cel_depart_1 == BORD) || (cel_depart_2 == BORD) || (cel_depart_1 == IN) || (cel_depart_2 == IN) || (cel_depart_1 == OUT) || (cel_depart_2 == OUT);
+    int8_t cel1_flag = (char)(cel_depart_1 != cel_arrivee_1);
+    int8_t cel2_flag = (char)(cel_depart_2 != cel_arrivee_2);
+    int8_t transport_flag = (cel_depart_1 == cel_arrivee_2) && (cel_depart_2 == cel_arrivee_1);
+    int8_t inout_flag = (cel_depart_1 == BORD) || (cel_depart_2 == BORD) || (cel_depart_1 == IN) || (cel_depart_2 == IN) || (cel_depart_1 == OUT) || (cel_depart_2 == OUT);
     // definition des transitions de 2 cellules :
     // reference = numero de reference (optionnel) pour identification
     // classe    = la classe de transition: VERTICAL ou HORIZONTAL
@@ -193,36 +194,36 @@ void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char
   }
 }
 
-void trans(char classe, char cel_depart_1, char cel_depart_2, char cel_arrivee_1, char cel_arrivee_2, double intensite)
+void trans(int8_t classe, int8_t cel_depart_1, int8_t cel_depart_2, int8_t cel_arrivee_1, int8_t cel_arrivee_2, double intensite)
 {
   trans_ref( -1, classe, cel_depart_1, cel_depart_2, cel_arrivee_1, cel_arrivee_2, intensite);
 }
 
-void trans_type(char ref, char type)
+void trans_type(int8_t ref, int8_t type)
 {
-  int i;
+  int32_t i;
   i = get_trans(ref);
   t_trans[i].type = type;
 }
 
-void trans_time(char ref, char mode)
+void trans_time(int8_t ref, int8_t mode)
 {
-  int i;
+  int32_t i;
   i = get_trans(ref);
   t_trans[i].time_mode = mode;
 }
 
-void trans_regul(char ref, Callback_regul reg_func)
+void trans_regul(int8_t ref, Callback_regul reg_func)
 {
-  int i;
+  int32_t i;
   i = get_trans(ref);
   t_trans[i].regul = reg_func;
 }
 
-int trans_check_flag(char ref, Callback_check chk_func, char cel, char inv)
+int32_t trans_check_flag(int8_t ref, Callback_check chk_func, int8_t cel, int8_t inv)
 {
   DataCheck *pdc;
-  int i, j;
+  int32_t i, j;
 
   i = get_trans(ref);
   if (cel != 1 && cel != 2){
@@ -252,20 +253,20 @@ int trans_check_flag(char ref, Callback_check chk_func, char cel, char inv)
   return j;
 }
 
-int trans_check(char ref, Callback_check chk_func, char cel)
+int32_t trans_check(int8_t ref, Callback_check chk_func, int8_t cel)
 {
   return trans_check_flag(ref, chk_func, cel, 0);
 }
 
-int trans_check_inv(char ref, Callback_check chk_func, char cel)
+int32_t trans_check_inv(int8_t ref, Callback_check chk_func, int8_t cel)
 {
   return trans_check_flag(ref, chk_func, cel, 1);
 }
 
-void trans_check_cell(char ref, char cel, char dir, char cell_type)
+void trans_check_cell(int8_t ref, int8_t cel, int8_t dir, int8_t cell_type)
 {
   DataCheck *pdc;
-  int i, j;
+  int32_t i, j;
 
   /// find transition
   i = get_trans(ref);
@@ -279,10 +280,10 @@ void trans_check_cell(char ref, char cel, char dir, char cell_type)
   pdc->char_data2 = cell_type;
 }
 
-void trans_check_no_cell(char ref, char cel, char dir, char cell_type)
+void trans_check_no_cell(int8_t ref, int8_t cel, int8_t dir, int8_t cell_type)
 {
   DataCheck *pdc;
-  int i, j;
+  int32_t i, j;
 
   /// find transition
   i = get_trans(ref);
@@ -299,11 +300,11 @@ void trans_check_no_cell(char ref, char cel, char dir, char cell_type)
 #ifdef CELL_COLOR
 extern Callback_check check_color;
 
-void trans_check_color(char ref, char cel, float lambda_col)
+void trans_check_color(int8_t ref, int8_t cel, float lambda_col)
 {
   DataCheck *pdc;
   float lambda;
-  int i, j;
+  int32_t i, j;
 
   /// find transition
   i = get_trans(ref);
@@ -335,9 +336,9 @@ void trans_check_color(char ref, char cel, float lambda_col)
 }
 #endif
 
-int split_trans_hor(int db_hor)
+int32_t split_trans_hor(int32_t db_hor)
 {
-  int i, depart_eo, depart_ns, arrivee_eo, arrivee_ns, flag=0;
+  int32_t i, depart_eo, depart_ns, arrivee_eo, arrivee_ns, flag=0;
 
   // decouplage des transitions contenant le doublet horizontal db_hor
   for (i=0; i < nb_trans_db; i++){
@@ -368,7 +369,7 @@ int split_trans_hor(int db_hor)
   return flag;
 }
 
-void add_link(int tr1, int tr2, char ltr_cel, double intensite)
+void add_link(int32_t tr1, int32_t tr2, int8_t ltr_cel, double intensite)
 {
   if (nb_liens >= MAX_LIENS){
     ErrPrintf("ERROR: max number of links (%d) exceeded\n", MAX_LIENS);
@@ -400,7 +401,7 @@ void add_link(int tr1, int tr2, char ltr_cel, double intensite)
   }
 }
 
-void trans_link(char ref1, char ref2, char ltr_cel, double intensite)
+void trans_link(int8_t ref1, int8_t ref2, int8_t ltr_cel, double intensite)
 {
   // definition des liens entre 2 transitions de 2 cellules :
   // ref1 = reference de la premiere transition
@@ -413,10 +414,10 @@ void trans_link(char ref1, char ref2, char ltr_cel, double intensite)
   add_link(get_trans(ref1), get_trans(ref2), ltr_cel, intensite);
 }
 
-void split_link_hor(int tr0, int tr)
+void split_link_hor(int32_t tr0, int32_t tr)
 {
   // pour chaque lien avec tr0, creer un lien identique avec tr a la place de tr0
-  int i;
+  int32_t i;
   LogPrintf("decouplage des liens contenant la transition %d\n", tr0);
   for (i=0; i<nb_liens; i++){
     if (t_lien[i].trans1 == tr0) add_link(tr, t_lien[i].trans2, t_lien[i].cel, t_lien[i].intensite);
@@ -424,7 +425,7 @@ void split_link_hor(int tr0, int tr)
   }
 }
 
-void trans_cel_ref(char ref, char cel_depart, char cel_arrivee, double intensite)
+void trans_cel_ref(int8_t ref, int8_t cel_depart, int8_t cel_arrivee, double intensite)
 {
   // definition des transitions d'une cellule
   // reference = numero de reference (optionnel) pour identification
@@ -440,22 +441,22 @@ void trans_cel_ref(char ref, char cel_depart, char cel_arrivee, double intensite
   nb_trans_cel++;
 }
 
-void trans_cel(char cel_depart, char cel_arrivee, double intensite)
+void trans_cel(int8_t cel_depart, int8_t cel_arrivee, double intensite)
 {
   trans_cel_ref(-1, cel_depart, cel_arrivee, intensite);
 }
 
-void trans_cel_regul(char ref, Callback_regul f)
+void trans_cel_regul(int8_t ref, Callback_regul f)
 {
-  int i;
+  int32_t i;
   i = get_trans(ref);
   t_trans_cel[i].regul = f;
 }
 
-void do_trans_db(int tr, int ix, int dir)
+void do_trans_db(int32_t tr, int32_t ix, int32_t dir)
 {
-  int db_depart, db_arrivee;
-  int ix2, tc, tc2;
+  int32_t db_depart, db_arrivee;
+  int32_t ix2, tc, tc2;
 
   if (tr >= nb_trans_db){
     ErrPrintf("ERROR: do_trans_db - transition %d does not exist\n", tr);
@@ -664,7 +665,7 @@ void do_trans_db(int tr, int ix, int dir)
 #endif
 }
 
-void do_trans_cel(int tr, int ix)
+void do_trans_cel(int32_t tr, int32_t ix)
 {
   if (tr >= nb_trans_cel){
     ErrPrintf("ERROR: cell transition %d does not exist\n", tr);
@@ -682,10 +683,10 @@ void do_trans_cel(int tr, int ix)
 void dump_transitions()
 {
   FILE *fp;
-  int i, j;
-  static char flag_trans[200];
-  static char type_trans[100];
-  //char nom_classe[4][25];
+  int32_t i, j;
+  static int8_t flag_trans[200];
+  static int8_t type_trans[100];
+  //int8_t nom_classe[4][25];
 
   /*sprintf(nom_classe[VERTICAL], "VERTICAL");
   sprintf(nom_classe[HORIZONTAL], "HORIZONTAL");
@@ -761,13 +762,13 @@ void dump_transitions()
 }
 
 #ifdef INFO_TRANS
-extern int cpt_trans_blocked[];
+extern int32_t cpt_trans_blocked[];
 
 void dump_trans_info()
 {
-  static int cpt = 0;
+  static int32_t cpt = 0;
   FILE *fp;
-  int i;
+  int32_t i;
 
   fp = fopen("TRANS.log","a");
 

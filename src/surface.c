@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -28,6 +28,7 @@
 #include <memory.h>
 #include <math.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -44,31 +45,31 @@
 #include "simul.h"
 
 extern double csp_time;                  // temps reel simule
-extern int H, L, D, HL, HLD;       // les dimensions de la terre
-extern int LN, LS, LEO, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
+extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
+extern int32_t LN, LS, LEO, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
 extern Cell  *TE;	           // la 'terre'
-extern int pbc_mode;  //periodic boundary conditions
-extern int ava_mode;  //mode d'avalanches
-extern int ava_h_lim;
+extern int32_t pbc_mode;  //periodic boundary conditions
+extern int32_t ava_mode;  //mode d'avalanches
+extern int32_t ava_h_lim;
 extern float ava_delay; //delai entre avalanches
 extern float ava_angle;
 extern float ava_angle_stable;
 extern float ava_angle_col;
-extern int ava_upwind;
+extern int32_t ava_upwind;
 #ifdef PARALLEL
-extern int mode_par;    //mode parallele
+extern int32_t mode_par;    //mode parallele
 #endif
-extern int nb_pv;                  // nombre de plans verticaux (non-DUM)
-extern char *psol;                    // indicateur des plans solides verticaux est-ouest
-extern char *rot_map;        // periodic mapping of the rotating space
+extern int32_t nb_pv;                  // nombre de plans verticaux (non-DUM)
+extern int8_t *psol;                    // indicateur des plans solides verticaux est-ouest
+extern int8_t *rot_map;        // periodic mapping of the rotating space
 extern Pos2 *rot_map_pos;        // periodic mapping of the rotating space
 
 #ifdef PHASES
-const unsigned char Phase[MAX_CELL] = PHASES;   //phase (fluide ou solide) des types de cellules
+const uint8_t Phase[MAX_CELL] = PHASES;   //phase (fluide ou solide) des types de cellules
 #endif // PHASES
 
 #ifdef ALTI
-short *alti = NULL;           // elevations locales de terrain
+int16_t *alti = NULL;           // elevations locales de terrain
 //float *alti_mean = NULL;      // elevations locales de terrain, après moyennage
 Vec2 *norm2d = NULL;          // normale 2d a la surface definie par alti
 Vec3 *norm3d = NULL;          // normale 3d a la surface definie par alti
@@ -77,13 +78,13 @@ float angle_norm3d_iso=0.0;   // direction variable pour le calcul des normales 
 float *grdv = NULL;           // gradient de vitesse en surface
 float slope_angle=20.0;       // pente maximale pour la montee des grains
 float ava_propag_angle=30.0;  // pente minimale pour les avalanches avec propagation
-int nb_ava_propag=0;          // nombre de cellules deplacees par propagation d'avalanches
-int nb_drop_ava_propag=0;     // nombre de cellules qui tombent par propagation d'avalanches
-char *ava_mask = NULL;        // tableau de localisation des avalanches
+int32_t nb_ava_propag=0;          // nombre de cellules deplacees par propagation d'avalanches
+int32_t nb_drop_ava_propag=0;     // nombre de cellules qui tombent par propagation d'avalanches
+int8_t *ava_mask = NULL;        // tableau de localisation des avalanches
 FifoPos2* ava_fifo = NULL;     // file ordonnee (circulaire) des avalanches
-int veg_h_max=0;         // hauteur max pour la vegetation
+int32_t veg_h_max=0;         // hauteur max pour la vegetation
 
-void loop_ava_propag(int i, int j);
+void loop_ava_propag(int32_t i, int32_t j);
 
 void params_surface()
 {
@@ -93,7 +94,7 @@ void params_surface()
 }
 
 // creation d'une file FIFO
-FifoPos2* fifo_create(int len)
+FifoPos2* fifo_create(int32_t len)
 {
   FifoPos2* fifo;
 
@@ -131,10 +132,10 @@ Pos2 fifo_get(FifoPos2 *fifo)
 
 // modification de l'altitude par ajout d'une cellule de type 'typ', en ix
 // (code optimise)
-void modif_alti_cel(int ix, unsigned char typ)
+void modif_alti_cel(int32_t ix, uint8_t typ)
 {
-  int x, y, z, i, j;
-  int al;
+  int32_t x, y, z, i, j;
+  int32_t al;
 
   //LogPrintf("modif_alti_cel - debut : ix = %d\n", ix);
 
@@ -162,17 +163,17 @@ void modif_alti_cel(int ix, unsigned char typ)
 }
 
 
-void calcule_alti(unsigned char typ, char alti_mode)
+void calcule_alti(uint8_t typ, int8_t alti_mode)
 {
   Cell *aux;
-  short *pt;
-  int i, j, k;
+  int16_t *pt;
+  int32_t i, j, k;
 
   //LogPrintf("calcule_alti : typ = %d\n", typ);
 
   if (!alti){
     AllocMemoryPrint("alti", alti, short, L*D/*LEO*LNS*/);
-    //alti = (short *)malloc((L-2)*LNS*sizeof(short));
+    //alti = (int16_t *)malloc((L-2)*LNS*sizeof(short));
     //if (!alti) {ErrPrintf("ERREUR : calcule_alti - allocation impossible\n");  exit(-1);}
   }
 
@@ -201,12 +202,12 @@ void calcule_alti(unsigned char typ, char alti_mode)
 }
 
 
-int calcule_alti_max(unsigned char typ)
+int32_t calcule_alti_max(uint8_t typ)
 {
   Cell *aux;
-  short max=0;
-  short *pt;
-  int i, j, k;
+  int16_t max=0;
+  int16_t *pt;
+  int32_t i, j, k;
 
   for(j=0; j < LNS; j++)
     for(i=0; i < LEO; i++, pt++){
@@ -226,7 +227,7 @@ int calcule_alti_max(unsigned char typ)
 #endif
 
 // apply boundary conditions on one cell
-void apply_bc_cell(int *pt_x, int *pt_y)
+void apply_bc_cell(int32_t *pt_x, int32_t *pt_y)
 {
   if (!pbc_mode){
     /// open or closed boundaries
@@ -245,8 +246,8 @@ void apply_bc_cell(int *pt_x, int *pt_y)
     }
     else{
       /// rotating space
-      int x = *pt_x + 1;
-      int y = *pt_y + LN;
+      int32_t x = *pt_x + 1;
+      int32_t y = *pt_y + LN;
       assert((x >= 0) && (y >= 0));
       if (OutOfSpace(x, y)){
         *pt_x = RotMapPosX(x, y) - 1;
@@ -276,8 +277,8 @@ void apply_bc_cel_interp(float *pt_x, float *pt_y)
     }
     else{
       /// rotating space
-      int x = floor(*pt_x) + 1;
-      int y = floor(*pt_y) + LN;
+      int32_t x = floor(*pt_x) + 1;
+      int32_t y = floor(*pt_y) + LN;
       if (OutOfSpace(x, y)){
         *pt_x += RotMapPosX(x, y) - x;
         *pt_y += RotMapPosY(x, y) - y;
@@ -286,11 +287,11 @@ void apply_bc_cel_interp(float *pt_x, float *pt_y)
   }
 }
 
-//interpolation de l'altitude en un point intermediaire
+//interpolation de l'altitude en un point32_t intermediaire
 float interpole_alti_cell(float x, float z)
 {
-  int x0, x1, z0, z1;
-  int y00, y01, y10, y11;
+  int32_t x0, x1, z0, z1;
+  int32_t y00, y01, y10, y11;
   float tx0, tx1, tz0, tz1;
 
   x0 = floor(x);
@@ -321,17 +322,17 @@ float interpole_alti_cell(float x, float z)
 }
 
 
-// calcule de la normale 3d au point (i,j)
+// calcule de la normale 3d au point32_t (i,j)
 // avec pente calculee suivant les altitudes interpolees dans la direction de la plus grande pente
-void calcule_norm3d_cel_pente_max_interp(int i, int j, float r)
+void calcule_norm3d_cel_pente_max_interp(int32_t i, int32_t j, float r)
 {
-  static char start=1;
+  static int8_t start=1;
   //static float r;
-  int r0;
+  int32_t r0;
   Vec3 *n3d;
-  int x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
-  int ux, uy, uz, vy, vz;
-  int wx, wy, wz;
+  int32_t x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
+  int32_t ux, uy, uz, vy, vz;
+  int32_t wx, wy, wz;
   float d, co, si, angle, r1, r2;
   float fx1, fx2, fy1, fy2, fz1, fz2, fux, fuy, fuz, fwx, fwy, fwz;
 
@@ -452,11 +453,11 @@ void calcule_norm3d_cel_pente_max_interp(int i, int j, float r)
 
 void calcule_normales()
 {
-  int x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
-  int ux, uy, vy, vz;
-  int wx, wy, wz;
+  int32_t x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
+  int32_t ux, uy, vy, vz;
+  int32_t wx, wy, wz;
   float d;
-  int i, j, ii;
+  int32_t i, j, ii;
 
   if (!norm2d){
     LogPrintf("calcul des normales 2d et 3d\n");
@@ -534,17 +535,17 @@ void calcule_normales()
 
 #ifdef AVALANCHES
 // callback de controle des transitions d'avalanches en fonction de la pente locale en surface
-int check_ava(int ix, void *data)
+int32_t check_ava(int32_t ix, void *data)
 {
-  static char start=1;
-  int x, y, z, i, j, ij, i2, j2, al, al2, delta_x, delta_y, delta_z, chk_ok=0;
+  static int8_t start=1;
+  int32_t x, y, z, i, j, ij, i2, j2, al, al2, delta_x, delta_y, delta_z, chk_ok=0;
   float nx, ny, nz;
   static float ny_lim=0;
   //static float nxz_lim=0.7071; //sqrt(2)/2
   float chk_angle=0, r, alea, prob;
   Vec3 *pt_n3d=NULL;
   DataCheck *pdc = data;
-  unsigned char typ;
+  uint8_t typ;
 
   if (start){
     LogPrintf("check_ava : ava_h_lim = %d\n", ava_h_lim);
@@ -593,7 +594,7 @@ int check_ava(int ix, void *data)
 
   //if (delta_y <= 0) return 0;
   if (delta_y < 0) {
-    int typ2 = TE[ix+delta_x+delta_z*HL].celltype;
+    int32_t typ2 = TE[ix+delta_x+delta_z*HL].celltype;
     LogPrintf("check_ava : x = %04d   z = %04d   al = %04d   delta_x = %04d   delta_y = %04d   delta_z = %04d   typ = %d   typ2 = %d   dir = %d   cel = %d\n", x, z, al, delta_x, delta_y, delta_z, typ, typ2, pdc->dir, pdc->cel);
   }
 
@@ -727,10 +728,10 @@ int check_ava(int ix, void *data)
 // callback de controle des transitions de montee de grains en fonction de la pente locale en surface
 // (on suppose que le lien de transitions se fera en est-ouest)
 // TODO? : on pourrait aussi verifier la difference de hauteur en est-ouest avant de calculer la normale ...
-int check_slope(int ix, void *data)
+int32_t check_slope(int32_t ix, void *data)
 {
-  static char start=1;
-  int x, y, z, i, j, ij, chk_ok=0;
+  static int8_t start=1;
+  int32_t x, y, z, i, j, ij, chk_ok=0;
   float nx;
   static float nx_lim=0;
   Vec3 *pt_n3d;
@@ -813,8 +814,8 @@ void reset_grad_vel()
 
 void calcule_grad_vel()
 {
-  //int i, j, x0, y0, x1, y1, x2, y2, ix1, ix2, vx1, vy1, vx2, vy2;
-  int i, j, ii, x0, y0, z0, x2, y2, z2, ix2;
+  //int32_t i, j, x0, y0, x1, y1, x2, y2, ix1, ix2, vx1, vy1, vx2, vy2;
+  int32_t i, j, ii, x0, y0, z0, x2, y2, z2, ix2;
   float vx2, vy2, vel2, tgx, tgy;//, sum_gv, gv_mean;
   //float *pt_gv;
 
@@ -890,7 +891,7 @@ void calcule_grad_vel()
 /*
 void init_cgv()
 {
-  int ix, vx, vy, vv;
+  int32_t ix, vx, vy, vv;
   maxvel = 0.0;
   meanvel = 0.0;
   for (ix=0; ix<HLD; ix++){
@@ -911,7 +912,7 @@ void init_cgv()
 float prob_cgv(float gv, float gvmin, float gvmax)
 {
   //static float grdv_max = VSTEP_H*VSTEP_L*VSTEP_TIME*2;
-  static char start = 1;
+  static int8_t start = 1;
   //static float grdvc_min = 0.0;
   //static float grdvc = 0.0;
   //static float grdvc_max = 0.0;
@@ -956,9 +957,9 @@ float prob_cgv(float gv, float gvmin, float gvmax)
 }
 
 // callback de controle en fonction du gradient de la vitesse selon la normale a la surface
-int check_grad_vel(int ix, void *data)
+int32_t check_grad_vel(int32_t ix, void *data)
 {
-  int x, y, z, chk_ok;
+  int32_t x, y, z, chk_ok;
   float gv, alea, prob;
 
   //calcul de la position (x,y,z)
@@ -969,9 +970,9 @@ int check_grad_vel(int ix, void *data)
   prob = prob_cgv(gv, grdvc_min, grdvc_max);
 
   //calcul de la pente
-  /*int i = x-1;
-  int j = z-LN;
-  int ij = i + j*LEO;
+  /*int32_t i = x-1;
+  int32_t j = z-LN;
+  int32_t ij = i + j*LEO;
   calcule_norm3d_cel_pente_max_interp(i, j, 3.0);
   Vec3 *pt_n3d = norm3d + ij;
   float nx = pt_n3d->x;
@@ -991,9 +992,9 @@ int check_grad_vel(int ix, void *data)
 
 #ifdef CELL_COLOR
 // callback de controle en fonction du gradient de la vitesse selon la normale a la surface
-int check_grad_vel_color(int ix, void *data)
+int32_t check_grad_vel_color(int32_t ix, void *data)
 {
-  int x, y, z, chk_ok;
+  int32_t x, y, z, chk_ok;
   float gv, alea, prob;
 
   //calcul de la position (x,y,z)
@@ -1006,12 +1007,12 @@ int check_grad_vel_color(int ix, void *data)
 }
 #endif
 
-void compute_coef_cgv(/*int idb*/)
+void compute_coef_cgv(/*int32_t idb*/)
 {
-  int i, k, ik;
-  int n0, nn, np;
+  int32_t i, k, ik;
+  int32_t n0, nn, np;
   float sum_gv, gv_mean;
-  static char start = 1;
+  static int8_t start = 1;
   FILE *fp;
 
   if (!grdv) return /*0.0*/;
@@ -1052,18 +1053,18 @@ void compute_coef_cgv(/*int idb*/)
 
 #ifdef AVALANCHES
 //avalanches dans 8 directions equiprobables
-void avalanches(unsigned char typ, short h_lim, short nb_cel_max, char alti_mode)
+void avalanches(uint8_t typ, int16_t h_lim, int16_t nb_cel_max, int8_t alti_mode)
 {
-  //static short *alti = NULL;
-  static char first=1;
+  //static int16_t *alti = NULL;
+  static int8_t first=1;
   Cell *aux, *aux2, cel;
   //CellData data;
-  short *pt, *pt2;
-  int i, j, k, jmin, jmax, ix, ix2;
-  unsigned char alea, cpt, flag_ava;
-  int step[8], step_alti[8];
-  short i_cel, h_lim_diag;
-  int nb_ava, nb_ava_iter;
+  int16_t *pt, *pt2;
+  int32_t i, j, k, jmin, jmax, ix, ix2;
+  uint8_t alea, cpt, flag_ava;
+  int32_t step[8], step_alti[8];
+  int16_t i_cel, h_lim_diag;
+  int32_t nb_ava, nb_ava_iter;
   FILE *fp;
 
 #ifdef MODEL_AVA
@@ -1076,10 +1077,10 @@ void avalanches(unsigned char typ, short h_lim, short nb_cel_max, char alti_mode
 //#ifdef MODEL_AVA
 //#ifdef CELL_COLOR
 #if 0
-  short h_lim0 = h_lim;
-  short h_lim1 = h_lim-1;
-  short h_lim_diag0 = h_lim_diag;
-  short h_lim_diag1 = h_lim_diag-1;
+  int16_t h_lim0 = h_lim;
+  int16_t h_lim1 = h_lim-1;
+  int16_t h_lim_diag0 = h_lim_diag;
+  int16_t h_lim_diag1 = h_lim_diag-1;
   if (h_lim1==0) h_lim1 = 1;
   assert(h_lim1 > 0);
 #endif
@@ -1247,22 +1248,22 @@ void avalanches(unsigned char typ, short h_lim, short nb_cel_max, char alti_mode
 
 
 //avalanches dans 8 directions selon les normales
-//void avalanches_norm(unsigned char typ, float angle, short nb_cel_max, char alti_mode)
-void avalanches_norm(unsigned char typ, short nb_cel_max, char alti_mode)
+//void avalanches_norm(uint8_t typ, float angle, int16_t nb_cel_max, int8_t alti_mode)
+void avalanches_norm(uint8_t typ, int16_t nb_cel_max, int8_t alti_mode)
 {
-  //static short *alti = NULL;
-  static char first=1;
-  static unsigned char flag_diag=1;
+  //static int16_t *alti = NULL;
+  static int8_t first=1;
+  static uint8_t flag_diag=1;
   Cell *aux, *aux2, cel;
   //Vec3 n3d;
   //CellData data;
-  short *pt, *pt2;
+  int16_t *pt, *pt2;
   float nx, ny, nz, ny_lim, anh, r;
-  int i, j, k, jmin, jmax, ix, ix2, ij;
-  unsigned char flag_ava, flag_drop;
-  int step, step_alti;
-  short i_cel;
-  int nb_ava, nb_ava_iter, nb_ava_drop;
+  int32_t i, j, k, jmin, jmax, ix, ix2, ij;
+  uint8_t flag_ava, flag_drop;
+  int32_t step, step_alti;
+  int16_t i_cel;
+  int32_t nb_ava, nb_ava_iter, nb_ava_drop;
   FILE *fp;
   Vec3 *pt_n3d;
   float angle;
@@ -1488,13 +1489,13 @@ void avalanches_norm(unsigned char typ, short nb_cel_max, char alti_mode)
 // avalanches localisees avec propagation vers les 4 premiers voisins (fonction recursive)
 // TODO : mode CELL_COLOR
 // TODO : mode CYCLAGE_HOR
-void ava_propag(int i, int j)
+void ava_propag(int32_t i, int32_t j)
 {
-  short *pt, *pt2;
-  unsigned char flag_ava, flag_drop;
-  int step, step_alti;
-  int jmin, jmax, ix, ix2, ij;
-  short h, k;
+  int16_t *pt, *pt2;
+  uint8_t flag_ava, flag_drop;
+  int32_t step, step_alti;
+  int32_t jmin, jmax, ix, ix2, ij;
+  int16_t h, k;
 
   if (pbc_mode && rot_map){
     ErrPrintf("ERROR: sorry, rotating space is not compatible with synchronous avalanches\n");
@@ -1716,10 +1717,10 @@ void ava_propag(int i, int j)
 }
 
 
-void loop_ava_propag(int i, int j)
+void loop_ava_propag(int32_t i, int32_t j)
 {
   Pos2 p2;
-  int nb_iter, nb_fifo_max;
+  int32_t nb_iter, nb_fifo_max;
 
   if (!ava_mask){
     AllocMemoryPrint("ava_mask", ava_mask, char, LEO*LNS);
@@ -1766,10 +1767,10 @@ void loop_ava_propag(int i, int j)
 #endif //AVALANCHES
 
 #ifdef USE_VEGETATION
-int check_vegetation(int ix, void *data)
+int32_t check_vegetation(int32_t ix, void *data)
 {
-  static char start=1;
-  int x, y, z;
+  static int8_t start=1;
+  int32_t x, y, z;
 
   if (start){
     LogPrintf("check_vegetation : veg_h_max = %d\n", veg_h_max);
@@ -1785,11 +1786,11 @@ int check_vegetation(int ix, void *data)
 
 ////////////////////////////////////////////////////////////////////////////////////:
 
-void dump_surface(char* name, int cpt, int unit)
+void dump_surface(char* name, int32_t cpt, int32_t unit)
 {
-  char filename[100];
+  int8_t filename[100];
   FILE *fp;
-  int i,j,n;
+  int32_t i,j,n;
 /*
   //dump de la composante verticale des normales
   if (norm3d){
@@ -1824,7 +1825,7 @@ void dump_surface(char* name, int cpt, int unit)
       exit(-4);
     }
 
-    short *pt_al = alti;
+    int16_t *pt_al = alti;
     for(j=0; j<LNS; j++){
       n=0;
       for(i=0; i<LEO; i++, pt_al++){
@@ -1847,19 +1848,19 @@ void dump_sigma_alti()
 {
   static float *mean;
   static float *sigma;
-  long sum;
+  int64_t sum;
   float diff, var;
-  int i, j;
+  int32_t i, j;
   FILE *fp;
-  int i0 = 0; //L/10; //offset pour reduire l'artefact lie aux effets de bords (non-raccordement des oscillations)
+  int32_t i0 = 0; //L/10; //offset pour reduire l'artefact lie aux effets de bords (non-raccordement des oscillations)
 
   //LogPrintf("dump_sigma_alti\n");
 
   //if (!alti) return;
 //#ifdef  AVALANCHES
 #if 0
-  extern int ava_h_lim; // hauteur limite avant avalanche
-  extern int ava_nb_cel_max;  // nb de cellules qui tombent simultanement
+  extern int32_t ava_h_lim; // hauteur limite avant avalanche
+  extern int32_t ava_nb_cel_max;  // nb de cellules qui tombent simultanement
   avalanches(GR, ava_h_lim, ava_nb_cel_max, ALTI_MODE_BAS);
 #else
   //calcule_alti(GR, ALTI_MODE_BAS);
@@ -1916,15 +1917,15 @@ void dump_autocorrel()
 {
   static float *mean;
   static float *ac;
-  static char nom[32];
-  static int cpt=0;
-  short *pt_al;
+  static int8_t nom[32];
+  static int32_t cpt=0;
+  int16_t *pt_al;
   float *pt_ac;
-  long sum;
+  int64_t sum;
   float diff, var;
-  int i, j, k;
+  int32_t i, j, k;
   FILE *fp;
-  int i0 = 0; //L/10; //offset pour reduire l'artefact lie aux effets de bords (non-raccordement des oscillations)
+  int32_t i0 = 0; //L/10; //offset pour reduire l'artefact lie aux effets de bords (non-raccordement des oscillations)
 
   //LogPrintf("dump_autocorrel\n");
 
@@ -1933,8 +1934,8 @@ void dump_autocorrel()
   //if (!alti) return;
 //#ifdef  AVALANCHES
 #if 0
-  extern int ava_h_lim; // hauteur limite avant avalanche
-  extern int ava_nb_cel_max;  // nb de cellules qui tombent simultanement
+  extern int32_t ava_h_lim; // hauteur limite avant avalanche
+  extern int32_t ava_nb_cel_max;  // nb de cellules qui tombent simultanement
   avalanches(GR, ava_h_lim, ava_nb_cel_max, ALTI_MODE_BAS);
 #else
   //calcule_alti(GR, ALTI_MODE_BAS);
@@ -1991,12 +1992,12 @@ void dump_autocorrel()
 #endif //DUMP_AUTOCORREL
 
 #ifdef CGV
-void dump_grad_vel(int cpt, int unit)
+void dump_grad_vel(int32_t cpt, int32_t unit)
 {
-  static char filename[100];
+  static int8_t filename[100];
   FILE *fp;
   float *pt_gv;
-  int i, j, n;
+  int32_t i, j, n;
 
   if (grdv){
     //calcule_grad_vel();
@@ -2050,7 +2051,7 @@ void dump_cgv()
 
 void dump_cgv_coef()
 {
-  static int start=1, cpt=0;
+  static int32_t start=1, cpt=0;
   FILE *fp;
 
   fp = fopen("CGV_COEF.log","a");

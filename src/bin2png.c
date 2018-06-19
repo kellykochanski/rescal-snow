@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+
 #include "defs.h"
 //#include "bin2png.h"
 #include "macros.h"
@@ -34,12 +36,12 @@
 #include "surface.h"
 #include "view.h"
 
-int prog=PROG_TOOL;
-unsigned char opt_nv=1, opt_info=0;
-char *output_filename=NULL;
+int32_t prog=PROG_TOOL;
+uint8_t opt_nv=1, opt_info=0;
+int8_t *output_filename=NULL;
 
-extern int H, L, D;
-extern char *bin_filename;
+extern int32_t H, L, D;
+extern int8_t *bin_filename;
 
 void usage()
 {
@@ -62,18 +64,18 @@ void usage()
 }
 
 
-void general_options(int argc, char *argv[])
+void general_options(int32_t argc, int8_t *argv[])
 {
-  int i;
+  int32_t i;
   for(i=1; i<argc; i++){
     if (!strcmp(argv[i],"-o"))
       output_filename = argv[++i];
   }
 }
 
-int main(int argc, char **argv)
+int32_t main(int32_t argc, int8_t **argv)
 {
-  int i;
+  int32_t i;
 
   if (argc < 5){
     usage();
@@ -134,14 +136,14 @@ void pop_status()
 {
 }
 
-void lock_display(int log_flag)
+void lock_display(int32_t log_flag)
 {
 }
 
-void unlock_display(int log_flag)
+void unlock_display(int32_t log_flag)
 {
 }
 
-int elapsed(double *sec)
+int32_t elapsed(double *sec)
 {
 }

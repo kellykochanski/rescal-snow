@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -34,36 +35,36 @@
 #define READ_INT(_CH) (int)(*(int*)(_CH))
 #define READ_DOUBLE(_CH) (double)(*(double*)(_CH))
 
-extern int H, L, D, HL, HLD;       // les dimensions de la terre
+extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
 extern Cell  *TE;	           // la 'terre'
 extern double csp_time;
 
-char header[2048];  //metadata header
-int csp_cell_size=0;   //size of cells in a CSP file
-int csp_header_size=0; //size of CSP header
-int csp_L=0;
-int csp_H=0;
-int csp_D=0;
-int csp_x_bounds=0;   //east_west thickness of the boundary walls
-int csp_y_bounds=0;   //north-south thickness of the boundary walls
-int csp_z_bounds=0;   //vertical thickness of the boundary walls
-unsigned char decomp_flag=0;
-unsigned char check_model=1;
+int8_t header[2048];  //metadata header
+int32_t csp_cell_size=0;   //size of cells in a CSP file
+int32_t csp_header_size=0; //size of CSP header
+int32_t csp_L=0;
+int32_t csp_H=0;
+int32_t csp_D=0;
+int32_t csp_x_bounds=0;   //east_west thickness of the boundary walls
+int32_t csp_y_bounds=0;   //north-south thickness of the boundary walls
+int32_t csp_z_bounds=0;   //vertical thickness of the boundary walls
+uint8_t decomp_flag=0;
+uint8_t check_model=1;
 
-unsigned char little_endian()
+uint8_t little_endian()
 {
-  int n=1;
+  int32_t n=1;
 
   // return 1 if litlle endian, 0 otherwise
   return *(char*)&n;
 }
 
-void csp_set_warning(unsigned char check)
+void csp_set_warning(uint8_t check)
 {
   check_model = check;
 }
 
-void csp_set_bounds(int xb, int yb, int zb)
+void csp_set_bounds(int32_t xb, int32_t yb, int32_t zb)
 {
   csp_x_bounds = xb;
   csp_y_bounds = yb;
@@ -73,12 +74,12 @@ void csp_set_bounds(int xb, int yb, int zb)
   csp_H = H-2*zb;
 }
 
-void decompress(char *filename)
+void decompress(int8_t *filename)
 {
   decomp_flag = 0;
   if (strstr(filename,".gz")){
-    char command[100];
-    int ret;
+    int8_t command[100];
+    int32_t ret;
     LogPrintf("decompressing CSP file\n");
     sprintf(command, "gunzip %s", filename);
     ret = system(command);
@@ -91,11 +92,11 @@ void decompress(char *filename)
   }
 }
 
-void compress(char *filename, char force)
+void compress(int8_t *filename, int8_t force)
 {
   if (decomp_flag || force){
-    char command[100];
-    int ret;
+    int8_t command[100];
+    int32_t ret;
     sprintf(command, "gzip %s &", filename);
     ret = system(command);
     if (ret){
@@ -106,9 +107,9 @@ void compress(char *filename, char force)
   }
 }
 
-int read_csp_header(char *filename)
+int32_t read_csp_header(int8_t *filename)
 {
-  int chunk, cksize, mdsize, offset, n;
+  int32_t chunk, cksize, mdsize, offset, n;
   FILE *fp;
 
   decompress(filename);
@@ -184,7 +185,7 @@ int read_csp_header(char *filename)
       }
     }
     else if (chunk == READ_INT("SIZE")){
-      //int csp_H, csp_L, csp_D;
+      //int32_t csp_H, csp_L, csp_D;
       csp_H = READ_INT(header+offset);
       csp_L = READ_INT(header+offset+4);
       csp_D = READ_INT(header+offset+8);
@@ -198,7 +199,7 @@ int read_csp_header(char *filename)
       D = csp_D;
     }
     else if (chunk == READ_INT("CELL")){
-      //int csp_szcell;
+      //int32_t csp_szcell;
       csp_cell_size = READ_INT(header+offset);
       LogPrintf("chunk CELL: %d\n", csp_cell_size);
       if (csp_cell_size > sizeof(Cell)){
@@ -217,12 +218,12 @@ int read_csp_header(char *filename)
   return csp_header_size;
 }
 
-void read_csp(char *filename)
+void read_csp(int8_t *filename)
 {
   FILE *fp;
-  unsigned char *buf, *aux;
-  int i, j, k, n;
-  int szcell;
+  uint8_t *buf, *aux;
+  int32_t i, j, k, n;
+  int32_t szcell;
   Cell *pt = TE;
 
   LogPrintf("reading CSP data : %s\n", filename);
@@ -285,13 +286,13 @@ void read_csp(char *filename)
   compress(filename,0);
 }
 
-int generate_csp_header()
+int32_t generate_csp_header()
 {
-  int offset=0;
-  int hdsz_offset=0; //offset of header size
-  int cksize=0; //chunk size
-  int mdsize=0; //metadata size
-  int md4; //4-bytes metadata
+  int32_t offset=0;
+  int32_t hdsz_offset=0; //offset of header size
+  int32_t cksize=0; //chunk size
+  int32_t mdsize=0; //metadata size
+  int32_t md4; //4-bytes metadata
 
   //LogPrintf("generation of metadata\n");
 
@@ -372,14 +373,14 @@ int generate_csp_header()
   return offset;
 }
 
-void write_csp(char dump_type, char *filename)
+void write_csp(int8_t dump_type, int8_t *filename)
 {
-  static int hd_size=0;
-  static char start=1;
+  static int32_t hd_size=0;
+  static int8_t start=1;
   FILE *fp;
-  int i,j;
+  int32_t i,j;
   Cell *pt = TE;
-  //char *buf, *aux;
+  //int8_t *buf, *aux;
   Cell *buf, *aux;
 
   LogPrintf("writing CSP data : %s\n", filename);

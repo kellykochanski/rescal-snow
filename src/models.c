@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -90,6 +90,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdint.h>
+
 #include "defs.h"
 #include "macros.h"
 #include "param.h"
@@ -97,19 +99,19 @@
 #include "space.h"
 #include "lgca.h"
 
-extern int Ncel[];    //number of cells in each state
-extern int LNS;       //north-south width
-extern int ava_trans;   //flag for avalanche transitions
+extern int32_t Ncel[];    //number of cells in each state
+extern int32_t LNS;       //north-south width
+extern int32_t ava_trans;   //flag for avalanche transitions
 extern float ava_delay;
-extern int boundary;  //boundary conditions
+extern int32_t boundary;  //boundary conditions
 
 /// parameters and rates for each model
 
-char *model_name = NULL; //name of the model
+int8_t *model_name = NULL; //name of the model
 #ifdef LGCA
-int use_lgca = 1;
+int32_t use_lgca = 1;
 #else
-int use_lgca = 0;
+int32_t use_lgca = 0;
 #endif // LGCA
 
 #if defined(MODEL_SNO) || defined(MODEL_DUN)
@@ -122,7 +124,7 @@ float coef_b = 10.0;
 float coef_c = 500.0;
 float prob_link_ET = 0.5;
 float prob_link_TT = 0.5;
-int flag_hm = 0;
+int32_t flag_hm = 0;
 #ifdef CELL_COLOR
 float lambda_E_col = -1;
 float lambda_C_col = -1;
@@ -134,7 +136,7 @@ float lambda_D_mob_col = -1;
 
 #ifdef MODEL_DUN // options for dun but not sno model
 #ifdef USE_VEGETATION
-int use_veg = 1;
+int32_t use_veg = 1;
 float lambda_V_up;
 float lambda_V_die;
 float lambda_V_die_air;
@@ -161,7 +163,7 @@ float lambda_I = 0.1;
 #ifdef MODEL_RIV
 float lambda_I, lambda_D, lambda_L, lambda_C;
 float lambda_E_v, lambda_E_h;
-int trans_BT = 0;
+int32_t trans_BT = 0;
 #endif
 
 #if defined(MODEL_CMB) || defined(MODEL_CRY)
@@ -183,7 +185,7 @@ float lambda_L, lambda_I;
 #ifdef MODEL_LIFE
 float lambda_B = 1.0;
 float lambda_D = 1.0;
-extern int B_min, B_max, S_min, S_max;
+extern int32_t B_min, B_max, S_min, S_max;
 #endif
 
 #ifdef AVALANCHES
@@ -251,7 +253,7 @@ Callback_check check_cell_top;
 
 void params_modele()
 {
-  char str[100];
+  int8_t str[100];
 
   /// declare families of parameters
   sprintf(str, "%s model parameters", MOD_NAME);
@@ -484,7 +486,7 @@ void init_modele()
 
 */
 
-  char tmode = TIME_CORR; //time correction (default value for check_grad_vel)
+  int8_t tmode = TIME_CORR; //time correction (default value for check_grad_vel)
 
   /***** erosion *****/
   trans_ref(8,  EST_OUEST, EAUC, GR,  EAUC, GRJ, lambda_E );
@@ -658,7 +660,7 @@ void init_modele()
 //#define VEG_VARIANT 1 /// VEG state is considered as vegetation without grain
 #define VEG_VARIANT 2 /// VEG state is considered as vegetated grain
 
-  extern int veg_h_max;
+  extern int32_t veg_h_max;
 
   if (use_veg){
     LogPrintf("VEG_VARIANT=%d\n", VEG_VARIANT);
@@ -1288,10 +1290,10 @@ void init_modele()
 
 float coef_injection = 1.0; //regulation de l'injection de grain
 
-int callback_bord_dun(void *data)
+int32_t callback_bord_dun(void *data)
 {
-  static int Ncel_GR_debut = 0;
-  int Ncel_GR;
+  static int32_t Ncel_GR_debut = 0;
+  int32_t Ncel_GR;
   double *ref_intensite = (double*)data;
 
   Ncel_GR = Ncel[GR] + Ncel[GRJ];
@@ -1311,9 +1313,9 @@ int callback_bord_dun(void *data)
   return 0;
 }
 
-int callback_injection_coef(void *data)
+int32_t callback_injection_coef(void *data)
 {
-  static char start = 1;
+  static int8_t start = 1;
   static double lambda_injection_debut;
 
   double *ref_intensite = (double*)data;
@@ -1333,7 +1335,7 @@ int callback_injection_coef(void *data)
 #ifdef AVALANCHES
 
 //modulation intensite des transitions d'avalanches
-int callback_ava_trans(void *data)
+int32_t callback_ava_trans(void *data)
 {
   double *ref_intensite = (double*)data;
 

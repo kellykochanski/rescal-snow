@@ -17,9 +17,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <stdint.h>
 
 #define CELL_DATA defined(CELL_COLOR)
 
@@ -33,26 +35,26 @@
 
 
 typedef struct cellule{
-  unsigned char celltype;
+  uint8_t celltype;
 #ifdef CELL_COLOR
-  unsigned char color;
+  uint8_t color;
 #endif
 #ifdef CELL_TIME
-  int celltime; //date du dernier changement d'etat
+  int32_t celltime; //date du dernier changement d'etat
 #endif
 } Cell;
 
 #define CELL_TYPE_SIZE sizeof(unsigned char)
 #define CELL_DATA_SIZE (sizeof(Cell) - CELL_TYPE_SIZE)
 
-//typedef char CellData[CELL_DATA_SIZE];
+//typedef int8_t CellData[CELL_DATA_SIZE];
 
 
 void init_Ncel();
-void init_cellule(Cell cel, int index);
-void modifie_cellule(int type, int index);
-//void ajoute_cellule(int type, int index);
-void deplace_cellule(int ix, int ix2);
-//void elimine_cellule(int index);
+void init_cellule(Cell cel, int32_t index);
+void modifie_cellule(int32_t type, int32_t index);
+//void ajoute_cellule(int32_t type, int32_t index);
+void deplace_cellule(int32_t ix, int32_t ix2);
+//void elimine_cellule(int32_t index);
 //void log_cell_info();
 void log_cell();
