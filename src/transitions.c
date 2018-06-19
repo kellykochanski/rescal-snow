@@ -134,13 +134,8 @@ int32_t get_trans(int8_t ref)
   }
   return i;
 }
-<<<<<<< HEAD
-
 
 void trans_ref(int8_t ref, int8_t classe, int8_t cel_depart_1, int8_t cel_depart_2, int8_t cel_arrivee_1, int8_t cel_arrivee_2, double intensite)
-=======
-void trans_ref(char ref, char classe, char cel_depart_1, char cel_depart_2, char cel_arrivee_1, char cel_arrivee_2, double intensite)
->>>>>>> f9ab606323a335ab187ee7bea74ca0858f14f134
 {
   if (intensite<0){
     LogPrintf("WARNING: negative transition rate (%f). Transition removed.\n", intensite);
