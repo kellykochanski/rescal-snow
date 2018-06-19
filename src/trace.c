@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -26,17 +26,18 @@
 // Not yet corrected because not sure if this is compensated for elsewhere.
 
 
-//mode TRACE_SRC : generation du bassin versant d'un point de sortie
-//mode TRACE_AIRE : calcul de l'aire drainee (~debit) en chaque point (2D)
-//mode TRACE_PAR : calcul du debit et de la pente en chaque point (2D), et sauvegarde du parcours effectif de chaque cellule
-//mode TRACE_TRANS : comptage des transtions en chaque point (2D)
-//mode TRACE3D_CEL : comptage des cellules d'un type donne qui transitent en chaque point (3D)
+//mode TRACE_SRC : generation du bassin versant d'un point32_t de sortie
+//mode TRACE_AIRE : calcul de l'aire drainee (~debit) en chaque point32_t (2D)
+//mode TRACE_PAR : calcul du debit et de la pente en chaque point32_t (2D), et sauvegarde du parcours effectif de chaque cellule
+//mode TRACE_TRANS : comptage des transtions en chaque point32_t (2D)
+//mode TRACE3D_CEL : comptage des cellules d'un type donne qui transitent en chaque point32_t (3D)
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 #include <memory.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -52,18 +53,18 @@
 #include "simul.h"
 #include "param.h"
 
-extern int H, L, D, HL, HLD;             // les dimensions de la terre
+extern int32_t H, L, D, HL, HLD;             // les dimensions de la terre
 extern Cell *TE;	                 // la 'terre'
 extern double csp_time;                  // temps reel simule
 extern float csp_angle;                  // angle resultant de toutes les rotations
-extern int L_bounds;
-extern int D_bounds;
-extern int rot_mode;
-extern unsigned char reorient_flag;
-extern int vdir_mode;
+extern int32_t L_bounds;
+extern int32_t D_bounds;
+extern int32_t rot_mode;
+extern uint8_t reorient_flag;
+extern int32_t vdir_mode;
 
-int source_x, source_y, source_z, source_ix;   //point source
-int src_flag = 0; //indicateur
+int32_t source_x, source_y, source_z, source_ix;   //point32_t source
+int32_t src_flag = 0; //indicateur
 
 void trace_src_init();
 void trace_aire_init();
@@ -81,11 +82,11 @@ void trace_src_end_loop();
 void trace_aire_end_loop();
 void trace_par_end_loop();
 
-void trace_src_test(int ix);
-void trace_aire_test(int ix);
+void trace_src_test(int32_t ix);
+void trace_aire_test(int32_t ix);
 
-int trace_src_point(int x, int z);
-int trace_aire_point(int x, int z);
+int32_t trace_src_point(int32_t x, int32_t z);
+int32_t trace_aire_point(int32_t x, int32_t z);
 
 void trace_src_dump();
 void trace_aire_dump();
@@ -126,13 +127,13 @@ void trace_init()
 #endif
 }
 
-int trace_init_loop()
+int32_t trace_init_loop()
 {
-  static int x = 0, y = 1, z = 1, cpt_src = 0;
-  int ix = 0;
+  static int32_t x = 0, y = 1, z = 1, cpt_src = 0;
+  int32_t ix = 0;
 
 #ifdef TRACE_PAR
-  // un seul point source
+  // un seul point32_t source
   if ((!x) || (cpt_src)) {
     x = L/2;
     z = L/2;
@@ -146,7 +147,7 @@ int trace_init_loop()
   // survol complet
   if (!cpt_src){
     if (!x) LogPrintf("NB_CEL_SRC = %d\n", NB_CEL_SRC);
-    //on deplace le point source
+    //on deplace le point32_t source
     if (x<L-2){
       x++;
     }
@@ -175,7 +176,7 @@ int trace_init_loop()
   while (TE[ix+L].celltype == EAU) {ix +=L; y++;}
   if (TE[ix].celltype == EAU){
     cellule_terre(BOUE, ix);
-    //LogPrintf("point de depart : %d %d %d\n", x, y, z);
+    //LogPrintf("point32_t de depart : %d %d %d\n", x, y, z);
 #if defined(TRACE_SRC)
     trace_src_test(ix);
 #endif
@@ -220,7 +221,7 @@ void trace_end_loop()
 #endif
 }
 
-void trace_test(int ix)
+void trace_test(int32_t ix)
 {
 #ifdef TRACE_SRC
   trace_src_test(ix);
@@ -231,7 +232,7 @@ void trace_test(int ix)
 #endif
 }
 
-int trace_point(int x, int z)
+int32_t trace_point(int32_t x, int32_t z)
 {
 #ifdef TRACE_SRC
   if (trace_src_point(x, z)) return 1;
@@ -268,8 +269,8 @@ void trace_dump_loop()
 
 #define DIST_SRC 100 //16 //5 //carre du rayon autour de la cellule test en mode TRACE_SRC
 
-unsigned char *src_map;   //carte des points source
-int test_x, test_z;
+uint8_t *src_map;   //carte des points source
+int32_t test_x, test_z;
 
 
 void trace_src_init()
@@ -298,10 +299,10 @@ void trace_src_end_loop()
   if (src_flag) src_map[source_x+source_z*L]++;
 }
 
-void trace_src_test(int ix)
+void trace_src_test(int32_t ix)
 {
   if (TE[ix].celltype == BOUE){
-    int x, y, z, dd;
+    int32_t x, y, z, dd;
     Calcule_xyz(ix, x, y, z);
     dd = (x - test_x)*(x - test_x) + (z - test_z)*(z - test_z);
     if (dd <= DIST_SRC){
@@ -314,7 +315,7 @@ void trace_src_test(int ix)
   }
 }
 
-int trace_src_point(int x, int z)
+int32_t trace_src_point(int32_t x, int32_t z)
 {
   //return (src_map[x+z*L] == NB_CEL_SRC ) ?  1 : 0;
   return (src_map[x+z*L] > (NB_CEL_SRC >> 1)) ?  1 : 0;
@@ -324,8 +325,8 @@ int trace_src_point(int x, int z)
 void trace_src_dump()
 {
   FILE *fp;
-  int x,z;
-  char nom[32];
+  int32_t x,z;
+  int8_t nom[32];
 
   sprintf(nom, "BASSIN_%d.data", NB_CEL_SRC);
 
@@ -348,8 +349,8 @@ void trace_src_dump()
 /// On comptabilise le nombre de parcours qui passent en chaque colonne.
 /// En sortie, on sauve la carte 2d avec l'intensite du flux en chaque point.
 
-unsigned char *trace_map;   //carte des points parcourus par une cellule source
-int *aire_map;   //carte des aires drainees
+uint8_t *trace_map;   //carte des points parcourus par une cellule source
+int32_t *aire_map;   //carte des aires drainees
 
 void trace_aire_init()
 {
@@ -369,26 +370,26 @@ void trace_aire_init_loop()
 
 void trace_aire_end_loop()
 {
-  int i;
+  int32_t i;
   for(i=0; i<L*D; i++) aire_map[i] += trace_map[i];
 
-/*  int nn;
+/*  int32_t nn;
   for(i=0, nn=0; i<L*L; i++) nn += trace_map[i];
   LogPrintf("nn = %d\n", nn); */
 }
 
 
-void trace_aire_test(int ix)
+void trace_aire_test(int32_t ix)
 {
   if (TE[ix].celltype == BOUE){
-    int x, y, z;
+    int32_t x, y, z;
     Calcule_xyz(ix, x, y, z);
     trace_map[x+z*L]=1;
     //LogPrintf("trace_test : %d %d %d\n", x, y, z);
   }
 }
 
-int trace_aire_point(int x, int z)
+int32_t trace_aire_point(int32_t x, int32_t z)
 {
   return (trace_map) ? trace_map[x+z*L] : 0;
 }
@@ -396,8 +397,8 @@ int trace_aire_point(int x, int z)
 void trace_aire_dump()
 {
   FILE *fp;
-  int aire_max=0;
-  int x, z, amx, amz;
+  int32_t aire_max=0;
+  int32_t x, z, amx, amz;
 
   fp = fopen("AIRE.data","w");
   for(z=1; z<L-1; z++){
@@ -429,14 +430,14 @@ void trace_aire_dump()
 /// On comptabilise les occurences de certaines transitions en fonction du modèle, en chaque colonne.
 /// En sortie, on sauve une carte 2d pour chaque type de transition.
 
-int *trace_diffusion; //carte des transitions de diffusion
-int *trace_dissolution; //carte des transitions de dissolution
-int *trace_cristallisation; //carte des transitions de cristallisation
-int *trace_erosion; //carte des transitions d'erosion
-int *trace_chk_erosion; //carte des transitions d'erosion bloquees
-int *trace_transport_eo; //carte du transport est-ouest
-int *trace_transport; //carte du transport
-int *trace_gravi; //carte des transitions de gravite
+int32_t *trace_diffusion; //carte des transitions de diffusion
+int32_t *trace_dissolution; //carte des transitions de dissolution
+int32_t *trace_cristallisation; //carte des transitions de cristallisation
+int32_t *trace_erosion; //carte des transitions d'erosion
+int32_t *trace_chk_erosion; //carte des transitions d'erosion bloquees
+int32_t *trace_transport_eo; //carte du transport est-ouest
+int32_t *trace_transport; //carte du transport
+int32_t *trace_gravi; //carte des transitions de gravite
 
 void trace_trans_init()
 {
@@ -468,9 +469,9 @@ void trace_trans_init()
 #endif
 }
 
-void trace_trans(int tr, int ix)
+void trace_trans(int32_t tr, int32_t ix)
 {
-  int x, y, z, ind;
+  int32_t x, y, z, ind;
   Calcule_xyz(ix, x, y, z);
   ind = x + z*L;
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
@@ -496,9 +497,9 @@ void trace_trans(int tr, int ix)
 #endif
 }
 
-void trace_trans_blocked(int tr, int ix)
+void trace_trans_blocked(int32_t tr, int32_t ix)
 {
-  int x, y, z, ind;
+  int32_t x, y, z, ind;
   Calcule_xyz(ix, x, y, z);
   ind = x + z*L;
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
@@ -510,8 +511,8 @@ void trace_trans_blocked(int tr, int ix)
 void trace_trans_dump()
 {
   FILE *fp;
-static int cpt = 0;
-  char nom[128];
+static int32_t cpt = 0;
+  int8_t nom[128];
 
 #ifdef MODELE_DUN
   /*sprintf(nom, "DIFFUS%03d.car", cpt++);
@@ -602,7 +603,7 @@ void trace_trans_quit()
 
 #ifdef TRACE_PAR
 /// On memorise le parcours 3d d'une cellule "test" (type BOUE, modele RIV).
-/// Puis on calcule la pente moyenne en chaque point du parcours.
+/// Puis on calcule la pente moyenne en chaque point32_t du parcours.
 /// Ensuite, on recommence avec une autre cellule "test", au meme endroit.
 /// On integre le nombre de passages et la pente moyenne, en chaque colonne.
 /// En sortie, on sauve la carte 2d pour le debit moyen et la pente moyenne de l'ecoulement.
@@ -623,24 +624,24 @@ void trace_trans_quit()
 
 //structures
 typedef struct un_element_de_parcours{
-  int x,y,z;  //position
+  int32_t x,y,z;  //position
   float t;    //temps
   //float p;    //pente locale
 } par_elt;
 
 par_elt parcours[BUF_SIZE]; //portion de parcours d'une cellule test
 #ifdef OPTI_PAR
-int *par_map;               //indices du premier passage en chaque colonne
+int32_t *par_map;               //indices du premier passage en chaque colonne
 #endif
 double *pente_map;          //estimation de la pente en chaque point
-int *nb_pas;                //nombre de passages en chaque point
-int cur_elt = 0;            //indice courant
-int lg_par = 0;             //longueur du parcours
+int32_t *nb_pas;                //nombre de passages en chaque point
+int32_t cur_elt = 0;            //indice courant
+int32_t lg_par = 0;             //longueur du parcours
 
 
 void elimine_cellules_actives()
 {
-  int i, j, k, n;
+  int32_t i, j, k, n;
   Cell *aux = TE;
   // on enleve les cellules actives avant de calculer les differents parcours
   n=0;
@@ -685,12 +686,12 @@ void trace_par_init_loop()
   lg_par = cur_elt = 1;
 }
 
-double calcul_pente(int i) //(par_elt *pe1, par_elt *pe2)
+double calcul_pente(int32_t i) //(par_elt *pe1, par_elt *pe2)
 {
   double pente;
 
   /*if ((i-OFFSET_PENTE>=0) && (i+OFFSET_PENTE<cur_elt))*/{
-    int i1, i2, dx, dy, dz, dh, dd;
+    int32_t i1, i2, dx, dy, dz, dh, dd;
     i1 = i-OFFSET_PENTE; if (i1<0) i1 = 0;
     i2 = i+OFFSET_PENTE; if (i2>=cur_elt) i2 = cur_elt-1;
     dx = parcours[i2].x - parcours[i1].x;
@@ -720,9 +721,9 @@ void dump_parcours()
   FILE *fp;
   par_elt *pe;
   float pente;
-  static int num = 1;
+  static int32_t num = 1;
 
-  int i;
+  int32_t i;
   fp = fopen("PARCOURS.data","a");
   fprintf(fp, "### PARCOURS %d ###\n", num++);
   for (i=0, pe = parcours; i<cur_elt; i++, pe++){
@@ -732,19 +733,19 @@ void dump_parcours()
   fclose(fp);
 }
 
-void trace_par(int ix)
+void trace_par(int32_t ix)
 {
   //memoriser la position de la cellule test
   if (TE[ix].celltype == BOUE){
     if (lg_par<LG_PAR_MAX){
-      int x, y, z;
+      int32_t x, y, z;
       par_elt *pe = parcours + cur_elt;
       Calcule_xyz(ix, x, y, z);
   #ifdef OPTI_PAR
       if (par_map[x+z*L] >= 0){
         //on est deja passe par la ...
         //donc on efface la fin du parcours ...
-        int i, premier;
+        int32_t i, premier;
         premier = par_map[x+z*L];
         assert (cur_elt >= premier);
         for (i = cur_elt-1, pe = parcours+i; i>premier; i--, pe--)
@@ -777,7 +778,7 @@ void trace_par(int ix)
     }
     else{
       // parcours trop long, on remplace la cellule de boue par une cellule d'eau
-      ErrPrintf("ERROR: cell course is too long (length=%d) !\n", lg_par);
+      ErrPrintf("ERROR: cell course is too int64_t (length=%d) !\n", lg_par);
       cellule_terre(EAU, ix);
       trace_par_end_loop();
      }
@@ -787,7 +788,7 @@ void trace_par(int ix)
 void trace_par_end_loop()
 {
   if (cur_elt){
-    int i, n, ixz;
+    int32_t i, n, ixz;
     par_elt *pe;
     double pente;
 /*#ifdef OPTI_PAR
@@ -814,8 +815,8 @@ void trace_par_end_loop()
 void trace_par_dump()
 {
   FILE *fp;
-  int x,z;
-  char nom[32];
+  int32_t x,z;
+  int8_t nom[32];
 
 #ifdef OPTI_PAR
   fp = fopen("DEBIT_OP.data","w");
@@ -859,24 +860,24 @@ void trace_par_dump()
 #define LG_PAR_COL_MAX 10000  //max length of each course
 #define BUF_SIZE_COL 10 //LG_PAR_COL_MAX  //size of buffer for each course
 
-int nb_par_col = 0; //number of colors
+int32_t nb_par_col = 0; //number of colors
 
 //structures
 typedef struct un_element_de_parcours_color{
-  int x,y,z;  //position
-  int tr; //transition
+  int32_t x,y,z;  //position
+  int32_t tr; //transition
   float t;    //time
 } par_elt_col;
 
 par_elt_col parcours[NB_CEL_PAR_COL_MAX][BUF_SIZE_COL]; //courses of all colored cells
 
-int cur_elt[NB_CEL_PAR_COL_MAX];            //current indices for each course
-int lg_par[NB_CEL_PAR_COL_MAX];             //length for each course
+int32_t cur_elt[NB_CEL_PAR_COL_MAX];            //current indices for each course
+int32_t lg_par[NB_CEL_PAR_COL_MAX];             //length for each course
 
 
 void trace_par_col_init()
 {
-  int i,j,ix,cm1;
+  int32_t i,j,ix,cm1;
   par_elt_col *pe;
 
   LogPrintf("init trace_par_col\n");
@@ -910,9 +911,9 @@ void trace_par_col_init()
 
 void trace_par_col_rotation(float angle)
 {
-  int ix,col,cur;
+  int32_t ix,col,cur;
   par_elt_col *pe;
-  int x, y, z;
+  int32_t x, y, z;
 
   //LogPrintf("trace_par_col_rotation - angle=%f\n",angle);
 
@@ -971,13 +972,13 @@ void trace_par_col_rotation(float angle)
   }
 }
 
-void dump_par_col(int col)
+void dump_par_col(int32_t col)
 {
   FILE *fp;
   par_elt_col *pe;
-  //static int num = 1;
-  char name[100];
-  int j;
+  //static int32_t num = 1;
+  int8_t name[100];
+  int32_t j;
 
   //save course for one color from current buffer
   sprintf(name,"PAR_COL%03d.data", col);
@@ -988,14 +989,14 @@ void dump_par_col(int col)
   fclose(fp);
 }
 
-void trace_par_col(int ix, int tr)
+void trace_par_col(int32_t ix, int32_t tr)
 {
   if (TE[ix].color){
-    int cm1 = TE[ix].color-1;
+    int32_t cm1 = TE[ix].color-1;
     //LogPrintf("trace_par_col: ix=%d, tr=%d, col=%d, csp_angle=%f\n", ix, tr, TE[ix].color, csp_angle);
     if (cur_elt[cm1]<0) return;
     if (lg_par[cm1]<LG_PAR_COL_MAX){
-      int x, y, z;
+      int32_t x, y, z;
       par_elt_col *pe = parcours[cm1] + cur_elt[cm1];
       Calcule_xyz(ix, x, y, z);
       //LogPrintf("trace_par_col: x=%d, y=%d, z=%d\n", x, y, z);
@@ -1016,7 +1017,7 @@ void trace_par_col(int ix, int tr)
     }
     else{
       //course too long
-      ErrPrintf("ERROR: cell course is too long (col=%d, length=%d) !\n", TE[ix].color, lg_par[cm1]);
+      ErrPrintf("ERROR: cell course is too int64_t (col=%d, length=%d) !\n", TE[ix].color, lg_par[cm1]);
       //color is removed
       TE[ix].color = 0;
     }
@@ -1029,9 +1030,9 @@ void trace_par_col(int ix, int tr)
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef TRACE3D_CEL
-/// Comptage des cellules de type CEL_TEST qui transitent en chaque point de l'espace cellulaire (3d).
+/// Comptage des cellules de type CEL_TEST qui transitent en chaque point32_t de l'espace cellulaire (3d).
 /// En sortie, on obtient l'intensite du flux.
-/// Option TRACE_MVT : comptage des cellules de gaz sur reseau en chaque point et dans toutes les directions.
+/// Option TRACE_MVT : comptage des cellules de gaz sur reseau en chaque point32_t et dans toutes les directions.
 
 //constantes
 #ifdef MODELE_DUN
@@ -1043,14 +1044,14 @@ void trace_par_col(int ix, int tr)
 //#define TRACE_MVT
 #endif
 
-int *cpt_cel; //compteur de cellules (en chaque point)
+int32_t *cpt_cel; //compteur de cellules (en chaque point)
 #ifdef TRACE_MVT
-int *cpt_mvt_est; //compteur de cellules mvt_est (en chaque point)
-int *cpt_mvt_ouest; //compteur de cellules mvt_ouest (en chaque point)
-int *cpt_check_mvt_est; //compteur de tests reussis pour le controle du transport vers l'est (en chaque point)
-int *cpt_check_mvt_bas; //compteur de tests reussis pour le controle du transport vers le bas (en chaque point)
+int32_t *cpt_mvt_est; //compteur de cellules mvt_est (en chaque point)
+int32_t *cpt_mvt_ouest; //compteur de cellules mvt_ouest (en chaque point)
+int32_t *cpt_check_mvt_est; //compteur de tests reussis pour le controle du transport vers l'est (en chaque point)
+int32_t *cpt_check_mvt_bas; //compteur de tests reussis pour le controle du transport vers le bas (en chaque point)
 #endif //TRACE_MVT
-int nb_trace3d_cel=0; // nombre d'appels de la procedure trace3d_cel()
+int32_t nb_trace3d_cel=0; // nombre d'appels de la procedure trace3d_cel()
 
 void trace3d_cel_init()
 {
@@ -1076,7 +1077,7 @@ void trace3d_cel_init()
 
 void trace3d_cel()
 {
-  int i;
+  int32_t i;
   for (i=0; i<HLD; i++){
     if (TE[i].celltype == CEL_TEST) cpt_cel[i]++;
 #ifdef TRACE_MVT
@@ -1093,8 +1094,8 @@ void trace3d_cel()
 void trace3d_cel_dump()
 {
   FILE *fp;
-  static int cpt = 0;
-  //char nom[128];
+  static int32_t cpt = 0;
+  //int8_t nom[128];
 
   //sprintf(nom, "CEL%03d.bin", cpt++);
   fp = fopen("CEL.bin","wb");
@@ -1153,7 +1154,7 @@ extern TransitionDb t_trans[];
 FluxMap *flux_map = NULL;
 FluxMap *total_flux_map = NULL;
 float trace_flux_delay = 0;
-int trace_flux_auto = 0;
+int32_t trace_flux_auto = 0;
 
 FluxMap *init_flux_map(float angle)
 {
@@ -1193,11 +1194,11 @@ void trace_flux_init()
 }
 
 
-void trace_flux(int tr, int ix)
+void trace_flux(int32_t tr, int32_t ix)
 {
   TransitionDb *ptr;
-  int x, y, z;
-  int ind;
+  int32_t x, y, z;
+  int32_t ind;
 
   //LogPrintf("flux dir = %d\n", ptr->classe);
 
@@ -1205,9 +1206,9 @@ void trace_flux(int tr, int ix)
   Calcule_xyz(ix, x, y, z);
 
   /// sens du transport
-  int step = 1;
+  int32_t step = 1;
   ptr = &t_trans[tr];
-  int type_cel1=t_doub[ptr->depart].one;
+  int32_t type_cel1=t_doub[ptr->depart].one;
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
   if (type_cel1 == EAUC){
     step = -1;
@@ -1226,7 +1227,7 @@ void trace_flux(int tr, int ix)
 
 void compute_total_flux()
 {
-  int x,z,ind,ind0;
+  int32_t x,z,ind,ind0;
   float x0,z0,tx,tz,f00,f10,f01,f11;
 
   //LogPrintf("compute_total_flux: %f\n", flux_map->angle);
@@ -1293,9 +1294,9 @@ void trace_flux_rotate(float angle)
 void trace_flux_dump()
 {
   FILE *fp;
-  static int cpt = 1;
-  char name[128];
-  int x, z;
+  static int32_t cpt = 1;
+  int8_t name[128];
+  int32_t x, z;
 
   LogPrintf("trace_flux_dump: cpt = %d, csp_time = %f\n", cpt, csp_time);
 
@@ -1366,10 +1367,10 @@ void params_trace()
 
 /// Data outputs during current simulation
 
-void trace_dump(char flag_info)
+void trace_dump(int8_t flag_info)
 {
   static double time_threshold = 0.0;
-  static char start=1;
+  static int8_t start=1;
 
 #ifdef TRACE_TRANS
   if (flag_info) trace_trans_dump();

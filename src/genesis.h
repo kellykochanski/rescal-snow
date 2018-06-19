@@ -17,15 +17,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
+#include <stdint.h>
+
 typedef struct _template{
-  int type;
-  char *name;
-  char *desc;
-  int nb_args;
+  int32_t type;
+  int8_t *name;
+  int8_t *desc;
+  int32_t nb_args;
   float *args;
 } CSP_Template;
 

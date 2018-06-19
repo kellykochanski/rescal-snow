@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -27,23 +27,25 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdint.h>
+
 #include "defs.h"
 #include "macros.h"
 #include "param.h"
 
 #define LG_MAX 1024 /// maximum length of a line in parameters file
 
-extern char *model_name;
-extern char *bin_filename;
-extern char *csp_filename;
+extern int8_t *model_name;
+extern int8_t *bin_filename;
+extern int8_t *csp_filename;
 
-extern int H, L, D;
-extern int graine;
+extern int32_t H, L, D;
+extern int32_t graine;
 
-int nb_families=0;    /// number of families
+int32_t nb_families=0;    /// number of families
 Family *list_families=NULL;  /// list of the families
 
-int nb_params=0;    /// number of de parameters
+int32_t nb_params=0;    /// number of de parameters
 Parameter *list_params=NULL;  /// list of the parameters
 
 /// DECLARATION OF A PARAMETER
@@ -52,7 +54,7 @@ Parameter *list_params=NULL;  /// list of the parameters
 /// par_adr : address of the parameter (in memory)
 /// par_type : type of the parameter, possible values are PARAM_STRING | PARAM_INT | PARAM_FLOAT | PARAM_DOUBLE
 /// par_family : family of the parameter
-void parameter(char *par_nom, char *par_usage, void *par_adr, unsigned char par_type, char *par_family);
+void parameter(int8_t *par_nom, int8_t *par_usage, void *par_adr, uint8_t par_type, int8_t *par_family);
 
 
 void init_list_families()
@@ -64,7 +66,7 @@ void init_list_families()
 }
 
 
-void param_family(char *name, char *desc)
+void param_family(int8_t *name, int8_t *desc)
 {
   list_families[nb_families].name = strdup(name);
   list_families[nb_families].description = strdup(desc);
@@ -73,9 +75,9 @@ void param_family(char *name, char *desc)
   assert(nb_families<NB_PAR_FAM_MAX);
 }
 
-void display_family(unsigned char family)
+void display_family(uint8_t family)
 {
-  int j,l;
+  int32_t j,l;
 
   assert(family < nb_families);
 
@@ -91,12 +93,12 @@ void display_family(unsigned char family)
   }
 }
 
-unsigned char get_family(char *name)
+uint8_t get_family(int8_t *name)
 {
-  char family = 0;
+  int8_t family = 0;
 
   if (name){
-    int i=1;
+    int32_t i=1;
     while ((i<nb_families) && (strcmp(name, list_families[i].name))) i++;
     if (i<nb_families) family = i;
   }
@@ -132,7 +134,7 @@ void init_list_params()
 
 void param_usage()
 {
-  int i, j;
+  int32_t i, j;
 
   printf("\nFORMAT OF PARAMETERS_FILE\n");
   //printf("\nFORMAT OF PARAMETERS_FILE (for \"%s\" model)\n", MOD_NAME);
@@ -157,7 +159,7 @@ void bad_args()
   exit(-4);
 }
 
-void bad_params(char *str)
+void bad_params(int8_t *str)
 {
   ErrPrintf("ERROR: cannot read parameter %s\n", str);
 
@@ -165,7 +167,7 @@ void bad_params(char *str)
 }
 
 
-int read_int(char *s, int *err)
+int32_t read_int(int8_t *s, int32_t *err)
 {
   if (!isdigit(s[0]) && ((s[0]!='-') || !isdigit(s[1]))){
     *err = 1;
@@ -174,7 +176,7 @@ int read_int(char *s, int *err)
   return atoi(s);
 }
 
-double read_float(char *s, int *err)
+double read_float(int8_t *s, int32_t *err)
 {
   //LogPrintf("read_float : %s\n",s);
   if (!isdigit(s[0]) && ((s[0]!='-') || !isdigit(s[1]))){
@@ -184,7 +186,7 @@ double read_float(char *s, int *err)
   return atof(s);
 }
 
-int read_boolean(char* str, int *err)
+int32_t read_boolean(char* str, int32_t *err)
 {
   if (!strcmp(str, "YES") || !strcmp(str, "1")){
     return 1;
@@ -198,7 +200,7 @@ int read_boolean(char* str, int *err)
   }
 }
 
-void parameter(char *par_name, char *par_usage, void *par_adr, unsigned char par_type, char *par_family)
+void parameter(int8_t *par_name, int8_t *par_usage, void *par_adr, uint8_t par_type, int8_t *par_family)
 {
   list_params[nb_params].name = par_name;
   list_params[nb_params].usage = par_usage;
@@ -211,7 +213,7 @@ void parameter(char *par_name, char *par_usage, void *par_adr, unsigned char par
   assert(nb_params < NB_PARAM_MAX);
 }
 
-void parameter_hidden(char *par_name, char *par_usage, void *par_adr, unsigned char par_type, char *par_family)
+void parameter_hidden(int8_t *par_name, int8_t *par_usage, void *par_adr, uint8_t par_type, int8_t *par_family)
 {
 
   list_params[nb_params].name = par_name;
@@ -225,10 +227,10 @@ void parameter_hidden(char *par_name, char *par_usage, void *par_adr, unsigned c
   assert(nb_params < NB_PARAM_MAX);
 }
 
-void init_val_param(char *par_name, char *par_val)
+void init_val_param(int8_t *par_name, int8_t *par_val)
 {
-  int i=0;
-  int err=0;
+  int32_t i=0;
+  int32_t err=0;
 
   while ((i<nb_params) && (strcmp(list_params[i].name, par_name))) i++;
 
@@ -270,9 +272,9 @@ void init_val_param(char *par_name, char *par_val)
   }
 }
 
-void read_line(FILE *fp, char *str)
+void read_line(FILE *fp, int8_t *str)
 {
-  char *ptr, *ptrmax, c;
+  int8_t *ptr, *ptrmax, c;
 
   ptr = str;
   ptrmax = str+LG_MAX;
@@ -294,14 +296,14 @@ void read_line(FILE *fp, char *str)
 }
 
 
-void read_parameters(char *param_file)
+void read_parameters(int8_t *param_file)
 {
   FILE *fp;
-  char *par_name;
-  char *par_val;
-  char str[LG_MAX];
-  char *ptr;
-  int n=0;
+  int8_t *par_name;
+  int8_t *par_val;
+  int8_t str[LG_MAX];
+  int8_t *ptr;
+  int32_t n=0;
 
   LogPrintf("read parameters file : %s\n", param_file);
 
@@ -341,15 +343,15 @@ void read_parameters(char *param_file)
   LogPrintf("read_parameters : %d parametres lus\n", n);
 
   if (n<nb_params){
-    int i=0;
+    int32_t i=0;
     for (i=0; i<nb_params; i++)
       if (!list_params[i].init && list_params[i].is_visible) LogPrintf("WARNING: parameter %s not found\n", list_params[i].name);
   }
 }
 
-int param_is_set(char *str)
+int32_t param_is_set(int8_t *str)
 {
-  int i=0;
+  int32_t i=0;
   while ((i<nb_params) && (strcmp(list_params[i].name, str))) i++;
 
   return list_params[i].init;

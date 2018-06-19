@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+
 #include "defs.h"
 #include "macros.h"
 #include "cells.h"
@@ -37,36 +39,36 @@
 #endif
 
 extern Cell   *TE;	      // notre 'terre'
-extern int HLD;       // les dimensions de la terre
-//extern int H, L, HL, HLD;       // les dimensions de la terre
+extern int32_t HLD;       // les dimensions de la terre
+//extern int32_t H, L, HL, HLD;       // les dimensions de la terre
 //extern RefCellules *RefCel;      // references des cellules vers les cellules actives
-extern const unsigned char Phase[MAX_CELL];	//phase (fluide ou solide) des types de cellules
+extern const uint8_t Phase[MAX_CELL];	//phase (fluide ou solide) des types de cellules
 #ifdef CELL_TIME
 extern double csp_time;
 #endif
 #ifdef ALTI
-extern int LN;
-extern short *alti;
+extern int32_t LN;
+extern int16_t *alti;
 #endif
-extern int use_lgca;
+extern int32_t use_lgca;
 
-const char *etats[MAX_CELL] = ETATS;  // les noms des types de cellules
+const int8_t *etats[MAX_CELL] = ETATS;  // les noms des types de cellules
 
-//char t_cell[MAX_CELL];        // cellules actives
-//int *cel_pos[MAX_CELL];                   // les tableaux contenant la position des cellules actives
-//int Ncelmax[MAX_CELL];                    // taille des tableaux de position des cellules actives
-int Ncel[MAX_CELL];                       // nombre de cellules par type
+//int8_t t_cell[MAX_CELL];        // cellules actives
+//int32_t *cel_pos[MAX_CELL];                   // les tableaux contenant la position des cellules actives
+//int32_t Ncelmax[MAX_CELL];                    // taille des tableaux de position des cellules actives
+int32_t Ncel[MAX_CELL];                       // nombre de cellules par type
 
 #ifdef PARALLEL
-int Ncel_par[MAX_CELL];           // nombre total de cellules par type sur l'ensemble des process
-extern int mode_par;              // mode parallele
-extern unsigned char pserv;       // flag process serveur
+int32_t Ncel_par[MAX_CELL];           // nombre total de cellules par type sur l'ensemble des process
+extern int32_t mode_par;              // mode parallele
+extern uint8_t pserv;       // flag process serveur
 #endif
 
 
 void init_Ncel()
 {
-  int i;
+  int32_t i;
 
   for (i=0; i<MAX_CELL; i++)
     Ncel[i]=0;
@@ -78,7 +80,7 @@ void init_Ncel()
   //LogPrintf ("Ncel[MOINS] = %d\n",Ncel[MOINS]);
 }
 
-void init_cellule(Cell cel, int index)
+void init_cellule(Cell cel, int32_t index)
 {
   TE[index] = cel;
 #ifdef CELL_TIME
@@ -92,9 +94,9 @@ void init_cellule(Cell cel, int index)
 #endif
 }
 
-void modifie_cellule(int type, int index)
+void modifie_cellule(int32_t type, int32_t index)
 {
-  int old_type;
+  int32_t old_type;
 
   old_type = TE[index].celltype;
 
@@ -123,7 +125,7 @@ void modifie_cellule(int type, int index)
 }
 
 /*
-void echange_cellules(int ix, int ix2)
+void echange_cellules(int32_t ix, int32_t ix2)
 {
   Cell aux;
 
@@ -135,7 +137,7 @@ void echange_cellules(int ix, int ix2)
 
 
 //deplace la cellule ix en ix2
-void deplace_cellule(int ix, int ix2)
+void deplace_cellule(int32_t ix, int32_t ix2)
 {
   TE[ix2] = TE[ix];
 #ifdef CELL_TIME
@@ -153,7 +155,7 @@ void deplace_cellule(int ix, int ix2)
 #ifdef MODEL_ICB
 void verifier_Ncel_MOINS()
 {
-  int i,N;
+  int32_t i,N;
 
   for(i=N=0; i<HLD; i++)
     if (TE[i].celltype == MOINS) N++;
@@ -172,10 +174,10 @@ void verifier_Ncel_MOINS()
 void log_cell()
 {
   FILE *fp;
-  int i, nb;
-  char *filename = "CELL.log";
-  static int start = 1;
-  static int cpt = 0;
+  int32_t i, nb;
+  int8_t *filename = "CELL.log";
+  static int32_t start = 1;
+  static int32_t cpt = 0;
 
   if (start){
     fp = fopen(filename,"w");
@@ -195,16 +197,16 @@ void log_cell()
     for(i=0; i<MAX_CELL; i++){
       if (etats[i]){
 #ifdef PHASES
-       char *str_phase = (Phase[i]==SOLID)?"<SOLID>":"<FLUID>";
+       int8_t *str_phase = (Phase[i]==SOLID)?"<SOLID>":"<FLUID>";
 #else
-       char *str_phase = NULL;
+       int8_t *str_phase = NULL;
 #endif
         fprintf(fp,"ST(%d): %s %s\n", i, etats[i], str_phase);
       }
     }
 
     fprintf(fp,"\n     ");
-    char str[30];
+    int8_t str[30];
     for(i=0; i<MAX_CELL; i++){
       if (etats[i]){
         str[0] = 0;

@@ -20,7 +20,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -29,6 +29,8 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <assert.h>
+#include <stdint.h>
+
 #include "defs.h"
 #include "macros.h"
 #include "cells.h"
@@ -46,29 +48,29 @@ extern RefDoublets *RefDB;      // references des cellules vers les doublets act
 extern RefDoublets_Type *RefDB_Type;       // references des cellules de la terre vers les doublets actifs
 extern RefDoublets_Ind *RefDB_Ind;       // references des cellules de la terre vers les doublets actifs
 #endif
-extern int   H, L, D, HL, HLD;     // les dimensions de la terre
-extern int LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
-extern const char *etats[];     // les noms des types de cellules
-extern int direction[];
-extern int orientation[];
-extern int pbc_mode;  //periodic boundary conditions
-extern char *rot_map;        // periodic mapping of the rotating space
+extern int32_t   H, L, D, HL, HLD;     // les dimensions de la terre
+extern int32_t LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
+extern const int8_t *etats[];     // les noms des types de cellules
+extern int32_t direction[];
+extern int32_t orientation[];
+extern int32_t pbc_mode;  //periodic boundary conditions
+extern int8_t *rot_map;        // periodic mapping of the rotating space
 #ifdef PARALLEL
-extern int mode_par;    //mode parallele
+extern int32_t mode_par;    //mode parallele
 #endif
 
 Doublet t_doub[MAX_DB];               // la description des doublets
-int db_inv[3][MAX_CELL][MAX_CELL];    // la map inverse pour le type de doublet, etant
+int32_t db_inv[3][MAX_CELL][MAX_CELL];    // la map inverse pour le type de doublet, etant
                                       // donnes le type de cell et la direction
-const char *classes_db[5] = CLASSES_DB; //noms des classes de doublet
-int nb_type_db=0;                 // nombre de types de doublets
-int *db_pos[MAX_DB];            // les tableaux contenant la position des doublets actifs
-int Ndb[MAX_DB];                // nombre de doublets actifs par type
-int Ndbmax[MAX_DB];             // taille des tableaux de position des doublets actifs
+const int8_t *classes_db[5] = CLASSES_DB; //noms des classes de doublet
+int32_t nb_type_db=0;                 // nombre de types de doublets
+int32_t *db_pos[MAX_DB];            // les tableaux contenant la position des doublets actifs
+int32_t Ndb[MAX_DB];                // nombre de doublets actifs par type
+int32_t Ndbmax[MAX_DB];             // taille des tableaux de position des doublets actifs
 
-int init_doublet(int classe, char etat1, char etat2, char actif)
+int32_t init_doublet(int32_t classe, int8_t etat1, int8_t etat2, int8_t actif)
 {
-  int i;
+  int32_t i;
 
   // tester si le doublet existe deja ...
   for (i=0; i<nb_type_db; i++){
@@ -92,9 +94,9 @@ int init_doublet(int classe, char etat1, char etat2, char actif)
   return i;
 }
 
-void split_db_hor(int db_hor, int *db_eo, int *db_ns)
+void split_db_hor(int32_t db_hor, int32_t *db_eo, int32_t *db_ns)
 {
-  unsigned char etat1, etat2, actif;
+  uint8_t etat1, etat2, actif;
 
   etat1 = t_doub[db_hor].one;
   etat2 = t_doub[db_hor].two;
@@ -125,9 +127,9 @@ void split_db_hor(int db_hor, int *db_eo, int *db_ns)
 }
 
 
-void bouclage_hor(int *p_typ, int *p_ind, int dir)
+void bouclage_hor(int32_t *p_typ, int32_t *p_ind, int32_t dir)
 {
-  int ix = *p_ind;
+  int32_t ix = *p_ind;
 
   (*p_ind) = hcycle(ix);
   (*p_typ) = db_inv[orientation[dir]][TE[*p_ind].celltype][TE[get_cell_dir(ix, dir)].celltype];
@@ -135,13 +137,13 @@ void bouclage_hor(int *p_typ, int *p_ind, int dir)
 
 #ifdef REFDB_PTR
 
-void translate_db_pos(int type, unsigned long offset)
+void translate_db_pos(int32_t type, unsigned int64_t offset)
 {
-  int i, ix;
+  int32_t i, ix;
 
   LogPrintf ("translation d'adresses sur les references au tableau db_pos[%d]\n",type);
 #if 0
-  extern int arch;
+  extern int32_t arch;
 
   if (arch == W64){
     LogPrintf ("offset = 0x%016lx\n", offset);
@@ -171,10 +173,10 @@ void translate_db_pos(int type, unsigned long offset)
 }
 #endif
 
-void realloc_db_pos(int type)
+void realloc_db_pos(int32_t type)
 {
 #ifdef REFDB_PTR
-  int *old_adr = db_pos[type];
+  int32_t *old_adr = db_pos[type];
 #endif
 
   //Ndbmax[type] += (Ndbmax[type]>>1); // on augmente de 50% la taille du tableau db_pos[type]
@@ -190,12 +192,12 @@ void realloc_db_pos(int type)
 #endif
 }
 
-int type_doublet(int ix, int dir)
+int32_t type_doublet(int32_t ix, int32_t dir)
 {
   return db_inv[orientation[dir]][TE[ix].celltype][TE[get_cell_dir(ix, dir)].celltype];
 }
 
-void elimine_doublet(int type, int index, int dir)
+void elimine_doublet(int32_t type, int32_t index, int32_t dir)
 {
 #ifdef CYCLAGE_HOR
   if (pbc_mode && (type == DB_BORD) && (dir != BAS)){
@@ -204,11 +206,11 @@ void elimine_doublet(int type, int index, int dir)
 #endif
 
   if ((type >= 0) && t_doub[type].actif){
-    int *elim, *der;
+    int32_t *elim, *der;
 #ifdef REFDB_PTR
     elim = RefDB[index][dir];
 #else
-    int ind_elim = RefDB_Ind[index][dir];
+    int32_t ind_elim = RefDB_Ind[index][dir];
     elim = db_pos[type] + ind_elim;
     if (*elim != index) {
       ErrPrintf("erreur adresse doublet actif dans elimine_doublet(): type=%d ind=%d dir=%d Ndb[type]=%d\n *elim=%d index=%d\n", type, ind_elim, dir, Ndb[type], *elim, index);
@@ -225,10 +227,10 @@ void elimine_doublet(int type, int index, int dir)
       Ndb[type]--;
       //if (type==11){LogPrintf("Ndb[%d] = %d\n", type, Ndb[type]);}
       if (Ndb[type] < 0){
-        extern unsigned long int iter;
+        extern uint64_t iter;
         ErrPrintf("ERROR: Ndb[%d] = %d\n", type, Ndb[type]);
         ErrPrintf("index = %d\n", index);
-        int x,y,z;
+        int32_t x,y,z;
         Calcule_xyz(index,x,y,z);
         ErrPrintf("x=%d   y=%d   z=%d\n",x,y,z);
         ErrPrintf("iter=%ld\n", iter);
@@ -263,71 +265,71 @@ void elimine_doublet(int type, int index, int dir)
   }
 }
 
-void elimine_doublet_est(int index)
+void elimine_doublet_est(int32_t index)
 {
 #ifdef REFDB_PTR
-  int type = db_inv[EST_OUEST][TE[index].celltype][TE[index+1].celltype];
+  int32_t type = db_inv[EST_OUEST][TE[index].celltype][TE[index+1].celltype];
 #else
-  int type = RefDB_Type[index][EST];
+  int32_t type = RefDB_Type[index][EST];
 #endif
   elimine_doublet(type, index, EST);
 }
 
-void elimine_doublet_ouest(int index)
+void elimine_doublet_ouest(int32_t index)
 {
 #ifdef REFDB_PTR
-  int type = db_inv[EST_OUEST][TE[index-1].celltype][TE[index].celltype];
+  int32_t type = db_inv[EST_OUEST][TE[index-1].celltype][TE[index].celltype];
 #else
-  int type = RefDB_Type[index-1][EST];
+  int32_t type = RefDB_Type[index-1][EST];
 #endif
   elimine_doublet(type, index-1, EST);
 }
 
-void elimine_doublet_bas(int index)
+void elimine_doublet_bas(int32_t index)
 {
   if (H <= 3) return;
 #ifdef REFDB_PTR
-  int type = db_inv[VERTICAL][TE[index].celltype][TE[index+L].celltype];
+  int32_t type = db_inv[VERTICAL][TE[index].celltype][TE[index+L].celltype];
 #else
-  int type = RefDB_Type[index][BAS];
+  int32_t type = RefDB_Type[index][BAS];
 #endif
   elimine_doublet(type, index, BAS);
 }
 
-void elimine_doublet_haut(int index)
+void elimine_doublet_haut(int32_t index)
 {
   if (H <= 3) return;
 #ifdef REFDB_PTR
-  int type = db_inv[VERTICAL][TE[index-L].celltype][TE[index].celltype];
+  int32_t type = db_inv[VERTICAL][TE[index-L].celltype][TE[index].celltype];
 #else
-  int type = RefDB_Type[index-L][BAS];
+  int32_t type = RefDB_Type[index-L][BAS];
 #endif
   elimine_doublet(type, index-L, BAS);
 }
 
-void elimine_doublet_sud(int index)
+void elimine_doublet_sud(int32_t index)
 {
   if (D <= 3) return;
 #ifdef REFDB_PTR
-  int type = db_inv[NORD_SUD][TE[index].celltype][TE[index+HL].celltype];
+  int32_t type = db_inv[NORD_SUD][TE[index].celltype][TE[index+HL].celltype];
 #else
-  int type = RefDB_Type[index][SUD];
+  int32_t type = RefDB_Type[index][SUD];
 #endif
   elimine_doublet(type, index, SUD);
 }
 
-void elimine_doublet_nord(int index)
+void elimine_doublet_nord(int32_t index)
 {
   if (D <= 3) return;
 #ifdef REFDB_PTR
-  int type = db_inv[NORD_SUD][TE[index-HL].celltype][TE[index].celltype];
+  int32_t type = db_inv[NORD_SUD][TE[index-HL].celltype][TE[index].celltype];
 #else
-  int type = RefDB_Type[index-HL][SUD];
+  int32_t type = RefDB_Type[index-HL][SUD];
 #endif
   elimine_doublet(type, index-HL, SUD);
 }
 
-void ajoute_doublet(int type, int index, int dir)
+void ajoute_doublet(int32_t type, int32_t index, int32_t dir)
 {
 #ifdef CYCLAGE_HOR
   if (pbc_mode && (type == DB_BORD) && (dir != BAS))
@@ -336,8 +338,8 @@ void ajoute_doublet(int type, int index, int dir)
 
 #ifdef PARALLEL
   if (mode_par && (type == DB_TUNNEL)){
-    int tc = TE[index].celltype;  //t_doub[type].one;
-    //int tc2 = t_doub[type].two;
+    int32_t tc = TE[index].celltype;  //t_doub[type].one;
+    //int32_t tc2 = t_doub[type].two;
     //LogPrintf("TUNNEL : tc=%d  \n", tc);
     if (dir == EST){
       if (tc != TUNNEL)
@@ -378,52 +380,52 @@ void ajoute_doublet(int type, int index, int dir)
 }
 
 
-void ajoute_doublet_est(int index)
+void ajoute_doublet_est(int32_t index)
 {
-  int type = db_inv[EST_OUEST][TE[index].celltype][TE[index+1].celltype];
+  int32_t type = db_inv[EST_OUEST][TE[index].celltype][TE[index+1].celltype];
   ajoute_doublet(type, index, EST);
 }
 
-void ajoute_doublet_ouest(int index)
+void ajoute_doublet_ouest(int32_t index)
 {
-  int type = db_inv[EST_OUEST][TE[index-1].celltype][TE[index].celltype];
+  int32_t type = db_inv[EST_OUEST][TE[index-1].celltype][TE[index].celltype];
   ajoute_doublet(type, index-1, EST);
 }
 
-void ajoute_doublet_bas(int index)
+void ajoute_doublet_bas(int32_t index)
 {
   if (H <= 3) return;
-  int type = db_inv[VERTICAL][TE[index].celltype][TE[index+L].celltype];
+  int32_t type = db_inv[VERTICAL][TE[index].celltype][TE[index+L].celltype];
   ajoute_doublet(type, index, BAS);
 }
 
-void ajoute_doublet_haut(int index)
+void ajoute_doublet_haut(int32_t index)
 {
   if (H <= 3) return;
-  int type = db_inv[VERTICAL][TE[index-L].celltype][TE[index].celltype];
+  int32_t type = db_inv[VERTICAL][TE[index-L].celltype][TE[index].celltype];
   ajoute_doublet(type, index-L, BAS);
 }
 
-void ajoute_doublet_sud(int index)
+void ajoute_doublet_sud(int32_t index)
 {
   if (D <= 3) return;
-  int type = db_inv[NORD_SUD][TE[index].celltype][TE[index+HL].celltype];
+  int32_t type = db_inv[NORD_SUD][TE[index].celltype][TE[index+HL].celltype];
   ajoute_doublet(type, index, SUD);
 }
 
-void ajoute_doublet_nord(int index)
+void ajoute_doublet_nord(int32_t index)
 {
   if (D <= 3) return;
-  int type = db_inv[NORD_SUD][TE[index-HL].celltype][TE[index].celltype];
+  int32_t type = db_inv[NORD_SUD][TE[index-HL].celltype][TE[index].celltype];
   ajoute_doublet(type, index-HL, SUD);
 }
 
 void init_db_inv()
 {
-  int i, n;
-  int cl, etat1, etat2, db_eo, db_ns;
-  int split;
-  char flag_conflict;
+  int32_t i, n;
+  int32_t cl, etat1, etat2, db_eo, db_ns;
+  int32_t split;
+  int8_t flag_conflict;
 
   // initialisation du tableau db_inv[][][]
   memset(db_inv, DB_INACTIF, sizeof(db_inv));
@@ -511,8 +513,8 @@ void init_db_inv()
 
 void init_db_pos()
 {
-  static char first = 1;
-  unsigned int i,j,k, ix, td, tot;
+  static int8_t first = 1;
+  uint32_t i,j,k, ix, td, tot;
   Cell *t,*dr, *ba, *de;
 
   // allocations pour les tableaux de positions db_pos[][]
@@ -600,7 +602,7 @@ void init_db_pos()
 
 void fin_db_pos()
 {
-  int i;
+  int32_t i;
   LogPrintf("liberation db_pos\n");
   for(i = 0; i < nb_type_db; i++){
     //if (db_pos[i]) free(db_pos[i]);
@@ -612,7 +614,7 @@ void fin_db_pos()
 void dump_doublets()
 {
   FILE *fp;
-  int i;
+  int32_t i;
 
   fp = fopen("DBL.log","w");
   if ( ! fp ){
@@ -633,9 +635,9 @@ void dump_doublets()
 #ifdef INFO_DBL
 void dump_db_info()
 {
-  static int cpt = 0;
+  static int32_t cpt = 0;
   FILE *fp;
-  int i,tot,totmax;
+  int32_t i,tot,totmax;
 
   fp = fopen("DBL.log","a");
 

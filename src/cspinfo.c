@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -30,19 +30,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+
 #include "defs.h"
 #include "macros.h"
 #include "format.h"
 #include "cells.h"
 
 
-int H=0, L=0, D=0, HL=0, HLD=0;       // les dimensions de la terre
+int32_t H=0, L=0, D=0, HL=0, HLD=0;       // les dimensions de la terre
 Cell  *TE=NULL;	           // la 'terre'
 double csp_time=0.0;
-char *csp_filename=NULL; //nom du fichier CSP
-unsigned char opt_count=0;
-const char *etats[MAX_CELL] = ETATS;  // les noms des types de cellules
-int Ncel[MAX_CELL];        // nombre de cellules par type
+int8_t *csp_filename=NULL; //nom du fichier CSP
+uint8_t opt_count=0;
+const int8_t *etats[MAX_CELL] = ETATS;  // les noms des types de cellules
+int32_t Ncel[MAX_CELL];        // nombre de cellules par type
 
 void usage()
 {
@@ -53,9 +55,9 @@ void usage()
   exit(-1);
 }
 
-void general_options(int argc, char *argv[])
+void general_options(int32_t argc, int8_t *argv[])
 {
-  int i;
+  int32_t i;
   for(i=1; i<argc; i++){
     if (!strcmp(argv[i],"-c"))
       opt_count=1;
@@ -64,7 +66,7 @@ void general_options(int argc, char *argv[])
 
 void count_cells()
 {
-  int i;
+  int32_t i;
 
   HL = H*L;
   HLD = HL*D;
@@ -89,9 +91,9 @@ void count_cells()
   }
 }
 
-int main(int argc, char **argv)
+int32_t main(int32_t argc, int8_t **argv)
 {
-  int i;
+  int32_t i;
 
   if (argc < 2){
     usage();

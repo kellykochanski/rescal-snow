@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -55,8 +55,8 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 /// ======================================================
 
 /// common options
-// #define OPENMP		//use OpenMP parallelization (on lattice gas)
-#define GUI		//graphical interface
+#define OPENMP		//use OpenMP parallelization (on lattice gas)
+//#define GUI		//graphical interface
 #define CYCLAGE_HOR     //enable horizontal cycling
 #define INFO_CEL        //log the number of cells
 #define INFO_DBL        //log the number of active doublets

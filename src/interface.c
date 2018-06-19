@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdint.h>
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
@@ -40,13 +41,13 @@
 #include "callbacks.h"
 #include "interface.h"
 
-extern gint area_w, area_h;
-extern unsigned char opt_info;
-extern unsigned char opt_nv;
+extern gint32_t area_w, area_h;
+extern uint8_t opt_info;
+extern uint8_t opt_nv;
 
 GtkWidget *drawingarea;
 GtkStatusbar *statusbar;
-guint id_status=0;
+guint32_t id_status=0;
 
 #ifdef GUI
 
@@ -58,7 +59,7 @@ GtkWidget* create_window(void)
   GtkBuilder  *builder;
   //GtkTextView       *textview;
   //GtkTextBuffer     *buffer;
-  gchar *ui_file = "rescal-ui.xml";
+  gint8_t *ui_file = "rescal-ui.xml";
 
   gchar* filename = g_build_filename (RESCAL_DATA_DIR, ui_file, NULL);
 
@@ -119,7 +120,7 @@ void update_window()
 
 #endif //GUI
 
-void push_status(char* str, int id)
+void push_status(char* str, int32_t id)
 {
   if (opt_nv) return;
   if (!id) id = id_status;
@@ -132,7 +133,7 @@ void push_status(char* str, int id)
   }
 }
 
-void pop_status(int id)
+void pop_status(int32_t id)
 {
   if (opt_nv) return;
   if (!id) id = id_status;

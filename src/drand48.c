@@ -2,8 +2,8 @@
 /*LINTLIBRARY*/
 /*
  *	drand48, etc. pseudo-random number generator
- *	This implementation assumes unsigned short integers of at least
- *	16 bits, long integers of at least 32 bits, and ignores
+ *	This implementation assumes uint16_t integers of at least
+ *	16 bits, int64_t integers of at least 32 bits, and ignores
  *	overflows on adding or multiplying two unsigned integers.
  *	Two's-complement representation is assumed in a few places.
  *	Some extra masking is done if unsigneds are exactly 16 bits
@@ -12,6 +12,7 @@
  */
 //#if 1
 #ifdef __CYGWIN__
+#include <stdint.h>
 
 #ifndef HAVEFP
 #define HAVEFP 1
@@ -20,7 +21,7 @@
 #define MASK	((unsigned)(1 << (N - 1)) + (1 << (N - 1)) - 1)
 #define LOW(x)	((unsigned)(x) & MASK)
 #define HIGH(x)	LOW((x) >> N)
-#define MUL(x, y, z)	{ long l = (long)(x) * (long)(y); \
+#define MUL(x, y, z)	{ int64_t l = (long)(x) * (long)(y); \
 		(z)[0] = LOW(l); (z)[1] = HIGH(l); }
 #define CARRY(x, y)	((long)(x) + (long)(y) > MASK)
 #define ADDEQU(x, y, z)	(z = CARRY(x, (y)), x = LOW(x + (y)))
@@ -36,14 +37,14 @@
 #define SEED(x0, x1, x2) (SET3(x, x0, x1, x2), SET3(a, A0, A1, A2), c = C)
 #define REST(v)	for (i = 0; i < 3; i++) { xsubi[i] = x[i]; x[i] = temp[i]; } \
 		return (v);
-#define NEST(TYPE, f, F)	TYPE f(xsubi) register unsigned short *xsubi; { \
-	register int i; register TYPE v; unsigned temp[3]; \
+#define NEST(TYPE, f, F)	TYPE f(xsubi) register uint16_t *xsubi; { \
+	register int32_t i; register TYPE v; unsigned temp[3]; \
 	for (i = 0; i < 3; i++) { temp[i] = x[i]; x[i] = LOW(xsubi[i]); }  \
 	v = F(); REST(v); }
 #define HI_BIT	(1L << (2 * N - 1))
 
 static unsigned x[3] = { X0, X1, X2 }, a[3] = { A0, A1, A2 }, c = C;
-static unsigned short lastx[3];
+static uint16_t lastx[3];
 static void next();
 
 #if HAVEFP
@@ -71,7 +72,7 @@ irand48(m)
 /* Treat x[i] as a 48-bit fraction, and multiply it by the 16-bit
  * multiplier m.  Return integer part as result.
  */
-register unsigned short m;
+register uint16_t m;
 {
 	unsigned r[4], p[2], carry0 = 0;
 
@@ -87,11 +88,11 @@ register unsigned short m;
 long
 krand48(xsubi, m)
 /* same as irand48, except user provides storage in xsubi[] */
-register unsigned short *xsubi;
-unsigned short m;
+register uint16_t *xsubi;
+uint16_t m;
 {
-	register int i;
-	register long iv;
+	register int32_t i;
+	register int64_t iv;
 	unsigned temp[3];
 
 	for (i = 0; i < 3; i++) {
@@ -113,10 +114,10 @@ lrand48()
 long
 mrand48()
 {
-	register long l;
+	register int64_t l;
 
 	next();
-	/* sign-extend in case length of a long > 32 bits
+	/* sign-extend in case length of a int64_t > 32 bits
 						(as on Honeywell) */
 	return ((l = ((long)x[2] << N) + x[1]) & HI_BIT ? l | -HI_BIT : l);
 }
@@ -140,14 +141,14 @@ next()
 
 void
 srand48(seedval)
-long seedval;
+int64_t seedval;
 {
 	SEED(X0, LOW(seedval), HIGH(seedval));
 }
 
-unsigned short *
+uint16_t *
 seed48(seed16v)
-unsigned short seed16v[3];
+uint16_t seed16v[3];
 {
 	SETLOW(lastx, x, 0);
 	SEED(LOW(seed16v[0]), LOW(seed16v[1]), LOW(seed16v[2]));
@@ -156,7 +157,7 @@ unsigned short seed16v[3];
 
 void
 lcong48(param)
-unsigned short param[7];
+uint16_t param[7];
 {
 	SETLOW(x, param, 0);
 	SETLOW(a, param, 3);
@@ -169,7 +170,7 @@ NEST(long, jrand48, mrand48);
 
 #ifdef DRIVER
 /*
-	This should print the sequences of integers in Tables 2
+	This should print32_t the sequences of integers in Tables 2
 		and 1 of the TM:
 	1623, 3442, 1447, 1829, 1305, ...
 	657EB7255101, D72A0C966378, 5A743C062A23, ...
@@ -178,7 +179,7 @@ NEST(long, jrand48, mrand48);
 
 main()
 {
-	int i;
+	int32_t i;
 
 	for (i = 0; i < 80; i++) {
 		printf("%4d ", (int)(4096 * drand48()));

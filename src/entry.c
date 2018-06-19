@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -29,11 +29,14 @@
 
 #define _MAIN_
 #include <locale.h>
-#include <gtk/gtk.h>
+//GTK-JBK
+//#include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -41,7 +44,8 @@
 #include "param.h"
 #include "cells.h"
 #include "simul.h"
-#include "interface.h"
+//GTK interface-JBK
+//#include "interface.h"
 #include "callbacks.h"
 //#include "monitor.h"
 #include "view.h"
@@ -53,28 +57,32 @@
 #endif
 
 
-extern int graine;            // graine pour la generation des nombres aleatoires
+extern int32_t graine;            // graine pour la generation des nombres aleatoires
 extern float dump_delay_png;
 extern float dump_delay_csp;
-extern unsigned char csphpp_flag;
+extern uint8_t csphpp_flag;
 extern float stop_delay_t0;
 extern double stop_time;
-extern int mode_pat;
+extern int32_t mode_pat;
 #ifdef PARALLEL
-extern int mode_par;    //mode parallele
-extern int proc_id;
+extern int32_t mode_par;    //mode parallele
+extern int32_t proc_id;
 #endif
 
-int prog=PROG_RESCAL;
-int arch=0;
+int32_t prog=PROG_RESCAL;
+int32_t arch=0;
 float frame_delay=0;
-unsigned char opt_h=0, opt_hm=0, opt_nv=0, opt_info=0,  opt_dcsp=0, opt_dbin=0, opt_stop=0, opt_quit=0;
-unsigned char flag_no_input=0;
-gint dcsp_delay, dbin_delay, stop_delay;
-unsigned char opt_dpng=0, opt_djpeg=0;
-gint dpng_delay=0, djpeg_delay=0;
+uint8_t opt_h=0, opt_hm=0, opt_nv=0, opt_info=0,  opt_dcsp=0, opt_dbin=0, opt_stop=0, opt_quit=0;
+uint8_t flag_no_input=0;
+uint8_t opt_dpng=0, opt_djpeg=0;
 
-int main (int argc, char *argv[])
+//converted from gint32_t to int-JBK
+//gint32_t dcsp_delay, dbin_delay, stop_delay;
+//gint32_t dpng_delay=0, djpeg_delay=0;
+int32_t dcsp_delay, dbin_delay, stop_delay;
+int32_t dpng_delay=0, djpeg_delay=0;
+
+int32_t main (int32_t argc, int8_t *argv[])
 {
   DumpPar dp_info, dp_csp, dp_bin, dp_png, dp_jpeg;
 
@@ -83,7 +91,7 @@ int main (int argc, char *argv[])
 #endif
 
 #ifdef LOG_FILE
-  char log_filename[100];
+  int8_t log_filename[100];
   sprintf(log_filename,"RESCAL.log");
 #ifdef PARALLEL
   if (proc_id>=0){
@@ -111,7 +119,10 @@ int main (int argc, char *argv[])
 
   flag_no_input = (*argv[1] == '-');
 
-  gtk_set_locale();
+
+  //GTK to be removed-JBK
+  //gtk_set_locale();
+
 #ifdef NUM_MODE
   LogPrintf("format of numerical values: %s \n", NUM_MODE);
   setlocale(LC_NUMERIC, NUM_MODE);
@@ -123,9 +134,13 @@ int main (int argc, char *argv[])
   if (sizeof(long)==8) arch = W64;
   LogPrintf("size of long: %ld bytes (%s)\n", sizeof(long), (arch==W32)?"32b":"64b");
   LogPrintf("size of cell: %lu byte(s)\n", sizeof(Cell));
+
+//this isn't accesible with the GTK free version-JBK
 #ifndef GUI
   LogPrintf("graphical interface disabled\n");
 #endif
+
+
 #ifdef USE_GD
   LogPrintf("use of libgd\n");
 #endif
@@ -177,7 +192,7 @@ int main (int argc, char *argv[])
 
 
   /// is execution deterministic ?
-  int dflag = 1;
+  int32_t dflag = 1;
 #ifdef DETERMINISTIC
 #ifdef PARALLEL_AUTOMATA
   if (mode_pat) dflag = 0;
@@ -195,6 +210,8 @@ int main (int argc, char *argv[])
   else
     LogPrintf("non-deterministic execution\n");
 
+//Major GTK section to be removed-JBK
+  /*/
   if (!opt_nv){
 #if (GLIB_MAJOR_VERSION <= 2) && (GLIB_MINOR_VERSION<32)
     g_thread_init(NULL); /// deprecated function since glib 2.32
@@ -202,29 +219,40 @@ int main (int argc, char *argv[])
     gdk_threads_init();
     gtk_init (&argc, &argv);
   }
+   */
   /*else gtk_init_check (&argc, &argv);*/
 
   rescal_init(argv[1]);
   view_init(argc, argv);
+#ifdef GUI
   callbacks_init();
+#endif
 
   //if (opt_nv) rescal(0);
 
+//This is some more GTK code that isn't needed-JBK
+/*
 #ifdef GUI
   if (!opt_nv) {
     create_window();
     gcallback_flash(0);
   }
 #endif
+*/
 
   if (opt_info) {
     log_info();
     dp_info = (DumpPar){DUMP_LOG, 1};
+    //GTK output-JBK
+    /*
     g_timeout_add_seconds(60, gcallback_dump, &dp_info); //toutes les minutes
     //g_timeout_add_seconds(1, gcallback_dump, &dp_info); //toutes les secondes
-  }
+  */
+   }
 
-  if (opt_dcsp) {
+//Removed for GTK dependinces-JBK
+//TODO Remove GTK Dependinces by channging callback dump, and g_timeout-JBK
+/*  if (opt_dcsp) {
     //dump_terre(DUMP_CSP, dcsp_delay);
     dp_csp = (DumpPar){DUMP_CSP, dcsp_delay};
     gcallback_dump(&dp_csp);
@@ -237,34 +265,40 @@ int main (int argc, char *argv[])
     gcallback_dump(&dp_bin);
     g_timeout_add_seconds(dbin_delay*60, gcallback_dump, &dp_bin);
   }
-
+*/
 #if defined(USE_LIBPNG) || defined(USE_GD)
   view_dump_init();
 #endif
 
   if (opt_dpng) {
-    dump_image_inter(dpng_delay, "png");
-    dp_png = (DumpPar){DUMP_PNG, dpng_delay};
-    g_timeout_add_seconds(dpng_delay, gcallback_dump, &dp_png);
+    set_ss_timeout(dpng_delay, "png");
+    //g_timeout_add_seconds(dpng_delay, gcallback_dump, &dp_png);
   }
   if (opt_djpeg) {
-    dump_image_inter(djpeg_delay, "jpeg");
-    dp_jpeg = (DumpPar){DUMP_JPEG, djpeg_delay};
-    g_timeout_add_seconds(djpeg_delay, gcallback_dump, &dp_jpeg);
+    set_ss_timeout(djpeg_delay, "jpeg");
+    //g_timeout_add_seconds(djpeg_delay, gcallback_dump, &dp_jpeg);
   }
 
   if (opt_stop) {
-    g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, stop_delay*60+15, gcallback_stop, 0, NULL);
+    pthread_t pth;
+    pthread_create(&pth, 0, do_stop, (void*)(intptr_t)(stop_delay*60));
+    //TODO remove GTK dependince from timeout_add-JBK
+    //g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, stop_delay*60+15, gcallback_stop, 0, NULL);
+
     //gtk_timeout_add(stop_delay*60000+15000, callback_stop, 0);
   }
-  if (opt_quit){
-    g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, 1, gcallback_quit, 0, NULL);
+  if (opt_quit) {
+    pthread_t pth;
+    pthread_create(&pth, 0, do_quit, 0);
+    //TODO remove GTK dependince from timeout_add-JBK
+    //g_timeout_add_seconds_full(G_PRIORITY_DEFAULT, 1, gcallback_quit, 0, NULL);
   }
 
-  int nRetVal;
+  int32_t nRetVal;
   pthread_t pth;
   nRetVal = pthread_create( &pth, 0, rescal_thread, 0);
-
+  pthread_join(pth,0); //TODO: THIS IS TEMP CODE-JBK
+  //**** This was already commented out? ***-JBK
   /*
   GThread *pth;
   GError *err = NULL;
@@ -273,8 +307,10 @@ int main (int argc, char *argv[])
   */
 
   //gtk_idle_add(idle, NULL);
+  //*************************************
 
-  gtk_main ();
+  //More GTK that's not needed-JBK
+  //gtk_main ();
 
 #ifdef LOG_FILE
   fclose(log_file);
@@ -283,9 +319,9 @@ int main (int argc, char *argv[])
   return 0;
 }
 
-void read_delay(char *str, DumpDelay *pd)
+void read_delay(int8_t *str, DumpDelay *pd)
 {
-  int n;
+  int32_t n;
   if (strstr(str, "t0")){
     pd->unit = UNIT_T0;
     if (sscanf(str, "%ft0", &pd->val)!=1) {ErrPrintf("ERROR: invalid delay value %s\n",str); exit(-1);}
@@ -298,9 +334,9 @@ void read_delay(char *str, DumpDelay *pd)
   //LogPrintf("delay: %f (%d)\n", pd->val, pd->unit);
 }
 
-void general_options(int argc, char *argv[])
+void general_options(int32_t argc, int8_t *argv[])
 {
-  int i;
+  int32_t i;
   DumpDelay dd;
 
   /// log the command line options
@@ -319,7 +355,7 @@ void general_options(int argc, char *argv[])
     else if (!strcmp(argv[i],"-nv"))
       opt_nv = 1;
     else if (!strcmp(argv[i],"-fr")){
-      int frame_rate = atoi(argv[++i]);
+      int32_t frame_rate = atoi(argv[++i]);
       frame_delay = (frame_rate<100) ? 1000/frame_rate : 10;
     }
     else if (!strcmp(argv[i],"-info")){
@@ -464,15 +500,20 @@ void usage_no_input()
   printf("Try '-h' option for usage\n");
 }
 
+
+//TODO convert this to non GTK?-JBK
+/*
 //#ifdef GTK_OLD_SYNTAX
 #if GTK2 && (GTK_MINOR_VERSION<14)
-void g_timeout_add_seconds(int nsec, GtkFunction gcallback_dump, gpointer data)
+void g_timeout_add_seconds(int32_t nsec, GtkFunction gcallback_dump, gpointer data)
 {
   gtk_timeout_add(nsec*1000, gcallback_dump, data);
 }
 
-void g_timeout_add_seconds_full(int prior, int nsec, GtkFunction gcallback_dump, gpointer data, void *notify)
+void g_timeout_add_seconds_full(int32_t prior, int32_t nsec, GtkFunction gcallback_dump, gpointer data, void *notify)
 {
   gtk_timeout_add(nsec*1000, gcallback_dump, data);
 }
 #endif
+*/
+

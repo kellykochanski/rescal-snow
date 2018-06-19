@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -28,6 +28,8 @@
 #include <math.h>
 #include <assert.h>
 #include <pthread.h>
+#include <stdint.h>
+
 #include "defs.h"
 #include "macros.h"
 #include "format.h"
@@ -45,30 +47,30 @@
 #include "trace.h"
 
 extern double csp_time;                  // temps reel simule
-extern int pbc_mode;  //periodic boundary conditions
-extern int use_lgca;
+extern int32_t pbc_mode;  //periodic boundary conditions
+extern int32_t use_lgca;
 
 #ifdef PARALLEL
-extern int mode_par;    //mode parallele
-extern int proc_id;     //numero de process en mode parallele (0 = serveur)
-extern int Tunnel[];    //bords partages avec d'autres process
+extern int32_t mode_par;    //mode parallele
+extern int32_t proc_id;     //numero de process en mode parallele (0 = serveur)
+extern int32_t Tunnel[];    //bords partages avec d'autres process
 #endif
 
-extern int ava_norm;
-extern int rot_mode;
+extern int32_t ava_norm;
+extern int32_t rot_mode;
 
 #ifdef SURRECTIONS
-extern int sur_mode;                // type de surrection (uniforme ou locale)
+extern int32_t sur_mode;                // type de surrection (uniforme ou locale)
 #endif
 
-int L=0, H=0, D=0, HL=0, HLD=0;       // dimensions of the cellular space
-int L_bounds=1, D_bounds = 1; //thickness of lateral boundaries
-int LN, LS, LEO, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
-int Hd2, Ld2, Dd2;
+int32_t L=0, H=0, D=0, HL=0, HLD=0;       // dimensions of the cellular space
+int32_t L_bounds=1, D_bounds = 1; //thickness of lateral boundaries
+int32_t LN, LS, LEO, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
+int32_t Hd2, Ld2, Dd2;
 Cell  *TE=NULL;	           // la 'terre'
-char *bin_filename=NULL; //nom du fichier BIN
-char *csp_filename=NULL; //nom du fichier CSP
-int L_rot=0, D_rot=0;     // dimensions of the rotating space
+int8_t *bin_filename=NULL; //nom du fichier BIN
+int8_t *csp_filename=NULL; //nom du fichier CSP
+int32_t L_rot=0, D_rot=0;     // dimensions of the rotating space
 
 #ifdef REFDB_PTR
 RefDoublets *RefDB=NULL;       // references des cellules de la terre vers les doublets actifs
@@ -76,14 +78,14 @@ RefDoublets *RefDB=NULL;       // references des cellules de la terre vers les d
 RefDoublets_Type *RefDB_Type=NULL;       // references des cellules de la terre vers les doublets actifs
 RefDoublets_Ind *RefDB_Ind=NULL;       // references des cellules de la terre vers les doublets actifs
 #endif
-int graine = 273676;           // graine pour la generation des nombres aleatoires
-int h_ceil=0;                 //epaisseur du plafond
-int h_floor=0;                 //epaisseur du sol
-int nb_pv=0;                  // nombre de plans verticaux (non-DUM)
-char *psol=NULL;              // indicateur des plans solides verticaux est-ouest
-char *csol=NULL;              // indicateur des colonnes solides
+int32_t graine = 273676;           // graine pour la generation des nombres aleatoires
+int32_t h_ceil=0;                 //epaisseur du plafond
+int32_t h_floor=0;                 //epaisseur du sol
+int32_t nb_pv=0;                  // nombre de plans verticaux (non-DUM)
+int8_t *psol=NULL;              // indicateur des plans solides verticaux est-ouest
+int8_t *csol=NULL;              // indicateur des colonnes solides
 float csp_angle = 0.0;        //angle resultant de toutes les rotations
-char *rot_map = NULL;        // periodic mapping of the rotating space
+int8_t *rot_map = NULL;        // periodic mapping of the rotating space
 Pos2 *rot_map_pos = NULL;        // periodic mapping of the rotating space
 Pos2 *rot_map_pos0 = NULL;        // old periodic mapping of the rotating space
 
@@ -97,7 +99,7 @@ void init_terre()
   //pthread_cond_init (&cond_csp, NULL);
 }
 
-void lock_csp(int log_flag)
+void lock_csp(int32_t log_flag)
 {
 #ifdef CSP_MUTEX
   if (log_flag) LogPrintf("lock csp\n");
@@ -106,7 +108,7 @@ void lock_csp(int log_flag)
 #endif
 }
 
-void unlock_csp(int log_flag)
+void unlock_csp(int32_t log_flag)
 {
 #ifdef CSP_MUTEX
   if (log_flag) LogPrintf("unlock csp\n");
@@ -117,9 +119,9 @@ void unlock_csp(int log_flag)
 
 void cree_terre()
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
-  char *filename;
+  int8_t *filename;
 
   if (pbc_mode) LogPrintf("cyclage horizontal\n");
 
@@ -145,7 +147,7 @@ void cree_terre()
     D_rot = D;
     float diag_length = sqrtf(L*L + D*D);
     LogPrintf("diag_length = %f\n", diag_length);
-    int margin = 5;
+    int32_t margin = 5;
   #ifdef LGCA
     if (use_lgca) margin = DIST_MVT_NS + 1;
   #endif // LGCA
@@ -245,7 +247,7 @@ void cree_terre()
     }
   }
 #else
-  unsigned char type = (BORD>=2) ? 0 : 2;
+  uint8_t type = (BORD>=2) ? 0 : 2;
   for(k=0; k < D; k++){ // profondeur
     for(j=0; j < H; j++){ // hauteur
       for(i=0; i < L; i++, aux++){ //largeur
@@ -286,7 +288,7 @@ void cree_terre()
 #ifdef PARALLEL
 void cree_tunnels()
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   aux = TE;
@@ -315,7 +317,7 @@ void apocalypse()
 }
 
 
-void cellule_terre(unsigned char type, int ix)
+void cellule_terre(uint8_t type, int32_t ix)
 {
   //changer l'etat d'une cellule de la terre
   elimine_doublet_est(ix);
@@ -336,9 +338,9 @@ void cellule_terre(unsigned char type, int ix)
 }
 
 /// Horizontal cycling in case of periodic boundary conditions
-int hcycle(int ix)
+int32_t hcycle(int32_t ix)
 {
-  int x, y, z;
+  int32_t x, y, z;
 
   if (TE[ix].celltype != BORD){
     //WarnPrintf("WARNING: hcycle - it is not a boundary\n");
@@ -379,9 +381,9 @@ int hcycle(int ix)
   return ix;
 }
 
-int get_cell_east(int ix)
+int32_t get_cell_east(int32_t ix)
 {
-  int ix2;
+  int32_t ix2;
   ix2 = ix+1;
 
 #ifdef CYCLAGE_HOR
@@ -398,9 +400,9 @@ int get_cell_east(int ix)
   return ix2;
 }
 
-int get_cell_west(int ix)
+int32_t get_cell_west(int32_t ix)
 {
-  int ix2;
+  int32_t ix2;
   ix2 = ix-1;
 
 #ifdef CYCLAGE_HOR
@@ -417,9 +419,9 @@ int get_cell_west(int ix)
   return ix2;
 }
 
-int get_cell_south(int ix)
+int32_t get_cell_south(int32_t ix)
 {
-  int ix2;
+  int32_t ix2;
   ix2 = ix+HL;
 
 #ifdef CYCLAGE_HOR
@@ -436,9 +438,9 @@ int get_cell_south(int ix)
   return ix2;
 }
 
-int get_cell_north(int ix)
+int32_t get_cell_north(int32_t ix)
 {
-  int ix2;
+  int32_t ix2;
   ix2 = ix-HL;
 
 #ifdef CYCLAGE_HOR
@@ -455,19 +457,19 @@ int get_cell_north(int ix)
   return ix2;
 }
 
-int get_cell_down(int ix)
+int32_t get_cell_down(int32_t ix)
 {
   return ix + L;
 }
 
-int get_cell_up(int ix)
+int32_t get_cell_up(int32_t ix)
 {
   return ix - L;
 }
 
-int get_cell_dir(int ix, char dir)
+int32_t get_cell_dir(int32_t ix, int8_t dir)
 {
-  int ix2;
+  int32_t ix2;
   if (dir == EST)
     ix2 = get_cell_east(ix);
   else if (dir == OUEST)
@@ -488,8 +490,8 @@ float color_coef=0.1; //0.1;         // coefficient associe a la callback check_
 
 void init_color()
 {
-  int i, j, k;
-  int nbcelcol=0;
+  int32_t i, j, k;
+  int32_t nbcelcol=0;
 
   //LogPrintf("initialisation des couleurs %d %d\n", sizeof(Cell), sizeof(Cell2));
   //initialise la couleur des cellules
@@ -512,12 +514,12 @@ void init_color()
 }
 
 // callback de controle en fonction de la couleur
-int check_color(int ix, void *data)
+int32_t check_color(int32_t ix, void *data)
 {
-  static int start = 1;
+  static int32_t start = 1;
   //static float coef = 0.1;
   DataCheck *pdc = data;
-  int chk_ok = 1;
+  int32_t chk_ok = 1;
 
   if (start){
     LogPrintf("controle en fonction de la couleur des grains - coef = %f - col = %d\n", pdc->coef, pdc->col);
@@ -535,27 +537,27 @@ int check_color(int ix, void *data)
 #endif
 
 #if CELL_DATA
-//char cdata_offset = sizeof(TE->celltype);
+//int8_t cdata_offset = sizeof(TE->celltype);
 /*
 //initialisation des donnees de la cellule ix
-void init_cell_data(CellData data, int ix)
+void init_cell_data(CellData data, int32_t ix)
 {
   memcpy((void *)(TE+ix) + CELL_TYPE_SIZE, (void *)(&data), CELL_DATA_SIZE);
 }
 
 //copier les donnees de la cellule ix dans data
-void get_cell_data(CellData data, int ix)
+void get_cell_data(CellData data, int32_t ix)
 {
   memcpy((void *)(&data), (void *)(TE+ix) + CELL_TYPE_SIZE, CELL_DATA_SIZE);
 }
 */
 
 //permuter les donnees de 2 cellules
-void swap_cell_data(int ix, int ix2)
+void swap_cell_data(int32_t ix, int32_t ix2)
 {
   Cell aux;
-  char flag1 = 1;
-  char flag2 = 1;
+  int8_t flag1 = 1;
+  int8_t flag2 = 1;
 
   //LogPrintf("offset = %d\n", offset);
 
@@ -582,7 +584,7 @@ void swap_cell_data(int ix, int ix2)
   if (flag2) memcpy((void *)(TE+ix2) + CELL_TYPE_SIZE, (void *)(&aux) + CELL_TYPE_SIZE, CELL_DATA_SIZE); //TE[ix2].celldata <- aux.celldata
 }
 
-void update_inout_data(int ix, int ix2)
+void update_inout_data(int32_t ix, int32_t ix2)
 {
 #ifdef CELL_COLOR
 #ifdef IN
@@ -594,7 +596,7 @@ void update_inout_data(int ix, int ix2)
 }
 
 //copier les donnees de la cellule ix dans la cellule ix2
-void copy_cell_data(int ix, int ix2)
+void copy_cell_data(int32_t ix, int32_t ix2)
 {
   memcpy((void *)(TE+ix2) + CELL_TYPE_SIZE, (void *)(TE+ix) + CELL_TYPE_SIZE, CELL_DATA_SIZE); //TE[ix2].celldata <- aux.celldata
 }
@@ -602,46 +604,46 @@ void copy_cell_data(int ix, int ix2)
 #endif  //CELL_DATA
 
 // callback de controle en fonction de l'altitude
-int check_alti(int ix, void *data)
+int32_t check_alti(int32_t ix, void *data)
 {
-  static int start = 1;
+  static int32_t start = 1;
   if (start){
     LogPrintf("controle du flux entrant en fonction de l'altitude\n");
     start = 0;
   }
   //calcul de la position (x,y,z)
-  int x, y, z;
+  int32_t x, y, z;
   Calcule_xyz(ix, x, y, z);
 
   //calcul probabiliste suivant y
   float alea = drand48();
   float var = 1.0-(float)y/H; //probabilite plus forte si altitude elevee (y faible)
   //float var = 1.0-2.0*(float)y/H;
-  int chk_ok = (alea < var);
+  int32_t chk_ok = (alea < var);
   //if (!chk_ok) {LogPrintf(" check_alti : not ok\n");}
   return chk_ok;
 }
 
-int check_cell_dir(int ix, void *data)
+int32_t check_cell_dir(int32_t ix, void *data)
 {
   DataCheck *pdc = data;
-  int dir = pdc->char_data1;
-  int cell_type = pdc->char_data2;
-  int ix2;
+  int32_t dir = pdc->char_data1;
+  int32_t cell_type = pdc->char_data2;
+  int32_t ix2;
 
   ix2 = get_cell_dir(ix, dir);
 
   return TE[ix2].celltype == cell_type;
 }
 
-int check_no_cell_dir(int ix, void *data)
+int32_t check_no_cell_dir(int32_t ix, void *data)
 {
   return !check_cell_dir(ix, data);
 }
 
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
 // callback de controle en fonction de la cellule a l'ouest
-int check_grain_seul(int index, void *data)
+int32_t check_grain_seul(int32_t index, void *data)
 {
   return TE[index-1].celltype == EAUC;
 }
@@ -649,21 +651,21 @@ int check_grain_seul(int index, void *data)
 
 #ifdef MODEL_LIFE
 //threshold values for birth transitions
-int B_min = 3;
-int B_max = 3;
+int32_t B_min = 3;
+int32_t B_max = 3;
 //threshold values for cells to stay alive
-int S_min = 2;
-int S_max = 3;
+int32_t S_min = 2;
+int32_t S_max = 3;
 
 /// counts living neighbours
-int count_neighbours(int ix)
+int32_t count_neighbours(int32_t ix)
 {
-  int nb = 0;
+  int32_t nb = 0;
 
-  int ix_east = get_cell_east(ix);
-  int ix_west = get_cell_west(ix);
-  int ix_south = get_cell_south(ix);
-  int ix_north = get_cell_north(ix);
+  int32_t ix_east = get_cell_east(ix);
+  int32_t ix_west = get_cell_west(ix);
+  int32_t ix_south = get_cell_south(ix);
+  int32_t ix_north = get_cell_north(ix);
 
   if (TE[ix_east].celltype == ALIVE) nb++;
   if (TE[ix_west].celltype == ALIVE) nb++;
@@ -678,17 +680,17 @@ int count_neighbours(int ix)
 }
 
 /// check callback for the birth transition of a cell
-int check_birth(int ix, void *data)
+int32_t check_birth(int32_t ix, void *data)
 {
-  int nb = count_neighbours(ix);
+  int32_t nb = count_neighbours(ix);
 
   return (nb >= B_min) && (nb <= B_max);
 }
 
 /// check callback for the death transition of a cell
-int check_death(int ix, void *data)
+int32_t check_death(int32_t ix, void *data)
 {
-  int nb = count_neighbours(ix);
+  int32_t nb = count_neighbours(ix);
 
   return (nb < S_min) || (nb > S_max);
 }
@@ -696,15 +698,15 @@ int check_death(int ix, void *data)
 
 #ifdef SURRECTIONS
 
-unsigned char *surrection_map = NULL;
+uint8_t *surrection_map = NULL;
 
 void init_surrection()
 {
-  int i, k, x1, x2, z1, z2;
+  int32_t i, k, x1, x2, z1, z2;
   float alea;
-  int Lmap = L-2;
-  int Dmap = D-2;
-  unsigned char *aux;
+  int32_t Lmap = L-2;
+  int32_t Dmap = D-2;
+  uint8_t *aux;
   Cell *pt;
 
   if (sur_mode == SUR_MODE_UNIFORM) {LogPrintf("surrection uniforme\n");}  // \t iter = %lu%09lu \n", md_iter, iter);
@@ -735,7 +737,7 @@ void init_surrection()
   }
 
   if (sur_mode == SUR_MODE_CONE){
-    int di, dk, r2;
+    int32_t di, dk, r2;
     alea = drand48();
     r2 = alea*alea*Lmap*Dmap/8;
     LogPrintf("rayon = %d\n", (int)sqrt(r2));
@@ -750,7 +752,7 @@ void init_surrection()
   }
 
   if (sur_mode == SUR_MODE_TECTO){
-    int prof;
+    int32_t prof;
     //alea = drand48();
     //prof = alea*Dmap/2;
     prof = Dmap;
@@ -758,18 +760,18 @@ void init_surrection()
     for(k=z1; k < z2; k++){ // profondeur
       aux = surrection_map + x1 + k*Lmap;
       for(i=x1; i < x2; i++, aux++){ //largeur
-        int dk = Dmap*0.45 - k;
+        int32_t dk = Dmap*0.45 - k;
         *aux = ((dk >= 0) && (dk < prof));
       }
     }
   }
 }
 
-int surrection()
+int32_t surrection()
 {
-  int i, j, k, n;
+  int32_t i, j, k, n;
   Cell *aux;
-  unsigned char *auxmap;
+  uint8_t *auxmap;
 
   //initialisation du tableau surrection_map
   init_surrection();
@@ -819,13 +821,13 @@ int surrection()
 #endif //SURRECTIONS
 
 
-void translation(int dx, int dz)
+void translation(int32_t dx, int32_t dz)
 {
   static Cell *auxmap = NULL;
   static float dx_sum = 0;
   static float dz_sum = 0;
   Cell *aux, *aux2;
-  int i, j, k, i0, k0;
+  int32_t i, j, k, i0, k0;
 
   if (!dx && !dz) return;
 
@@ -892,10 +894,10 @@ void translation(int dx, int dz)
 }
 
 /// set a line of points in a horizontal LxD map (for the periodic boundaries of a rotating space)
-void set_line(char *hmap, float x1, float y1, float x2, float y2, char c)
+void set_line(int8_t *hmap, float x1, float y1, float x2, float y2, int8_t c)
 {
   float sdx,sdy,dxabs,dyabs;
-  int i,ix1,iy1,px,py,i2;
+  int32_t i,ix1,iy1,px,py,i2;
   float slope;
   float dx = x2-x1;
   float dy = y2-y1;
@@ -938,10 +940,10 @@ void set_line(char *hmap, float x1, float y1, float x2, float y2, char c)
 
 void verify_rotating_map()
 {
-  int i,j,k;
-  int bmin, bmax;
+  int32_t i,j,k;
+  int32_t bmin, bmax;
   Pos2 cp, cp2;
-  int ix, ix1, ix2;
+  int32_t ix, ix1, ix2;
 
   for(i=0; i < L; i++){
     bmin = -1;
@@ -978,9 +980,9 @@ void verify_rotating_map()
 }
 
 
-void translate_rotation_map(int di, int dk)
+void translate_rotation_map(int32_t di, int32_t dk)
 {
-  int i, k, i2, k2;
+  int32_t i, k, i2, k2;
 
   for(k=0; k < D; k++){
     for(i=0; i < L; i++){
@@ -1000,7 +1002,7 @@ void translate_rotation_map(int di, int dk)
 
 void rotate_map(float angle)
 {
-  int i,k;
+  int32_t i,k;
 
   //LogPrintf("rotate map - angle=%f\n", angle);
 
@@ -1030,23 +1032,23 @@ void rotate_map(float angle)
   float co = cos(angle*PI/180.0);
   float si = sin(angle*PI/180.0);
   /// north-west corner
-  int i00 = Round(cx + co*x1 - si*y1);
-  int k00 = Round(cy + si*x1 + co*y1);
+  int32_t i00 = Round(cx + co*x1 - si*y1);
+  int32_t k00 = Round(cy + si*x1 + co*y1);
   /// north-east corner
-  int i10 = Round(cx + co*x2 - si*y1);
-  int k10 = Round(cy + si*x2 + co*y1);
+  int32_t i10 = Round(cx + co*x2 - si*y1);
+  int32_t k10 = Round(cy + si*x2 + co*y1);
   /// south-west corner
-  int i01 = Round(cx + co*x1 - si*y2);
-  int k01 = Round(cy + si*x1 + co*y2);
+  int32_t i01 = Round(cx + co*x1 - si*y2);
+  int32_t k01 = Round(cy + si*x1 + co*y2);
   //LogPrintf("float: %f\n", cx + co*x2 - si*y1);
   /// inner boundary edges
-  int di1 = i10 - i00;
-  int dk1 = k10 - k00;
-  int di2 = i01 - i00; //-dk1;
-  int dk2 = k01 - k00; //di1;
+  int32_t di1 = i10 - i00;
+  int32_t dk1 = k10 - k00;
+  int32_t di2 = i01 - i00; //-dk1;
+  int32_t dk2 = k01 - k00; //di1;
   /// translate south-east corner
-  int i11 = i10 + di2; //roundf(di0 + co*di11 - si*dk11);
-  int k11 = k10 + dk2; //roundf(dk0 + si*di11 + co*dk11);
+  int32_t i11 = i10 + di2; //roundf(di0 + co*di11 - si*dk11);
+  int32_t k11 = k10 + dk2; //roundf(dk0 + si*di11 + co*dk11);
 
   /*LogPrintf("cx=%f, cy=%f\n", cx, cy);
   LogPrintf("x1=%f, y1=%f\n", x1, y1);
@@ -1062,7 +1064,7 @@ void rotate_map(float angle)
   set_line(rot_map, i10, k10, i11, k11, 1);
 
   /// fill the map of the rotating space (with value 2)
-  int bmin, bmax;
+  int32_t bmin, bmax;
   for(k=0; k < D; k++){
     // locate the inner boundaries
     bmin = -1;
@@ -1091,8 +1093,8 @@ void rotate_map(float angle)
     /// set the periodic mapping on the outside of rotating space (and put negative values in rotation map)
     float rx = sqrtf(L*L+D*D)/L_rot;
     float ry = sqrtf(L*L+D*D)/D_rot;
-    int imax = (int)ceilf((rx-1.0)/2);
-    int kmax = (int)ceilf((ry-1.0)/2);
+    int32_t imax = (int)ceilf((rx-1.0)/2);
+    int32_t kmax = (int)ceilf((ry-1.0)/2);
     //LogPrintf("rx=%f, ry=%f\n", rx, ry);
     //LogPrintf("imax=%d, kmax=%d\n", imax, kmax);
     for (k=-kmax; k <= kmax; k++){
@@ -1115,7 +1117,7 @@ void rotate_map(float angle)
 }
 
 
-void rotation(float angle, char mode, char flags)
+void rotation(float angle, int8_t mode, int8_t flags)
 {
   static Cell *csp_tmp = NULL;
   static Cell *TE0 = NULL;
@@ -1125,8 +1127,8 @@ void rotation(float angle, char mode, char flags)
   float si;
   float di0, dk0;
   float di, dk;
-  int i0, k0;
-  int i, j, k;
+  int32_t i0, k0;
+  int32_t i, j, k;
 
   if (!csp_tmp) AllocMemoryPrint("csp_tmp (rotation)", csp_tmp, Cell, HLD);
 
@@ -1158,7 +1160,7 @@ void rotation(float angle, char mode, char flags)
 
   /// rotating table
   if ((mode == ROT_MODE_DISK) && !(flags & ROT_REORIENT_UNDO)){
-    //int r2 = (Ld2-2)*(Ld2-2);
+    //int32_t r2 = (Ld2-2)*(Ld2-2);
     //float r2 = (Ld2-12)*(Ld2-12); //en presence d'un trou cylindrique, prevoir une table tournante de rayon inferieur d'une cellule
     float dist = 10;
     float R = (D<L) ? Dd2-dist : Ld2-dist;
@@ -1248,14 +1250,14 @@ void rotation(float angle, char mode, char flags)
               }
               else{
                 /// find nearest cell in rotating space, towards the center
-                int ix0 = i0+j*L+k0*HL;
+                int32_t ix0 = i0+j*L+k0*HL;
                 //LogPrintf("full rotation - trying to find a cell, i0=%d, k0=%d, ix0=%d\n", i0, k0, ix0);
                 float dist = sqrtf(di*di + dk*dk);
                 float step_i = -di/dist;
                 float step_k = -dk/dist;
                 //LogPrintf("di=%f, dk=%f\n",di,dk);
                 //LogPrintf("step_i=%f, step_k=%f\n",step_i,step_k);
-                int nb;
+                int32_t nb;
                 for(nb=1; nb<10; nb++){
                   di += step_i;
                   dk += step_k;
@@ -1266,7 +1268,7 @@ void rotation(float angle, char mode, char flags)
                   //LogPrintf("i0=%d, k0=%d\n", i0, k0);
                 }
                 //LogPrintf("full rotation - cell found, ix0=%d, nb=%d\n", ix0, nb);
-                static int nbmax=3; /// empirical value
+                static int32_t nbmax=3; /// empirical value
                 if (nb>nbmax){
                   WarnPrintf("WARNING: full rotation - cell found too far, nb=%d, i=%d, k=%d, i0=%d, k0=%d\n", nb, i, k, i0, k0);
                   nbmax = nb;
@@ -1299,7 +1301,7 @@ void rotation(float angle, char mode, char flags)
             i0 = Round(di0 + co*di + si*dk);
             k0 = Round(dk0 - si*di + co*dk);
 #ifdef TRACE_DAR_COL
-            char no_trace = 0;
+            int8_t no_trace = 0;
             if ((i0<1) || (i0>=L-1) || (k0<1) || (k0>=D-1)) no_trace=1;
 #endif
             while (i0<1) i0+=L-2;
@@ -1388,12 +1390,12 @@ void rotation(float angle, char mode, char flags)
   //LogPrintf("end of rotation\n");
 }
 
-void rotation90(int n)
+void rotation90(int32_t n)
 {
   static Cell *auxmap = NULL;
   Cell *aux, *aux2;
-  int i, j, k;
-  int i0, k0;
+  int32_t i, j, k;
+  int32_t i0, k0;
   float a = n*PI/2;
   float co = cos(a);
   float si = sin(a);
@@ -1454,7 +1456,7 @@ void rotation90(int n)
 void conditions_bords()
 {
   Cell *aux;
-  int j, k, k1, k2, ll;
+  int32_t j, k, k1, k2, ll;
 
   //ouverture aleatoire d'une partie du bord gauche (sans DUM)
   ll = D/4;
@@ -1478,7 +1480,7 @@ void conditions_bords()
 #ifdef LISSAGE
 void init_lissage()
 {
-  int i, j, k;
+  int32_t i, j, k;
   Cell *aux;
 
   LogPrintf("init_lissage\n");
@@ -1501,7 +1503,7 @@ void init_lissage()
 
 void lissage_terre()
 {
-  int i, n;
+  int32_t i, n;
   Cell *aux;
 
 #ifdef MODEL_RIV
@@ -1519,10 +1521,10 @@ void lissage_terre()
 }
 #endif  //LISSAGE
 
-int dummy_h_plan(int y)
+int32_t dummy_h_plan(int32_t y)
 {
-  int i,k,ix;
-  int res=1;
+  int32_t i,k,ix;
+  int32_t res=1;
 
   //test si le plan horizontal y est entierement constitue de cellules DUM|BORD|IN|OUT
   for(k=0; (k<D) && (res); k++){ // profondeur
@@ -1536,9 +1538,9 @@ int dummy_h_plan(int y)
   return res;
 }
 
-int dummy_column(int x, int z)
+int32_t dummy_column(int32_t x, int32_t z)
 {
-  int ix;
+  int32_t ix;
 
   ix = z*HL + L + x;
   //test si la colonne (x,y) est entierement constitue de cellules DUM
@@ -1548,10 +1550,10 @@ int dummy_column(int x, int z)
   return (TE[ix].celltype == BORD) ? DUM : 0;
 }
 
-int dummy_v_plan(int z)
+int32_t dummy_v_plan(int32_t z)
 {
-  int x=1;
-  int res=1;
+  int32_t x=1;
+  int32_t res=1;
 
   //test si le plan vertical z est entierement constitue de cellules DUM|BORD
   while((x<L-1) && (res=dummy_column(x, z))) x++;
@@ -1563,8 +1565,8 @@ int dummy_v_plan(int z)
 
 void calcule_couloir()
 {
-  int i;
-  static char start = 1;
+  int32_t i;
+  static int8_t start = 1;
 
   if (!psol) AllocMemory(psol,char,D);
   //ResetMemory(psol,int,L);
@@ -1619,7 +1621,7 @@ void calcule_couloir()
 //calcul des colonnes en DUM|BORD
 void compute_v_walls()
 {
-  int i,j;
+  int32_t i,j;
 
   if (!csol){
     AllocMemory(csol,char,L*D);
@@ -1639,7 +1641,7 @@ void compute_v_walls()
 //calcul epaisseur du plafond en DUM
 void compute_h_ceil()
 {
-  int j;
+  int32_t j;
 
   for(j=1; (j<H) && dummy_h_plan(j); j++); // hauteur
 
@@ -1653,7 +1655,7 @@ void compute_h_ceil()
 //calcul epaisseur du sol en DUM
 void compute_h_floor()
 {
-  int j;
+  int32_t j;
 
   for(j=H-2; (j>0) && dummy_h_plan(j); j--); // hauteur
 
@@ -1664,9 +1666,9 @@ void compute_h_floor()
   //return j;
 }
 
-Vec3 compute_mass_center(int type)
+Vec3 compute_mass_center(int32_t type)
 {
-  int i, j, k, ix, n;
+  int32_t i, j, k, ix, n;
   Vec3 mc = {0, 0, 0};
 
   n = 0;
@@ -1698,16 +1700,16 @@ Vec3 compute_mass_center(int type)
 
 void dump_rugosi(/*double csp_time*/)
 {
-  static int cpt=0;
+  static int32_t cpt=0;
 	double lmean, hmean, rugH, rugB, rugHmean, rugBmean;
 	Cell *haut, *bas;
-	int i,j,top,bot;
-	static int *Vtop=NULL, *Vbot=NULL;
-	char nom[256];
+	int32_t i,j,top,bot;
+	static int32_t *Vtop=NULL, *Vbot=NULL;
+	int8_t nom[256];
 	FILE *fp;
 
-	if ( ! Vtop ) Vtop = (int *) malloc(sizeof(int)*L*D);
-	if ( ! Vbot ) Vbot = (int *) malloc(sizeof(int)*L*D);
+	if ( ! Vtop ) Vtop = (int32_t *) malloc(sizeof(int)*L*D);
+	if ( ! Vbot ) Vbot = (int32_t *) malloc(sizeof(int)*L*D);
 
 	lmean = hmean = rugH = rugB = rugHmean = rugBmean = 0.0;
 
@@ -1796,15 +1798,15 @@ void dump_rugosi(/*double csp_time*/)
 #endif
 
 
-void dump_terre(char dump_type, int cpt, int unit)
+void dump_terre(int8_t dump_type, int32_t cpt, int32_t unit)
 {
-  char filename[100];
-  char str[100];
-  char *ext;
+  int8_t filename[100];
+  int8_t str[100];
+  int8_t *ext;
 
   ext = (dump_type == DUMP_CSP) ? "csp" : "bin";
 #ifdef PARALLEL
-  extern int proc_id;
+  extern int32_t proc_id;
   sprintf(str,"_%d",proc_id);
 #else
   *str = 0;
@@ -1822,7 +1824,7 @@ void dump_terre(char dump_type, int cpt, int unit)
 
 #ifdef APPEL_GMT
   if (dump_type == DUMP_BIN){
-    char command[100];
+    int8_t command[100];
     sprintf(command, "./bin2map %s %d %d >> GMT.log", filename, H-2, L-2);
     system(command);
     //sprintf(command, "mv ero.jpeg GMT%04d.jpeg", cpt);
@@ -1832,7 +1834,7 @@ void dump_terre(char dump_type, int cpt, int unit)
 
 #ifdef APPEL_MCC
   if (dump_type == DUMP_BIN){
-    char command[100];
+    int8_t command[100];
     fp = fopen("PARAMS.txt","w");
     fprintf(fp,"datafile='%s'\n",filename);
     fprintf(fp,"h=%d;\n",H-2);
@@ -1859,11 +1861,11 @@ void dump_terre(char dump_type, int cpt, int unit)
 
 
 #ifdef DUMP_SIGNATURE
-void dump_signature(int ii)
+void dump_signature(int32_t ii)
 {
   FILE *fp;
-  int i;
-  unsigned int sig, *aux;
+  int32_t i;
+  uint32_t sig, *aux;
 
   //calcul de la signature
   sig=0;

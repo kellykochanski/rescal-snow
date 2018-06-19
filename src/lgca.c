@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -29,6 +29,7 @@
 #include <math.h>
 #ifdef OPENMP
 #include <omp.h>
+#include <stdint.h>
 #endif
 #ifdef __AVX__
 #include <stdio.h>
@@ -56,9 +57,9 @@
 #define CYCLAGE_MVT
 #endif
 
-extern int pbc_mode;  //periodic boundary conditions
-extern int boundary;  //boundary conditions
-extern char *rot_map;        // periodic mapping of the rotating space
+extern int32_t pbc_mode;  //periodic boundary conditions
+extern int32_t boundary;  //boundary conditions
+extern int8_t *rot_map;        // periodic mapping of the rotating space
 extern Pos2 *rot_map_pos;    // periodic mapping of the rotating space
 
 #ifdef MVT_VFOR
@@ -70,18 +71,18 @@ float intensite_gfor = 0.001; //instensite du forcage global
 #endif
 
 
-extern unsigned char opt_info;
-extern int H, L, D, HL, HLD;       // les dimensions de la terre
-extern int LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud ...)
+extern uint8_t opt_info;
+extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
+extern int32_t LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud ...)
 extern Cell  *TE;	           // la 'terre'
-extern int Ncel[];                       // nombre de cellules par type
-extern unsigned char opt_vel;       //affichage des vitesses moyennes
+extern int32_t Ncel[];                       // nombre de cellules par type
+extern uint8_t opt_vel;       //affichage des vitesses moyennes
 extern Vec2 *norm2d;              //normale a la surface
 //extern float *norm2dx;          // normale a la surface  (composante X)
 //extern float *norm2dy;          // normale a la surface  (composante Y)
-extern int h_ceil;  //epaisseur du plafond
-extern char *psol;                // indicateur des plans solides verticaux est-ouest
-extern const unsigned char Phase[MAX_CELL];	//phase (fluide ou solide) des types de cellules
+extern int32_t h_ceil;  //epaisseur du plafond
+extern int8_t *psol;                // indicateur des plans solides verticaux est-ouest
+extern const uint8_t Phase[MAX_CELL];	//phase (fluide ou solide) des types de cellules
 
 MvtField *CelMvt;	//cellules en mouvements
 MvtField *CelMvt2;	//cellules en mouvements
@@ -92,42 +93,42 @@ MvtField Collisions_SolSlow[16][SIZE_MVT_FIELD]; //tableau des collisions fluide
 #ifdef SOLFAST
 MvtField Collisions_SolFast[16][SIZE_MVT_FIELD]; //tableau des collisions fluide-solide (cas d'une unique particule rapide)
 #endif
-int CelVelx[SIZE_MVT_FIELD];  //precomputed sums of horizontal velocities for a single node
-int CelVely[SIZE_MVT_FIELD];  //precomputed sums of vertical velocities for a single node
+int32_t CelVelx[SIZE_MVT_FIELD];  //precomputed sums of horizontal velocities for a single node
+int32_t CelVely[SIZE_MVT_FIELD];  //precomputed sums of vertical velocities for a single node
 
-int *Velx_time=NULL, *Vely_time=NULL;	//vitesses locales instantanees
-int *Velx=NULL, *Vely=NULL;	//vitesses locales moyennees (espace et temps)
-int *Veln=NULL;  //sliding window for the number of fluid nodes
+int32_t *Velx_time=NULL, *Vely_time=NULL;	//vitesses locales instantanees
+int32_t *Velx=NULL, *Vely=NULL;	//vitesses locales moyennees (espace et temps)
+int32_t *Veln=NULL;  //sliding window for the number of fluid nodes
 float *Velx_interp=NULL, *Vely_interp=NULL;	//vitesses locales interpolees (espace) et moyennees (temps)
-int *Velx_vector=NULL, *Vely_vector=NULL; //sliding vectors of velocities
-int *Veln_vector=NULL; //sliding vector for the number of fluid nodes
-int CH, CLEO, CLNS, CHL, CHLD, CLN, CLS;     // dimensions du reseau de collisions (CLEO/CLNS = largeur du reseau de collisions en est-ouest/nord-sud)
-int VH, VL, VHL, VHLD;	// dimensions du tableau des vitesses
-int HLN;    //offset dans le reseau classique
-long nb_cel_fluide=0;	//nombre de cellules fluides
-long *NbMvt=NULL;		//nombre de particules en mouvement dans chaque couche du reseau
-long nb_mvt_in=0;		//nombre de particules entrant dans le reseau
-long nb_mvt_out=0;		//nombre de particules sortant du reseau
+int32_t *Velx_vector=NULL, *Vely_vector=NULL; //sliding vectors of velocities
+int32_t *Veln_vector=NULL; //sliding vector for the number of fluid nodes
+int32_t CH, CLEO, CLNS, CHL, CHLD, CLN, CLS;     // dimensions du reseau de collisions (CLEO/CLNS = largeur du reseau de collisions en est-ouest/nord-sud)
+int32_t VH, VL, VHL, VHLD;	// dimensions du tableau des vitesses
+int32_t HLN;    //offset dans le reseau classique
+int64_t nb_cel_fluide=0;	//nombre de cellules fluides
+int64_t *NbMvt=NULL;		//nombre de particules en mouvement dans chaque couche du reseau
+int64_t nb_mvt_in=0;		//nombre de particules entrant dans le reseau
+int64_t nb_mvt_out=0;		//nombre de particules sortant du reseau
 #ifdef MVT_REGUL
-long *NbMvt0=NULL;		//nombre de particules en mouvement au depart dans chaque couche du reseau
+int64_t *NbMvt0=NULL;		//nombre de particules en mouvement au depart dans chaque couche du reseau
 #endif
-unsigned char NbMvtCell[SIZE_MVT_FIELD];  //nombre de particules en mouvement dans chaque etat d'une cellule
+uint8_t NbMvtCell[SIZE_MVT_FIELD];  //nombre de particules en mouvement dans chaque etat d'une cellule
 float densite=0;	//densite moyenne de particules en mouvement
 float maxvel = 0.0;  //vitesse interpolee maximale apres stabilisation
 float meanvel = 0.0;  //vitesse interpolee moyenne apres stabilisation
-int col_iter=0;   //nombre de cycles de collisions
-char *nom_fic_mvt = NULL; //nom du fichier VELOC (initial)
-int lgca_reset = 1;
-int lgca_speedup = 0; //initial speedup of the stabilization of lattice gas
-int lgca_mixing = 1; //mixing of the flux (on the left boundary)
+int32_t col_iter=0;   //nombre de cycles de collisions
+int8_t *nom_fic_mvt = NULL; //nom du fichier VELOC (initial)
+int32_t lgca_reset = 1;
+int32_t lgca_speedup = 0; //initial speedup of the stabilization of lattice gas
+int32_t lgca_mixing = 1; //mixing of the flux (on the left boundary)
 
 void lecture_mvt();
-void do_mvt_in(int ix);
+void do_mvt_in(int32_t ix);
 void do_regul_mvt();
 void do_force_mvt();
 void do_mixing();
 void compute_vel_interp();
-//void do_dump_mvt(int inter);
+//void do_dump_mvt(int32_t inter);
 void dump_densite();
 void dump_mvt_in_out();
 void dump_collisions();
@@ -151,7 +152,7 @@ void params_collisions()
 
 void init_collisions()
 {
-  int i;
+  int32_t i;
 
   /// size of the lattice
   CH=H*NB_MVT_VER;
@@ -341,7 +342,7 @@ void init_collisions()
 
 #ifdef SOLSLOW
   // initialisation (d'une partie) du tableau Collisions_SolSlow[]
-  int mvt_sol_E, mvt_sol_O, mvt_sol_H, mvt_sol_B, mvt_sol;
+  int32_t mvt_sol_E, mvt_sol_O, mvt_sol_H, mvt_sol_B, mvt_sol;
   LogPrintf("collisions realistes : solslow\n");
   memset(Collisions_SolSlow,0,sizeof(Collisions_SolSlow));
   for (mvt_sol=0; mvt_sol<16; mvt_sol++){
@@ -360,7 +361,7 @@ void init_collisions()
 
 #ifdef SOLFAST
   // initialisation (d'une partie) du tableau Collisions_SolFast[]
-  int mvt_sol_EB, mvt_sol_OB, mvt_sol_EH, mvt_sol_OH;//, mvt_sol;
+  int32_t mvt_sol_EB, mvt_sol_OB, mvt_sol_EH, mvt_sol_OH;//, mvt_sol;
   LogPrintf("collisions realistes : solfast\n");
   memset(Collisions_SolFast,0,sizeof(Collisions_SolFast));
   for (mvt_sol=0; mvt_sol<16; mvt_sol++){
@@ -383,8 +384,8 @@ void init_collisions()
   if (opt_info) dump_collisions();
 
   // initialization of precomputed sums of velocities
-  int *pvx = CelVelx;
-  int *pvy = CelVely;
+  int32_t *pvx = CelVelx;
+  int32_t *pvy = CelVely;
   for(i=0; i<SIZE_MVT_FIELD; i++, pvx++, pvy++){
 #ifdef VEL_SLIDE
     if (i & MVT_SOLID) continue;
@@ -413,9 +414,9 @@ void init_collisions()
 #ifdef OPENMP
 #pragma omp parallel
   {
-    int tid = omp_get_thread_num();
+    int32_t tid = omp_get_thread_num();
     if (tid==0){
-      int nthreads = omp_get_num_threads();
+      int32_t nthreads = omp_get_num_threads();
       LogPrintf("number of OMP threads : %d\n", nthreads);
     }
   }
@@ -429,7 +430,7 @@ void init_mvt_cell(MvtField *mvt)
   static MvtField mvt_slow[] = {MVT_E, MVT_O, MVT_B, MVT_H};
   static MvtField mvt_fast[] = {MVT_EB, MVT_EH, MVT_OB, MVT_OH};
 
-  int alea;
+  int32_t alea;
   //if (drand48() < 0.5)
   /*if (j>0.6*H)*/{
     //do_mvt_in(k*HL+j*L+i);
@@ -440,7 +441,7 @@ void init_mvt_cell(MvtField *mvt)
     else if (aleat < 0.5) {*mvt |= MVT_EH; nb_mvt++;}*/
 
     // 1 particule
-    /*int alea8=drand48()*8;
+    /*int32_t alea8=drand48()*8;
     *aux_mvt = (alea8<1) ? MVT_E : 0;
     // *aux_mvt = (alea8<4) ? mvt_slow[alea8] : (alea8<8) ? mvt_fast[alea8-4] : 0;
             if (*aux_mvt) nb_mvt_in++;*/
@@ -467,7 +468,7 @@ void init_mvt_cell(MvtField *mvt)
     }
 
     // 2 particules lentes
-    /*int alea2=drand48()*2;
+    /*int32_t alea2=drand48()*2;
     *aux_mvt = mvt_slow[alea2]; // 1 particule lente horizontale
     alea2=drand48()*2;
     *aux_mvt |= mvt_slow[2+alea2]; // 1 particule lente verticale
@@ -481,7 +482,7 @@ void init_mvt_cell(MvtField *mvt)
     nb_mvt_in +=2;*/
 
     // 6 particules
-    /*int alea4=drand48()*4;
+    /*int32_t alea4=drand48()*4;
     *aux_mvt = MVT_SLOW ^ mvt_slow[alea4]; // 3 particules lentes
     alea4=drand48()*4;
     *aux_mvt |= MVT_FAST ^ mvt_fast[alea4]; // 3 particules rapides
@@ -492,7 +493,7 @@ void init_mvt_cell(MvtField *mvt)
 // initialisation du tableau MvtCel des particules de gaz sur reseau
 void init_mvt()
 {
-  int i, j, k, ic;
+  int32_t i, j, k, ic;
   Cell *aux;
   MvtField *aux_mvt;
 
@@ -549,7 +550,7 @@ void init_mvt()
 
   //speed up the stabilization of the flow
   if (lgca_speedup){
-    //int nb_cyc_for=VSTEP_TIME*10;
+    //int32_t nb_cyc_for=VSTEP_TIME*10;
     LogPrintf("speedup of the lattice gas: %d\n", lgca_speedup);
     for(i=0; i<lgca_speedup; i++) do_force_mvt();
   }
@@ -561,9 +562,9 @@ void init_mvt()
 }
 
 // set the lattice gas out of the rotating space, using periodic boundary conditions
-void out_of_space_mvt(int reset_mvt)
+void out_of_space_mvt(int32_t reset_mvt)
 {
-  int i, j, k, ic, ck, typ;
+  int32_t i, j, k, ic, ck, typ;
   MvtField *aux_mvt;
   Pos2 cp;
 
@@ -623,7 +624,7 @@ void out_of_space_mvt(int reset_mvt)
 // modification globale de la terre
 void collisions_mod_terre()
 {
-  int i, j, k, ic;
+  int32_t i, j, k, ic;
   Cell *aux;
   MvtField *aux_mvt;
 
@@ -650,7 +651,7 @@ void collisions_mod_terre()
 void lecture_mvt()
 {
   FILE *fp;
-  int i, ix;
+  int32_t i, ix;
 
   LogPrintf("lecture fichier HPP : %s\n",nom_fic_mvt);
 
@@ -675,7 +676,7 @@ void lecture_mvt()
 }
 
 
-int mvt(int index)
+int32_t mvt(int32_t index)
 {
   //return (CelMvt[index] & (MVT_E | MVT_O | MVT_B | MVT_H));
   return (CelMvt[index] & MVT_ALLDIR);
@@ -683,54 +684,54 @@ int mvt(int index)
 }
 
 
-int mvt_solid(int ii)
+int32_t mvt_solid(int32_t ii)
 {
   return (CelMvt[ii] & MVT_SOLID);
 }
 
-int mvt_bas(int ii)
+int32_t mvt_bas(int32_t ii)
 {
   return (CelMvt[ii] & (MVT_B | MVT_EB | MVT_OB));
 }
 
-int mvt_haut(int ii)
+int32_t mvt_haut(int32_t ii)
 {
   return (CelMvt[ii] & (MVT_H | MVT_EH | MVT_OH));
 }
 
-int mvt_est(int ii)
+int32_t mvt_est(int32_t ii)
 {
   //return (CelMvt[ii] & (MVT_EB | MVT_EH));
   return (CelMvt[ii] & (MVT_E | MVT_EB | MVT_EH));
 }
 
-int mvt_ouest(int ii)
+int32_t mvt_ouest(int32_t ii)
 {
   //return (CelMvt[ii] & MVT_O);
   //return (CelMvt[ii] & (MVT_OB | MVT_OH));
   return (CelMvt[ii] & (MVT_O | MVT_OB | MVT_OH));
 }
 
-int check_mvt(int index, void *data)
+int32_t check_mvt(int32_t index, void *data)
 {
-  int ii;
+  int32_t ii;
   Calcule_cix(index, ii);
   return (CelMvt[ii] & MVT_ALLDIR);
 }
 
-int check_mvt_solid(int index, void *data)
+int32_t check_mvt_solid(int32_t index, void *data)
 {
-  int ii;
+  int32_t ii;
   Calcule_cix(index, ii);
   return (CelMvt[ii] & MVT_SOLID);
 }
 
-int check_mvt_bas(int index, void *data)
+int32_t check_mvt_bas(int32_t index, void *data)
 {
-  int ii;
+  int32_t ii;
   Calcule_cix(index, ii);
   /*
-  int val = 0;
+  int32_t val = 0;
   if (CelMvt[index] & MVT_B) val++;
   if (CelMvt[index] & MVT_EB) val++;
   if (CelMvt[index] & MVT_OB) val++;
@@ -743,12 +744,12 @@ int check_mvt_bas(int index, void *data)
   return (CelMvt[ii] & (MVT_B | MVT_EB | MVT_OB));
 }
 
-int check_mvt_haut(int index, void *data)
+int32_t check_mvt_haut(int32_t index, void *data)
 {
-  int ii;
+  int32_t ii;
   Calcule_cix(index, ii);
   /*
-  int val = 0;
+  int32_t val = 0;
   if (CelMvt[ii] & MVT_H) val++;
   if (CelMvt[ii] & MVT_EH) val++;
   if (CelMvt[ii] & MVT_OH) val++;
@@ -761,12 +762,12 @@ int check_mvt_haut(int index, void *data)
   return (CelMvt[ii] & (MVT_H | MVT_EH | MVT_OH));
 }
 
-int check_mvt_est(int index, void *data)
+int32_t check_mvt_est(int32_t index, void *data)
 {
-  int ii;
+  int32_t ii;
   Calcule_cix(index, ii);
   /*
-  int val = 0;
+  int32_t val = 0;
   if (CelMvt[index] & MVT_E) val++;
   if (CelMvt[index] & MVT_EB) val++;
   if (CelMvt[index] & MVT_EH) val++;
@@ -780,11 +781,11 @@ int check_mvt_est(int index, void *data)
   //return (CelMvt[ii] & MVT_E);
 }
 
-int check_mvt_ouest(int index, void *data)
+int32_t check_mvt_ouest(int32_t index, void *data)
 {
-  int ii;
+  int32_t ii;
   Calcule_cix(index, ii);
-  /*int val = 0;
+  /*int32_t val = 0;
   if (CelMvt[ii] & MVT_O) val++;
   if (CelMvt[ii] & MVT_OB) val++;
   if (CelMvt[ii] & MVT_OH) val++;
@@ -796,29 +797,29 @@ int check_mvt_ouest(int index, void *data)
   return (CelMvt[ii] & (MVT_O | MVT_OB | MVT_OH));
 }
 
-int check_mvt_est_et_bas(int index, void *data)
+int32_t check_mvt_est_et_bas(int32_t index, void *data)
 {
   return check_mvt_est(index, NULL) && check_mvt_bas(index, NULL);
 }
 
-int check_mvt_EB(int index, void *data)
+int32_t check_mvt_EB(int32_t index, void *data)
 {
-  int ii;
+  int32_t ii;
   Calcule_cix(index, ii);
   //return (CelMvt[ii] & MVT_B | MVT_E | MVT_EB); //bug
   //return (CelMvt[ii] & (MVT_B | MVT_E | MVT_EB));
   return (CelMvt[ii-10*CLEO] & (MVT_B | MVT_E | MVT_EB)); //magouille
 }
 
-int check_no_mvt_est_et_bas(int index, void *data)
+int32_t check_no_mvt_est_et_bas(int32_t index, void *data)
 {
   return !check_mvt_est_et_bas(index, NULL);
 }
 
-int check_mvt_mean_bas(int index, void *data)
+int32_t check_mvt_mean_bas(int32_t index, void *data)
 {
 #if (VSTEP > 1)
-  int cx, cy, cz;
+  int32_t cx, cy, cz;
   Calcule_cxyz(index, cx, cy, cz);
   return (Vely[(cx/VSTEP_L)+(cy/VSTEP_H)*VL+cz*VHL] > 0);
 #else
@@ -826,10 +827,10 @@ int check_mvt_mean_bas(int index, void *data)
 #endif
 }
 
-int check_mvt_mean_est(int index, void *data)
+int32_t check_mvt_mean_est(int32_t index, void *data)
 {
 #if (VSTEP > 1)
-  int cx, cy, cz;
+  int32_t cx, cy, cz;
   Calcule_cxyz(index, cx, cy, cz);
   return (Velx[(cx/VSTEP_L)+(cy/VSTEP_H)*VL+cz*VHL] > 0);
 #else
@@ -837,15 +838,15 @@ int check_mvt_mean_est(int index, void *data)
 #endif
 }
 
-int check_no_mvt_mean_bas(int index, void *data)
+int32_t check_no_mvt_mean_bas(int32_t index, void *data)
 {
   return !check_mvt_mean_bas(index, NULL);
 }
 
-void collisions_modcell(int type, int index)
+void collisions_modcell(int32_t type, int32_t index)
 {
-  //int ii=(index-HLN)*NB_MVT_EO;
-  int x, y, z, ii, ic, cz;
+  //int32_t ii=(index-HLN)*NB_MVT_EO;
+  int32_t x, y, z, ii, ic, cz;
   Calcule_xyz(index, x, y, z);
   cz = (z-LN)/DIST_MVT_NS;
   if (z != cz*DIST_MVT_NS + LN){
@@ -871,7 +872,7 @@ void collisions_modcell(int type, int index)
 
 void do_collisions()
 {
-  int i, j, k, ii, ii2;
+  int32_t i, j, k, ii, ii2;
 
 #ifdef SF_REAL
   //const float PI = 3.14159;
@@ -880,7 +881,7 @@ void do_collisions()
   //const float TP8 = tan(PI/8.0); //~0.41
   const float CP8 = cos(PI/8.0);
   const float SP8 = sin(PI/8.0);
-  char sfmod = 0;
+  int8_t sfmod = 0;
 #endif
 
 #ifdef OPENMP
@@ -890,7 +891,7 @@ void do_collisions()
   //LogPrintf("do_collisions\n");
   for(k=CLN; k<=CLS; k++){ // profondeur
     /* Obtain thread number */
-    //int tid = omp_get_thread_num();
+    //int32_t tid = omp_get_thread_num();
 
     ii = CLEO*CH*k + CLEO;
     //LogPrintf("tid=%d k=%d ii=%d\n", tid, k, ii);
@@ -921,10 +922,10 @@ void do_collisions()
         }
 #endif //PLAF_REAL
 
-  //int mvt_sol_slow = 0;//debug
-  //int mvt_sol_fast = 0;//debug
-  //int mvt_sfr_slow = 0;//debug
-  //int mvt_sfr_fast = 0;//debug
+  //int32_t mvt_sol_slow = 0;//debug
+  //int32_t mvt_sol_fast = 0;//debug
+  //int32_t mvt_sfr_slow = 0;//debug
+  //int32_t mvt_sfr_fast = 0;//debug
 
 #ifdef SOLSLOW
         if (mvt_solid(ii) && (NbMvtCell[CelMvt[ii] & MVT_SLOW]==1)){ //Collisions ameliorees (fuilde-solide)
@@ -934,17 +935,17 @@ void do_collisions()
           if (pbc_mode && (i==CLEO-NB_MVT_EO-1)) ii2 -= CLEO-2*NB_MVT_EO;
 #endif
           //OUEST
-          int mvt_sol_E = mvt_solid(ii2) ? (MVT_E >> 2) : 0;
+          int32_t mvt_sol_E = mvt_solid(ii2) ? (MVT_E >> 2) : 0;
           ii2 = ii-1;
 #ifdef CYCLAGE_HOR
           if (pbc_mode && (i==NB_MVT_EO)) ii2 += CLEO-2*NB_MVT_EO;
 #endif
-          int mvt_sol_O = mvt_solid(ii-1) ? (MVT_O >> 2) : 0;
+          int32_t mvt_sol_O = mvt_solid(ii-1) ? (MVT_O >> 2) : 0;
           //BAS
-          int mvt_sol_B = mvt_solid(ii+CLEO) ? (MVT_B >> 2) : 0;
+          int32_t mvt_sol_B = mvt_solid(ii+CLEO) ? (MVT_B >> 2) : 0;
           //HAUT
-          int mvt_sol_H = mvt_solid(ii-CLEO) ? (MVT_H >> 2) : 0;
-          int mvt_sol = mvt_sol_E | mvt_sol_O | mvt_sol_B | mvt_sol_H;
+          int32_t mvt_sol_H = mvt_solid(ii-CLEO) ? (MVT_H >> 2) : 0;
+          int32_t mvt_sol = mvt_sol_E | mvt_sol_O | mvt_sol_B | mvt_sol_H;
           UnsetMask(CelMvt2[ii], MVT_SLOW);
           SetMask(CelMvt2[ii], Collisions_SolSlow[mvt_sol][CelMvt[ii] & MVT_SLOW]);
           //mvt_sol_slow = Collisions_SolSlow[mvt_sol][CelMvt[ii] & MVT_SLOW];  //debug
@@ -955,41 +956,41 @@ void do_collisions()
         //if ((CelMvt[ii] & MVT_SOLID) && (NbMvtCell[CelMvt[ii] & MVT_FAST]==1)){ //Collisions ameliorees (fuilde-solide)
         if (mvt_solid(ii) && (NbMvtCell[CelMvt[ii] & MVT_FAST]==1)){ //Collisions ameliorees (fuilde-solide)
         //if (mvt_solid(ii) && (NbMvtCell[CelMvt[ii] & MVT_FAST]>=1)){ //Collisions ameliorees (fuilde-solide)
-          /*int mvt_sol_E = CelMvt[ii+1] & MVT_SOLID;
-          int mvt_sol_O = CelMvt[ii-1] & MVT_SOLID;
-          int mvt_sol_B = CelMvt[ii+CLEO] & MVT_SOLID;
-          int mvt_sol_H = CelMvt[ii-CLEO] & MVT_SOLID;*/
+          /*int32_t mvt_sol_E = CelMvt[ii+1] & MVT_SOLID;
+          int32_t mvt_sol_O = CelMvt[ii-1] & MVT_SOLID;
+          int32_t mvt_sol_B = CelMvt[ii+CLEO] & MVT_SOLID;
+          int32_t mvt_sol_H = CelMvt[ii-CLEO] & MVT_SOLID;*/
 
           //EST-BAS
           ii2 = ii+CLEO+1;
 #ifdef CYCLAGE_HOR
           if (pbc_mode && (i==CLEO-NB_MVT_EO-1)) ii2 -= CLEO-2*NB_MVT_EO;
 #endif
-          int mvt_sol_EB = mvt_solid(ii2) ? (MVT_EB >> 6) : 0;  //CelMvt[ii+CLEO+1] & MVT_SOLID;
+          int32_t mvt_sol_EB = mvt_solid(ii2) ? (MVT_EB >> 6) : 0;  //CelMvt[ii+CLEO+1] & MVT_SOLID;
 
           //EST-HAUT
           ii2 = ii-CLEO+1;
 #ifdef CYCLAGE_HOR
           if (pbc_mode && (i==CLEO-NB_MVT_EO-1)) ii2 -= CLEO-2*NB_MVT_EO;
 #endif
-          int mvt_sol_EH = mvt_solid(ii2) ? (MVT_EH >> 6) : 0;  //CelMvt[ii-CLEO+1] & MVT_SOLID;
+          int32_t mvt_sol_EH = mvt_solid(ii2) ? (MVT_EH >> 6) : 0;  //CelMvt[ii-CLEO+1] & MVT_SOLID;
 
           //OUEST-BAS
           ii2 = ii+CLEO-1;
 #ifdef CYCLAGE_HOR
           if (pbc_mode && (i==NB_MVT_EO)) ii2 += CLEO-2*NB_MVT_EO;
 #endif
-          int mvt_sol_OB = mvt_solid(ii2) ? (MVT_OB >> 6) : 0;  //CelMvt[ii+CLEO-1] & MVT_SOLID;
+          int32_t mvt_sol_OB = mvt_solid(ii2) ? (MVT_OB >> 6) : 0;  //CelMvt[ii+CLEO-1] & MVT_SOLID;
 
           //OUEST-HAUT
           ii2 = ii-CLEO-1;
 #ifdef CYCLAGE_HOR
           if (pbc_mode && (i==NB_MVT_EO)) ii2 += CLEO-2*NB_MVT_EO;
 #endif
-          int mvt_sol_OH = mvt_solid(ii2) ? (MVT_OH >> 6) : 0;  //CelMvt[ii-CLEO-1] & MVT_SOLID;
-          //int mvt_sol = (mvt_sol_E << 3) | (mvt_sol_O << 2) | (mvt_sol_B << 1) | mvt_sol_H;
-          //int mvt_sol = (mvt_sol_EB << 3) | (mvt_sol_OB << 2) | (mvt_sol_EH << 1) | mvt_sol_OH;
-          int mvt_sol = mvt_sol_EB | mvt_sol_EH | mvt_sol_OB | mvt_sol_OH;
+          int32_t mvt_sol_OH = mvt_solid(ii2) ? (MVT_OH >> 6) : 0;  //CelMvt[ii-CLEO-1] & MVT_SOLID;
+          //int32_t mvt_sol = (mvt_sol_E << 3) | (mvt_sol_O << 2) | (mvt_sol_B << 1) | mvt_sol_H;
+          //int32_t mvt_sol = (mvt_sol_EB << 3) | (mvt_sol_OB << 2) | (mvt_sol_EH << 1) | mvt_sol_OH;
+          int32_t mvt_sol = mvt_sol_EB | mvt_sol_EH | mvt_sol_OB | mvt_sol_OH;
           UnsetMask(CelMvt2[ii], MVT_FAST);
           SetMask(CelMvt2[ii], Collisions_SolFast[mvt_sol][CelMvt[ii] & MVT_FAST]);
           //mvt_sol_fast = Collisions_SolFast[mvt_sol][CelMvt[ii] & MVT_FAST];  //debug
@@ -1000,7 +1001,7 @@ void do_collisions()
         const float slow_val = SP8; //0.01; //SP8; //~0.38
         const float fast_val = CP8-SP8; //0.01; //CP8-SP8; //~0.54
         // normale precalculee
-        int ni = (i/NB_MVT_EO) - 1 + (k*DIST_MVT_NS)*(L-2);
+        int32_t ni = (i/NB_MVT_EO) - 1 + (k*DIST_MVT_NS)*(L-2);
         //LogPrintf("ni = %d \n", ni);
         float nx = norm2d[ni].x;
         float ny = norm2d[ni].y;
@@ -1174,9 +1175,9 @@ void do_collisions()
   col_iter++;
 }
 
-void propagate_mvtcel(int i, int ii)
+void propagate_mvtcel(int32_t i, int32_t ii)
 {
-  int ii0;
+  int32_t ii0;
 
   CelMvt[ii]=0;
 
@@ -1236,16 +1237,16 @@ void propagate_mvtcel(int i, int ii)
 }
 
 #ifdef USE_AVX
-void propagate_mvtcel_vec(int i, int ii)
+void propagate_mvtcel_vec(int32_t i, int32_t ii)
 {
-  static int step = sizeof(__m256d)/sizeof(MvtField);
-  static int start = 1;
+  static int32_t step = sizeof(__m256d)/sizeof(MvtField);
+  static int32_t start = 1;
   static __m256i mm_maskv_so, mm_maskv_e, mm_maskv_w, mm_maskv_u, mm_maskv_d, mm_maskv_ue, mm_maskv_uw, mm_maskv_de, mm_maskv_dw;
   __m256i *mm_valp, mm_a, mm_b, mm_res, *mm_curp;
 
   if (start){
 #ifdef OPENMP
-    int tid=omp_get_thread_num();
+    int32_t tid=omp_get_thread_num();
     //LogPrintf("thread_num=%d\n", tid);
     if (tid==0)
 #endif
@@ -1331,10 +1332,10 @@ void propagate_mvtcel_vec(int i, int ii)
 
 void do_propagations()
 {
-  int i, j, k, ii;
-  int n=0;
+  int32_t i, j, k, ii;
+  int32_t n=0;
 #ifdef USE_AVX
-  static int step = sizeof(__m256d)/sizeof(MvtField);
+  static int32_t step = sizeof(__m256d)/sizeof(MvtField);
 #endif
 
 #ifdef OPENMP
@@ -1391,10 +1392,10 @@ void do_propagations()
   if (opt_info) dump_mvt_in_out();
 }
 
-void do_mvt_in(int ix)
+void do_mvt_in(int32_t ix)
 {
   float aleat = drand48();
-  int k = (int)(ix/CHL);
+  int32_t k = (int)(ix/CHL);
   //MvtField mvt0 = CelMvt[ix];
   //injection d'une particule lente
   if (aleat < 0.5*DENSITE)
@@ -1424,7 +1425,7 @@ void do_mvt_in(int ix)
 #ifdef MVT_REGUL
 void do_regul_mvt()
 {
-  int k, ix, y, cpt;
+  int32_t k, ix, y, cpt;
 
   //LogPrintf("do_regul_mvt : %d -> %d\n", NbMvt, NbMvt0);
 
@@ -1447,8 +1448,8 @@ void do_regul_mvt()
 
 void do_force_mvt()
 {
-  int x, y, z;
-  int ix;
+  int32_t x, y, z;
+  int32_t ix;
   // injection flux maximum sur le bord gauche
   /*for (y=0; y<CH; y++){
     ix = 1+y*CLEO;
@@ -1514,7 +1515,7 @@ void do_force_mvt()
 
 #ifdef MVT_VFOR
   // forcage partiel du flux sur le bord gauche
-  int cpt_vfor=0;
+  int32_t cpt_vfor=0;
 
   for(z=CLN; z<=CLS; z++){
     for(x=0; x<1; x++){
@@ -1553,8 +1554,8 @@ void do_force_mvt()
 
 #ifdef MVT_GFOR
   // forcage global du flux
-  int cpt_for = 0;
-  int nb_mvt_for = nb_cel_fluide * intensite_gfor;
+  int32_t cpt_for = 0;
+  int32_t nb_mvt_for = nb_cel_fluide * intensite_gfor;
 
   //LogPrintf ("forcage sur %d cellules MVT\n", nb_mvt_for);
 
@@ -1588,8 +1589,8 @@ void do_force_mvt()
 //#ifdef BROUILLAGE_MVT
 void do_mixing()
 {
-  int i, y, z, y1, y2;
-  int cix, cix1, cix2, mvt;
+  int32_t i, y, z, y1, y2;
+  int32_t cix, cix1, cix2, mvt;
 
   for(z=CLN; z<=CLS; z++){
     for (i=0; i<(CH/2); i++){
@@ -1624,13 +1625,13 @@ void do_mixing()
 //#endif
 
 
-void compute_vel(char flag_interp)
+void compute_vel(int8_t flag_interp)
 {
-  static int cpt=0;
-  //static int cpt_dump=0;
-  int i, j, k, ix, cpt1;
-  int *pvx, *pvy;
-  int vel_size;
+  static int32_t cpt=0;
+  //static int32_t cpt_dump=0;
+  int32_t i, j, k, ix, cpt1;
+  int32_t *pvx, *pvy;
+  int32_t vel_size;
   float fluid_ratio;
 
 #ifndef VEL_SLIDE
@@ -1692,8 +1693,8 @@ void compute_vel(char flag_interp)
 #ifndef VEL_SLIDE
   /// averaging over neighboring space by using fixed windows
   //LogPrintf("compute_vel: moyennage dans l'espace\n");
-  int iv, jv, imax, jmax;
-  int nb_mvt_fluide;
+  int32_t iv, jv, imax, jmax;
+  int32_t nb_mvt_fluide;
 
 #ifdef OPENMP
 #pragma omp parallel for private(i,j,k,iv,jv,ix,pvx,pvy,imax,jmax,nb_mvt_fluide,fluid_ratio)
@@ -1730,12 +1731,12 @@ void compute_vel(char flag_interp)
 #else
   /// averaging over neighboring space by using sliding windows
 
-  int *pwx, *pwy, *pwn, *pvn;
-  int *pwx0, *pwy0, *pwx1, *pwy1;
-  int iw, jw;
-  int i0 = VSTEP_L/2;
-  int j0 = VSTEP_H/2;
-  int i1 = VSTEP_L - i0;
+  int32_t *pwx, *pwy, *pwn, *pvn;
+  int32_t *pwx0, *pwy0, *pwx1, *pwy1;
+  int32_t iw, jw;
+  int32_t i0 = VSTEP_L/2;
+  int32_t j0 = VSTEP_H/2;
+  int32_t i1 = VSTEP_L - i0;
 
   pvx = pvy = pvn = NULL;
 
@@ -1932,8 +1933,8 @@ void compute_vel(char flag_interp)
   /*if (lgca_ready)*/{
     //meanvel = 0;
     float vel_max = 0;
-    int vel_size_2d = vel_size/CLNS;
-    int vx, vy;
+    int32_t vel_size_2d = vel_size/CLNS;
+    int32_t vx, vy;
     float vel, vel_sum;
     vel_sum = 0;
     maxvel = 0;
@@ -1964,8 +1965,8 @@ void compute_vel(char flag_interp)
 /// interpolation of the velocity
 void compute_vel_interp()
 {
-  int i, j, k;
-  int ix, ix0, ix1;
+  int32_t i, j, k;
+  int32_t ix, ix0, ix1;
 
   if (!Velx_interp){
     AllocMemoryPrint("Velx_interp", Velx_interp, float, HLD);
@@ -1978,12 +1979,12 @@ void compute_vel_interp()
   }
 
 #ifndef VEL_SLIDE
-  int iv, jv;
-  int *pvx, *pvy;
-  int Velx00, Velx01, Velx10, Velx11;
-  int Vely00, Vely01, Vely10, Vely11;
-  int a00, a01, a10, a11;
-  int imax = VSTEP/NB_MVT_EO;
+  int32_t iv, jv;
+  int32_t *pvx, *pvy;
+  int32_t Velx00, Velx01, Velx10, Velx11;
+  int32_t Vely00, Vely01, Vely10, Vely11;
+  int32_t a00, a01, a10, a11;
+  int32_t imax = VSTEP/NB_MVT_EO;
 
   /// interpolation in each vertical plane
   //LogPrintf("interpolation dans chaque plan de collisions\n");
@@ -2060,7 +2061,7 @@ void compute_vel_interp()
 
 #if (DIST_MVT_NS > 1)
   float fz0, fz1;
-  int kv, kvmax;
+  int32_t kv, kvmax;
 
   /// north-south interpolation between all vertical planes
   //LogPrintf("interpolation nord-sud dans les plans intermediaires\n");
@@ -2091,8 +2092,8 @@ void compute_vel_interp()
 
 void dump_mvt_in_out()
 {
-  static int cpt = 0;
-  static int step = 0;
+  static int32_t cpt = 0;
+  static int32_t step = 0;
   FILE *fp;
 
   if (!cpt && !step){
@@ -2115,14 +2116,14 @@ void dump_mvt_in_out()
 
 void dump_densite()
 {
-  static int cpt = 0;
+  static int32_t cpt = 0;
   FILE *fp;
-  int ix, n;
-  //int nb_cel_fluide_dump = 0;
+  int32_t ix, n;
+  //int32_t nb_cel_fluide_dump = 0;
 
   //recalcul nb_mvt, nb_mvt_sol et nb_cel_fluide
-  int nb_mvt = 0; //nombre de particules mobiles
-  int nb_mvt_sol = 0; //nombre de particules mobiles localisees dans une cellule solide
+  int32_t nb_mvt = 0; //nombre de particules mobiles
+  int32_t nb_mvt_sol = 0; //nombre de particules mobiles localisees dans une cellule solide
   //for (ix=0; ix<CHLD; ix++){
   for (ix=CHL*CLN; ix<CHL*(CLS+1); ix++){
     n = NbMvtCell[CelMvt[ix]];
@@ -2143,15 +2144,15 @@ void dump_densite()
 
 void dump_vel()
 {
-  static int cpt = 0;
-  static char start = 1;
+  static int32_t cpt = 0;
+  static int8_t start = 1;
   FILE *fp;
 
   if ((!Velx_interp) || (!Vely_interp)) {cpt++; return;}
 
 #ifdef STABILITY_ANALYSIS
   //recalcul maxvel et meanvel  (calcul plus precis mais plus long, car on elimine les cellules solides lors du moyennage)
-  int ix, ncel;
+  int32_t ix, ncel;
   float vx, vy, vv;
   maxvel = 0.0;
   meanvel = 0.0;
@@ -2181,9 +2182,9 @@ void dump_vel()
   fclose(fp);
 }
 
-void dump_mvt(int cpt, int unit)
+void dump_mvt(int32_t cpt, int32_t unit)
 {
-  static char filename[100];
+  static int8_t filename[100];
   FILE *fp;
 
 #if 1
@@ -2214,7 +2215,7 @@ void dump_mvt(int cpt, int unit)
 
   //free(buf);
   /*if (inter){
-    char command[100];
+    int8_t command[100];
     sprintf(command, "gzip %s", nom);
     system(command);
   }*/
@@ -2247,7 +2248,7 @@ void dump_mvt(int cpt, int unit)
 void dump_collisions()
 {
   FILE *fp;
-  int mvt_in, mvt_out;
+  int32_t mvt_in, mvt_out;
 
   fp = fopen("LGCA.log","w");
 
@@ -2267,8 +2268,8 @@ void dump_collisions()
 #ifdef SOLSLOW
   //dump des regles de collision solide-fluide pour les particules lentes
   //selon la configuration du voisinage
-  int slow[4] = {MVT_E, MVT_O, MVT_B, MVT_H};
-  int mvt_sol_E, mvt_sol_O, mvt_sol_B, mvt_sol_H, mvt_sol, i;
+  int32_t slow[4] = {MVT_E, MVT_O, MVT_B, MVT_H};
+  int32_t mvt_sol_E, mvt_sol_O, mvt_sol_B, mvt_sol_H, mvt_sol, i;
   fprintf(fp, "\n   SOLID     |      IN      |      OUT\n");
   fprintf(fp, "E  O  B  H   | E  O  B  H   | E  O  B  H\n");
   for (mvt_sol=0; mvt_sol<16; mvt_sol++){
@@ -2291,8 +2292,8 @@ void dump_collisions()
 #ifdef SOLFAST
   //dump des regles de collision solide-fluide pour les particules rapides (en diagonale)
   //selon la configuration du voisinage
-  int fast[4] = {MVT_EB, MVT_EH, MVT_OB, MVT_OH};
-  int mvt_sol_EB, mvt_sol_OB, mvt_sol_EH, mvt_sol_OH;//, mvt_sol, i;
+  int32_t fast[4] = {MVT_EB, MVT_EH, MVT_OB, MVT_OH};
+  int32_t mvt_sol_EB, mvt_sol_OB, mvt_sol_EH, mvt_sol_OH;//, mvt_sol, i;
   fprintf(fp, "\n   SOLID     |      IN      |      OUT\n");
   fprintf(fp, "EB EH OB OH  | EB EH OB OH  | EB EH OB OH\n");
   for (mvt_sol=0; mvt_sol<16; mvt_sol++){
@@ -2320,8 +2321,8 @@ void dump_collisions()
 void dump_signature_mvt()
 {
   FILE *fp;
-  int i;
-  unsigned int sig, *aux;
+  int32_t i;
+  uint32_t sig, *aux;
 
   //calcul de la signature
   sig=0;

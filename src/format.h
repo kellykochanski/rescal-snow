@@ -17,17 +17,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <stdint.h>
 
 #define CSP_MAGIC_NUM "\212CSP"
 
 enum DUMP_TYPES {DUMP_CSP, DUMP_BIN, DUMP_PNG, DUMP_JPEG, DUMP_LOG};
 
-void csp_set_warning(unsigned char check);
-void csp_set_bounds(int xb, int yb, int zb);
-void compress(char *filename, char force);
-int read_csp_header(char *filename);
-void read_csp(char *filename);
-void write_csp(char dump_type, char *filename);
+void csp_set_warning(uint8_t check);
+void csp_set_bounds(int32_t xb, int32_t yb, int32_t zb);
+void compress(int8_t *filename, int8_t force);
+int32_t read_csp_header(int8_t *filename);
+void read_csp(int8_t *filename);
+void write_csp(int8_t dump_type, int8_t *filename);
