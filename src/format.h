@@ -29,7 +29,7 @@ enum DUMP_TYPES {DUMP_CSP, DUMP_BIN, DUMP_PNG, DUMP_JPEG, DUMP_LOG};
 
 void csp_set_warning(uint8_t check);
 void csp_set_bounds(int32_t xb, int32_t yb, int32_t zb);
-void compress(int8_t *filename, int8_t force);
-int32_t read_csp_header(int8_t *filename);
-void read_csp(int8_t *filename);
-void write_csp(int8_t dump_type, int8_t *filename);
+void compress(char *filename, char force);
+int32_t read_csp_header(char *filename);
+void read_csp(char *filename);
+void write_csp(char dump_type, char *filename);

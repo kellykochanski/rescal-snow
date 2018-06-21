@@ -41,14 +41,13 @@
 #include "view.h"
 #include "format.h"
 
-int32_t prog=PROG_TOOL;
-uint8_t opt_nv=1, opt_info=0;
-int8_t *output_filename=NULL;
+int32_t prog = PROG_TOOL;
+unsigned char opt_nv = 1, opt_info = 0;
+char *output_filename = NULL;
 
-extern int8_t *csp_filename;
+extern char *csp_filename;
 
-void usage()
-{
+void usage() {
   printf("ReSCAL image generator from a CSP file");
   //printf(", %s model", MOD_NAME);
 #ifdef CELL_COLOR
@@ -57,27 +56,26 @@ void usage()
 #ifdef CELL_TIME
   printf(", CELL_TIME data");
 #endif
-  printf("\nversion %s (%s)\n",VER_NUM,VER_DAT);
+  printf("\nversion %s (%s)\n", VER_NUM, VER_DAT);
   //printf("size of cells : %lu byte(s)\n", sizeof(Cell));
   printf("\nusage : csp2png <CSP-file> [GRAPHICAL OPTIONS] [-o <output PNG file>]\n");
   show_view_options();
   exit(-1);
 }
 
-void general_options(int32_t argc, int8_t *argv[])
-{
+void general_options(int32_t argc, char *argv[]) {
   int32_t i;
-  for(i=1; i<argc; i++){
-    if (!strcmp(argv[i],"-o"))
+  for (i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-o")) {
       output_filename = argv[++i];
+    }
   }
 }
 
-int32_t main(int32_t argc, int8_t **argv)
-{
+int main(int argc, char **argv) {
   int32_t i;
 
-  if (argc < 2){
+  if (argc < 2) {
     usage();
     exit(-4);
   }
@@ -89,9 +87,9 @@ int32_t main(int32_t argc, int8_t **argv)
 
   cree_terre();
 
-  if (!output_filename){
+  if (!output_filename) {
     output_filename = csp_filename;
-    strcpy(output_filename+strlen(output_filename)-3, "png");
+    strcpy(output_filename + strlen(output_filename) - 3, "png");
   }
 
   //calcule_couloir();
@@ -116,31 +114,24 @@ int32_t main(int32_t argc, int8_t **argv)
 
 //// empty functions, for linking with simul.c
 
-void do_thread_sched()
-{
+void do_thread_sched() {
 }
 
-void wait_lgca_thread()
-{
+void wait_lgca_thread() {
 }
 
-void push_status(char* str)
-{
+void push_status(char* str) {
 }
 
-void pop_status()
-{
+void pop_status() {
 }
 
-void lock_display(int32_t log_flag)
-{
+void lock_display(int32_t log_flag) {
 }
 
-void unlock_display(int32_t log_flag)
-{
+void unlock_display(int32_t log_flag) {
 }
 
-int32_t elapsed(double *sec)
-{
+int32_t elapsed(double *sec) {
 }
 

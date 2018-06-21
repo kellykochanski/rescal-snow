@@ -24,9 +24,9 @@
 #include <stdint.h>
 
 #ifdef _MAIN_
-int64_t total_memory=0;  //taille totale de memoire allouee
+int64_t total_memory = 0; //taille totale de memoire allouee
 #ifdef LOG_FILE
-FILE *log_file=NULL;
+FILE *log_file = NULL;
 #endif
 #else
 extern int64_t total_memory;
@@ -63,27 +63,27 @@ extern FILE *log_file;
 
 
 #define AllocMemory(adr,type,taille) \
-{			\
-  if( (adr=(type *)malloc(sizeof(type)*taille)) == NULL ){	\
-	  ErrPrintf("malloc error : %d\n",(int)sizeof(type)*taille);		\
-	  exit(-1);					\
-	}						\
-	total_memory += sizeof(type)*taille;          \
+{     \
+  if( (adr=(type *)malloc(sizeof(type)*taille)) == NULL ){  \
+    ErrPrintf("malloc error : %d\n",(int)sizeof(type)*taille);    \
+    exit(-1);         \
+  }           \
+  total_memory += sizeof(type)*taille;          \
 }
 
 #define ReallocMemory(adr,type,taille) \
-{			\
-	if( (adr=(type *)realloc(adr,sizeof(type)*taille)) == NULL ){	\
-	  ErrPrintf("realloc error: %d\n",(int)sizeof(type)*taille);	\
-	  exit(-1);					\
-  }						\
+{     \
+  if( (adr=(type *)realloc(adr,sizeof(type)*taille)) == NULL ){ \
+    ErrPrintf("realloc error: %d\n",(int)sizeof(type)*taille);  \
+    exit(-1);         \
+  }           \
 }
 
 #define ResetMemory(adr,type,taille) memset(adr,0,sizeof(type)*taille);
 
 #define PrintMemory(var,type,taille,flag) \
   int64_t taille_mem = sizeof(type)*taille; \
-  int8_t *str = flag ? "re" : ""; \
+  char *str = flag ? "re" : ""; \
   if (taille_mem >= 1000000) \
     LogPrintf("%sallocation %s : %.2f Mo\n", str, var, (float)taille_mem/1000000) \
   else \
@@ -114,9 +114,9 @@ extern FILE *log_file;
 #define FreeMemory(adr,type,taille) \
 { \
   if (adr == NULL){ \
-    ErrPrintf("Error in FreeMemory\n");	\
-    exit(-1);					\
-  }						\
+    ErrPrintf("Error in FreeMemory\n"); \
+    exit(-1);         \
+  }           \
   free(adr); \
   total_memory -= sizeof(type)*taille;          \
 }

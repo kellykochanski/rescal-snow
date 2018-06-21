@@ -27,7 +27,7 @@
 #define DB_BORD -2
 #define DB_TUNNEL -3
 
-typedef struct un_doublet{
+typedef struct un_doublet {
   uint8_t classe, one, two, actif;
 } Doublet;
 
@@ -35,19 +35,15 @@ typedef struct un_doublet{
 //#define REFDB_PTR
 
 #ifdef REFDB_PTR
-
 //la reference vers les doublets actifs est un pointeur (32 ou 64 bits selon l'architecture de la machine cible)
 typedef int32_t *RefDoublets[3];
-
 #else
-
 //la reference vers les doublets actifs est codee sur un caractere (8 bits) pour le type, et un entier (32 bits) pour l'index dans le tableau de positions
-typedef int8_t RefDoublets_Type[3];
+typedef char RefDoublets_Type[3];
 typedef int32_t RefDoublets_Ind[3];
-
 #endif
 
-int32_t init_doublet(int32_t classe, int8_t etat1, int8_t etat2, int8_t actif);
+int32_t init_doublet(int32_t classe, char etat1, char etat2, char actif);
 void split_db_hor(int32_t db_hor, int32_t *db_eo, int32_t *db_ns);
 int32_t type_doublet(int32_t index, int32_t dir);
 void elimine_doublet(int32_t type, int32_t index, int32_t dir);

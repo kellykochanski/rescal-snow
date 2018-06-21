@@ -46,16 +46,16 @@
 
 //masques pour les mouvements de fluides sur reseaux (modele multi-speed)
 
-#define MVT_SOLID 1	//phase solide
-#define MVT_OUT 2	//sortie
-#define MVT_E 4		//est
-#define MVT_O 8		//ouest
-#define MVT_B 16	//bas
-#define MVT_H 32	//haut
-#define MVT_EB 64	//est-bas
-#define MVT_EH 128	//est-haut
-#define MVT_OB 256	//ouest-bas
-#define MVT_OH 512	//ouest-haut
+#define MVT_SOLID 1 //phase solide
+#define MVT_OUT 2 //sortie
+#define MVT_E 4   //est
+#define MVT_O 8   //ouest
+#define MVT_B 16  //bas
+#define MVT_H 32  //haut
+#define MVT_EB 64 //est-bas
+#define MVT_EH 128  //est-haut
+#define MVT_OB 256  //ouest-bas
+#define MVT_OH 512  //ouest-haut
 
 #define MVT_SLOW (MVT_E | MVT_O | MVT_B | MVT_H) //vitesses lentes
 #define MVT_FAST (MVT_EB | MVT_EH | MVT_OB | MVT_OH) //vitesses rapides
@@ -63,7 +63,7 @@
 
 typedef uint16_t MvtField;
 
-#define SIZE_MVT_FIELD 1024 	//(1<<(8*sizeof(MvtField)))
+#define SIZE_MVT_FIELD 1024   //(1<<(8*sizeof(MvtField)))
 
 //parametres pour le couplage et le moyennage
 
@@ -88,15 +88,6 @@ typedef uint16_t MvtField;
 #define SetMask(mvt, mask) mvt |= mask
 #define UnsetMask(mvt, mask) mvt &= (-1) ^ mask
 
-
-/*
-#define Calcul_cix(index, cind) \
-{                           \
-  int32_t x,y,z;                  \
-  Calcule_xyz(index, x, y, z); \
-  cind = x*NB_MVT_EO + y*CLEO + ((z-LN)/DIST_MVT_NS)*CHL; \
-}
-*/
 #define Calcule_cix(index, cix) \
 { \
   int32_t z = (int)index/HL; \
@@ -129,17 +120,17 @@ int32_t mvt_ouest(int32_t ii);
 //Callback_check check_mvt_haut;
 //Callback_check check_mvt_ouest;
 //Callback_check check_mvt_est;
-int32_t check_mvt_solid(int32_t index, void *data);
-int32_t check_mvt_bas(int32_t index, void *data);
-int32_t check_mvt_haut(int32_t index, void *data);
-int32_t check_mvt_est(int32_t index, void *data);
-int32_t check_mvt_ouest(int32_t index, void *data);
-int32_t check_mvt_est_et_bas(int32_t index, void *data);
-int32_t check_mvt_EB(int32_t index, void *data);
-int32_t check_no_mvt_est_et_bas(int32_t index, void *data);
-int32_t check_mvt_mean_bas(int32_t index, void *data);
-int32_t check_mvt_mean_est(int32_t index, void *data);
-int32_t check_no_mvt_mean_bas(int32_t index, void *data);
+int32_t check_mvt_solid(int32_t index);
+int32_t check_mvt_bas(int32_t index);
+int32_t check_mvt_haut(int32_t index);
+int32_t check_mvt_est(int32_t index);
+int32_t check_mvt_ouest(int32_t index);
+int32_t check_mvt_est_et_bas(int32_t index);
+int32_t check_mvt_EB(int32_t index);
+int32_t check_no_mvt_est_et_bas(int32_t index);
+int32_t check_mvt_mean_bas(int32_t index);
+int32_t check_mvt_mean_est(int32_t index);
+int32_t check_no_mvt_mean_bas(int32_t index);
 void collisions_modcell(int32_t type, int32_t index);
 void do_collisions();
 void do_propagations();

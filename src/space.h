@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-typedef struct vector_3d{
+typedef struct vector_3d {
   float x;
   float y;
   float z;
@@ -53,11 +53,8 @@ void init_terre();
 void lock_csp(int32_t log_flag);
 void unlock_csp(int32_t log_flag);
 void cree_terre();
-#ifdef PARALLEL
-void cree_tunnels();
-#endif
 void apocalypse();
-//int32_t lecture_terre(int8_t *nom);
+//int32_t lecture_terre(char *nom);
 void cellule_terre(uint8_t type, int32_t ix);
 int32_t hcycle(int32_t ix);
 int32_t get_cell_east(int32_t ix);
@@ -66,10 +63,8 @@ int32_t get_cell_south(int32_t ix);
 int32_t get_cell_north(int32_t ix);
 int32_t get_cell_down(int32_t ix);
 int32_t get_cell_up(int32_t ix);
-int32_t get_cell_dir(int32_t ix, int8_t dir);
-#if CELL_DATA
-//void init_cell_data(CellData data, int32_t ix);
-//void get_cell_data(CellData data, int32_t ix);
+int32_t get_cell_dir(int32_t ix, char dir);
+#ifdef CELL_DATA
 void swap_cell_data(int32_t ix, int32_t ix2);
 void copy_cell_data(int32_t ix, int32_t ix2);
 #endif
@@ -87,15 +82,12 @@ int32_t check_alti(int32_t ix, void *data);
 int32_t check_cell_dir(int32_t ix, void *data);
 int32_t check_grain_seul(int32_t index, void *data);
 
-#ifdef SURRECTIONS
-int32_t surrection();
-#endif
 void translation(int32_t dx, int32_t dz);
 void rotate_map(float angle);
-void rotation(float angle, int8_t mode, int8_t flags);
+void rotation(float angle, char mode, char flags);
 void rotation90(int32_t n);
 
-void dump_terre(int8_t dump_type, int32_t cpt, int32_t unit);
+void dump_terre(char dump_type, int32_t cpt, int32_t unit);
 void dump_rugosi();
 #ifdef DUMP_SIGNATURE
 void dump_signature(int32_t ii);

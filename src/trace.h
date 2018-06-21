@@ -60,7 +60,7 @@ void trace3d_cel_quit();
 #endif
 
 #ifdef TRACE_FLUX
-typedef struct flux_map{
+typedef struct flux_map {
   float angle;
   float *flux_ew;
   float *flux_ns;
@@ -73,5 +73,5 @@ void trace_flux_dump();
 #endif
 
 void params_trace();
-void trace_dump(int8_t flag_info);
+void trace_dump(char flag_info);
 

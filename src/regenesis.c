@@ -48,58 +48,54 @@
 
 int32_t H0, L0, D0, HL0, HLD0;       // les dimensions de la terre initiale
 int32_t H, L, D, HL, HLD;       // les dimensions de la terre finale
-double csp_time=0.0;
+double csp_time = 0.0;
 int32_t Hd2, Ld2, Pd2, Hd3, Hd4;
-Cell  *TE=NULL;             // notre 'terre'
-Cell  *TE0=NULL;             // ancienne 'terre'
-int8_t *csp_filename=NULL; //nom du fichier CSP
-int8_t out_format=DUMP_CSP;  //format en sortie
+Cell  *TE = NULL;           // notre 'terre'
+Cell  *TE0 = NULL;           // ancienne 'terre'
+char *csp_filename = NULL; //nom du fichier CSP
+char out_format = DUMP_CSP; //format en sortie
 int32_t graine = 68374;
 float alpha = 0.0;  // angle de rotation
-int8_t opt_prefix=0;
+char opt_prefix = 0;
 
 double drand48();
 void  srand48();
 
 
-void read_terre()
-{
+void read_terre() {
   int32_t sz;
   sz = read_csp_header(csp_filename);
 
   out_format = sz ? DUMP_CSP : DUMP_BIN;
 
-  if (!sz){
+  if (!sz) {
     //binary file
     H = H0;
     L = L0;
     D = D0;
-  }
-  else{
+  } else {
     //CSP file
     H0 = H;
     L0 = L;
     D0 = D;
   }
 
-  HL0 = HL = H*L;
-  HLD0 = HLD = HL*D;
+  HL0 = HL = H * L;
+  HLD0 = HLD = HL * D;
 
   AllocMemoryPrint("TE", TE, Cell, HLD);
   ResetMemory(TE, Cell, HLD);
 
-  csp_set_bounds(0,0,0);
+  csp_set_bounds(0, 0, 0);
 
   read_csp(csp_filename);
 }
 
 // on copie TE dans TE0
-void cp_TE_TE0()
-{
-  if (!TE0){
+void cp_TE_TE0() {
+  if (!TE0) {
     AllocMemoryPrint("TE0", TE0, Cell, HLD);
-  }
-  else if (HLD != HLD0){
+  } else if (HLD != HLD0) {
     ReallocMemory(TE0, Cell, HLD);
     H0 = H;
     L0 = L;
@@ -115,30 +111,31 @@ void change_cel()
 // in : TE
 // out : TE
 {
-  int32_t i, j, k, n;
-  float di, dj, dk;
-  int32_t Ld2, Pd2, Hd2;
-  float Ldx, Ldy, Ldz;
-  Cell *aux;
+//   int32_t i, j, k, n;
+//   float di, dj, dk;
+//   int32_t Ld2, Pd2, Hd2;
+//   float Ldx, Ldy, Ldz;
+//   Cell *aux;
 
-  Ld2 = (int) L/2;
-  Pd2 = (int) D/2;
-  Hd2 = (int) H/2;
-  int32_t lc = L*0.3;//Ld2; //L*0.75; //Ld2+40; //L/4; //Ld2; //largeur couloir
-  Ldx= Ld2-0.5; //Ld3;//Ld4;
-  Ldy= Pd2-0.5; //Ld4; //(int) L/2;
-  Ldz= Hd2;
-  int32_t rcyl = Ld2-5; //rayon cylindre
+//   Ld2 = (int) L / 2;
+//   Pd2 = (int) D / 2;
+//   Hd2 = (int) H / 2;
+//   int32_t lc = L * 0.3; //Ld2; //L*0.75; //Ld2+40; //L/4; //Ld2; //largeur couloir
+//   Ldx = Ld2 - 0.5; //Ld3;//Ld4;
+//   Ldy = Pd2 - 0.5; //Ld4; //(int) L/2;
+//   Ldz = Hd2;
+//   int32_t rcyl = Ld2 - 5; //rayon cylindre
 
   LogPrintf("change_cel\n");
 
-  aux = TE;
-  for(k=0,n=1; k < D; k++,n=1-n) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
-        di = i - Ldx;
-        dj = j - Ldz;
-        dk = k - Ldy;
+//   aux = TE;
+  // TODO: Figure out what is going on here
+//   for (k = 0, n = 1; k < D; k++, n = 1 - n) // profondeur
+//     for (j = 0; j < H; j++) // hauteur
+//       for (i = 0; i < L; i++, aux++) { //largeur
+//         di = i - Ldx;
+//         dj = j - Ldz;
+//         dk = k - Ldy;
         //if ((n==0) || (j > H0) ||  (j==0) || (j-0.08*k < 0))
         //aux->celltype   = DUM;
         //else if ((n==1))
@@ -164,12 +161,12 @@ void change_cel()
         //if ((j == 0) && ((di*di + dk*dk >= rcyl*rcyl) && ((di+1)*(di+1) + dk*dk < rcyl*rcyl))) ////source de grains en demi-cercle
         //  aux->celltype = IN;
         //if ((j ==H-1) && (i > Ld2) && (di*di + dk*dk >= rcyl*rcyl)) ////sortie de grains en cercle
-          //aux->celltype = OUT;
+        //aux->celltype = OUT;
         /*float Ldx1 = Ld2-0.5-(L/3)*cos(PI/4);
         float Ldy1 = Pd2-0.5-(L/3)*sin(PI/4);
         if ((j >= H-1) && ((i-Ldx1)*(i-Ldx1) + (k-Ldy1)*(k-Ldy1) <= 25*16)) ////source de grains en disque au sol
           aux->celltype = IN;*/
-      }
+//       }
 }
 
 //#ifdef MODEL_DUN
@@ -185,21 +182,21 @@ void rotation()
   float co = cos(alpha);
   float si = sin(alpha);
 
-  LogPrintf("rotation de %f degres\n", alpha*180/PI);
+  LogPrintf("rotation de %f degres\n", alpha * 180 / PI);
   cp_TE_TE0();
   aux = TE;
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
         di = i - Ld2;
         dk = k - Pd2;
-        if (di*di + dk*dk < Ld2*Ld2){
-          i0 = Ld2 + co*di - si*dk;
-          k0 = Ld2 + si*di + co*dk;
-          *aux = *(TE0+i0+j*L0+k0*HL0);
+        if (di * di + dk * dk < Ld2 * Ld2) {
+          i0 = Ld2 + co * di - si * dk;
+          k0 = Ld2 + si * di + co * dk;
+          *aux = *(TE0 + i0 + j * L0 + k0 * HL0);
+        } else {
+          *aux   = *(TE0 + i + j * L0 + k * HL0);
         }
-        else
-          *aux   = *(TE0+i+j*L0+k*HL0);
         //if (aux->celltype == DUM) aux->celltype = EAUC;
       }
 }
@@ -221,32 +218,43 @@ void rotation_cyclic()
   di0 = Ld2 - 0.5;
   dk0 = Pd2 - 0.5;
 
-  LogPrintf("rotation cyclique de %f degres\n", alpha*180/PI);
+  LogPrintf("rotation cyclique de %f degres\n", alpha * 180 / PI);
   cp_TE_TE0();
   aux0 = TE0;
   aux = TE;
 
-  for(k=0; k < D; k++){ // profondeur
-    for(j=0; j < H; j++){ // hauteur
-      for(i=0; i < L; i++, aux++, aux0++){ //largeur
+  for (k = 0; k < D; k++) { // profondeur
+    for (j = 0; j < H; j++) { // hauteur
+      for (i = 0; i < L; i++, aux++, aux0++) { //largeur
         di = i - di0;
         dk = k - dk0;
-        if ((aux0->celltype != BORD) && (aux0->celltype != DUM) && (aux0->celltype != IN)){
-          i0 = roundf(di0 + co*di + si*dk);
-          k0 = roundf(dk0 - si*di + co*dk);
-          while (i0<0) i0+=L;
-          while (i0>=L) i0-=L;
-          while (k0<0) k0+=D;
-          while (k0>=D) k0-=D;
-          *aux = TE0[i0+j*L+k0*HL];
+        if ((aux0->celltype != BORD) && (aux0->celltype != DUM) && (aux0->celltype != IN)) {
+          i0 = roundf(di0 + co * di + si * dk);
+          k0 = roundf(dk0 - si * di + co * dk);
+          while (i0 < 0) {
+            i0 += L;
+          }
+          while (i0 >= L) {
+            i0 -= L;
+          }
+          while (k0 < 0) {
+            k0 += D;
+          }
+          while (k0 >= D) {
+            k0 -= D;
+          }
+          *aux = TE0[i0 + j * L + k0 * HL];
 
 #ifdef MODEL_DUN
-          if (aux->celltype == DUM) aux->celltype = EAUC;
+          if (aux->celltype == DUM) {
+            aux->celltype = EAUC;
+          }
 #endif
-        }
-        else
+        } else
           //aux2->celltype = aux->celltype;
+        {
           *aux = *aux0;
+        }
       }
     }
   }
@@ -259,24 +267,24 @@ void rotation90(int32_t n)
   Cell *aux;
   int32_t i, j, k;
   int32_t i0, k0;
-  float a = n*PI/2;
+  float a = n * PI / 2;
   float co = cos(a);
   float si = sin(a);
   float di0 = Ld2 - 0.5;
   float dk0 = Ld2 - 0.5;
   float di, dk;
 
-  LogPrintf("rotation complete de %f degres\n", a*180/PI);
+  LogPrintf("rotation complete de %f degres\n", a * 180 / PI);
   cp_TE_TE0();
   aux = TE;
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
         di = i - di0;
         dk = k - dk0;
-        i0 = di0 + co*(float)di - si*(float)dk;
-        k0 = dk0 + si*(float)di + co*(float)dk;
-        *aux = *(TE0+i0+j*L0+k0*HL0);
+        i0 = di0 + co * (float)di - si * (float)dk;
+        k0 = dk0 + si * (float)di + co * (float)dk;
+        *aux = *(TE0 + i0 + j * L0 + k0 * HL0);
       }
 }
 
@@ -288,23 +296,26 @@ void translation()
   Cell *aux;
 
   //translation est-ouest
-  int32_t d_eo=L/3; //L/3; //L/4; //L/10; //L/5;
+  int32_t d_eo = L / 3; //L/3; //L/4; //L/10; //L/5;
   aux = TE;
   LogPrintf("translation : %d\n", d_eo);
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
 #ifdef MODEL_DUN
         //aux->celldata = (i<L-d_eo)? (aux+d_eo)->celldata : (aux->celldata == DUM)? DUM : EAUC;
         //if ((i>=L-d_eo) && (j==H-2)) aux->celldata = (drand48() < 0.2) ? GR : EAUC; //sable
         //if (i>=L-d_eo) aux->celldata = DUM;//(j<=H-3)? EAUC : DUM;
-        if (i < L-d_eo){
-          if (aux->celltype != IN) *aux = *(aux+d_eo);
-        }
-        else{
+        if (i < L - d_eo) {
+          if (aux->celltype != IN) {
+            *aux = *(aux + d_eo);
+          }
+        } else {
           //if (aux->celldata != DUM && (aux+d_eo)->celldata != DUM) aux->celldata = (aux+d_eo-L)->celldata;//EAUC;
           //if (aux->celldata != DUM) aux->celldata = (aux+d_eo)->celldata;
-          if (aux->celltype != DUM ) ResetCell(aux,EAUC);
+          if (aux->celltype != DUM) {
+            ResetCell(aux, EAUC);
+          }
         }
 #endif
       }
@@ -318,22 +329,25 @@ void translation_alldir()
   Cell *aux;
 
   //translation est-ouest
-  int32_t d_eo=100; //L/3; //L/4; //L/10; //L/5;
+  int32_t d_eo = 100; //L/3; //L/4; //L/10; //L/5;
   //translation nord-sud
-  int32_t d_ns=100;
+  int32_t d_ns = 100;
 
   LogPrintf("translation : %d , %d\n", d_eo, d_ns);
   cp_TE_TE0();
   aux = TE;
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
 #ifdef MODEL_DUN
-          if ((i+d_eo >= 0) && (i+d_eo < L) && (k+d_ns >= 0) && (k+d_ns < D)){
-          if (aux->celltype != IN) *aux = *(TE0+d_eo+i+j*L+(k+d_ns)*HL);
-        }
-        else{
-          if (aux->celltype != DUM ) ResetCell(aux,EAUC);
+        if ((i + d_eo >= 0) && (i + d_eo < L) && (k + d_ns >= 0) && (k + d_ns < D)) {
+          if (aux->celltype != IN) {
+            *aux = *(TE0 + d_eo + i + j * L + (k + d_ns) * HL);
+          }
+        } else {
+          if (aux->celltype != DUM) {
+            ResetCell(aux, EAUC);
+          }
         }
 #endif
       }
@@ -347,24 +361,27 @@ void translation_cyclic()
   Cell *aux;
 
   //translation est-ouest
-  int32_t d_eo=140; //L/3; //L/4; //L/10; //L/5;
+  int32_t d_eo = 140; //L/3; //L/4; //L/10; //L/5;
 
   LogPrintf("translation : %d\n", d_eo);
   cp_TE_TE0();
   aux = TE;
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
 #ifdef MODEL_DUN
         //aux->celltype = (i<L-d_eo)? (aux+d_eo)->celltype : (aux->celltype == DUM)? DUM : EAUC;
         //if ((i>=L-d_eo) && (j==H-2)) aux->celltype = (drand48() < 0.2) ? GR : EAUC; //sable
         //if (i>=L-d_eo) aux->celltype = DUM;//(j<=H-3)? EAUC : DUM;
-        if (i < L-d_eo){
-          if (aux->celltype != IN) *aux = *(TE0+d_eo+i+j*L+k*HL);
-        }
-        else{
+        if (i < L - d_eo) {
+          if (aux->celltype != IN) {
+            *aux = *(TE0 + d_eo + i + j * L + k * HL);
+          }
+        } else {
           //if (aux->celltype != DUM && (aux+d_eo-L)->celltype != DUM) *aux = *(TE0+d_eo-L+i+j*L+k*HL);
-          if (aux->celltype != DUM) *aux = *(TE0+d_eo-L+i+j*L+k*HL);
+          if (aux->celltype != DUM) {
+            *aux = *(TE0 + d_eo - L + i + j * L + k * HL);
+          }
         }
 #endif
       }
@@ -378,20 +395,23 @@ void translation_cyclic_ns()
   Cell *aux;
 
   //translation nord_sud
-  int32_t d_ns=220; //L/3; //L/4; //L/10; //L/5;
+  int32_t d_ns = 220; //L/3; //L/4; //L/10; //L/5;
 
   LogPrintf("translation : %d\n", d_ns);
   cp_TE_TE0();
   aux = TE;
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
 #ifdef MODEL_DUN
-        if (k < D-d_ns){
-          if (aux->celltype != IN) *aux = *(TE0+i+j*L+(k+d_ns)*HL);
-        }
-        else{
-          if (aux->celltype != DUM) *aux = *(TE0+i+j*L+(d_ns-D+k)*HL);
+        if (k < D - d_ns) {
+          if (aux->celltype != IN) {
+            *aux = *(TE0 + i + j * L + (k + d_ns) * HL);
+          }
+        } else {
+          if (aux->celltype != DUM) {
+            *aux = *(TE0 + i + j * L + (d_ns - D + k) * HL);
+          }
         }
 #endif
       }
@@ -406,31 +426,33 @@ void transcale1()
 
   //translation + homothetie vers l'ouest
 
-  int32_t d_eo=L/10; //L/8;
+  int32_t d_eo = L / 10; //L/8;
   int32_t ii, jj, kk;
-  int32_t d_ns=0;
+  int32_t d_ns = 0;
   float coef1 = 0.4;
 
   LogPrintf("translation 1 + rescaling\n");
   cp_TE_TE0();
   aux = TE;
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
-        ii = (i*coef1)+d_eo;
-        jj = H-1-((H-1-j)*coef1);
-        kk = Pd2+((k-Pd2)*coef1)+d_ns;
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
+        ii = (i * coef1) + d_eo;
+        jj = H - 1 - ((H - 1 - j) * coef1);
+        kk = Pd2 + ((k - Pd2) * coef1) + d_ns;
 #ifdef MODEL_DUN
-        if (((ii>0) && (ii<L) && (jj>0) && (jj<H) && (kk>0) && (kk<D)))
-          *aux = *(TE0+ii+jj*L+kk*HL);
-        else
+        if (((ii > 0) && (ii < L) && (jj > 0) && (jj < H) && (kk > 0) && (kk < D))) {
+          *aux = *(TE0 + ii + jj * L + kk * HL);
+        } else {
           ResetCell(aux, EAUC);
+        }
         //if ((j<H-1) && (aux->celltype == DUM)) ResetCell(aux,EAUC);
-        if (j == 0)
+        if (j == 0) {
           ResetCell(aux, DUM);
+        }
         //else if ( j == H-1) ResetCell(aux,EAUC);
 #endif
-        }
+      }
 }
 
 void transcale2()
@@ -443,11 +465,11 @@ void transcale2()
   //translation + homothetie vers l'ouest
   //conservation de l'ancienne topographie
 
-  int32_t d_eo=L/8; //L/8;
+  int32_t d_eo = L / 8; //L/8;
   int32_t ii, jj, kk;
   //int32_t d_ns=2*D/15; //position 1
   //int32_t d_ns=1.7*D/15;
-  int32_t d_ns=D/15; //position 2
+  int32_t d_ns = D / 15; //position 2
   //int32_t d_ns=0; //position 3
   float coef2 = 1.5;
 
@@ -455,23 +477,25 @@ void transcale2()
   LogPrintf("d_ns = %d\n", d_ns);
   aux = TE;
   cp_TE_TE0();
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
-        ii = (i*coef2)+d_eo;
-        jj = H-1-((H-1-j)*coef2);
-        kk = Pd2+((k-Pd2)*coef2)+d_ns;
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
+        ii = (i * coef2) + d_eo;
+        jj = H - 1 - ((H - 1 - j) * coef2);
+        kk = Pd2 + ((k - Pd2) * coef2) + d_ns;
 #ifdef MODEL_DUN
-        if (aux->celltype != GR){
-          if (((ii>0) && (ii<L) && (jj>0) && (kk>0) && (kk<D)))
-            *aux = *(TE0+ii+jj*L+kk*HL);
-          else
+        if (aux->celltype != GR) {
+          if (((ii > 0) && (ii < L) && (jj > 0) && (kk > 0) && (kk < D))) {
+            *aux = *(TE0 + ii + jj * L + kk * HL);
+          } else {
             ResetCell(aux, EAUC);
+          }
         }
-        if ((j<H-1) && (aux->celltype == DUM))
+        if ((j < H - 1) && (aux->celltype == DUM))
           ResetCell(aux, EAUC)
-        else if (j==H-1)
-          ResetCell(aux, DUM);
+          else if (j == H - 1) {
+            ResetCell(aux, DUM);
+          }
 #endif
       }
 }
@@ -486,21 +510,22 @@ void rescale_height()
   cp_TE_TE0();
 
   //redimensionnement
-  H = 2*H0;
-  HL = H*L;
-  HLD = HL*D;
+  H = 2 * H0;
+  HL = H * L;
+  HLD = HL * D;
   LogPrintf("dilatation verticale : %d\n", H);
   ReallocMemory(TE, Cell, HLD);
   aux = TE;
 
-  for(k=0; k < D; k++){ // profondeur
-    for(j=0; j < H; j++){ // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
-        j0 = j*H0/H;
-        *aux = *(TE0+i+j0*L0+k*HL0);
+  for (k = 0; k < D; k++) { // profondeur
+    for (j = 0; j < H; j++) { // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
+        j0 = j * H0 / H;
+        *aux = *(TE0 + i + j0 * L0 + k * HL0);
 #ifdef MODEL_DUN
-        if ((H < H0) && ((j == 0) || (j == H-1)))
+        if ((H < H0) && ((j == 0) || (j == H - 1))) {
           ResetCell(aux, DUM);
+        }
 #endif
       }
     }
@@ -518,30 +543,34 @@ void change_height()
 
   //redimensionnement
   H = 200; //H0*2/3; //H0*2;
-  Hd2 = H/2;
-  HL = H*L;
-  HLD = HL*D;
+  Hd2 = H / 2;
+  HL = H * L;
+  HLD = HL * D;
 
   LogPrintf("redimensionnement vertical : %d x %d x %d \n", H, L, D);
   ReallocMemory(TE, Cell, HLD);
   aux = TE;
 
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
 #ifdef MODEL_DUN
-        if (H0-H+j > 0)
-          *aux = *(TE0+i+(H0-H+j)*L+k*HL0);
-        else if ((TE0+i+k*HL0+L)->celltype == DUM)
+        if (H0 - H + j > 0) {
+          *aux = *(TE0 + i + (H0 - H + j) * L + k * HL0);
+        } else if ((TE0 + i + k * HL0 + L)->celltype == DUM)
           ResetCell(aux, DUM)
-        else
-          ResetCell(aux, EAUC);
-        if (j == 0) ResetCell(aux, DUM); //plafond
+          else {
+            ResetCell(aux, EAUC);
+          }
+        if (j == 0) {
+          ResetCell(aux, DUM);  //plafond
+        }
 #else
-        if (H0-H+j >= 0)
-          *aux = *(TE0+i+(H0-H+j)*L+k*HL0);
-        else
+        if (H0 - H + j >= 0) {
+          *aux = *(TE0 + i + (H0 - H + j) * L + k * HL0);
+        } else {
           ResetCell(aux, MOINS);
+        }
 #endif
         //if (j==H-1) ResetCell(aux, DUM); //sol plat
       }
@@ -563,10 +592,10 @@ void add_layers()
   //redimensionnement : ajout de h1 couches en haut et h2 couches en bas
   h1 = 30; //en haut
   h2 = 10; //en bas
-  H = H0+h1+h2;
-  Hd2 = H/2;
-  HL = H*L;
-  HLD = HL*D;
+  H = H0 + h1 + h2;
+  Hd2 = H / 2;
+  HL = H * L;
+  HLD = HL * D;
 
 #ifdef MODEL_DUN
   typ = EAUC;
@@ -579,13 +608,14 @@ void add_layers()
 
   printf("redimensionnement vertical : %d x %d x %d \n", H, L, D);
 
-  for(k=0; k < D; k++) // profondeur
-    for(j=0; j < H; j++) // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
-        if ((j >= h1) && (j < H-h2))
-          *aux = *(TE0+i+(j-h1)*L+k*HL0);
-        else
+  for (k = 0; k < D; k++) // profondeur
+    for (j = 0; j < H; j++) // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
+        if ((j >= h1) && (j < H - h2)) {
+          *aux = *(TE0 + i + (j - h1) * L + k * HL0);
+        } else {
           ResetCell(aux, typ);
+        }
       }
 }
 
@@ -600,26 +630,27 @@ void change_width()
 
   //redimensionnement horizontal est-ouest
   int32_t d;
-  L = L0*2; //L0*2;
-  Ld2 = L/2;
-  HL = H*L;
-  HLD = HL*D;
-  d = (L-L0)/2;
+  L = L0 * 2; //L0*2;
+  Ld2 = L / 2;
+  HL = H * L;
+  HLD = HL * D;
+  d = (L - L0) / 2;
 
   ReallocMemory(TE, Cell, HLD);
   aux = TE;
 
   printf("redimensionnement horizontal est-ouest : %d x %d x %d \n", H, L, D);
 
-  for(k=0; k < D; k++){ // profondeur
-    for(j=0; j < H; j++){ // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
-        if (i<d)
-          *aux = *(TE0+j*L0+k*HL0);
-        else if (i>=L-d)
-          *aux = *(TE0+(L0-1)+j*L0+k*HL0);
-        else
-          *aux = *(TE0+(i-d)+j*L0+k*HL0);
+  for (k = 0; k < D; k++) { // profondeur
+    for (j = 0; j < H; j++) { // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
+        if (i < d) {
+          *aux = *(TE0 + j * L0 + k * HL0);
+        } else if (i >= L - d) {
+          *aux = *(TE0 + (L0 - 1) + j * L0 + k * HL0);
+        } else {
+          *aux = *(TE0 + (i - d) + j * L0 + k * HL0);
+        }
       }
     }
   }
@@ -638,43 +669,45 @@ void change_depth()
   //redimensionnement horizontal nord-sud centre
 
   D = 20;
-  d = (D-D0)/2;
-  HLD = HL*D;
+  d = (D - D0) / 2;
+  HLD = HL * D;
 
   ReallocMemory(TE, Cell, HLD);
   aux = TE;
 
   printf("redimensionnement horizontal nord-sud : %d x %d x %d \n", H, L, D);
 
-  for(k=0; k < D; k++){ // profondeur
-    for(j=0; j < H; j++){ // hauteur
-      for(i=0; i < L; i++, aux++){ //largeur
-        if (k<d)
-          *aux = *(TE0+i+j*L0);
-        else if (k>=D-d)
-          *aux = *(TE0+i+j*L0+(D0-1)*HL0);
-        else
-          *aux = *(TE0+i+j*L0+(k-d)*HL0);
+  for (k = 0; k < D; k++) { // profondeur
+    for (j = 0; j < H; j++) { // hauteur
+      for (i = 0; i < L; i++, aux++) { //largeur
+        if (k < d) {
+          *aux = *(TE0 + i + j * L0);
+        } else if (k >= D - d) {
+          *aux = *(TE0 + i + j * L0 + (D0 - 1) * HL0);
+        } else {
+          *aux = *(TE0 + i + j * L0 + (k - d) * HL0);
+        }
       }
     }
   }
 }
 
-void regenerate_terre()
-{
+void regenerate_terre() {
   //LogPrintf("random seed: %d\n", graine);
   srand48(graine);
 
-  Hd2 = (int) H0/2;
-  Ld2 = (int) L0/2;
-  Pd2 = (int) D0/2;
-  Hd3 = (int) 2*H0/3;
-  Hd4 = (int) H0/4;
+  Hd2 = (int) H0 / 2;
+  Ld2 = (int) L0 / 2;
+  Pd2 = (int) D0 / 2;
+  Hd3 = (int) 2 * H0 / 3;
+  Hd4 = (int) H0 / 4;
 
   // uncomment the functions that should be applied
 
   /***** Rotation d'angle alpha avec table tournante *****/
-  if (alpha) rotation();
+  if (alpha) {
+    rotation();
+  }
 
   /***** Rotation d'angle alpha avec bouclage *****/
   //if (alpha) rotation_cyclic();
@@ -722,22 +755,21 @@ void regenerate_terre()
 }
 
 
-void dump_terre()
-{
-  int8_t out_filename[256];
+void dump_terre() {
+  char out_filename[256];
 
-  if (opt_prefix)
+  if (opt_prefix) {
     sprintf(out_filename, "Regen_%s", basename(csp_filename));
-  else
+  } else {
     strcpy(out_filename, "Regen.csp");
+  }
 
-  csp_set_bounds(0,0,0);
+  csp_set_bounds(0, 0, 0);
 
   write_csp(out_format, out_filename);
 }
 
-void usage()
-{
+void usage() {
 
   printf("usage: \n regenesis <CSP file> [OPTIONS]\n");
   printf(" regenesis <binary file> H L D [OPTIONS]\n");
@@ -754,43 +786,42 @@ void usage()
   exit(-1);
 }
 
-void read_args(int32_t argc, int8_t **argv)
-{
+void read_args(int32_t argc, char **argv) {
   int32_t n;
 
   n = 1;
-  while ((n<argc) && (*argv[n]!='-')) n++;
+  while ((n < argc) && (*argv[n] != '-')) {
+    n++;
+  }
 
-  if ((n != 2) && (n != 5))
+  if ((n != 2) && (n != 5)) {
     usage();
+  }
 
   csp_filename = argv[1];
 
-  if (n == 5){
+  if (n == 5) {
     H0 = atoi(argv[2]);
     L0 = atoi(argv[3]);
     D0 = atoi(argv[4]);
   }
 
-  for(; n<argc; n++){
-    if (!strcmp(argv[n],"-s") || !strcmp(argv[n],"-g")){
+  for (; n < argc; n++) {
+    if (!strcmp(argv[n], "-s") || !strcmp(argv[n], "-g")) {
       graine = atoi(argv[++n]);
-    }
-    else if (!strcmp(argv[n],"-rot")){
+    } else if (!strcmp(argv[n], "-rot")) {
       alpha = atof(argv[++n]);
-      alpha = (alpha/180)*PI;
-    }
-    else if (!strcmp(argv[n],"-prefix"))
+      alpha = (alpha / 180) * PI;
+    } else if (!strcmp(argv[n], "-prefix")) {
       opt_prefix = 1;
-    else{
+    } else {
       ErrPrintf("Error: option %s unknown\n", argv[n]);
       exit(-1);
     }
   }
 }
 
-int32_t main(int32_t argc, int8_t **argv)
-{
+int32_t main(int32_t argc, char **argv) {
   LogPrintf("regenesis %s\n", VER_NUM);
 
   read_args(argc, argv);

@@ -37,38 +37,32 @@
 #include "doublets.h"
 #include "transitions.h"
 #include "space.h"
-#ifdef PARALLEL
-#include "synchro.h"
-#endif
 
-extern Cell   *TE;	        // notre 'terre'
+extern Cell   *TE;	                      // notre 'terre'
 #ifdef REFDB_PTR
-extern RefDoublets *RefDB;      // references des cellules vers les doublets actifs
+extern RefDoublets *RefDB;                // references des cellules vers les doublets actifs
 #else
-extern RefDoublets_Type *RefDB_Type;       // references des cellules de la terre vers les doublets actifs
-extern RefDoublets_Ind *RefDB_Ind;       // references des cellules de la terre vers les doublets actifs
+extern RefDoublets_Type *RefDB_Type;      // references des cellules de la terre vers les doublets actifs
+extern RefDoublets_Ind *RefDB_Ind;        // references des cellules de la terre vers les doublets actifs
 #endif
-extern int32_t   H, L, D, HL, HLD;     // les dimensions de la terre
-extern int32_t LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
-extern const int8_t *etats[];     // les noms des types de cellules
+extern int32_t   H, L, D, HL, HLD;        // les dimensions de la terre
+extern int32_t LN, LS, LNS, HLN;          // couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
+extern const char *etats[];             // les noms des types de cellules
 extern int32_t direction[];
 extern int32_t orientation[];
-extern int32_t pbc_mode;  //periodic boundary conditions
-extern int8_t *rot_map;        // periodic mapping of the rotating space
-#ifdef PARALLEL
-extern int32_t mode_par;    //mode parallele
-#endif
+extern int32_t pbc_mode;                  // periodic boundary conditions
+extern char *rot_map;                   // periodic mapping of the rotating space
 
-Doublet t_doub[MAX_DB];               // la description des doublets
+Doublet t_doub[MAX_DB];                   // la description des doublets
 int32_t db_inv[3][MAX_CELL][MAX_CELL];    // la map inverse pour le type de doublet, etant
-                                      // donnes le type de cell et la direction
-const int8_t *classes_db[5] = CLASSES_DB; //noms des classes de doublet
-int32_t nb_type_db=0;                 // nombre de types de doublets
-int32_t *db_pos[MAX_DB];            // les tableaux contenant la position des doublets actifs
-int32_t Ndb[MAX_DB];                // nombre de doublets actifs par type
-int32_t Ndbmax[MAX_DB];             // taille des tableaux de position des doublets actifs
+                                          // donnes le type de cell et la direction
+const char *classes_db[5] = CLASSES_DB; // noms des classes de doublet
+int32_t nb_type_db=0;                     // nombre de types de doublets
+int32_t *db_pos[MAX_DB];                  // les tableaux contenant la position des doublets actifs
+int32_t Ndb[MAX_DB];                      // nombre de doublets actifs par type
+int32_t Ndbmax[MAX_DB];                   // taille des tableaux de position des doublets actifs
 
-int32_t init_doublet(int32_t classe, int8_t etat1, int8_t etat2, int8_t actif)
+int32_t init_doublet(int32_t classe, char etat1, char etat2, char actif)
 {
   int32_t i;
 
@@ -136,25 +130,10 @@ void bouclage_hor(int32_t *p_typ, int32_t *p_ind, int32_t dir)
 }
 
 #ifdef REFDB_PTR
-
 void translate_db_pos(int32_t type, unsigned int64_t offset)
 {
   int32_t i, ix;
-
   LogPrintf ("translation d'adresses sur les references au tableau db_pos[%d]\n",type);
-#if 0
-  extern int32_t arch;
-
-  if (arch == W64){
-    LogPrintf ("offset = 0x%016lx\n", offset);
-    LogPrintf ("nouvelle adresse = 0x%016x\n", (unsigned long)db_pos[type]);
-  }
-  else{
-    LogPrintf ("offset = 0x%08lx\n", offset);
-    LogPrintf ("nouvelle adresse = 0x%08x\n", (unsigned int)db_pos[type]);
-  }
-#endif
-
   for (i=0; i<Ndb[type]; i++){
     ix = db_pos[type][i];
     if (RefDB[ix][BAS] == db_pos[type] + i - offset)
@@ -178,14 +157,9 @@ void realloc_db_pos(int32_t type)
 #ifdef REFDB_PTR
   int32_t *old_adr = db_pos[type];
 #endif
-
-  //Ndbmax[type] += (Ndbmax[type]>>1); // on augmente de 50% la taille du tableau db_pos[type]
   Ndbmax[type] <<= 1; // on double la taille du tableau db_pos[type]
-
   LogPrintf ("reallocation db_pos[%d] : %d doublets\n",type,Ndbmax[type]);
-
   ReallocMemoryPrint("db_pos", db_pos[type], int, Ndbmax[type]);
-
 #ifdef REFDB_PTR
   if (old_adr != db_pos[type])  //adresse du tableau db_pos[type] a peut-etre change ?
     translate_db_pos(type, ((unsigned long)db_pos[type] - (unsigned long)old_adr)/sizeof(int));
@@ -225,7 +199,6 @@ void elimine_doublet(int32_t type, int32_t index, int32_t dir)
       RefDB_Ind[index][dir] = -1;
 #endif
       Ndb[type]--;
-      //if (type==11){LogPrintf("Ndb[%d] = %d\n", type, Ndb[type]);}
       if (Ndb[type] < 0){
         extern uint64_t iter;
         ErrPrintf("ERROR: Ndb[%d] = %d\n", type, Ndb[type]);
@@ -336,26 +309,6 @@ void ajoute_doublet(int32_t type, int32_t index, int32_t dir)
     bouclage_hor(&type, &index, dir);
 #endif
 
-#ifdef PARALLEL
-  if (mode_par && (type == DB_TUNNEL)){
-    int32_t tc = TE[index].celltype;  //t_doub[type].one;
-    //int32_t tc2 = t_doub[type].two;
-    //LogPrintf("TUNNEL : tc=%d  \n", tc);
-    if (dir == EST){
-      if (tc != TUNNEL)
-        synchro_tunnel_est(tc, index);
-      else
-        synchro_tunnel_ouest(TE[index+1].celltype, index+1);
-    }
-    else if (dir == SUD){
-      if (tc != TUNNEL)
-        synchro_tunnel_sud(tc, index);
-      else
-        synchro_tunnel_nord(TE[index+HL].celltype, index+HL);
-    }
-  }
-#endif
-
   if ((type >= 0) && t_doub[type].actif){
     if (Ndb[type] >= Ndbmax[type]) // tableau db_pos pas assez grand ?
       realloc_db_pos(type);
@@ -425,7 +378,7 @@ void init_db_inv()
   int32_t i, n;
   int32_t cl, etat1, etat2, db_eo, db_ns;
   int32_t split;
-  int8_t flag_conflict;
+  char flag_conflict;
 
   // initialisation du tableau db_inv[][][]
   memset(db_inv, DB_INACTIF, sizeof(db_inv));
@@ -457,12 +410,8 @@ void init_db_inv()
         db_eo = db_inv[EST_OUEST][etat1][etat2];
         db_ns = db_inv[NORD_SUD][etat1][etat2];
         flag_conflict = ((db_eo >= 0) && t_doub[db_eo].actif) || ((db_ns >= 0) && t_doub[db_ns].actif);
-        //if (((db_eo >= 0) ) || ((db_ns >= 0) )){
         if (flag_conflict){
-          //split_db_hor(i);
-          //LogPrintf("init_db_inv: etat1=%d, etat2=%d, db_eo=%d db_ns=%d\n", etat1, etat2, db_eo, db_ns);
           split |= split_trans_hor(i);
-          //split = 0;
         }
       }
     }
@@ -497,26 +446,13 @@ void init_db_inv()
     }
   }
 #endif
-
-#ifdef PARALLEL
-  // cas particulier des tunnels
-  for (i=0; i<MAX_CELL; i++){
-    db_inv[EST_OUEST][i][TUNNEL] = DB_TUNNEL;
-    db_inv[EST_OUEST][TUNNEL][i] = DB_TUNNEL;
-    db_inv[NORD_SUD][i][TUNNEL] = DB_TUNNEL;
-    db_inv[NORD_SUD][TUNNEL][i] = DB_TUNNEL;
-    db_inv[VERTICAL][i][TUNNEL] = DB_TUNNEL;
-    db_inv[VERTICAL][TUNNEL][i] = DB_TUNNEL;
-  }
-#endif
 }
 
 void init_db_pos()
 {
-  static int8_t first = 1;
+  static char first = 1;
   uint32_t i,j,k, ix, td, tot;
   Cell *t,*dr, *ba, *de;
-
   // allocations pour les tableaux de positions db_pos[][]
   tot = 0;
   for(i = 0; i < nb_type_db; i++){
@@ -527,9 +463,6 @@ void init_db_pos()
         AllocMemory(db_pos[i], int, Ndbmax[i]);
       }
     }
-    //pos[i] = (int*) malloc(nmax[i]*sizeof(int) );
-    //LogPrintf ("Allocation de pos[%d] : %ld\n", i, nmax[i]*sizeof(int));
-    //LogPrintf("adresse de pos[%d] : %08x\n",i,pos[i]);
     tot += Ndbmax[i];
   }
   if (first){
@@ -545,18 +478,13 @@ void init_db_pos()
   memset(RefDB_Type, DB_INACTIF, sizeof(RefDoublets_Type) * HLD);
   memset(RefDB_Ind, -1, sizeof(RefDoublets_Ind) * HLD);
 #endif
-  //t = TE;
-  t = TE; // + LN*HL;
+  t = TE;
   dr = t+1; ba = t+L; de = t+HL;
   ix = 0;
-  //ix = LN*HL;
-
-  //for(k = 0; k < L; k++){
   for(k = 0; k < D; k++){
     for(j = 0; j < H; j++){
       for(i = 0; i < L; i++, t++, dr++, ba++, de++, ix++){
 #ifdef CYCLAGE_HOR
-        //if (!pbc_mode || ((k > 0) && (i > 0))) //pour eviter la surcharge aux bords !!
         if (pbc_mode){
           if (!rot_map){
             if ((k == 0) || (i == 0)){
@@ -577,9 +505,6 @@ void init_db_pos()
         }
 #endif
         if ((k < D-1) && (j < H-1) && (i < L-1)) // on ne sort pas de la terre !!
-#ifdef PARALLEL
-        if ((dr->celltype != TUNNEL) && (ba->celltype != TUNNEL) && (de->celltype != TUNNEL)) //le doublet n'est pas dans une zone de recouvrement asservie
-#endif
         {
           if (j > 0){
             td = db_inv[EST_OUEST][t->celltype][dr->celltype];
@@ -597,7 +522,6 @@ void init_db_pos()
       }
     }
   }
-  //LogPrintf("init_db_pos : fin\n");
 }
 
 void fin_db_pos()
@@ -605,7 +529,6 @@ void fin_db_pos()
   int32_t i;
   LogPrintf("liberation db_pos\n");
   for(i = 0; i < nb_type_db; i++){
-    //if (db_pos[i]) free(db_pos[i]);
     if (t_doub[i].actif) FreeMemory(db_pos[i], int, Ndbmax[i]);
   }
 }
@@ -626,7 +549,6 @@ void dump_doublets()
   fprintf(fp,"\nNB_TYPE_DOUBLET = %d\n",nb_type_db);
   for(i=0; i<nb_type_db; i++){
     fprintf(fp,"DB(%2d): %s, [%s, %s] %s\n", i, classes_db[t_doub[i].classe], etats[t_doub[i].one], etats[t_doub[i].two], t_doub[i].actif?"active":"");
-    //fprintf(fp,"DB(%2d): %s, [%s, %s] %s | %d\n", i, classes_db[t_doub[i].classe], etats[t_doub[i].one], etats[t_doub[i].two], t_doub[i].actif?"active":"", (t_doub[i].classe <= 2)?db_inv[t_doub[i].classe][t_doub[i].one][t_doub[i].two]:-1);  //DEBUG
   }
 
   fclose(fp);
@@ -658,10 +580,7 @@ void dump_db_info()
       totmax += Ndbmax[i];
     }
   }
-  //fprintf(fp,"     (total = %d, max = %d, alloc = %lu)",tot,totmax,totmax*sizeof(int)); //debug info
-
   fclose(fp);
-
   cpt++;
 }
 #endif
