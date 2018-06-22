@@ -1861,11 +1861,10 @@ void dump_terre(int8_t dump_type, int32_t cpt, int32_t unit)
 
 
 #ifdef DUMP_SIGNATURE
-void dump_signature(int32_t ii)
-{
-  FILE *fp;
+void dump_signature(int32_t ii){
   int32_t i;
   uint32_t sig, *aux;
+  char output[128];
 
   //calcul de la signature
   sig=0;
@@ -1873,14 +1872,8 @@ void dump_signature(int32_t ii)
   for(i=0; i<HLD*sizeof(Cell)/sizeof(unsigned int); i++, aux++) sig += (*aux); //sig = sig ^ (*aux);
 
   //dump
-  fp = fopen("SIGN_CSP.log","a");
-  if ( ! fp ){
-    ErrPrintf("erreur ouverture fichier dump signature CSP\n");
-    exit(-4);
-  }
-  fprintf(fp, "%08x : %08x\n", ii, sig);
-  fclose(fp);
-
+  sprintf(output, "%08x : %08x\n", ii, sig);
+  output_write("CELLSPACE_SIGNATURE", output);
 }
 #endif
 

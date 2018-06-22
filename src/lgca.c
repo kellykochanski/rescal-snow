@@ -381,8 +381,6 @@ void init_collisions()
   }
 #endif
 
-  if (opt_info) dump_collisions();
-
   // initialization of precomputed sums of velocities
   int32_t *pvx = CelVelx;
   int32_t *pvy = CelVely;
@@ -411,16 +409,6 @@ void init_collisions()
   if (opt_info) dump_signature_mvt();
 #endif
 
-#ifdef OPENMP
-#pragma omp parallel
-  {
-    int32_t tid = omp_get_thread_num();
-    if (tid==0){
-      int32_t nthreads = omp_get_num_threads();
-      LogPrintf("number of OMP threads : %d\n", nthreads);
-    }
-  }
-#endif
 }
 
 
@@ -2094,19 +2082,15 @@ void dump_mvt_in_out()
 {
   static int32_t cpt = 0;
   static int32_t step = 0;
-  FILE *fp;
+  char current_output[128];
 
   if (!cpt && !step){
-    fp = fopen("MVT_IO.log","w");
-    fprintf(fp,"      \t mvt_in    \t mvt_out   \t ratio\n");
-    fclose(fp);
+    output_write("MVT_IO","      \t mvt_in    \t mvt_out   \t ratio\n");
   }
 
-  //fichier in-out
   if (step >= VSTEP_TIME){
-    fp = fopen("MVT_IO.log","a");
-    fprintf(fp,"%04d: \t%09ld \t%09ld \t%f\n", cpt, nb_mvt_in, nb_mvt_out, (nb_mvt_in) ? ((float)nb_mvt_out/nb_mvt_in) : 0);
-    fclose(fp);
+    sprintf(current_output, "MTV_IO","%04d: \t%09ld \t%09ld \t%f\n", cpt, nb_mvt_in, nb_mvt_out, (nb_mvt_in) ? ((float)nb_mvt_out/nb_mvt_in) : 0);
+    output_write("MVT_IO", current_output);
     step = nb_mvt_in = nb_mvt_out = 0;	//reset
     cpt++;
   }
@@ -2114,39 +2098,34 @@ void dump_mvt_in_out()
     step++;
 }
 
-void dump_densite()
-{
-  static int32_t cpt = 0;
-  FILE *fp;
+void dump_densite(){
+// Write numbers of moving cells, in solid and fluid, to DENSITE.log
+  static int32_t cpt = 0; // count number of times function has been called == number of lines written to file
   int32_t ix, n;
-  //int32_t nb_cel_fluide_dump = 0;
+  char output[256];
 
   //recalcul nb_mvt, nb_mvt_sol et nb_cel_fluide
-  int32_t nb_mvt = 0; //nombre de particules mobiles
+  int32_t nb_mvt = 0; //nombre de particules mobiles // number of mobile particles
   int32_t nb_mvt_sol = 0; //nombre de particules mobiles localisees dans une cellule solide
-  //for (ix=0; ix<CHLD; ix++){
+			  //number of mobile particles inside a solid cell
+
   for (ix=CHL*CLN; ix<CHL*(CLS+1); ix++){
     n = NbMvtCell[CelMvt[ix]];
     nb_mvt += n;
     if ((CelMvt[ix] & MVT_SOLID)) nb_mvt_sol += n;
-    //if (!(CelMvt[ix] & MVT_SOLID)) nb_cel_fluide_dump++;
   }
-  //densite = (float)nb_mvt / nb_cel_fluide;
+
+  // Calculate density
   densite = (float)(nb_mvt - nb_mvt_sol) / nb_cel_fluide;
 
-  //fichier densite
-  fp = fopen("DENSI.log","a");
-  if (!cpt) fprintf(fp,"\tmvt cells \tfluid nodes \tdensity \ttrapped cells\n");
-  fprintf(fp,"%04d: \t%09ld \t%09ld \t%f \t%09ld\n", cpt++, (long)nb_mvt, nb_cel_fluide, densite, (long)nb_mvt_sol);
-  //fprintf(fp,"%03d : \t%09ld \t%09ld (%09ld) \t%f\n", cpt++, (long)nb_mvt, nb_cel_fluide, nb_cel_fluide_dump, densite);
-  fclose(fp);
+  sprintf(output, "%04d: \t%09ld \t%09ld \t%f \t%09ld\n", cpt++, (long)nb_mvt, nb_cel_fluide, densite, (long)nb_mvt_sol);
+  output_write("DENSITE", output);
 }
 
 void dump_vel()
 {
   static int32_t cpt = 0;
-  static int8_t start = 1;
-  FILE *fp;
+  char output[128];
 
   if ((!Velx_interp) || (!Vely_interp)) {cpt++; return;}
 
@@ -2171,15 +2150,8 @@ void dump_vel()
 #endif
 
   //fichier VEL.log
-  fp = fopen("VEL.log","a");
-  if (start){
-    start = 0;
-    fprintf(fp,"      \t maxvel \t meanvel\n");
-  }
-  fprintf(fp,"%04d: \t  %04d  \t  %04d\n", cpt++, (int)maxvel, (int)meanvel);
-  //fprintf(fp,"%03d : \t  %04d  \t  %04d  \t  %04d\n", cpt++, (int)maxvel, (int)meanvel, (int)meanvel2);
-  //fprintf(fp,"nb_mvt = %lu\n", nb_mvt);
-  fclose(fp);
+  sprintf(output,"%04d: \t  %04d  \t  %04d\n", cpt++, (int)maxvel, (int)meanvel);
+  output_write("VEL", output);
 }
 
 void dump_mvt(int32_t cpt, int32_t unit)
@@ -2247,22 +2219,25 @@ void dump_mvt(int32_t cpt, int32_t unit)
 
 void dump_collisions()
 {
-  FILE *fp;
   int32_t mvt_in, mvt_out;
-
-  fp = fopen("LGCA.log","w");
+  char current_output[512]; //must hold sprintf strings of 16 ints
 
   //dump des regles de collision entre particules fluides
-  fprintf(fp, "          IN            |          OUT\n");
-  fprintf(fp, "E  W  B  T EB ET WB WT  |  E  W  B  T EB ET WB WT\n");
-  fprintf(fp, "-------------------------------------------------\n");
+  //dump the rules for collisions between fluid particles
+  current_output[0] = '\0';
+  strcat(current_output, "          IN            |          OUT\n");
+  strcat(current_output, "E  W  B  T EB ET WB WT  |  E  W  B  T EB ET WB WT\n");
+  strcat(current_output, "-------------------------------------------------\n");
+  output_write("LGCA", current_output);
+
   for(mvt_in=0; mvt_in<SIZE_MVT_FIELD; mvt_in+=4){
     mvt_out = Collisions[mvt_in];
-    fprintf(fp, "%d  %d  %d  %d  %d  %d  %d  %d  |  %d  %d  %d  %d  %d  %d  %d  %d\n",
+    sprintf(current_output, "%d  %d  %d  %d  %d  %d  %d  %d  |  %d  %d  %d  %d  %d  %d  %d  %d\n",
       (mvt_in & MVT_E)? 1 : 0, (mvt_in & MVT_O)? 1 : 0, (mvt_in & MVT_B)? 1 : 0, (mvt_in & MVT_H)? 1 : 0,
       (mvt_in & MVT_EB)? 1 : 0, (mvt_in & MVT_EH)? 1 : 0, (mvt_in & MVT_OB)? 1 : 0, (mvt_in & MVT_OH)? 1 : 0,
       (mvt_out & MVT_E)? 1 : 0, (mvt_out & MVT_O)? 1 : 0, (mvt_out & MVT_B)? 1 : 0, (mvt_out & MVT_H)? 1 : 0,
       (mvt_out & MVT_EB)? 1 : 0, (mvt_out & MVT_EH)? 1 : 0, (mvt_out & MVT_OB)? 1 : 0, (mvt_out & MVT_OH)? 1 : 0);
+    output_write("LGCA", current_output);
   }
 
 #ifdef SOLSLOW
@@ -2270,8 +2245,10 @@ void dump_collisions()
   //selon la configuration du voisinage
   int32_t slow[4] = {MVT_E, MVT_O, MVT_B, MVT_H};
   int32_t mvt_sol_E, mvt_sol_O, mvt_sol_B, mvt_sol_H, mvt_sol, i;
-  fprintf(fp, "\n   SOLID     |      IN      |      OUT\n");
-  fprintf(fp, "E  O  B  H   | E  O  B  H   | E  O  B  H\n");
+  current_output[0] = '\0';
+  strcat(current_output, "\n   SOLID     |      IN      |      OUT\n");
+  strcat(current_output, "E  O  B  H   | E  O  B  H   | E  O  B  H\n");
+  output_write("LGCA", current_output);
   for (mvt_sol=0; mvt_sol<16; mvt_sol++){
     mvt_sol_E = (mvt_sol & (MVT_E >> 2))? 1 : 0;
     mvt_sol_O = (mvt_sol & (MVT_O >> 2))? 1 : 0;
@@ -2281,10 +2258,11 @@ void dump_collisions()
       mvt_out = Collisions_SolSlow[mvt_sol][slow[i]];
       //mvt_in = MVT_SOLID | (1 << (2+i));
       //mvt_out = Collisions[mvt_in];
-      fprintf(fp, "% d  %d  %d  %d  |  %d  %d  %d  %d  |  %d  %d  %d  %d\n",
+      sprintf(current_output, "% d  %d  %d  %d  |  %d  %d  %d  %d  |  %d  %d  %d  %d\n",
               mvt_sol_E, mvt_sol_O, mvt_sol_B, mvt_sol_H,
               (i==0)? 1 : 0, (i==1)? 1 : 0, (i==2)? 1 : 0, (i==3)? 1 : 0,
               (mvt_out & MVT_E)? 1 : 0, (mvt_out & MVT_O)? 1 : 0, (mvt_out & MVT_B)? 1 : 0, (mvt_out & MVT_H)? 1 : 0);
+      output_write("LGCA", current_output);
     }
   }
 #endif
@@ -2294,8 +2272,10 @@ void dump_collisions()
   //selon la configuration du voisinage
   int32_t fast[4] = {MVT_EB, MVT_EH, MVT_OB, MVT_OH};
   int32_t mvt_sol_EB, mvt_sol_OB, mvt_sol_EH, mvt_sol_OH;//, mvt_sol, i;
-  fprintf(fp, "\n   SOLID     |      IN      |      OUT\n");
-  fprintf(fp, "EB EH OB OH  | EB EH OB OH  | EB EH OB OH\n");
+  current_output = '\0';
+  strcat(current_output, "\n   SOLID     |      IN      |      OUT\n");
+  strcat(current_output, "EB EH OB OH  | EB EH OB OH  | EB EH OB OH\n");
+  output_write("LGCA", current_output);
   for (mvt_sol=0; mvt_sol<16; mvt_sol++){
     mvt_sol_EB = (mvt_sol & (MVT_EB >> 6))? 1 : 0;
     mvt_sol_EH = (mvt_sol & (MVT_EH >> 6))? 1 : 0;
@@ -2303,16 +2283,14 @@ void dump_collisions()
     mvt_sol_OH = (mvt_sol & (MVT_OH >> 6))? 1 : 0;
     for (i=0; i<4; i++){
       mvt_out = Collisions_SolFast[mvt_sol][fast[i]];
-      //mvt_in = MVT_SOLID | (1 << (6+i));
-      //mvt_out = Collisions[mvt_in];
-      fprintf(fp, "% d  %d  %d  %d  |  %d  %d  %d  %d  |  %d  %d  %d  %d\n",
+      sprintf(current_output, "% d  %d  %d  %d  |  %d  %d  %d  %d  |  %d  %d  %d  %d\n",
               mvt_sol_EB, mvt_sol_EH, mvt_sol_OB, mvt_sol_OH,
               (i==0)? 1 : 0, (i==1)? 1 : 0, (i==2)? 1 : 0, (i==3)? 1 : 0,
               (mvt_out & MVT_EB)? 1 : 0, (mvt_out & MVT_EH)? 1 : 0, (mvt_out & MVT_OB)? 1 : 0, (mvt_out & MVT_OH)? 1 : 0);
+      output_write("LGCA", current_output);
     }
   }
 #endif
-  fclose(fp);
 }
 
 
@@ -2320,7 +2298,7 @@ void dump_collisions()
 #ifdef DUMP_SIGNATURE
 void dump_signature_mvt()
 {
-  FILE *fp;
+  char current_output[128];
   int32_t i;
   uint32_t sig, *aux;
 
@@ -2330,13 +2308,8 @@ void dump_signature_mvt()
   for(i=0; i<CHLD*sizeof(MvtField)/sizeof(unsigned int); i++, aux++) sig += (*aux); //sig = sig ^ (*aux);
 
   //dump
-  fp = fopen("SIGN_HPP.log","a");
-  if ( ! fp ){
-    ErrPrintf("erreur ouverture fichier dump signature HPP\n");
-    exit(-4);
-  }
-  fprintf(fp, "%08x : %08x\n", col_iter, sig);
-  fclose(fp);
+  sprintf(current_output, "%08x : %08x\n", col_iter, sig);
+  output_write("SIGN_HPP", current_output);
 
 }
 #endif

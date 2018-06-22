@@ -1277,7 +1277,9 @@ int32_t main(int32_t argc, int8_t **argv)
   uint8_t opt_par = 0;
 
 #ifdef LOG_FILE
-  log_file = fopen("GENESIS.log","w");
+  char *filename = output_path("GENESIS");
+  log_file = fopen(filename,"w");
+  free(filename);
 #endif
 
   init_list_params();

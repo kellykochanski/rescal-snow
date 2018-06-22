@@ -86,6 +86,9 @@ int32_t veg_h_max=0;         // hauteur max pour la vegetation
 
 void loop_ava_propag(int32_t i, int32_t j);
 
+void output_write(char* output_filename, char* output_content);
+void output_initialize();
+
 void params_surface()
 {
 #ifdef USE_VEGETATION
@@ -1066,6 +1069,7 @@ void avalanches(uint8_t typ, int16_t h_lim, int16_t nb_cel_max, int8_t alti_mode
   int16_t i_cel, h_lim_diag;
   int32_t nb_ava, nb_ava_iter;
   FILE *fp;
+  char output[128]; // things to be written to AVA log
 
 #ifdef MODEL_AVA
 //#if 1
@@ -1227,10 +1231,8 @@ void avalanches(uint8_t typ, int16_t h_lim, int16_t nb_cel_max, int8_t alti_mode
   }while (flag_ava);
 
   //dump avalanches
-  fp = fopen("AVA.log","a");
-  //fprintf(fp,"avalanches : %d   passes : %d   temps : %f\n", nb_ava, nb_ava_iter, temps); //fflush(stdout);
-  fprintf(fp,"avalanches : %d   passes : %d   csp_time : %f   h_lim : %d\n", nb_ava, nb_ava_iter, csp_time, h_lim); //fflush(stdout);
-  fclose(fp);
+  sprintf(output, "avalanches : %d   passes : %d   csp_time : %f   h_lim : %d\n", nb_ava, nb_ava_iter, csp_time, h_lim); //fflush(stdout);
+  output_write("AVA", output);
 
   if (nb_ava){
     //recalcul des tableaux de doublets actifs
@@ -1267,15 +1269,14 @@ void avalanches_norm(uint8_t typ, int16_t nb_cel_max, int8_t alti_mode)
   FILE *fp;
   Vec3 *pt_n3d;
   float angle;
+  char output[256];
 
   //calcule_alti(typ, alti_mode);
   //calcule_alti_mean();
 
-  fp = fopen("AVA.log","a");
   angle = ava_angle;
   ny_lim = cos(angle*PI/180);
   r = (angle <= 33.0) ? 3.5 : 3.0;
-  //fprintf(fp, "avalanches_norm : ny_lim = %f\n", ny_lim);
 
 #ifdef CELL_COLOR
 //#if 0
@@ -1307,7 +1308,6 @@ void avalanches_norm(uint8_t typ, int16_t nb_cel_max, int8_t alti_mode)
   jmax=LNS-1;
   do{
     nb_ava_iter++;
-    //fprintf(fp, "avalanches_norm : passe %d\n", nb_ava_iter);
     flag_ava = flag_drop = 0;
     //flag_diag = 1 - flag_diag;
     //angle_norm3d_iso = drand48()*PI/2.0;
@@ -1467,9 +1467,8 @@ void avalanches_norm(uint8_t typ, int16_t nb_cel_max, int8_t alti_mode)
   //}while (flag_ava);
 
   //dump avalanches
-  //fprintf(fp,"avalanches_norm : %d   passes : %d   temps : %f   angle : %f\n", nb_ava, nb_ava_iter, temps, angle*180/PI); //fflush(stdout);
-  fprintf(fp,"avalanches_norm : %d (mov) %d (drop)   passes : %d   csp_time : %f   angle : %f\n", nb_ava, nb_ava_drop, nb_ava_iter, csp_time, angle); //fflush(stdout);
-  fclose(fp);
+  sprintf(output,"avalanches_norm : %d (mov) %d (drop)   passes : %d   csp_time : %f   angle : %f\n", nb_ava, nb_ava_drop, nb_ava_iter, csp_time, angle); //fflush(stdout);
+  output_write("AVA", output);
 
   if (nb_ava){
     //recalcul des tableaux de doublets actifs
@@ -1789,8 +1788,8 @@ int32_t check_vegetation(int32_t ix, void *data)
 void dump_surface(char* name, int32_t cpt, int32_t unit)
 {
   int8_t filename[100];
-  FILE *fp;
   int32_t i,j,n;
+  char current_output[128];
 /*
   //dump de la composante verticale des normales
   if (norm3d){
@@ -1814,29 +1813,23 @@ void dump_surface(char* name, int32_t cpt, int32_t unit)
   }
 */
   if (unit == UNIT_COMP)
-    sprintf(filename,"%s%04d.data", name, cpt);
+    sprintf(filename,"%s%04d", name, cpt);
   else
-    sprintf(filename,"%s%05d_t0.data", name, cpt);
+    sprintf(filename,"%s%05d_t0", name, cpt);
 
   if (alti){
-    fp = fopen(filename,"w");
-    if ( ! fp ){
-      ErrPrintf("ERROR: cannot open file %s\n", filename);
-      exit(-4);
-    }
-
     int16_t *pt_al = alti;
     for(j=0; j<LNS; j++){
       n=0;
       for(i=0; i<LEO; i++, pt_al++){
         if (rot_map && OutOfSpace(1+i,LN+j)) continue;
-        fprintf(fp, "%d ", *pt_al);
+        sprintf(current_output, "%d ", *pt_al);
+	output_write(filename, current_output);
         n++;
       }
-      if (n>0) fprintf(fp, "\n");
+      if (n>0) output_write(filename, "\n");
     }
 
-    fclose(fp);
   }
 }
 
@@ -1911,8 +1904,8 @@ void dump_sigma_alti()
 
 
 #ifdef DUMP_AUTOCORREL
-//extern double temps;
 // calcul de l'auto-correlation spatiale du signal d'altitude
+// Calculation of the spatial autocorrelation of the surface altitude
 void dump_autocorrel()
 {
   static float *mean;
@@ -1926,6 +1919,7 @@ void dump_autocorrel()
   int32_t i, j, k;
   FILE *fp;
   int32_t i0 = 0; //L/10; //offset pour reduire l'artefact lie aux effets de bords (non-raccordement des oscillations)
+  		  // offset to reduce the effect artifacts caused by boundary conditions
 
   //LogPrintf("dump_autocorrel\n");
 
@@ -1933,13 +1927,6 @@ void dump_autocorrel()
 
   //if (!alti) return;
 //#ifdef  AVALANCHES
-#if 0
-  extern int32_t ava_h_lim; // hauteur limite avant avalanche
-  extern int32_t ava_nb_cel_max;  // nb de cellules qui tombent simultanement
-  avalanches(GR, ava_h_lim, ava_nb_cel_max, ALTI_MODE_BAS);
-#else
-  //calcule_alti(GR, ALTI_MODE_BAS);
-#endif
 
   if (!mean){
     AllocMemory(mean, float, LNS);
@@ -1962,9 +1949,10 @@ void dump_autocorrel()
   fclose(fp);
 
   //calcul de l'auto-correlation dans chaque couloir
+  // Calculation of the auto-correlation in every lane (referring I think to one 2D slice of cells)
   pt_ac = ac;
   for (j=0; j<LNS; j+=2){
-    pt_al = alti+j*LEO; //altitudes dans le couloir j
+    pt_al = alti+j*LEO; //altitudes dans le couloir j // Heights within the slice at y-coordinate j
     for (k=0; k<LEO/2; k++){
       sum = 0;
       for (i=i0; i<LEO; i++){
@@ -2000,7 +1988,6 @@ void dump_grad_vel(int32_t cpt, int32_t unit)
   int32_t i, j, n;
 
   if (grdv){
-    //calcule_grad_vel();
 
     if (unit == UNIT_COMP)
       sprintf(filename,"GRAD_VEL%04d.data", cpt);
@@ -2017,7 +2004,6 @@ void dump_grad_vel(int32_t cpt, int32_t unit)
     for(j=0; j<LNS; j++){
       n=0;
       for(i=0; i<LEO; i++, pt_gv++){
-        //if (rot_map && OutOfSpace(1+i,LN+j)) continue;
         fprintf(fp, "%f ", *pt_gv);
         n++;
       }
@@ -2030,37 +2016,25 @@ void dump_grad_vel(int32_t cpt, int32_t unit)
 
 void dump_cgv()
 {
+  char current_output[128];
   static float grdv_max = VSTEP_H*VSTEP_L*VSTEP_TIME*2;
-  FILE *fp;
   float gv, prob;
-
-  fp = fopen("PROB_CGV.data","w");
-  if ( ! fp ){
-    ErrPrintf("Erreur ouverture fichier PROB_CGV.data\n");
-    exit(-4);
-  }
 
   for(gv=Min(0,grdvc_min); gv<grdv_max; gv++){
     prob=prob_cgv(gv, grdvc_min, grdvc_max);
-    fprintf(fp, "%f   %f\n", gv, prob);
+    sprintf(current_output, "%f   %f\n", gv, prob);
+    output_write("PROB_CGV", current_output);
   }
-
-  fclose(fp);
 }
 
 
 void dump_cgv_coef()
 {
-  static int32_t start=1, cpt=0;
-  FILE *fp;
+  static int32_t cpt=0;
+  char output_string[256];
 
-  fp = fopen("CGV_COEF.log","a");
-  if (start){
-    start = 0;
-    fprintf(fp,"        cgv_coef");
-  }
-  fprintf(fp,"\n%04d:   %.4f", cpt++, cgv_coef);
-  fclose(fp);
+  sprintf(output_string, "\n%04d:   %.4f", cpt++, cgv_coef);
+  output_write("CGV_COEF", output_string);
 }
 #endif //CGV
 #endif //ALTI

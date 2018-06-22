@@ -33,6 +33,11 @@
 #include <math.h>
 #include <stdint.h>
 
+// For output
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "defs.h"
 #include "macros.h"
 #include "param.h"
@@ -195,6 +200,12 @@ int8_t *phys_prop_filename = NULL; //"real_data/desert_earth.prop";
 float time_scale = 1.0; //t_0
 #endif
 
+char *output_directory = "../out"; // directory for log and output files -KK
+void output_headers(); // write headers for output files into output_directory
+void output_write(char *output_filename, char *output_content); // write a line of output
+void output_path(char *filename); // append directory name and .log to filename
+void output_path_png(char *pngname); //append directory name and .png
+
 void compute_prob_dist();
 int32_t simul_trans();
 int32_t simul_check(int32_t , int32_t , int32_t );
@@ -291,6 +302,7 @@ void params_simul()
 #ifdef TIME_SCALE
   parameter("Phys_prop_file", "filename for physical parameters - optional", &phys_prop_filename, PARAM_STRING, "REAL");
 #endif
+  parameter("Output_directory", "name of directory for output - default value OUT", &output_directory, PARAM_STRING, "GENERAL");
 }
 
 void simul_parse()
@@ -397,6 +409,7 @@ void init_simul()
   ava_trans = (ava_mode == AVA_TRANS) || (ava_mode == AVA_PROPAG);
   ava_norm = (ava_angle != 0);
   simul_dump_flag = (dump_delay_png>0) || (dump_delay_csp>0);
+  output_headers(); //write headers for all output files
 }
 
 
@@ -2034,29 +2047,29 @@ void simul_dump()
   }
 }
 
-
 void dump_time()
 {
+  char current_output[256];
   static int32_t cpt = 0;
   static uint64_t md_iter_0 = 0, iter_0 = 0;
   static double csp_time_0 = 0;
   static double real_time_0 = 0;
   static int32_t col_iter_0 = 0;
   int64_t delta_iter, delta_md_iter;
-	FILE *fp;
 
-  fp = fopen("TIME.log","a");
-  if (!cpt){
-    fprintf(fp,"      nb trans.        delta trans.    time            delta time       ");
-#ifdef LGCA
-    if (use_lgca) fprintf(fp,"lgca cyc.    ");
-#endif
-    csp_time_0 = csp_time;
+  // First time this function is called
+  if (!cpt){ 
+    csp_time_0  = csp_time;
+    strcat(current_output, "      nb trans.        delta trans.    time            delta time       ");
+    if (use_lgca) strcat(current_output, "lgca cyc.    ");
 #ifdef TIME_SCALE
-    fprintf(fp,"real time      delta real time");
+    strcat(current_output, "real time     delta real time");
     real_time_0 = real_time;
 #endif
+    output_write("TIME", current_output);
   }
+
+  // Every call
   delta_iter = iter - iter_0;
   delta_md_iter = md_iter - md_iter_0;
   if ((delta_md_iter > 0) && (delta_iter < 0))
@@ -2065,20 +2078,24 @@ void dump_time()
     delta_md_iter--;
   }
 
-  if (delta_md_iter)
-    fprintf(fp,"\n%04d: %04lu%09lu %03lu%09lu       %e    %e     ", cpt++, md_iter, iter, delta_md_iter, delta_iter, csp_time, csp_time - csp_time_0);
-  else
-    fprintf(fp,"\n%04d: %04lu%09lu    %09lu       %e    %e     ", cpt++, md_iter, iter, delta_iter, csp_time, csp_time - csp_time_0);
+  if (delta_md_iter){
+    sprintf(current_output,"\n%04d: %04lu%09lu %03lu%09lu       %e    %e     ", cpt++, md_iter, iter, delta_md_iter, delta_iter, csp_time, csp_time - csp_time_0);
+  }
+  else {
+    sprintf(current_output,"\n%04d: %04lu%09lu    %09lu       %e    %e     ", cpt++, md_iter, iter, delta_iter, csp_time, csp_time - csp_time_0);
+  }
+  output_write("TIME", current_output);
 #ifdef LGCA
   if (use_lgca){
-    fprintf(fp,"%09d    ", col_iter - col_iter_0);
+    sprintf(current_output,"%09d    ", col_iter - col_iter_0);
+    output_write("TIME", current_output);
     col_iter_0 = col_iter;
   }
 #endif
 #ifdef TIME_SCALE
-  fprintf(fp,"%e   %e", real_time, real_time - real_time_0);
+  sprintf(current_output,"%e   %e", real_time, real_time - real_time_0);
+  output_write("TIME", current_output);
 #endif
-  fclose(fp);
 
   md_iter_0 = md_iter;
   iter_0 = iter;
@@ -2087,3 +2104,92 @@ void dump_time()
   real_time_0 = real_time;
 #endif
 }
+
+void output_path(char *filename){
+ // Replaces string "filename" with string "{output_directory}/filename.log"
+ // KK
+  
+  char name[strlen(filename)+2];
+  strcpy(name, filename);
+
+  strcpy(filename, output_directory);
+  strcat(filename, "/");
+  strcat(filename, name);
+  strcat(filename, ".log");
+}
+
+void output_path_noext(char *filename){
+  // Replaces string "filename" with string "{output_directory}/filename"
+  // without adding any extension.
+  // KK
+  char name[strlen(filename) + 2];
+  strcpy(name, filename);
+
+  strcpy(filename, output_directory);
+  strcat(filename, "/");
+  strcat(filename, name);
+}
+
+void output_write(char *output_filename, char *output_content){
+  // Write output string output_content
+  // to file output_directory/output_name.log
+  // (This opens and closes the file every time it is called.
+  //  Inefficient if called often for small blocks of text.
+  //  Currently this happens in numerous functions.)
+  FILE *fp;
+  char path[256] = {'\0'};
+
+  if (strlen(output_filename) + strlen(output_content) > 250){
+    ErrPrintf("Unexpectedly long file/directory name");}
+
+  strcat(path, output_filename);
+  output_path(path);
+
+  fp = fopen(path, "a");
+  if (! fp ) ErrPrintf("ERROR: cannot open file: %s \n", path);
+  fprintf(fp, output_content);
+  fclose(fp);
+}
+
+void output_headers(){
+  // List expected output files, and provide headers and metadata for each of them.
+  // This file should be called once, before any output is written.
+  // Output goes to a variety of files in directory output_directory/*.log
+  // KK
+  // TODO add *useful* and *complete* metadata to headers on output
+  // Current headers are copied from previous output functions
+  // TODO output_directory and output_filename will currently break in the face of typos
+  
+  FILE *fp;
+  void output_write(char *output_filename, char *output_content);
+
+  // Check if output directory exists. If not, create it.
+  // Uses #include <sys/types.h>, <sys/stat.h>, <unistd.h>
+  struct stat st = {0};
+  if (stat(output_directory, &st) == -1) mkdir(output_directory, 0777);
+  LogPrintf("\n Trying to write output to directory : %s", output_directory);
+
+  // Cell states (adds additional output in dump_cell)
+  output_write("CELL",     "\n# CELL STATES\n");
+  // CGV coefficients
+  output_write("CGV_COEF", "        cgv_coef");
+  // Doublets (additional output in dump_doublets and dump_dbl_info)
+  if (opt_info) dump_doublets();
+  // DENSITE.log
+  output_write("DENSITE", "\tmvt cells \tfluid nodes \tdensity \ttrapped cells\n");
+  // genesis
+  // lgca to LGCA.log
+  if (opt_info)  dump_collisions(); // information about fluid-particle collisions allowed in simulation
+  // mvt_io
+  // prob_cgv
+  // rescal
+  // time
+  // trans
+  if (opt_info) dump_transitions(); // information about transitions allowed in simulation
+#ifdef INFO_TRANS
+  dump_trans_info_header();
+#endif
+  // Velocities
+  output_write("VEL", "      \t maxvel \t meanvel\n"); 
+} 
+

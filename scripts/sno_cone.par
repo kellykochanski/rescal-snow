@@ -3,10 +3,9 @@
 ## A cone of sand will evolve into a barchan
 
 # KK created this to play with the parameters of the dune model.
-# Don't use this, might be broken. 
-# Make and modify a copy of dun.par 
 
 Model = SNO
+Output_directory = ./output/
 
 Csp_file = DUN.csp
 #H = 50

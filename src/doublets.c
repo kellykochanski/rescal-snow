@@ -35,6 +35,7 @@
 #include "macros.h"
 #include "cells.h"
 #include "doublets.h"
+#include "simul.h" // for output functions
 #include "transitions.h"
 #include "space.h"
 #ifdef PARALLEL
@@ -597,7 +598,6 @@ void init_db_pos()
       }
     }
   }
-  //LogPrintf("init_db_pos : fin\n");
 }
 
 void fin_db_pos()
@@ -611,56 +611,50 @@ void fin_db_pos()
 }
 
 
-void dump_doublets()
-{
-  FILE *fp;
-  int32_t i;
+void dump_doublets(){
+//Write information about doublets to DOUBLETS.log
+  char current_output[256];
 
-  fp = fopen("DBL.log","w");
-  if ( ! fp ){
-	  ErrPrintf("erreur ouverture fichier dump DBL.log\n");
-	  exit(-4);
+  output_write("DOUBLETS", "\n# NUMBER OF ACTIVE DOUBLETS\n");
+  output_write("DOUBLETS", "\n     ");
+  output_write("DOUBLETS", "\n# DOUBLETS\n");
+  sprintf(current_output, "\nNB_TYPE_DOUBLET = %d\n",nb_type_db);
+  output_write("DOUBLETS", current_output);
+  for(int i=0; i<nb_type_db; i++){
+    sprintf(current_output,"DB(%2d): %s, [%s, %s] %s\n", i, classes_db[t_doub[i].classe], etats[t_doub[i].one], etats[t_doub[i].two], t_doub[i].actif?"active":"");
+    output_write("DOUBLETS", current_output);
   }
-
-  fprintf(fp,"\n# DOUBLETS\n");
-  fprintf(fp,"\nNB_TYPE_DOUBLET = %d\n",nb_type_db);
-  for(i=0; i<nb_type_db; i++){
-    fprintf(fp,"DB(%2d): %s, [%s, %s] %s\n", i, classes_db[t_doub[i].classe], etats[t_doub[i].one], etats[t_doub[i].two], t_doub[i].actif?"active":"");
-    //fprintf(fp,"DB(%2d): %s, [%s, %s] %s | %d\n", i, classes_db[t_doub[i].classe], etats[t_doub[i].one], etats[t_doub[i].two], t_doub[i].actif?"active":"", (t_doub[i].classe <= 2)?db_inv[t_doub[i].classe][t_doub[i].one][t_doub[i].two]:-1);  //DEBUG
-  }
-
-  fclose(fp);
 }
 
 #ifdef INFO_DBL
-void dump_db_info()
-{
-  static int32_t cpt = 0;
-  FILE *fp;
-  int32_t i,tot,totmax;
+void dump_db_info(){
+//Write more info about doublets to DOUBLETS.log
+  static int32_t cpt = 0; // counts calls to this function
+  int32_t tot,totmax;
+  char current_output[256];
 
-  fp = fopen("DBL.log","a");
-
+  // Things to do the first time this function is called
   if (!cpt){
-    fprintf(fp,"\n# NUMBER OF ACTIVE DOUBLETS\n");
-    fprintf(fp,"\n     ");
-    for (i=0; i<nb_type_db; i++){
-      if (t_doub[i].actif) fprintf(fp,"     DB(%2d)", i);
+    for (int32_t i=0; i<nb_type_db; i++){
+      if (t_doub[i].actif){
+        sprintf(current_output,"     DB(%2d)", i);
+        output_write("DOUBLETS", current_output);
+      }
     }
   }
 
-  fprintf(fp,"\n%04d:",cpt);
-  for (i=tot=totmax=0; i<nb_type_db; i++)
+  // Things to do every time
+  sprintf(current_output,"\n%04d:",cpt);
+  output_write("DOUBLETS", current_output);
+  for (int32_t i=tot=totmax=0; i<nb_type_db; i++)
   {
     if (t_doub[i].actif){
-      fprintf(fp," %10d",Ndb[i]);
+      sprintf(current_output," %10d",Ndb[i]);
+      output_write("DOUBLETS", current_output);
       tot += Ndb[i];
       totmax += Ndbmax[i];
     }
   }
-  //fprintf(fp,"     (total = %d, max = %d, alloc = %lu)",tot,totmax,totmax*sizeof(int)); //debug info
-
-  fclose(fp);
 
   cpt++;
 }
