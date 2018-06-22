@@ -44,6 +44,7 @@
 #include "synchro.h"
 #endif
 #include "trace.h"
+#include "simul.h" //output
 
 extern const int8_t *etats[];             // les noms des types de cellules
 extern Doublet t_doub[];                // la description des doublets
@@ -684,32 +685,16 @@ void do_trans_cel(int32_t tr, int32_t ix)
 
 void dump_transitions()
 {
-  FILE *fp;
   int32_t i, j;
   static int8_t flag_trans[200];
   static int8_t type_trans[100];
-  //int8_t nom_classe[4][25];
+  char current_output[256];
 
-  /*sprintf(nom_classe[VERTICAL], "VERTICAL");
-  sprintf(nom_classe[HORIZONTAL], "HORIZONTAL");
-  sprintf(nom_classe[EST_OUEST], "EST_OUEST");
-  sprintf(nom_classe[NORD_SUD], "NORD_SUD");*/
+  sprintf(current_output, "\n# TRANSITIONS\n\nNB_TRANS_DB = %d\n", nb_trans_db);
+  output_write("TRANSITIONS", current_output);
 
-  fp = fopen("TRANS.log","w");
-  if ( ! fp ){
-	  ErrPrintf("ERROR: cannot open file TRANS.log\n");
-	  exit(-4);
-  }
-
-  fprintf(fp,"\n# TRANSITIONS\n");
-  fprintf(fp,"\nNB_TRANS_DB = %d\n",nb_trans_db);
   for(i=0; i<nb_trans_db; i++){
-    //fprintf(fp,"TR[%2d] = { %s , %2d , %2d, %12.6f }\n", i, t_trans[i].classe?"H":"V", t_trans[i].depart, t_trans[i].arrivee, t_trans[i].intensite);
-    //fprintf(fp,"  trans(%10s, %5s, %5s, %5s, %5s, lambda );\n", t_trans[i].classe?"HORIZONTAL":"VERTICAL",
     *flag_trans = 0;
-    /*if (t_trans[i].regul || t_trans[i].check){
-      sprintf(flag_trans, " {%s%s}", t_trans[i].regul ? "r": "", t_trans[i].check ? ((t_trans[i].chk_cel == 1) ? "c1" : "c2"): "");
-    }*/
     if (t_trans[i].regul){
       strcat(flag_trans,"regul");
     }
@@ -738,78 +723,88 @@ void dump_transitions()
 //#if CELL_DATA
     if (t_trans[i].type == TR_TRANSPORT) strcpy(type_trans, "TRANSPORT");
 //#endif
-    /*fprintf(fp,"TR[%d] : %s, [%s, %s] -> [%s, %s], %.9f%s%s\n", i, classes_db[t_trans[i].classe],
-                  etats[t_doub[t_trans[i].depart].one], etats[t_doub[t_trans[i].depart].two],
-                  etats[t_doub[t_trans[i].arrivee].one], etats[t_doub[t_trans[i].arrivee].two],
-                  t_trans[i].intensite, flag_trans, type_trans);*/
-    fprintf(fp,"TR(%2d): %s, [%s, %s] -> [%s, %s], %.9f", i, classes_db[t_trans[i].classe],
+    sprintf(current_output,"TR(%2d): %s, [%s, %s] -> [%s, %s], %.9f", i, classes_db[t_trans[i].classe],
                   etats[t_doub[t_trans[i].depart].one], etats[t_doub[t_trans[i].depart].two],
                   etats[t_doub[t_trans[i].arrivee].one], etats[t_doub[t_trans[i].arrivee].two],
                   t_trans[i].intensite);
-    if (*flag_trans) fprintf(fp," {%s}", flag_trans);
-    if (*type_trans) fprintf(fp, " <%s>", type_trans);
-    fprintf(fp, "\n");
+    if (*flag_trans){
+      sprintf(current_output, " {%s}", flag_trans);
+      output_write("TRANSITIONS", current_output);
+    }
+    if (*type_trans){
+      sprintf(current_output, " <%s>", type_trans);
+      output_write("TRANSITIONS", current_output);
+    }
+    output_write("TRANSITIONS", "\n");
   }
-  fprintf(fp,"\nNB_TRANS_CEL = %d\n",nb_trans_cel);
+  sprintf(current_output,"\nNB_TRANS_CEL = %d\n",nb_trans_cel);
+  output_write("TRANSITIONS", current_output);
   for(i=0; i<nb_trans_cel; i++){
-    fprintf(fp,"TR1(%2d) : %s -> %s, %.9f\n", i, etats[t_trans_cel[i].depart], etats[t_trans_cel[i].arrivee], t_trans_cel[i].intensite);
+    sprintf(current_output,"TR1(%2d) : %s -> %s, %.9f\n", i, etats[t_trans_cel[i].depart], etats[t_trans_cel[i].arrivee], t_trans_cel[i].intensite);
+    output_write("TRANSITIONS", current_output);
   }
 #ifdef LIENS_TRANSITIONS
-  fprintf(fp,"\n# LINKED TRANSITIONS\n");
-  fprintf(fp,"\nNB_LINKS = %d\n", nb_liens);
+  sprintf(current_output,"\n# LINKED TRANSITIONS\n");
+  output_write("TRANSITIONS", current_output);
+  sprintf(current_output, "\nNB_LINKS = %d\n", nb_liens);
+  output_write("TRANSITIONS", current_output);
   for(i=0; i<nb_liens; i++)
-    fprintf(fp,"LT(%2d): %d[%d] -> %d, %.9f\n", i, t_lien[i].trans1, t_lien[i].cel, t_lien[i].trans2, t_lien[i].intensite);
+    sprintf(current_output,"LT(%2d): %d[%d] -> %d, %.9f\n", i, t_lien[i].trans1, t_lien[i].cel, t_lien[i].trans2, t_lien[i].intensite);
+    output_write("TRANSITIONS", current_output);
 #endif
-  fclose(fp);
 }
 
 #ifdef INFO_TRANS
 extern int32_t cpt_trans_blocked[];
 
-void dump_trans_info()
-{
-  static int32_t cpt = 0;
-  FILE *fp;
+void dump_trans_info_header(){
+  char current_output[256];
+
+  // Write some initial information about transitions
+  output_write("TRANSITIONS", "\n# NUMBER OF OCCURRENCES\n\n    ");
+  for (int32_t i=0; i<nb_trans_db; i++){
+    sprintf(current_output, "     TR(%2d)", i);
+    if (t_trans[i].nb_chk) strcat(current_output, "       BLK");
+    output_write("TRANSITIONS", current_output);
+  }
+  for (int32_t i=0; i<nb_trans_cel; i++){
+    sprintf(current_output,"    TR1(%2d)", i);
+    output_write("TRANSITIONS", current_output);
+  }
+  for (int32_t i=0; i<nb_liens; i++){
+    sprintf(current_output, "     LT(%2d)", i);
+    output_write("TRANSITIONS", current_output);
+  }
+}
+  
+
+void dump_trans_info(){
   int32_t i;
+  char current_output[256];
+  int32_t cpt = 1;
 
-  fp = fopen("TRANS.log","a");
-
-  if (!cpt){
-    fprintf(fp,"\n# NUMBER OF OCCURRENCES\n");
-    fprintf(fp,"\n    ");
-    for (i=0; i<nb_trans_db; i++){
-      fprintf(fp,"     TR(%2d)", i);
-      if (t_trans[i].nb_chk) fprintf(fp,"        BLK");
-    }
-    for (i=0; i<nb_trans_cel; i++){
-      fprintf(fp,"    TR1(%2d)", i);
-    }
-    for (i=0; i<nb_liens; i++){
-      fprintf(fp,"     LT(%2d)", i);
+  sprintf(current_output,"\n%04d:",cpt);
+  output_write("TRANSITIONS", current_output);
+  for (i=0; i<nb_trans_db; i++){
+    sprintf(current_output," %10d", cpt_trans_db[i]);
+    output_write("TRANSITIONS", current_output);
+    cpt_trans_db[i] = 0;
+    if (t_trans[i].nb_chk){
+      sprintf(current_output," %10d",cpt_trans_blocked[i]);
+      output_write("TRANSITIONS", current_output);
+      cpt_trans_blocked[i] = 0;
     }
   }
-  else{
-    fprintf(fp,"\n%04d:",cpt);
-    for (i=0; i<nb_trans_db; i++){
-      fprintf(fp," %10d", cpt_trans_db[i]);
-      cpt_trans_db[i] = 0;
-      if (t_trans[i].nb_chk){
-        fprintf(fp," %10d",cpt_trans_blocked[i]);
-        cpt_trans_blocked[i] = 0;
-      }
-    }
-    for (i=0; i<nb_trans_cel; i++){
-      fprintf(fp," %10d", cpt_trans_cel[i]);
-      cpt_trans_cel[i] = 0;
-    }
-    for(i=0; i<nb_liens; i++){
-      fprintf(fp," %10d", cpt_lien[i]);
-      cpt_lien[i] = 0;
-    }
+  for (i=0; i<nb_trans_cel; i++){
+    sprintf(current_output," %10d", cpt_trans_cel[i]);
+    cpt_trans_cel[i] = 0;
+    output_write("TRANSITIONS", current_output);
   }
-
-  fclose(fp);
-
+  for(i=0; i<nb_liens; i++){
+    sprintf(current_output," %10d", cpt_lien[i]);
+    output_write("TRANSITIONS", current_output);
+    cpt_lien[i] = 0;
+  }
   cpt++;
 }
 #endif //INFO_TRANS

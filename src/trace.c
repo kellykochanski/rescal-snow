@@ -324,19 +324,18 @@ int32_t trace_src_point(int32_t x, int32_t z)
 
 void trace_src_dump()
 {
-  FILE *fp;
   int32_t x,z;
   int8_t nom[32];
+  char current_output[128];
 
-  sprintf(nom, "BASSIN_%d.data", NB_CEL_SRC);
+  sprintf(nom, "BASSIN_%d", NB_CEL_SRC);
 
-  fp = fopen(nom,"w");
   for (z=1; z<D-1; z++){
     for (x=1; x<L-1; x++){
-      fprintf(fp, "%d\n", src_map[x+z*L]);
+      sprintf(current_output, "%d\n", src_map[x+z*L]);
+      output_write(nom, current_output);
     }
   }
-  fclose(fp);
 }
 
 #endif  //TRACE_SRC
@@ -396,15 +395,15 @@ int32_t trace_aire_point(int32_t x, int32_t z)
 
 void trace_aire_dump()
 {
-  FILE *fp;
   int32_t aire_max=0;
   int32_t x, z, amx, amz;
+  char current_output[128];
 
-  fp = fopen("AIRE.data","w");
   for(z=1; z<L-1; z++){
     for(x=1; x<L-1; x++){
       aire_map[x+z*L] /= NB_CEL_SRC;
-      fprintf(fp, "%d\n", aire_map[x+z*L]);
+      sprintf(current_output, "%d\n", aire_map[x+z*L]);
+      output_write("AIR", current_output);
       if (aire_map[x+z*L] > aire_max){
         aire_max = aire_map[x+z*L];
         amx = x;
@@ -715,22 +714,22 @@ double calcul_pente(int32_t i) //(par_elt *pe1, par_elt *pe2)
   return pente;
 }
 
-void dump_parcours()
-{
+void dump_parcours(){
   //sauvegarder une portion du parcours
-  FILE *fp;
+  //Write data about the route/process to file
   par_elt *pe;
-  float pente;
+  float pente; // slope
   static int32_t num = 1;
-
   int32_t i;
-  fp = fopen("PARCOURS.data","a");
-  fprintf(fp, "### PARCOURS %d ###\n", num++);
+  char current_output[128];
+
+  sprintf(current_output, "### PARCOURS %d ###\n", num++);
+  output_write("PARCOURS", current_output);
   for (i=0, pe = parcours; i<cur_elt; i++, pe++){
     pente = calcul_pente(i);  //((i-OFFSET_PENTE>=0) && (i+OFFSET_PENTE<cur_elt)) ? calcul_pente(pe-OFFSET_PENTE, pe+OFFSET_PENTE) : 0.0;
-    fprintf(fp, "%03d %03d %03d %f %f\n", pe->x-1, pe->z-1, H-1-pe->y, pe->t, pente);
+    sprintf(current_output, "%03d %03d %03d %f %f\n", pe->x-1, pe->z-1, H-1-pe->y, pe->t, pente);
+    output_write("PARCOURS", current_output);
   }
-  fclose(fp);
 }
 
 void trace_par(int32_t ix)
@@ -814,36 +813,33 @@ void trace_par_end_loop()
 
 void trace_par_dump()
 {
-  FILE *fp;
   int32_t x,z;
   int8_t nom[32];
+  char current_output[128];
 
 #ifdef OPTI_PAR
-  fp = fopen("DEBIT_OP.data","w");
+  strcat(nom, "DEBIT_OP");
 #else
-  fp = fopen("DEBIT.data","w");
+  strcat(nom, "DEBIT");
 #endif
   for (z=1; z<D-1; z++){
     for (x=1; x<L-1; x++){
-      fprintf(fp, "%d\n", nb_pas[x+z*L]);
+      sprintf(current_output, "%d\n", nb_pas[x+z*L]);
+      output_write(nom, current_output);
     }
-    //fprintf(fp, "\n");
   }
-  fclose(fp);
 
 #ifdef OPTI_PAR
-  sprintf(nom, "PENTE_OP_%d.data", INT_PENTE);
+  sprintf(nom, "PENTE_OP_%d", INT_PENTE);
 #else
-  sprintf(nom, "PENTE_%d.data", INT_PENTE);
+  sprintf(nom, "PENTE_%d", INT_PENTE);
 #endif
-  fp = fopen(nom, "w");
   for (z=1; z<D-1; z++){
     for (x=1; x<L-1; x++){
-      fprintf(fp, "%f\n", pente_map[x+z*L]);
+      sprintf(current_output, "%f\n", pente_map[x+z*L]);
+      output_write(nom, current_output);
     }
-    //fprintf(fp, "\n");
   }
-  fclose(fp);
 }
 
 #endif  //TRACE_PAR
@@ -974,19 +970,17 @@ void trace_par_col_rotation(float angle)
 
 void dump_par_col(int32_t col)
 {
-  FILE *fp;
   par_elt_col *pe;
-  //static int32_t num = 1;
   int8_t name[100];
   int32_t j;
+  char current_output[128];
 
   //save course for one color from current buffer
   sprintf(name,"PAR_COL%03d.data", col);
-  fp = fopen(name,"a");
   for (j=0, pe = parcours[col-1]; j<cur_elt[col-1]; j++, pe++){
-    fprintf(fp, "%05d %05d %05d %03d %e\n", pe->x-1, pe->z-1, H-1-pe->y, pe->tr, pe->t);
+    sprintf(current_output, "%05d %05d %05d %03d %e\n", pe->x-1, pe->z-1, H-1-pe->y, pe->tr, pe->t);
+    output_write(name, current_output);
   }
-  fclose(fp);
 }
 
 void trace_par_col(int32_t ix, int32_t tr)
@@ -1293,36 +1287,34 @@ void trace_flux_rotate(float angle)
 
 void trace_flux_dump()
 {
-  FILE *fp;
   static int32_t cpt = 1;
   int8_t name[128];
   int32_t x, z;
+  char current_output[128];
 
   LogPrintf("trace_flux_dump: cpt = %d, csp_time = %f\n", cpt, csp_time);
 
   compute_total_flux();
 
   /// save east-west total flux
-  sprintf(name, "FLUX_EW_%04d.data", cpt);
-  fp = fopen(name,"w");
+  sprintf(name, "FLUX_EW_%04d", cpt);
   for(z=D_bounds; z<D-D_bounds; z++){
     for(x=L_bounds; x<L-L_bounds; x++){
-      fprintf(fp,"%.3f ",total_flux_map->flux_ew[x+z*L]);
+      sprintf(current_output,"%.3f ",total_flux_map->flux_ew[x+z*L]);
+      output_write(name, current_output);
     }
-    fprintf(fp,"\n");
+    output_write(name, "\n");
   }
-  fclose(fp);
 
   /// save north-south total flux
   sprintf(name, "FLUX_NS_%04d.data", cpt);
-  fp = fopen(name,"w");
   for(z=D_bounds; z<D-D_bounds; z++){
     for(x=L_bounds; x<L-L_bounds; x++){
-      fprintf(fp,"%.3f ",total_flux_map->flux_ns[x+z*L]);
+      sprintf(current_output,"%.3f ",total_flux_map->flux_ns[x+z*L]);
+      output_write(name, current_output);
     }
-    fprintf(fp,"\n");
+    output_write(name, "\n");
   }
-  fclose(fp);
 
 #ifdef ALTI
   /// reorient and save topography

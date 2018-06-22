@@ -120,7 +120,6 @@ void rescal_init(int8_t *param_filename)
   if (opt_info){
     log_cell();
     dump_doublets();
-    dump_transitions();
   }
 
 #ifdef ALTI
