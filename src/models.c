@@ -651,7 +651,7 @@ void init_modele()
     trans(VERTICAL, EAUC, IN, GRJ, IN, lambda_I/*0.05*/);
   }
 
-  /***** output *****/
+  /***** removal *****/
   //output of sand
   if (Ncel[OUT]>0){
     trans(VERTICAL, GR, OUT, EAUC, OUT, 1000);
@@ -799,7 +799,7 @@ void init_modele()
   /***** injection *****/
   trans(VERTICAL, IN, AIR, IN, GR, lambda_I);
 
-  /***** output *****/
+  /***** removal *****/
   //trans(VERTICAL, GR, OUT, AIR, OUT, 1000);
   trans(VERTICAL, GR, OUT, AIR, OUT, 0.1);
 

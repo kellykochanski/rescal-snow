@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>
+#include <simul.h>//output
 
 #include "defs.h"
 #include "macros.h"
@@ -1217,6 +1218,7 @@ void view_dump_png(int8_t *filename)
 
 void dump_image(int8_t *filename, int8_t *format)
 {
+  // append directory to filename
   if (!strcmp(format,"png"))
     view_dump_png(filename);
   else{
@@ -1293,19 +1295,25 @@ void view_dump_jpeg(int8_t *nom)
 
 void dump_image(int8_t *filename, int8_t *format)
 {
+  // Append directory name to output filename
+  output_path_noext(filename);
+
   if (!strcmp(format,"png"))
     view_dump_png(filename);
   else
     view_dump_jpeg(filename);
 }
 
-#else
+#else // not defined USE_GD
 
 #include <gtk/gtk.h>
 extern GtkWidget *drawingarea;
 
 void dump_image(int8_t *filename, int8_t *format)
 {
+  // Append directory name to output filename
+  output_path_noext(filename);
+  
   //LogPrintf("dump_image: %s - %s\n",filename,format);
   GdkPixbuf *pixbuf = gdk_pixbuf_get_from_drawable(NULL,drawingarea->window,NULL,0,0,0,0,img_w,img_h);
   gdk_pixbuf_save(pixbuf, filename, format, NULL, NULL);
