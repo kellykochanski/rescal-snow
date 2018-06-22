@@ -92,13 +92,9 @@ int32_t main (int32_t argc, int8_t *argv[])
 
 #ifdef LOG_FILE
   int8_t log_filename[100];
-  sprintf(log_filename,"RESCAL.log");
-#ifdef PARALLEL
-  if (proc_id>=0){
-    sprintf(log_filename,"RESCAL%d.log",proc_id);
-  }
-#endif
+  log_filename = output_path("RESCAL");
   if (argc>1) log_file = fopen(log_filename,"w");
+  free(log_filename);
 #endif
 
   //LogPrintf("ReSCAL\n");

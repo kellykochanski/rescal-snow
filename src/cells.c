@@ -33,6 +33,7 @@
 #include "space.h"
 #include "surface.h"
 #include "trace.h"
+#include "simul.h" //for output
 
 #ifdef LGCA
 #include "lgca.h"
@@ -170,87 +171,70 @@ void verifier_Ncel_MOINS()
 }
 #endif
 
+void log_cell_first(){
+  // Introductory details written to CELL.log on the first call to log_cell()
+  int32_t i, nb;
+  char current_output[256];
+
+  nb = 0;
+  for(i=0; i<MAX_CELL; i++){
+    if (etats[i]) nb++;
+  }
+  sprintf(current_output, "\nNB_STATES = %d\n", nb);
+  output_write("CELL", current_output);
+
+  for(i=0; i<MAX_CELL; i++){
+    if (etats[i]){
+#ifdef PHASES
+     int8_t *str_phase = (Phase[i]==SOLID)?"<SOLID>":"<FLUID>";
+#else
+     int8_t *str_phase = NULL;
+#endif
+     sprintf(current_output,"ST(%d): %s %s\n", i, etats[i], str_phase);
+     output_write("CELL", current_output);
+    }
+  }
+  output_write("CELL", "\n     ");
+  int8_t str[30];
+  for(i=0; i<MAX_CELL; i++){
+    if (etats[i]){
+      str[0] = 0;
+      strncat(str, etats[i], 10);
+      sprintf(current_output, "%11s", str);
+      output_write("CELL", current_output);
+    }
+  }
+
+  output_write("CELL", "\n");
+}
 
 void log_cell()
 {
-  FILE *fp;
-  int32_t i, nb;
-  int8_t *filename = "CELL.log";
+  int32_t nb;
   static int32_t start = 1;
   static int32_t cpt = 0;
+  char current_output[256];
 
+  // First call to log_cell do special stuff
   if (start){
-    fp = fopen(filename,"w");
-    if ( ! fp ){
-      ErrPrintf("ERROR: cannot open file CELL.log\n");
-      exit(-4);
-    }
-
-    fprintf(fp,"\n# CELL STATES\n");
-
-    nb = 0;
-    for(i=0; i<MAX_CELL; i++){
-      if (etats[i]) nb++;
-    }
-    fprintf(fp,"\nNB_STATES = %d\n", nb);
-
-    for(i=0; i<MAX_CELL; i++){
-      if (etats[i]){
-#ifdef PHASES
-       int8_t *str_phase = (Phase[i]==SOLID)?"<SOLID>":"<FLUID>";
-#else
-       int8_t *str_phase = NULL;
-#endif
-        fprintf(fp,"ST(%d): %s %s\n", i, etats[i], str_phase);
-      }
-    }
-
-    fprintf(fp,"\n     ");
-    int8_t str[30];
-    for(i=0; i<MAX_CELL; i++){
-      if (etats[i]){
-        str[0] = 0;
-        strncat(str, etats[i], 10);
-        fprintf(fp, "%11s", str);
-      }
-    }
-
-    fprintf(fp,"\n");
-    fclose(fp);
+    log_cell_first();
     start = 0;
-  }//start
+  }
+  // Other calls to log_cell do this
 #ifdef INFO_CEL
   else{
     //wait_csp_ready();
 
-    fp = fopen(filename,"a");
-
-    fprintf(fp,"%04d:",cpt++);
-    for (i=0; i<MAX_CELL; i++){
+    sprintf(current_output,"%04d:",cpt++);
+    output_write("CELL", current_output);
+    for (int32_t i=0; i<MAX_CELL; i++){
       if (etats[i]){
-        fprintf(fp,"  %09d", Ncel[i]);
+        sprintf(current_output,"  %09d", Ncel[i]);
+	output_write("CELL", current_output);
       }
     }
-    fprintf(fp,"\n");
+    output_write("CELL", "\n");
 
-    fclose(fp);
-
-#ifdef PARALLEL
-  //TODO : comprendre pourquoi cela ne marche pas bien en mode MPI !?
-  /*  if (mode_par){
-      synchro_Ncel(); //consolidation des donnees globales
-      if (pserv){
-        sprintf(nom,"INFO_CEL_PAR.log");
-        fp = fopen(nom,"a");
-        fprintf(fp,"%04d :",cpt-1);
-        for (i=0; i<MAX_CELL; i++){
-          if (Ncel_par[i]) fprintf(fp,"\tn[%d]=%d",i,Ncel_par[i]);
-        }
-        fprintf(fp,"\n");
-        fclose(fp);
-      }
-  }*/
-#endif  //PARALLEL
   }
 #endif //INFO_CEL
 }
