@@ -41,7 +41,7 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 /// ======================================================
 
 /// choice of a model
-#define MODEL_DUN    //Dune morphodynamics
+//#define MODEL_DUN    //Dune morphodynamics
 //#define MODEL_AVA    //Avalanches
 //#define MODEL_CMB    //Core-mantle boundary
 //#define MODEL_ICB    //Innercore-core boundary
