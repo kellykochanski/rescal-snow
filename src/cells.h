@@ -34,7 +34,7 @@
 #endif
 
 
-typedef struct cellule{
+typedef struct cellule {
   uint8_t celltype;
 #ifdef CELL_COLOR
   uint8_t color;

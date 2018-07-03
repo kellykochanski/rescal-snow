@@ -23,27 +23,17 @@
 
 #include <stdint.h>
 
-typedef struct pos_2d{
+typedef struct pos_2d {
   int16_t x;
   int16_t y;
 } Pos2;
 
-typedef struct vector_2d{
+typedef struct vector_2d {
   float x;
   float y;
 } Vec2;
 
-/*
-typedef struct fifo_int{
-  int32_t *array;
-  int32_t length;
-  int32_t nb;
-  int32_t head;
-  int32_t tail;
-} FifoInt;
-*/
-
-typedef struct fifo_pos_2d{
+typedef struct fifo_pos_2d {
   Pos2 *array;
   int32_t length;
   int32_t nb;
@@ -59,7 +49,7 @@ enum AVA_MODES {AVA_NONE, AVA_SYNC, AVA_TRANS, AVA_PROPAG};
 
 void params_surface();
 void modif_alti_cel(int32_t ix, uint8_t typ);
-void calcule_alti(uint8_t typ, int8_t alti_mode);
+void calcule_alti(uint8_t typ, char alti_mode);
 int32_t calcule_alti_max(uint8_t typ);
 void calcule_normales();
 int32_t check_ava(int32_t ix, void *data);
@@ -72,8 +62,8 @@ int32_t check_grad_vel(int32_t ix, void *data);
 int32_t check_grad_vel_color(int32_t ix, void *data);
 void compute_coef_cgv(/*int32_t idb*/);
 #endif
-void avalanches(uint8_t typ, int16_t h_lim, int16_t nb_cel_max, int8_t mode);
-void avalanches_norm(uint8_t typ, int16_t nb_cel_max, int8_t alti_mode);
+void avalanches(uint8_t typ, int16_t h_lim, int16_t nb_cel_max, char mode);
+void avalanches_norm(uint8_t typ, int16_t nb_cel_max, char alti_mode);
 void ava_propag(int32_t i, int32_t j);
 
 void dump_surface(char* name, int32_t cpt, int32_t unit);

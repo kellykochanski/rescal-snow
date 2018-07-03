@@ -38,7 +38,7 @@
 //enum IMG_FORMATS {IMG_PNG, IMG_JPEG};
 enum VIEW_DIR {VDIR_NONE, VDIR_NORTH, VDIR_WIND};
 
-typedef struct{
+typedef struct {
   int32_t col0;
   int32_t col1;
   int32_t nb_val;
@@ -46,7 +46,7 @@ typedef struct{
 } Shade;
 
 void show_view_options();
-int32_t view_init(int, int8_t **);
+int32_t view_init(int, char **);
 void view_img_size(int32_t *, int32_t *);
 void view_palette(int32_t *);
 void rotate_light(float angle);
@@ -58,16 +58,16 @@ int32_t update_cv(int32_t x, int32_t y, int32_t flag);
 
 #ifdef USE_LIBPNG
 void view_dump_init();
-void view_dump_png(int8_t *nom);
+void view_dump_png(char *nom);
 #endif
 
 #ifdef USE_GD
 void view_dump_init();
 //void view_dump_inter(int32_t inter, int32_t format);
-void view_dump_png(int8_t *nom);
-void view_dump_jpeg(int8_t *nom);
+void view_dump_png(char *nom);
+void view_dump_jpeg(char *nom);
 #endif
 
-void dump_image(int8_t *filename, int8_t *format);
-void dump_image_inter(int32_t inter, int8_t *format);
+void dump_image(char *filename, char *format);
+void dump_image_inter(int32_t inter, char *format);
 

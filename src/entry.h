@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-void general_options(int32_t argc, int8_t *argv[]);
+void general_options(int32_t argc, char *argv[]);
 void show_general_options();
 void usage_no_input();
 

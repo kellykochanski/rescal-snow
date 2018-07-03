@@ -40,89 +40,79 @@
 #include "transitions.h"
 #include "lgca.h"
 
-extern int32_t prog;    //main prog
-extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
-extern int32_t L_bounds, D_bounds;
-extern int32_t LEO, LN, LS, LNS, HLN;    //largeur est-ouest, limite nord, limite sud, largeur nord-sud
-extern Cell  *TE;	           // la 'terre'
-extern const uint8_t Phase[MAX_CELL];	//phase (fluide ou solide) des types de cellules
+extern int32_t        prog;                       // main prog
+extern int32_t        H, L, D, HL, HLD;           // les dimensions de la terre
+extern int32_t        L_bounds, D_bounds;
+extern int32_t        LEO, LN, LS, LNS, HLN;      // largeur est-ouest, limite nord, limite sud, largeur nord-sud
+extern Cell           *TE;                        // la 'terre'
+extern const uint8_t  Phase[MAX_CELL];            // phase (fluide ou solide) des types de cellules
 #ifdef ALTI
-extern int16_t *alti; // elevations locales du terrain
-extern Vec2 *norm2d;
-extern Vec3 *norm3d;          // normale 3d a la surface definie par alti
+extern int16_t        *alti;                      // elevations locales du terrain
+extern Vec2           *norm2d;
+extern Vec3           *norm3d;                    // normale 3d a la surface definie par alti
 #endif
-extern int8_t *psol;                    // indicateur des plans solides verticaux est-ouest
-extern int8_t *csol;
-extern int32_t h_ceil;  //epaisseur du plafond
-extern int32_t h_floor;
+extern char           *psol;                      // indicateur des plans solides verticaux est-ouest
+extern char           *csol;
+extern int32_t        h_ceil;                     // epaisseur du plafond
+extern int32_t        h_floor;
 #ifdef LGCA
-extern int32_t VH, VL, VHL, CLNS ;	// dimensions du tableau des vitesses
-//extern int32_t *Velx, *Vely;	//vitesses locales moyennees
-extern int32_t *Velx_sum, *Vely_sum;	//vitesses locales additives
-extern float *Velx_interp, *Vely_interp;	//vitesses locales interpolees
-extern int32_t use_lgca;
-extern int32_t lgca_ready;
+extern int32_t        VH, VL, VHL, CLNS;          // dimensions du tableau des vitesses
+extern int32_t        *Velx_sum, *Vely_sum;       // vitesses locales additives
+extern float          *Velx_interp, *Vely_interp; // vitesses locales interpolees
+extern int32_t        use_lgca;
+extern int32_t        lgca_ready;
 #endif
-#ifdef USE_VEGETATION
-extern int32_t use_veg;
-#endif
-extern int8_t *rot_map;        // periodic mapping of the rotating space
-extern int32_t rot_mode;
+extern char           *rot_map;                   // periodic mapping of the rotating space
+extern int32_t        rot_mode;
 
-uint8_t opt_ch=0;
-uint8_t opt_cv=0;
-uint8_t opt_lc=0;
-uint8_t opt_tr=0;
-uint8_t opt_al=0;
-uint8_t opt_lal=0;
-uint8_t opt_vel=0;
-uint8_t opt_vss=0;
-uint8_t opt_ls=0;
-int32_t hh=0;
-int32_t khh=0;
-int32_t abs_cv=0, prof_cv=0;
-uint8_t reorient_flag=0;
-uint8_t horizontal_display=0;
+uint8_t               opt_ch = 0;
+uint8_t               opt_cv = 0;
+uint8_t               opt_lc = 0;
+uint8_t               opt_tr = 0;
+uint8_t               opt_al = 0;
+uint8_t               opt_lal = 0;
+uint8_t               opt_vel = 0;
+uint8_t               opt_vss = 0;
+uint8_t               opt_ls = 0;
+int32_t               hh = 0;
+int32_t               khh = 0;
+int32_t               abs_cv = 0, prof_cv = 0;
+uint8_t               reorient_flag = 0;
+uint8_t               horizontal_display = 0;
 
-uint8_t visible[MAX_CELL];  //visibilite des cellules par type
-#ifdef CELL_COLOR
-int8_t colored[MAX_CELL];  //affichage de la couleur par type
-#endif
-uint8_t *image=NULL;
-uint8_t *image_end=NULL;
-int32_t nb_shades=1;
-int32_t col_shade_index=0;
-int32_t img_w, img_h;
-Shade shades[NB_SHADE_MAX];
-int32_t cel_shade_index[MAX_CELL];  //correspondance celltype --> shade
+uint8_t               visible[MAX_CELL];          // visibilite des cellules par type
+uint8_t               *image = NULL;
+uint8_t               *image_end = NULL;
+int32_t               nb_shades = 1;
+int32_t               col_shade_index = 0;
+int32_t               img_w, img_h;
+Shade                 shades[NB_SHADE_MAX];
+int32_t               cel_shade_index[MAX_CELL];  // correspondance celltype --> shade
 
 //direction of the incident light source
-float light_elevation = 45; // in degrees, from the horizon
-float light_azimuth = -90; //in degrees, clockwise from north
+float                 light_elevation = 45;       // in degrees, from the horizon
+float                 light_azimuth = -90;        // in degrees, clockwise from north
 Vec3 light;
 
 //display mode of the current orientation
-int32_t vdir_mode = VDIR_NONE;
+int32_t               vdir_mode = VDIR_NONE;
 
 //intervalle pour les pointilles
-int32_t ilc = 2;
+int32_t               ilc = 2;
 
 //zooming variables
-int32_t zoom_offset_x = 0;
-int32_t zoom_offset_y = 0;
-float zoom_coef = 1.0;
+int32_t               zoom_offset_x = 0;
+int32_t               zoom_offset_y = 0;
+float                 zoom_coef = 1.0;
 
 void set_light_xyz();
 
-void bad_options(int8_t *opt)
-{
+void bad_options(char *opt) {
   ErrPrintf("erreur lecture option : %s\n", opt);
-
   exit(-4);
 }
 
-void show_view_options()
-{
+void show_view_options() {
   printf("\nGRAPHICAL OPTIONS\n");
   printf("  -ch <val> \t horizontal cross section of height <val>\n");
   printf("  -cv0 \t\t centered vertical cross sections\n");
@@ -135,179 +125,186 @@ void show_view_options()
   printf("  -al \t\t height map\n");
   printf("  -lal \t\t low height map\n");
   printf("  -tr <cel> \t transparent cells of type <cel>\n");
-//#if defined(MODEL_DUN) || defined(MODEL_RIV) || defined(MODEL_AVA)
 #ifdef LGCA
-  if (prog == PROG_RESCAL)
+  if (prog == PROG_RESCAL) {
     printf("  -vel \t\t view flow mean velocity on a vertical plan\n");
-    printf("  -vel2 \t view flow mean velocity and vector field on a vertical plan\n");
-#if defined(CGV)
-  if (prog == PROG_RESCAL)
+  }
+  printf("  -vel2 \t view flow mean velocity and vector field on a vertical plan\n");
+#ifdef CGV
+  if (prog == PROG_RESCAL) {
     printf("  -vss \t\t view shear stress\n");
-    printf("  -vss2 \t view renormalized shear stress between min and max thresholds\n");
+  }
+  printf("  -vss2 \t view renormalized shear stress between min and max thresholds\n");
 #endif
 #endif
   fflush(stdout);
 }
 
-int32_t view_init(int32_t argc, int8_t *argv[])
-{
+int32_t view_init(int32_t argc, char *argv[]) {
   int32_t i;
   uint8_t typ;
 
-  hh = H>>1;
+  hh = H >> 1;
   memset(visible, 1, MAX_CELL);
 
-  for(i=1; i<argc; i++){
-    if (!strcmp(argv[i],"-cv0")){
+  for (i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-cv0")) {
       opt_cv = 1;
-      abs_cv = L>>1;
-      prof_cv = D>>1;
-    }
-    else if (!strcmp(argv[i],"-cv")){
-      int8_t c;
-      int32_t n=0;
+      abs_cv = L >> 1;
+      prof_cv = D >> 1;
+    } else if (!strcmp(argv[i], "-cv")) {
+      char c;
+      int32_t n = 0;
       opt_cv = 1;
-      if (i+1<argc) n = sscanf(argv[++i], "%d%c%d", &abs_cv, &c, &prof_cv);
+      if (i + 1 < argc) {
+        n = sscanf(argv[++i], "%d%c%d", &abs_cv, &c, &prof_cv);
+      }
       //LogPrintf("n=%d\n",n);
-      if (n<3) bad_options("-cv <abs>x<prof>");
-      abs_cv+=L_bounds;
-      prof_cv+=D_bounds;
+      if (n < 3) {
+        bad_options("-cv <abs>x<prof>");
+      }
+      abs_cv += L_bounds;
+      prof_cv += D_bounds;
       //LogPrintf("abs_cv=%d   prof_cv=%d\n", abs_cv, prof_cv);
-    }
-    else if (!strcmp(argv[i],"-lc"))
+    } else if (!strcmp(argv[i], "-lc")) {
       opt_lc = 1;
-    else if (!strcmp(argv[i],"-ch")){
+    } else if (!strcmp(argv[i], "-ch")) {
       opt_ch = 1;
       hh = atoi(argv[++i]);
-      if (hh>H-2) hh=H-2;
-    }
-    else if (!strcmp(argv[i],"-tr")){
+      if (hh > H - 2) {
+        hh = H - 2;
+      }
+    } else if (!strcmp(argv[i], "-tr")) {
       opt_tr = 1;
       typ = atoi(argv[++i]);
       visible[typ] = 0;
-    }
-    else if (!strcmp(argv[i],"-al")){
+    } else if (!strcmp(argv[i], "-al")) {
       opt_al = 1;
-      if ((i+1<argc) && (*argv[i+1]!='-')) i++; /// for backward compatibility
-    }
-    else if (!strcmp(argv[i],"-lal")){
+      if ((i + 1 < argc) && (*argv[i + 1] != '-')) {
+        i++;  /// for backward compatibility
+      }
+    } else if (!strcmp(argv[i], "-lal")) {
       opt_lal = 1;
-      if ((i+1<argc) && (*argv[i+1]!='-')) i++; /// for backward compatibility
+      if ((i + 1 < argc) && (*argv[i + 1] != '-')) {
+        i++;  /// for backward compatibility
+      }
     }
 #ifdef ALTI
-    else if (!strcmp(argv[i],"-ls")){
+    else if (!strcmp(argv[i], "-ls")) {
       opt_ls = 1;
       light_elevation = atof(argv[++i]);
       set_light_xyz();
     }
 #endif
 #ifdef LGCA
-    else if ((prog == PROG_RESCAL) && (use_lgca) && (!strcmp(argv[i],"-vel")))
+    else if ((prog == PROG_RESCAL) && (use_lgca) && (!strcmp(argv[i], "-vel"))) {
       opt_vel = 1;
+    }
     //LogPrintf("opt_vel = %d\n", opt_vel);
-    else if ((prog == PROG_RESCAL) && (use_lgca) && (!strcmp(argv[i],"-vel2")))
+    else if ((prog == PROG_RESCAL) && (use_lgca) && (!strcmp(argv[i], "-vel2"))) {
       opt_vel = 2;
+    }
     //LogPrintf("opt_vel = %d\n", opt_vel);
-#if defined(CGV)
-    else if ((prog == PROG_RESCAL) && (use_lgca) && (!strcmp(argv[i],"-vss")))
+#ifdef CGV
+    else if ((prog == PROG_RESCAL) && (use_lgca) && (!strcmp(argv[i], "-vss"))) {
       opt_vss = 1;
-    else if ((prog == PROG_RESCAL) && (use_lgca) && (!strcmp(argv[i],"-vss2")))
+    } else if ((prog == PROG_RESCAL) && (use_lgca) && (!strcmp(argv[i], "-vss2"))) {
       opt_vss = 2;
+    }
 #endif
 #endif
   }
 
-  if (!visible[BORD]){
+  if (!visible[BORD]) {
     ErrPrintf("ERROR: do not specify %d cells as transparent\n", BORD);
     exit(-1);
   }
 
-  if (LNS == 1) opt_lc = opt_vss = 0;
+  if (LNS == 1) {
+    opt_lc = opt_vss = 0;
+  }
 
-  if (opt_vel && !opt_cv) prof_cv = D>>1;
+  if (opt_vel && !opt_cv) {
+    prof_cv = D >> 1;
+  }
 
-  if (opt_cv || opt_vel){
+  if (opt_cv || opt_vel) {
     LogPrintf("abs_cv = %d\n", abs_cv);
     LogPrintf("prof_cv = %d\n", prof_cv);
   }
 
-  img_w = (L<=IMG_W_MAX)? L : IMG_W_MAX;
-  if (L>IMG_W_MAX) {LogPrintf("largeur de l'image fixee a IMG_W_MAX = %d\n", IMG_W_MAX); }
-  img_h = D;//LNS+2;//L;
-  if (opt_cv){
-    if (LNS>1) img_w += H;
-    img_h += H; //(LNS>1) ? 2*H : H;
+  img_w = (L <= IMG_W_MAX) ? L : IMG_W_MAX;
+  if (L > IMG_W_MAX) {
+    LogPrintf("largeur de l'image fixee a IMG_W_MAX = %d\n", IMG_W_MAX);
   }
-  if (opt_vel && (!opt_vss || !opt_cv || (L>D))) img_h += H;
-#if defined(CGV)
-  if (opt_vss){
-    horizontal_display = (L<=D);
-    if (horizontal_display)
+  img_h = D;
+  if (opt_cv) {
+    if (LNS > 1) {
+      img_w += H;
+    }
+    img_h += H;
+  }
+  if (opt_vel && (!opt_vss || !opt_cv || (L > D))) {
+    img_h += H;
+  }
+#ifdef CGV
+  if (opt_vss) {
+    horizontal_display = (L <= D);
+    if (horizontal_display) {
       img_w += L;
-    else
-      img_h += LNS+2;
+    } else {
+      img_h += LNS + 2;
+    }
   }
 #ifdef REORIENT_AUTO
-  LogPrintf("rot_mode = %d\n",rot_mode);
-  //if (opt_vss && (rot_mode == ROT_MODE_FULL)){ WarnPrintf("WARNING: display of the shear stress is not fully supported with FULL rotations\n");}
+  LogPrintf("rot_mode = %d\n", rot_mode);
 #endif
 #endif
 
-  if (!image){
-    /*image = (uint8_t *) malloc(img_w*img_h);
-  	if (!image){
-          ErrPrintf("erreur malloc image (img_w = %d   img_h = %d)\n", img_w, img_h);
-		  exit(-4);
-	  }*/
-    AllocMemoryPrint("image",image, unsigned char, img_w*img_h);
+  if (!image) {
+    AllocMemoryPrint("image", image, unsigned char, img_w * img_h);
     PrintTotalMemory();
-    memset(image, BORD, img_w*img_h);
-    image_end = image + img_w*img_h;
+    memset(image, BORD, img_w * img_h);
+    image_end = image + img_w * img_h;
   }
 
   return 0;
 }
 
-void view_img_size(int32_t *pL, int32_t *pH)
-{
+void view_img_size(int32_t *pL, int32_t *pH) {
   *pL = img_w;
   *pH = img_h;
 }
 
-void init_shading(int32_t index, int32_t nb_values, int32_t col0, int32_t col1)
-{
+void init_shading(int32_t index, int32_t nb_values, int32_t col0, int32_t col1) {
   assert(index < MAX_CELL);
   shades[index].col0 = col0; //dark brown
   shades[index].col1 = col1; //light brown
   shades[index].nb_val = nb_values;
-  shades[index].start = (index==0) ? MAX_CELL+1 : shades[index-1].start + shades[index-1].nb_val;
-  assert(shades[index].start + nb_values <256);
+  shades[index].start = (index == 0) ? MAX_CELL + 1 : shades[index - 1].start + shades[index - 1].nb_val;
+  assert(shades[index].start + nb_values < 256);
 }
 
-uint8_t view_shading(int32_t n, float val)
-{
-  return shades[n].start + val*(shades[n].nb_val-1);
+uint8_t view_shading(int32_t n, float val) {
+  return shades[n].start + val * (shades[n].nb_val - 1);
 }
 
 
-void view_palette(int32_t *colors)
-{
-  static int32_t start=1;
+void view_palette(int32_t *colors) {
+  static int32_t start = 1;
   static int32_t palette[256];
   int32_t i;
 
-  if (start==0){
-    memcpy(colors, palette, 256*sizeof(int));
+  if (start == 0) {
+    memcpy(colors, palette, 256 * sizeof(int));
     return;
   }
-  start=0;
 
-#if defined(MODEL_DUN)
-//#define GRC GRV //colored grain
+  start = 0;
 
+#ifdef MODEL_DUN
   palette[GR] = 0x00400000; //0x00000000; //grain
   palette[GRJ] = 0x00ff0000; //mobile grain
-  //palette[GRV] = 0x00ff00ff; //not used
 #ifdef BR
   palette[BR] = 0x007f3f00; //bedrock
 #endif
@@ -387,7 +384,6 @@ void view_palette(int32_t *colors)
   palette[DUM] = 0x000000ff;
 
 #else
-
   palette[0] = 0x00000000; //PLUS
   palette[1] = 0x00ffffff; //ZERO
   palette[2] = 0x00ff0000; //MOINS
@@ -396,63 +392,32 @@ void view_palette(int32_t *colors)
   palette[5] = 0x007f7f00; //IN
   palette[6] = 0x00afafaf; //BT
   palette[7] = 0x0000c8c8; //PIERRE
-
 #endif
-
-#ifdef PARALLEL
-  palette[TUNNEL] = 0x007f007f;
-#endif
-
-#ifdef MODEL_CMB
-  palette[COUPE] = 0x00007f00;
-#else
   palette[COUPE] = 0x00000000;
-#endif
-
 #ifdef ALTI
   /// color palette for shadings
   uint8_t red, green, blue;
   int32_t r0, g0, b0, r1, g1, b1;
   float coef;
-
-  //ResetMemory(cel_shade_index, int, MAX_CELL);
-  for(i=0; i<MAX_CELL; i++){
+  for (i = 0; i < MAX_CELL; i++) {
     cel_shade_index[i] = -1;
   }
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
   visible[EAUC] = 0; /// EAUC cells not visible
-  if (opt_ls | opt_al | opt_lal) visible[GRJ] = 0; /// GRJ cells not visible
+  if (opt_ls | opt_al | opt_lal) {
+    visible[GRJ] = 0;  /// GRJ cells not visible
+  }
 #endif // MODEL_DUN
-
-#ifdef MODEL_AVA
-  visible[AIR] = 0; /// AIR cells not visible
-#endif // MODEL_DUN
-
-#ifdef MODEL_RIV
-  visible[EAU] = 0; /// EAU cells not visible
-#endif // MODEL_RIV
-
   /// number of shadings
   nb_shades = 1;
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
   nb_shades++;
 #endif // MODEL_DUN
-#ifdef CELL_COLOR
-  nb_shades++;
-#endif
-#ifdef USE_VEGETATION
-  if (use_veg) nb_shades++;
-#endif
-#ifdef MODEL_RIV
-  nb_shades+=2;
-#endif
-
-  int32_t nb_values = (255 - MAX_CELL - 1)/nb_shades;
+  int32_t nb_values = (255 - MAX_CELL - 1) / nb_shades;
   LogPrintf("nb_shades=%d\n", nb_shades);
   LogPrintf("nb_values=%d\n", nb_values);
-
   /// default shading
-  int32_t index=0;
+  int32_t index = 0;
   init_shading(index, nb_values, 0x00400000, 0x00ffc37f); //brown shading
   cel_shade_index[ALTI] = index;
 
@@ -462,301 +427,238 @@ void view_palette(int32_t *colors)
   init_shading(index, nb_values, 0x00101010, 0x00909090); //dark grey shading
   cel_shade_index[DUM] = index;
 #endif // defined
-
-#ifdef CELL_COLOR
-  /// "colored" cells
-  index++;
-  init_shading(index, nb_values, 0x00202020, 0x00e0e0e0); //light grey shading
-  col_shade_index = index;
-#endif // CELL_COLOR
-
-#ifdef USE_VEGETATION
-  if (use_veg){
-    /// shading on vegetation
-    index++;
-    init_shading(index, nb_values, 0x00002000, 0x003f9f1f); //green shading
-    cel_shade_index[GRV] = index;
-    cel_shade_index[VEG] = index;
-  }
-#endif // USE_VEGETATION
-
-#ifdef MODEL_RIV
-  /// shading on mud cells
-  index++;
-  //init_shading(index, nb_values, 0x00e0a0a0, 0x00ffffff); //light brown shading
-  init_shading(index, nb_values, 0x00406080, 0x0080a0c0); //bluish grey shading
-  cel_shade_index[BOUE] = index;
-  index++;
-  //init_shading(index, nb_values, 0x00ff7f00, 0x00ffffaf); //orange shading
-  //init_shading(index, nb_values, 0x004080c0, 0x0070b0f0); //light brown shading
-  init_shading(index, nb_values, 0x00406080, 0x0080a0c0); //bluish grey shading
-  cel_shade_index[BT] = index;
-#endif // MODEL_RIV
-
   /// color palette for all shadings
-  for(index=0; index<nb_shades; index++){
+  for (index = 0; index < nb_shades; index++) {
     r0 = (shades[index].col0 & 0x00ff0000) >> 16;
     g0 = (shades[index].col0 & 0x0000ff00) >> 8;
     b0 = (shades[index].col0 & 0x000000ff);
     r1 = (shades[index].col1 & 0x00ff0000) >> 16;
     g1 = (shades[index].col1 & 0x0000ff00) >> 8;
     b1 = (shades[index].col1 & 0x000000ff);
-    for(i=0; i<shades[index].nb_val; i++) {
-      coef = (float)i/(shades[index].nb_val-1);
-      red = r1*coef + r0*(1-coef);
-      green = g1*coef + g0*(1-coef);
-      blue = b1*coef + b0*(1-coef);
-      palette[shades[index].start+i] = (red << 16) | (green << 8) | blue;
+    for (i = 0; i < shades[index].nb_val; i++) {
+      coef = (float)i / (shades[index].nb_val - 1);
+      red = r1 * coef + r0 * (1 - coef);
+      green = g1 * coef + g0 * (1 - coef);
+      blue = b1 * coef + b0 * (1 - coef);
+      palette[shades[index].start + i] = (red << 16) | (green << 8) | blue;
     }
   }
 #endif // ALTI
-
-  memcpy(colors, palette, 256*sizeof(int));
+  memcpy(colors, palette, 256 * sizeof(int));
 }
 
 
 // draw line
-void view_line(uint8_t *pix0, int32_t dx, int32_t dy, uint8_t color)
-{
-  int32_t sdx,sdy,px,py,dxabs,dyabs,i;
+void view_line(uint8_t *pix0, int32_t dx, int32_t dy, uint8_t color) {
+  int32_t sdx, sdy, px, py, dxabs, dyabs, i;
   float slope;
   uint8_t *pix;
-
-  /*if (dx*dx+dy*dy > 0){
-    LogPrintf("view_line() dx = %d, dy = %d\n", dx, dy);
-  }*/
 
   //horizontal clipping
   int32_t ipix = (int)(pix0 - image);
   int32_t xpix = ipix % img_w;
-  Check_min_max(dx, -xpix, img_w-1-xpix);
+  Check_min_max(dx, -xpix, img_w - 1 - xpix);
 
   dxabs = abs(dx);
   dyabs = abs(dy);
   sdx = sgn(dx);
   sdy = sgn(dy);
   i = 0;
-  if (dxabs >= dyabs) /* the line is more horizontal than vertical */
-  {
+  if (dxabs >= dyabs) { /* the line is more horizontal than vertical */
     slope = (float)dy / (float)dx;
-    while(1)
-    {
-      py = roundf(slope*i);
-      pix = pix0+i+py*img_w;
-      if ((pix >= image) && (pix < image_end)) *pix = color;
-      if (i==dx) break;
-      i+=sdx;
+    while (1) {
+      py = roundf(slope * i);
+      pix = pix0 + i + py * img_w;
+      if ((pix >= image) && (pix < image_end)) {
+        *pix = color;
+      }
+      if (i == dx) {
+        break;
+      }
+      i += sdx;
     }
-  }
-  else /* the line is more vertical than horizontal */
-  {
+  } else { /* the line is more vertical than horizontal */
     slope = (float)dx / (float)dy;
-    while(1)
-    {
-      px = roundf(slope*i);
-      pix = pix0+px+i*img_w;
-      if ((pix >= image) && (pix < image_end)) *pix = color;
-      if (i==dy) break;
-      i+=sdy;
+    while (1) {
+      px = roundf(slope * i);
+      pix = pix0 + px + i * img_w;
+      if ((pix >= image) && (pix < image_end)) {
+        *pix = color;
+      }
+      if (i == dy) {
+        break;
+      }
+      i += sdy;
     }
   }
 }
 
 // draw filled rectangle
-void view_rect(uint8_t *pix0, int32_t width, int32_t height, uint8_t color)
-{
+void view_rect(uint8_t *pix0, int32_t width, int32_t height, uint8_t color) {
   uint8_t *pix;
   int32_t y;
-
-  assert(pix0 + (height-1)*img_w + width <= image_end);
-
-  if (width <= 0) return;
-
+  assert(pix0 + (height - 1)*img_w + width <= image_end);
+  if (width <= 0) {
+    return;
+  }
   pix = pix0;
-
-  for (y=0; y < height; y++, pix+=img_w)
+  for (y = 0; y < height; y++, pix += img_w) {
     memset(pix, color, width);
+  }
 }
 
-int32_t view_alti(int32_t i, int32_t j, int32_t low_flag)
-{
+int32_t view_alti(int32_t i, int32_t j, int32_t low_flag) {
   Cell *pt;
   int32_t k;
 
-  pt = TE + i + j*HL;
-  if (!low_flag){
+  pt = TE + i + j * HL;
+  if (!low_flag) {
     /// find first visible cell starting from the top
-    k=1+h_ceil;
-    if (opt_ch) k=khh;
-    while ((k < H) && (visible[(pt+k*L)->celltype]==0)) k++;
-  }
-  else{
+    k = 1 + h_ceil;
+    if (opt_ch) {
+      k = khh;
+    }
+    while ((k < H) && (visible[(pt + k * L)->celltype] == 0)) {
+      k++;
+    }
+  } else {
     /// find highest visible cell starting from the bottom
-    int32_t kmin=0;
-    if (opt_ch) kmin=khh;
-    k=H-1-h_floor;
-    while ((k > kmin) && visible[(pt+(k-1)*L)->celltype]) k--;
+    int32_t kmin = 0;
+    if (opt_ch) {
+      kmin = khh;
+    }
+    k = H - 1 - h_floor;
+    while ((k > kmin) && visible[(pt + (k - 1)*L)->celltype]) {
+      k--;
+    }
   }
 
   return k;
 }
 
-uint8_t view_color(Cell *pt)
-{
-#if defined(CELL_COLOR) && defined(GRC)
-  return (pt->color) ? GRC : pt->celltype;
-#else
+uint8_t view_color(Cell *pt) {
   return pt->celltype;
-#endif // CELL_COLOR
 }
 
-void set_light_xyz()
-{
-  float alpha = light_azimuth*PI/180;
-  float phi = light_elevation*PI/180;
-  light.x = cosf(phi)*sinf(alpha); //1.0;
+void set_light_xyz() {
+  float alpha = light_azimuth * PI / 180;
+  float phi = light_elevation * PI / 180;
+  light.x = cosf(phi) * sinf(alpha); //1.0;
   light.y = sinf(phi); //0.0;
-  light.z = -cosf(phi)*cosf(alpha);
+  light.z = -cosf(phi) * cosf(alpha);
 }
 
-void rotate_light(float angle)
-{
+void rotate_light(float angle) {
   light_azimuth += angle;
   //LogPrintf("rotate_light: angle = %f   azimuth = %f\n", angle, light_azimuth);
   set_light_xyz();
 }
 
-float view_light(VECNORM *ptn)
-{
+float view_light(VECNORM *ptn) {
   float ldiff;
 
-#ifdef NORM2D
-  ldiff = (ptn->x)*light.x + (ptn->y)*light.y; //lumiere diffuse (2d)
-#else
-  ldiff = (ptn->x)*light.x + (ptn->y)*light.y + (ptn->z)*light.z; //lumiere diffuse
-#endif
-  if (ldiff < 0.0) ldiff = 0.0;
+  ldiff = (ptn->x) * light.x + (ptn->y) * light.y + (ptn->z) * light.z; //lumiere diffuse
+  if (ldiff < 0.0) {
+    ldiff = 0.0;
+  }
 
   return ldiff;
 }
 
-uint8_t * view()
-{
+uint8_t * view() {
   Cell *pt;
   uint8_t *pix, *cur_image;
-  int32_t i,j,k,typ;
+  int32_t i, j, k, typ;
   int32_t shade_index;
-
   pix = cur_image = image;
-
   view_rect(image, img_w, img_h, BORD);
-
   /// update the position of the horizontal cross section
-  khh = H-1-hh;
+  khh = H - 1 - hh;
 
 #ifdef ALTI
-  if (opt_ls){
+  if (opt_ls) {
     /// relief light shading
-    if (norm3d){
+    if (norm3d) {
       VECNORM *ptn;
-      assert (csol);
-      for(j=1; j < D-1; j++){
-#ifdef NORM2D
-        ptn = norm2d + (j-LN)*LEO;
-#else
-        ptn = norm3d + (j-LN)*LEO;
-#endif
-        //if ((j-LN<0) && !psol[j]) {ErrPrintf("ERROR: j-LN=%d (%d - %d)\n",j-LN,j,LN); exit(-1);}
-        pix = cur_image + j*img_w + 1;
-        for(i=1; i < L-1; i++, ptn++){
-          if (csol[j*L+i])
-              *pix++ = csol[j*L+i];
-          else{
-            k = view_alti(i,j,0);
-            pt = TE+j*HL+i+k*L;
+      assert(csol);
+      for (j = 1; j < D - 1; j++) {
+        ptn = norm3d + (j - LN) * LEO;
+        pix = cur_image + j * img_w + 1;
+        for (i = 1; i < L - 1; i++, ptn++) {
+          if (csol[j * L + i]) {
+            *pix++ = csol[j * L + i];
+          } else {
+            k = view_alti(i, j, 0);
+            pt = TE + j * HL + i + k * L;
             typ = pt->celltype;
             shade_index = cel_shade_index[typ];
-#ifdef CELL_COLOR
-            if (pt->color) shade_index = col_shade_index;
-#endif // CELL_COLOR
-            //if (shade_index >= 0)
-            if ((shade_index < 0) || (opt_ch && (k==khh))){
+            if ((shade_index < 0) || (opt_ch && (k == khh))) {
               *pix++ = view_color(pt);
-            }
-            else{
+            } else {
               *pix++ = view_shading(shade_index, view_light(ptn));
             }
           }
         }
       }
     }
-  }
-  else if (opt_al || opt_lal){
+  } else if (opt_al || opt_lal) {
     /// height map
-    for(j=1; j < D-1; j++){
-      pix = cur_image + j*img_w + 1;
-      for(i=1; i < L-1; i++){
-//#ifdef TRACE_SRC
+    for (j = 1; j < D - 1; j++) {
+      pix = cur_image + j * img_w + 1;
+      for (i = 1; i < L - 1; i++) {
 #if defined(TRACE_SRC) || defined(TRACE_AIRE)
-        if (trace_point(i,j)){
+        if (trace_point(i, j)) {
           *pix = COUPE;
-        }
-        else
+        } else
 #endif
         {
-          k = view_alti(i,j,opt_lal);
-          pt = TE+j*HL+i+k*L;
+          k = view_alti(i, j, opt_lal);
+          pt = TE + j * HL + i + k * L;
           typ = pt->celltype;
           shade_index = cel_shade_index[typ];
-#ifdef CELL_COLOR
-          if (pt->color) shade_index = col_shade_index;
-#endif // CELL_COLOR
-          if ((shade_index < 0) || (opt_ch && (k==khh))){
+          if ((shade_index < 0) || (opt_ch && (k == khh))) {
             *pix++ = view_color(pt);
-          }
-          else{
-            *pix++ = view_shading(shade_index, 1.0*(H-k)/H);
+          } else {
+            *pix++ = view_shading(shade_index, 1.0 * (H - k) / H);
           }
         }
       }
     }
-  }
-  else
+  } else
 #endif //ALTI
   {
     /// by default, display horizontal view of the (predefined) visible cells
     /// or cross section (with opt_ch option)
     /// without shading
-    for(j=1; j < D-1; j++){
-      pix = cur_image + j*img_w + 1;
-      for(i=1; i < L-1; i++){
-        k = opt_ch ? khh : view_alti(i,j,0);
-        pt = TE+j*HL+i+k*L;
+    for (j = 1; j < D - 1; j++) {
+      pix = cur_image + j * img_w + 1;
+      for (i = 1; i < L - 1; i++) {
+        k = opt_ch ? khh : view_alti(i, j, 0);
+        pt = TE + j * HL + i + k * L;
         *pix++ = view_color(pt);
       }
     }
   }
 
-  memset(pix,BORD,img_w);
-  //pix += img_w;
-  cur_image += D*img_w;
+  memset(pix, BORD, img_w);
+  cur_image += D * img_w;
 
-  if (opt_cv){
+  if (opt_cv) {
     pix = cur_image;
     /// vertical cross section, east-west
-    for(j=1; j < H-1; j++){
-      pt = TE + HL*(prof_cv) + j*L + 1;
-      pix = cur_image + j*img_w + 1;
-      for(i=1; i < L-1; i++, pt++){
+    for (j = 1; j < H - 1; j++) {
+      pt = TE + HL * (prof_cv) + j * L + 1;
+      pix = cur_image + j * img_w + 1;
+      for (i = 1; i < L - 1; i++, pt++) {
         *pix++ = view_color(pt);
       }
     }
-    if (LNS>1){
+    if (LNS > 1) {
       /// vertical cross section, north-south
-      for(i=1; i < D-1; i++){
-        pt = TE + i*HL + abs_cv + L;
-        pix = image + i*img_w + L + 1;
-        for(j=1; j < H-1; j++, pt+=L) {
+      for (i = 1; i < D - 1; i++) {
+        pt = TE + i * HL + abs_cv + L;
+        pix = image + i * img_w + L + 1;
+        for (j = 1; j < H - 1; j++, pt += L) {
           *pix++ = view_color(pt);
         }
       }
@@ -766,267 +668,140 @@ uint8_t * view()
 
 
 #ifdef ROTATIONS
-    if ((vdir_mode != VDIR_NONE) && (LNS>1)){
+    if ((vdir_mode != VDIR_NONE) && (LNS > 1)) {
       /// representation of current orientation
       extern float csp_angle;
-      int32_t Hd2 = H/2;
+      int32_t Hd2 = H / 2;
       int32_t l1 = Hd2;
-      int32_t l2 = l1/2;
+      int32_t l2 = l1 / 2;
       float alpha = 0.0;
-      if (vdir_mode == VDIR_NORTH){
+      if (vdir_mode == VDIR_NORTH) {
         //TODO
-      } else if (vdir_mode == VDIR_WIND){
-        alpha = -csp_angle*PI/180.0;
+      } else if (vdir_mode == VDIR_WIND) {
+        alpha = -csp_angle * PI / 180.0;
       }
       float co = cosf(alpha);
       float si = sinf(alpha);
-      pix = cur_image + L + Hd2 + Hd2*img_w;
-      pix -= (int)(0.5*l1*co);
-      pix -= (int)(0.5*l1*si)*img_w;
-      view_line(pix, l1*co, l1*si, COUPE);
-      pix += (int)(0.5*l2*si);
-      pix -= (int)(0.5*l2*co)*img_w;
-      view_line(pix, -l2*si, l2*co, COUPE);
+      pix = cur_image + L + Hd2 + Hd2 * img_w;
+      pix -= (int)(0.5 * l1 * co);
+      pix -= (int)(0.5 * l1 * si) * img_w;
+      view_line(pix, l1 * co, l1 * si, COUPE);
+      pix += (int)(0.5 * l2 * si);
+      pix -= (int)(0.5 * l2 * co) * img_w;
+      view_line(pix, -l2 * si, l2 * co, COUPE);
     }
 #endif
-    cur_image += H*img_w;
-  }
-  else if (opt_vel && opt_lc && !reorient_flag){
+    cur_image += H * img_w;
+  } else if (opt_vel && opt_lc && !reorient_flag) {
     /// cut line for the vertical velocity plane
-    pix = image + img_w*(prof_cv) + 1;
-    for (i=1; i<img_w-1; i+=ilc, pix+=ilc)
-      if (i!=L-1) *pix = COUPE;
+    pix = image + img_w * (prof_cv) + 1;
+    for (i = 1; i < img_w - 1; i += ilc, pix += ilc)
+      if (i != L - 1) {
+        *pix = COUPE;
+      }
   }
 
 #ifdef LGCA
-//#if 0
-  uint8_t *img_col = cur_image;//image + img_w*(img_h-H);
-  if (use_lgca){
-    if (opt_vel) cur_image += H*img_w;
-    if (horizontal_display)
-      img_col = image + L + D*img_w + (opt_cv? H : 0);
-    //else if (opt_vss)
-    //  view_rect(img_col + L, img_w - L, H, BORD);
-
-#if 0
-    /// basic rendering (vertical vs horizontal) of lgca particles
-    if (opt_vel){
-    //if (0){
-      uint8_t *pix0;
-      int32_t index, vcol;
-      pix0 = img_col;
-      index = HL*prof_cv;//(CLNS-1);//(CLNS>>1);
-      for(i=0; (i<HL) ; i++, index++, pix0++){
-        //*pix0 = check_mvt(index, NULL) ? COUPE : check_mvt_solid(index, NULL) ? DUM : BORD;
-        //*pix0 = check_mvt_ouest(index, NULL) ? GRJ : check_mvt_est(index, NULL) ? EAUT : check_mvt_solid(index, NULL) ? DUM : BORD;
-        //*pix0 = check_mvt_haut(index, NULL) ? GRJ : check_mvt_bas(index, NULL) ? EAUT : check_mvt_solid(index, NULL) ? DUM : BORD;
-        *pix0 = check_mvt_haut(index, NULL) || check_mvt_bas(index, NULL) ? GRJ : check_mvt_ouest(index, NULL) || check_mvt_est(index, NULL) ? EAUT : check_mvt_solid(index, NULL) ? DUM : BORD;
-      }
+  uint8_t *img_col = cur_image;
+  if (use_lgca) {
+    if (opt_vel) {
+      cur_image += H * img_w;
     }
-#elif 1
+    if (horizontal_display) {
+      img_col = image + L + D * img_w + (opt_cv ? H : 0);
+    }
     /// mean velocity (interpolation) of the flow in a vertical plane
-    if (opt_vel && Velx_interp && Vely_interp){
-      if ((prof_cv>=LN) && (prof_cv<=LS)){
+    if (opt_vel && Velx_interp && Vely_interp) {
+      if ((prof_cv >= LN) && (prof_cv <= LS)) {
         uint8_t *pix0;
         int32_t index, sol_flag;
         float vcol;
-        float vcolmax = sqrtf(2)*VSTEP_H*VSTEP_L*VSTEP_TIME;
+        float vcolmax = sqrtf(2) * VSTEP_H * VSTEP_L * VSTEP_TIME;
         pix0 = img_col;
-        index = HL*prof_cv;
-        for(j=0; j<H; j++){
-          pix0 = img_col + j*img_w;
-          for(i=0; (i<L) ; i++, index++, pix0++){
-            vcol = sqrtf(Velx_interp[index]*Velx_interp[index]+Vely_interp[index]*Vely_interp[index]);
-            if (vcol > vcolmax) vcol = vcolmax;
-            sol_flag = reorient_flag ? check_mvt_solid(index, NULL) : (Phase[TE[index].celltype]==SOLID);
-            *pix0 = sol_flag ? BORD : (Velx_interp[index]<0) ? EAUT : view_shading(0, vcol/vcolmax);
+        index = HL * prof_cv;
+        for (j = 0; j < H; j++) {
+          pix0 = img_col + j * img_w;
+          for (i = 0; (i < L) ; i++, index++, pix0++) {
+            vcol = sqrtf(Velx_interp[index] * Velx_interp[index] + Vely_interp[index] * Vely_interp[index]);
+            if (vcol > vcolmax) {
+              vcol = vcolmax;
+            }
+            sol_flag = reorient_flag ? check_mvt_solid(index) : (Phase[TE[index].celltype] == SOLID);
+            *pix0 = sol_flag ? BORD : (Velx_interp[index] < 0) ? EAUT : view_shading(0, vcol / vcolmax);
           }
         }
-      }
-      else{
-        for(j=0; j<H; j++) memset(img_col + j*img_w, DUM, L);
+      } else {
+        for (j = 0; j < H; j++) {
+          memset(img_col + j * img_w, DUM, L);
+        }
       }
     }
 
     /// rendering of the velocity field with arrows (vertical plane)
-    if ((opt_vel >= 2) && Velx_interp && Vely_interp){
+    if ((opt_vel >= 2) && Velx_interp && Vely_interp) {
       int32_t iv, jv;
       float *pvx0, *pvy0, *pvx, *pvy;
       uint8_t *pix0;
-      //int32_t fv=VSTEP*VSTEP_TIME*NB_MVT_EO*NB_MVT_VER/4;
-      int32_t fv=VSTEP_H*VSTEP_L*VSTEP_TIME/20;
-      int32_t planz = (int)(prof_cv-LN+1)/DIST_MVT_NS; //(CLNS>>1); //LNS-1;//(CLNS>>1);
-      Check_min_max(planz, 0, CLNS-1);
-      //int32_t fy=2*VSTEP_TIME*NB_MVT_EO*NB_MVT_VER;
-      //memset(img_col, BORD, HL);
-      pvx0 = Velx_interp+planz*HL;
-      pvy0 = Vely_interp+planz*HL;
-      pix0 = img_col; // + (VSTEP>>1)*img_w + (VSTEP>>1);
-      //view_rect(img_col, L, H, BORD);
-      for(jv=1; jv<VH-1; jv++){ //hauteur
-        pix = pix0 + jv*VSTEP_H*img_w + VSTEP_L;
-        pvx = pvx0 + jv*VSTEP_H*L + VSTEP_L;
-        pvy = pvy0 + jv*VSTEP_H*L + VSTEP_L;
-        for(iv=1; iv<VL-3; iv+=2, pvx+=2*VSTEP_L, pvy+=2*VSTEP_L, pix += 2*(VSTEP_L/NB_MVT_EO)){ //largeur
-          if ((jv<VH-1) && (iv<VL-1)){
-            //view_line(pix, (*pvx)>>1, (*pvy)>>1, 0);
-            //view_line(pix, ((*pvx)/VSTEP_TIME)>>1, ((*pvy)/VSTEP_TIME)>>1, 0);
-            view_line(pix, (*pvx)/fv, (*pvy)/fv, GRC);
-      /*if ((iv>0) && (jv>0)){
-        //calcul vorticite
-            int32_t vort = (*pvy) - (*(pvy-1)) - ((*pvx) - (*(pvx-VL)));
-            if (vort > 10) *pix = *(pix+1) = *(pix+L) = *(pix+L+1) = MOINS;
-            else if (vort < -10) *pix = *(pix+1) = *(pix+L) = *(pix+L+1) = DUM;
-            }*/
+      int32_t fv = VSTEP_H * VSTEP_L * VSTEP_TIME / 20;
+      int32_t planz = (int)(prof_cv - LN + 1) / DIST_MVT_NS;
+      Check_min_max(planz, 0, CLNS - 1);
+      pvx0 = Velx_interp + planz * HL;
+      pvy0 = Vely_interp + planz * HL;
+      pix0 = img_col;
+      for (jv = 1; jv < VH - 1; jv++) { //hauteur
+        pix = pix0 + jv * VSTEP_H * img_w + VSTEP_L;
+        pvx = pvx0 + jv * VSTEP_H * L + VSTEP_L;
+        pvy = pvy0 + jv * VSTEP_H * L + VSTEP_L;
+        for (iv = 1; iv < VL - 3; iv += 2, pvx += 2 * VSTEP_L, pvy += 2 * VSTEP_L, pix += 2 * (VSTEP_L / NB_MVT_EO)) { //largeur
+          if ((jv < VH - 1) && (iv < VL - 1)) {
+            view_line(pix, (*pvx) / fv, (*pvy) / fv, GRC);
           }
         }
       }
     }
-#else
-      /// basic rendering (east vs west) of lgca particles
-      uint8_t *pix0;
-      int32_t ii0, ii, x, y;
-      pix0 = img_col;
-      ii0 = (HL*NB_MVT_EO)*(int)((prof_cv-LN)/DIST_MVT_NS);//+(L*NB_MVT_EO*0.15);
-      //ii0 = (HL*NB_MVT_EO)*(L>>1)+(L*(NB_MVT_EO-1));
-      for(y=0; y<H ; y++, ii0+=L*NB_MVT_EO){
-        for(x=0, ii=ii0; x<L; x++, pix0++, ii+=NB_MVT_EO){
-          *pix0 = mvt_ouest(ii) ? EAUT : mvt_est(ii) ? GRJ : mvt(ii) ? EAUC : mvt_solid(ii) ? DUM : GR;
-          //*pix0 = mvt_haut(ii) ? GRJ : mvt_est(ii) ? EAUT : mvt_solid(ii) ? GR : EAUC;
-          //*pix0 = mvt_haut(ii) ? GRJ : mvt_bas(ii) ? EAUT : mvt_solid(ii) ? DUM : BORD;
-          //*pix0 = mvt_haut(ii) || mvt_bas(ii) ? GRJ : mvt_ouest(ii) || mvt_est(ii) ? EAUT : mvt_solid(ii) ? DUM : BORD;
-        }
-      }
-#endif
 
-#ifdef CGV
     /// display normals in the vertical plane of the flow
-    if (opt_vel /*&& opt_vss*/ && alti && norm3d && Velx_interp && (prof_cv>=LN) && (prof_cv<=LS) && !reorient_flag){
-    //if (0){
-      float ln=10;
-#ifdef CGV
+    if (opt_vel && alti && norm3d && Velx_interp && (prof_cv >= LN) && (prof_cv <= LS) && !reorient_flag) {
+      float ln = 10;
       extern float dist_grdv;
       ln = dist_grdv;
-#endif
       VECNORM *pn;
       int16_t *alt, x, y, z, stepx;
-      z = prof_cv-LN;
-      stepx = 10;//10; //VSTEP*2; //*2;
-      alt = alti+z*LEO+(stepx>>1);
-#ifdef NORM2D
-      pn = &norm2d[z*LEO+(stepx>>1)];
-#else
-      pn = &norm3d[z*LEO+(stepx>>1)];
-#endif
-      for(x=(stepx>>1); x<LEO; x+=stepx, alt+=stepx, pn+=stepx){
-      //for(x=1; x<L-2; x+=2, alt+=2, pnx+=2, pny+=2){
-        if (rot_map && OutOfSpace(x+1, z+1)) continue;
-        y = (H-1)-(*alt);
-        pix = img_col + y*img_w + x + 1;
-        view_line(pix, (int)(ln*(pn->x))/*/NB_MVT_EO*/, (int)(-ln*(pn->y)), GRJ);
-        //if (*pnx > 0.5) LogPrintf("nx = %f   ny = %f\n", *pnx, *pny);
-      }
-      //view_rect(img_col+L,img_w-L,H,BORD);
-    }
-#endif
-
-#ifdef CGV
-    /// display shear stress in dedicated horizontal plane
-    extern float *grdv;
-    extern float grdvc, grdvc_min, grdvc_max;
-
-    if (horizontal_display){
-      // horizontal disposition
-      cur_image = image + L;
-      if (opt_cv) cur_image += H;
-    }
-
-    if (opt_vss /*&& !reorient_flag*/){
-      if (grdv && lgca_ready){
-        //view_rect(cur_image, L, LN, BORD);
-        float *ptgv, prob, vcol;
-        float vcolmax = 4*grdvc;
-        for(j=0; j < LNS; j++){
-          pix = cur_image+(LN+j)*img_w;
-          if (!psol[LN+j] || reorient_flag){ //test si plan solide
-            ptgv = grdv + j*LEO;
-            *pix++ = BORD;
-            for(i=0; i < LEO; i++, ptgv++){
-              //if (rot_map && OutOfSpace(1+i, LN+j)){*pix++ = BORD; continue;}
-              if (opt_vss==1){
-                vcol = (*ptgv);
-                //if (vcol > vcolmax) vcol = vcolmax;
-                *pix++ = (vcol < 0) ? EAUT : (vcol <= vcolmax) ? view_shading(0, vcol/vcolmax) : GRJ;
-              }
-              else{
-                prob = prob_cgv(*ptgv, grdvc_min, grdvc_max);
-                *pix++ = view_shading(0, prob);
-              }
-            }
-            *pix++ = BORD;
-          }
-          else memset(pix, BORD, L);
-        }
-        //view_rect(cur_image + LS*img_w, L, D-1-LS, BORD);
-        /*if (opt_lc && (prof_cv>=LN) && (prof_cv<=LS)){
-          //ligne de coupe
-          //extern int32_t CHL;
-          //int32_t cx, cy, cz;
-          //Calcule_cxyz(HL*prof_cv+1, cx, cy, cz);
-          //int32_t cz = (int)(prof_cv-LN)/DIST_MVT_NS;
-          //memset(cur_image+img_w+img_w*cz*DIST_MVT_NS, COUPE, L);
-          //memset(cur_image+img_w*(1+prof_cv-LN), COUPE, L);
-          pix = cur_image+img_w*(prof_cv-LN);
-          for(i=0; i<L; i+=ilc, pix +=ilc) *pix = COUPE;
-        }*/
-      }
-      else{
-        //view_rect(cur_image, LEO, LNS, BORD);
-      }
-    }
-#ifndef NORM2D
-    extern float dist_grdv;
-    /// display normals on the horizontal plane of the shear stress
-    if ((opt_vss==1) && alti && norm3d && lgca_ready && !reorient_flag){
-    //if (0){
-      float ln=10;
-      ln = dist_grdv;
-      Vec3 *pn;
-      int16_t x, z, stepx, stepz;
+      z = prof_cv - LN;
       stepx = 10;
-      stepz = 10;
-      for(z=(stepz>>1); z<LNS; z+=stepz){
-        pn = &norm3d[z*LEO+(stepx>>1)];
-        for(x=(stepx>>1); x<LEO; x+=stepx, pn+=stepx){
-          if (rot_map && OutOfSpace(x+1, z+1)) continue;
-          pix = cur_image + (z+1)*img_w + x + 1;
-          view_line(pix, (int)(ln*(pn->x))/*/NB_MVT_EO*/, (int)(ln*(pn->z)), GRJ);
+      alt = alti + z * LEO + (stepx >> 1);
+      pn = &norm3d[z * LEO + (stepx >> 1)];
+      for (x = (stepx >> 1); x < LEO; x += stepx, alt += stepx, pn += stepx) {
+        if (rot_map && OutOfSpace(x + 1, z + 1)) {
+          continue;
         }
+        y = (H - 1) - (*alt);
+        pix = img_col + y * img_w + x + 1;
+        view_line(pix, (int)(ln * (pn->x)), (int)(-ln * (pn->y)), GRJ);
       }
     }
-#endif //NORM2D
-#endif //CGV
   }
 #endif //LGCA
 
   /// display cut lines (opt_lc option)
-  if (opt_cv && opt_lc){
+  if (opt_cv && opt_lc) {
     /// east-west and north-south cut lines
-    //memset(image+L*(1+prof_cv-LN), COUPE, L);
-    pix = image + img_w*(prof_cv) + 1;
-    for (i=1; i<img_w-1; i+=ilc, pix+=ilc)
-      if (i!=L-1) *pix = COUPE;
+    pix = image + img_w * (prof_cv) + 1;
+    for (i = 1; i < img_w - 1; i += ilc, pix += ilc)
+      if (i != L - 1) {
+        *pix = COUPE;
+      }
 
     pix = image + img_w + abs_cv;
-    for (j=1; j<D-2+H; j+=ilc, pix+=ilc*img_w)
-      if (j!=D-1) *pix = COUPE;
+    for (j = 1; j < D - 2 + H; j += ilc, pix += ilc * img_w)
+      if (j != D - 1) {
+        *pix = COUPE;
+      }
 
     /// horizontal cut line in east-west vertical cross section (with opt_ch option)
-    //if (!opt_tr && !opt_al && !opt_lal && !opt_ls){
-    if (opt_ch){
-      //memset(cur_image+hh*L, COUPE, L);
-      pix = image + (D+khh)*img_w + 1;
-      for (i=1; i<L-1; i+=ilc, pix+=ilc){
+    if (opt_ch) {
+      pix = image + (D + khh) * img_w + 1;
+      for (i = 1; i < L - 1; i += ilc, pix += ilc) {
         *pix = COUPE;
       }
     }
@@ -1036,95 +811,116 @@ uint8_t * view()
 }
 
 /// Update the position of horizontal/vertical cross sections
-int32_t update_cv(int32_t x, int32_t y, int32_t flag)
-{
-  int32_t ret=0;
-  int32_t dist=5; //max distance to catch the line
-  static int32_t flagx=0;
-  static int32_t flagy=0;
-  static int32_t flagz=0;
+int32_t update_cv(int32_t x, int32_t y, int32_t flag) {
+  int32_t ret = 0;
+  int32_t dist = 5; //max distance to catch the line
+  static int32_t flagx = 0;
+  static int32_t flagy = 0;
+  static int32_t flagz = 0;
 
-  if (!opt_cv || !opt_lc) return ret;
+  if (!opt_cv || !opt_lc) {
+    return ret;
+  }
 
   /// compute position in case of a zoomed area
-  x = (x - zoom_offset_x)/zoom_coef;
-  y = (y - zoom_offset_y)/zoom_coef;
+  x = (x - zoom_offset_x) / zoom_coef;
+  y = (y - zoom_offset_y) / zoom_coef;
 
-  if (!flag){
+  if (!flag) {
     /// caption of a cut line
-    if ((x<L+H) && (y<D+H)){
-      flagx = (abs(abs_cv-x) <= dist);
-      flagy = (abs(prof_cv-y) <= dist);
-      flagz = (opt_ch && (abs(D+khh-y) <= dist));
-    }
-    else{
+    if ((x < L + H) && (y < D + H)) {
+      flagx = (abs(abs_cv - x) <= dist);
+      flagy = (abs(prof_cv - y) <= dist);
+      flagz = (opt_ch && (abs(D + khh - y) <= dist));
+    } else {
       flagx = flagy = flagz = 0;
     }
   }
 
   /// controlled motion of a cut line
-  if (flagx) abs_cv = x;
-  if (flagy) prof_cv = y;
-  if (flagz) hh = D+H-y;
+  if (flagx) {
+    abs_cv = x;
+  }
+  if (flagy) {
+    prof_cv = y;
+  }
+  if (flagz) {
+    hh = D + H - y;
+  }
 
   /// check boundaries
-  if (abs_cv < 1) abs_cv = 1;
-  if (abs_cv > L-2) abs_cv = L-2;
-  if (prof_cv < 1) prof_cv = 1;
-  if (prof_cv > D-2) prof_cv = D-2;
-  if (hh < 1) hh = 1;
-  if (hh > H-2) hh = H-2;
+  if (abs_cv < 1) {
+    abs_cv = 1;
+  }
+  if (abs_cv > L - 2) {
+    abs_cv = L - 2;
+  }
+  if (prof_cv < 1) {
+    prof_cv = 1;
+  }
+  if (prof_cv > D - 2) {
+    prof_cv = D - 2;
+  }
+  if (hh < 1) {
+    hh = 1;
+  }
+  if (hh > H - 2) {
+    hh = H - 2;
+  }
 
   ret = 1;
 
   return ret;
 }
 
-void reset_zoom()
-{
+void reset_zoom() {
   zoom_coef = 1.0;
   zoom_offset_x = 0;
   zoom_offset_y = 0;
 }
 
-unsigned char* view_zoom(int32_t width, int32_t height, float coef)
-{
+unsigned char* view_zoom(int32_t width, int32_t height, float coef) {
   static uint8_t *image_zoom = NULL;
   static int32_t zoom_size = 0;
-  int32_t zoom_w = Min(img_w*coef, width);
-  int32_t zoom_h = Min(img_h*coef, height);
-  int32_t size = width*height;
+  int32_t zoom_w = Min(img_w * coef, width);
+  int32_t zoom_h = Min(img_h * coef, height);
+  int32_t size = width * height;
   uint8_t *pix;
   int32_t i, j, imin, imax, jmin, jmax, i0, j0;
 
-  if (zoom_size < size){
+  if (zoom_size < size) {
     LogPrintf("width=%d, height=%d\n", width, height);
-    if (!zoom_size) zoom_size = img_w*img_h;
-    while (zoom_size < size) zoom_size *= 1.5;
-    if (!image_zoom){
-      AllocMemoryPrint("image_zoom", image_zoom, unsigned char, zoom_size);
+    if (!zoom_size) {
+      zoom_size = img_w * img_h;
     }
-    else{
+    while (zoom_size < size) {
+      zoom_size *= 1.5;
+    }
+    if (!image_zoom) {
+      AllocMemoryPrint("image_zoom", image_zoom, unsigned char, zoom_size);
+    } else {
       ReallocMemoryPrint("image_zoom", image_zoom, unsigned char, zoom_size);
     }
   }
   memset(image_zoom, BORD, size);
   pix = image_zoom;
-  jmin = (height-zoom_h) >> 1;
+  jmin = (height - zoom_h) >> 1;
   jmax = jmin + zoom_h;
-  imin = (width-zoom_w) >> 1;
+  imin = (width - zoom_w) >> 1;
   imax = imin + zoom_w;
   zoom_offset_x = imin;
   zoom_offset_y = jmin;
   zoom_coef = coef;
 
-  for(j=jmin; j < jmax; j++){
-    j0 = roundf((j-jmin)/coef);
-    if (j0>=img_h) j0 = img_h-1;
-    pix = image_zoom + j*width + imin;
-    for(i=imin; i < imax; i++, pix++){
-      i0 = roundf((i-imin)/coef);
-      *pix = *(image + j0*img_w + i0);
+  for (j = jmin; j < jmax; j++) {
+    j0 = roundf((j - jmin) / coef);
+    if (j0 >= img_h) {
+      j0 = img_h - 1;
+    }
+    pix = image_zoom + j * width + imin;
+    for (i = imin; i < imax; i++, pix++) {
+      i0 = roundf((i - imin) / coef);
+      *pix = *(image + j0 * img_w + i0);
     }
   }
 
@@ -1137,8 +933,7 @@ unsigned char* view_zoom(int32_t width, int32_t height, float coef)
 
 png_color* png_palette;
 
-void view_dump_init()
-{
+void view_dump_init() {
   int32_t colors[256];
   int32_t i;
 
@@ -1149,42 +944,39 @@ void view_dump_init()
 
   view_palette(colors);
 
-  for(i=0; i<256; i++){
+  for (i = 0; i < 256; i++) {
     png_palette[i].red   = (colors[i] & 0x00ff0000) >> 16;
     png_palette[i].green = (colors[i] & 0x0000ff00) >> 8;
     png_palette[i].blue  = (colors[i] & 0x000000ff);
   }
 }
 
-void view_dump_png(int8_t *filename)
-{
+void view_dump_png(char *filename) {
   uint8_t *pix;
   int32_t j;
 
   LogPrintf("view_dump_png: writing file %s\n", filename);
 
   FILE *fp = fopen(filename, "wb");
-  if (!fp){
+  if (!fp) {
     ErrPrintf("ERROR: cannot open file %s\n", filename);
     exit(-4);
   }
 
   png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png_ptr){
+  if (!png_ptr) {
     ErrPrintf("ERROR: cannot create structure png_struct\n");
     exit(-4);
   }
 
   png_infop info_ptr = png_create_info_struct(png_ptr);
-  if (!info_ptr)
-  {
+  if (!info_ptr) {
     png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
     ErrPrintf("ERROR: cannot create structure png_info\n");
     exit(-4);
   }
 
-  if (setjmp(png_jmpbuf(png_ptr)))
-  {
+  if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
     fclose(fp);
     ErrPrintf("ERROR: cannot set jump in view_dump_png()\n");
@@ -1194,20 +986,17 @@ void view_dump_png(int8_t *filename)
   png_init_io(png_ptr, fp);
 
   png_set_IHDR(png_ptr, info_ptr, img_w, img_h,
-   8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
-   PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+               8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
   png_set_PLTE(png_ptr, info_ptr, png_palette, 256);
-
   png_write_info(png_ptr, info_ptr);
-  //png_write_png(png_ptr, info_ptr, 0, NULL);
 
   pix = view();
 
-  for(j=0; j<img_h; j++, pix+=img_w)
+  for (j = 0; j < img_h; j++, pix += img_w) {
     png_write_row(png_ptr, (png_byte*)pix);
-
-  //png_write_flush(png_ptr);
+  }
 
   png_write_end(png_ptr, NULL);
 
@@ -1216,150 +1005,49 @@ void view_dump_png(int8_t *filename)
   fclose(fp);
 }
 
-void dump_image(int8_t *filename, int8_t *format)
-{
-  // append directory to filename
-  if (!strcmp(format,"png"))
+void dump_image(char *filename, char *format) {
+  //append directory to filename
+  if (!strcmp(format, "png")) {
     view_dump_png(filename);
-  else{
+  } else {
     ErrPrintf("ERROR: jpeg format not supported\n");
     exit(-1);
   }
 }
 
-#elif defined(USE_GD)
+#endif //USE_LIBPNG
 
-#include <gd.h>
-
-gdImagePtr gd_img=NULL;
-int32_t gd_col[256];
-
-void view_dump_init()
-{
-  int32_t colors[256];
-  int32_t i, red, green, blue;
-
-  gd_img = gdImageCreate(img_w, img_h);
-
-  view_palette(colors);
-
-  for(i=0; i<256; i++){
-    red   = (colors[i] & 0x00ff0000) >> 16;
-    green = (colors[i] & 0x0000ff00) >> 8;
-    blue  = (colors[i] & 0x000000ff);
-    gd_col[i] = gdImageColorAllocate(gd_img, red, green, blue);
-  }
-}
-
-void view_gd()
-{
-  uint8_t *pix;
-  int32_t i, j;
-
-  assert(gd_img);
-
-  pix = view();
-
-  for(j=0; j<img_h; j++)
-    for(i=0; i<img_w; i++)
-      gdImageSetPixel(gd_img, i, j, gd_col[*pix++]);
-}
-
-void view_dump_png(int8_t *nom)
-{
-  FILE *fp;
-
-  view_gd();
-  fp = fopen(nom,"w");
-  if ( ! fp ){
-    ErrPrintf("erreur ouverture fichier png\n");
-    exit(-4);
-  }
-  gdImagePng(gd_img, fp);
-  fclose(fp);
-}
-
-void view_dump_jpeg(int8_t *nom)
-{
-  FILE *fp;
-
-  view_gd();
-  fp = fopen(nom,"w");
-  if ( ! fp ){
-    ErrPrintf("erreur ouverture fichier jpg\n");
-    exit(-4);
-  }
-  gdImageJpeg(gd_img, fp, 50); /* 50 -> medium quality and compression */
-  fclose(fp);
-}
-
-void dump_image(int8_t *filename, int8_t *format)
-{
-  // Append directory name to output filename
-  output_path_noext(filename);
-
-  if (!strcmp(format,"png"))
-    view_dump_png(filename);
-  else
-    view_dump_jpeg(filename);
-}
-
-#else // not defined USE_GD
-
-#include <gtk/gtk.h>
-extern GtkWidget *drawingarea;
-
-void dump_image(int8_t *filename, int8_t *format)
-{
-  // Append directory name to output filename
-  output_path_noext(filename);
-  
-  //LogPrintf("dump_image: %s - %s\n",filename,format);
-  GdkPixbuf *pixbuf = gdk_pixbuf_get_from_drawable(NULL,drawingarea->window,NULL,0,0,0,0,img_w,img_h);
-  gdk_pixbuf_save(pixbuf, filename, format, NULL, NULL);
-}
-
-#endif //USE_GD
-
-void dump_image_inter(int32_t inter, int8_t *format)
-{
-  static int32_t cpt_inter=0;
-  static int32_t cpt_snap=0;
-  static int8_t nom[100];
-  static int8_t str[100];
-  static int8_t flag_sec=0;
+void dump_image_inter(int32_t inter, char *format) {
+  static int32_t cpt_inter = 0;
+  static int32_t cpt_snap = 0;
+  static char nom[100];
+  static char str[100];
+  static char flag_sec = 0;
   int32_t nmin;
-  //int8_t *ext;
 
-#ifdef PARALLEL
-  extern int32_t proc_id;
-  sprintf(str,"_%d",proc_id);
-#else
   *str = 0;
-#endif
 
-  //ext = (format==IMG_PNG)? "png" : "jpg";
-  if (inter){
-    if (!cpt_inter) flag_sec = inter % 60; //fmodf(inter,60);
-    nmin = cpt_inter/60;
-    if (!flag_sec)
-      sprintf(nom,"%s%04d%s.%s", MOD_NAME, nmin, str, format);
-    else
-      sprintf(nom,"%s%04d-%02d%s.%s", MOD_NAME, nmin, cpt_inter - 60*nmin, str, format);
+  if (inter) {
+    if (!cpt_inter) {
+      flag_sec = inter % 60;
+    }
+    nmin = cpt_inter / 60;
+    if (!flag_sec) {
+      sprintf(nom, "%s%04d%s.%s", MOD_NAME, nmin, str, format);
+    } else {
+      sprintf(nom, "%s%04d-%02d%s.%s", MOD_NAME, nmin, cpt_inter - 60 * nmin, str, format);
+    }
     cpt_inter += inter;
-  }
-  else{
-    sprintf(nom,"SNAP%03d.%s", cpt_snap++, format);
+  } else {
+    sprintf(nom, "SNAP%03d.%s", cpt_snap++, format);
   }
 
   dump_image(nom, format);
 }
 
-void view_quit()
-{
-  if (image) free(image);
-#ifdef USE_GD
-  if (gd_img) free(gd_img);
-#endif
+void view_quit() {
+  if (image) {
+    free(image);
+  }
 }
 

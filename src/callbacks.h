@@ -49,16 +49,16 @@ void do_thread_sched();
 void log_info();
 
 #ifdef __GTK_H__
-gboolean gcallback_dump (gpointer  data);
-gboolean gcallback_stop (gpointer  data);
-gboolean gcallback_quit (gpointer data);
+gboolean gcallback_dump(gpointer  data);
+gboolean gcallback_stop(gpointer  data);
+gboolean gcallback_quit(gpointer data);
 gboolean gcallback_flash(gpointer  data);
 
 void on_drawingarea1_expose_event(GtkObject *object, gpointer user_data);
-void on_tool_button_go_toggled (GtkObject *object, gpointer user_data);
-void on_action_info_activate (GtkObject *object, gpointer user_data);
+void on_tool_button_go_toggled(GtkObject *object, gpointer user_data);
+void on_action_info_activate(GtkObject *object, gpointer user_data);
 gboolean on_drawingarea1_button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer user_data);
-void on_window_destroy (GtkObject *object, gpointer user_data);
+void on_window_destroy(GtkObject *object, gpointer user_data);
 #endif
 
 void* do_png(void* delay);

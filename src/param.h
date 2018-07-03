@@ -28,32 +28,32 @@
 #define NB_PARAM_MAX 200 /// max number of parameters
 
 
-typedef struct{
-  int8_t *name;
-  int8_t *description;
+typedef struct {
+  char *name;
+  char *description;
   int32_t nb;
 } Family;
 
-typedef struct{
-  int8_t *name;
-  int8_t *usage;
+typedef struct {
+  char *name;
+  char *usage;
   void *param;
   uint8_t type;
   uint8_t init;
   uint8_t is_visible;
   uint8_t family;
-  int8_t *family_name;
+  char *family_name;
 } Parameter;
 
 enum PARAM_TYPES {PARAM_STRING, PARAM_BOOLEAN, PARAM_INT, PARAM_FLOAT, PARAM_DOUBLE};
 
 void init_list_params();
 void param_usage();
-void param_family(int8_t *name, int8_t *desc);
-void parameter(int8_t *par_nom, int8_t *par_usage, void *par_adr, uint8_t par_type, int8_t *par_family);
-void parameter_hidden(int8_t *par_nom, int8_t *par_usage, void *par_adr, uint8_t par_type, int8_t *par_family);
-int32_t read_int(int8_t *s, int32_t *err);
-double read_float(int8_t *s, int32_t *err);
-void read_parameters(int8_t *param_file);
-int32_t param_is_set(int8_t *str);
+void param_family(char *name, char *desc);
+void parameter(char *par_nom, char *par_usage, void *par_adr, uint8_t par_type, char *par_family);
+void parameter_hidden(char *par_nom, char *par_usage, void *par_adr, uint8_t par_type, char *par_family);
+int32_t read_int(char *s, int32_t *err);
+double read_float(char *s, int32_t *err);
+void read_parameters(char *param_file);
+int32_t param_is_set(char *str);
 

@@ -40,7 +40,7 @@ Lambda_E = 4
 Lambda_F = 400
 
 ## Sintering rate - PARAMETER TO VARY
-Lambda_S = 0.2
+Lambda_S = 0.02
 
 ## Deposition rate
 Lambda_C = 2
