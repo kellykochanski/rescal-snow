@@ -57,14 +57,12 @@ common_HDRS = \
 rescal_OBJS = \
   $(common_OBJS) \
   entry.o \
-  interface.o \
   callbacks.o \
   rescal.o
 
 rescal_HDRS = \
   $(common_HDRS) \
   entry.h \
-  interface.h \
   callbacks.h \
   rescal.h \
   param.h

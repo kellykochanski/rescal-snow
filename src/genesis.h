@@ -23,10 +23,10 @@
 
 #include <stdint.h>
 
-typedef struct _template{
+typedef struct _template {
   int32_t type;
-  int8_t *name;
-  int8_t *desc;
+  char *name;
+  char *desc;
   int32_t nb_args;
   float *args;
 } CSP_Template;

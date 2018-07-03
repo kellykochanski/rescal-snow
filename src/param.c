@@ -35,18 +35,18 @@
 
 #define LG_MAX 1024 /// maximum length of a line in parameters file
 
-extern int8_t *model_name;
-extern int8_t *bin_filename;
-extern int8_t *csp_filename;
+extern char *model_name;
+extern char *bin_filename;
+extern char *csp_filename;
 
 extern int32_t H, L, D;
 extern int32_t graine;
 
-int32_t nb_families=0;    /// number of families
-Family *list_families=NULL;  /// list of the families
+int32_t nb_families = 0;  /// number of families
+Family *list_families = NULL; /// list of the families
 
-int32_t nb_params=0;    /// number of de parameters
-Parameter *list_params=NULL;  /// list of the parameters
+int32_t nb_params = 0;  /// number of de parameters
+Parameter *list_params = NULL; /// list of the parameters
 
 /// DECLARATION OF A PARAMETER
 /// par_name : name of the parameter
@@ -54,65 +54,64 @@ Parameter *list_params=NULL;  /// list of the parameters
 /// par_adr : address of the parameter (in memory)
 /// par_type : type of the parameter, possible values are PARAM_STRING | PARAM_INT | PARAM_FLOAT | PARAM_DOUBLE
 /// par_family : family of the parameter
-void parameter(int8_t *par_nom, int8_t *par_usage, void *par_adr, uint8_t par_type, int8_t *par_family);
+void parameter(char *par_nom, char *par_usage, void *par_adr, uint8_t par_type, char *par_family);
 
 
-void init_list_families()
-{
-  AllocMemory(list_families,Family,NB_PAR_FAM_MAX);
-  ResetMemory(list_families,Family,NB_PAR_FAM_MAX);
+void init_list_families() {
+  AllocMemory(list_families, Family, NB_PAR_FAM_MAX);
+  ResetMemory(list_families, Family, NB_PAR_FAM_MAX);
 
   param_family("", "Other parameters");
 }
 
 
-void param_family(int8_t *name, int8_t *desc)
-{
+void param_family(char *name, char *desc) {
   list_families[nb_families].name = strdup(name);
   list_families[nb_families].description = strdup(desc);
   list_families[nb_families].nb = 0;
   nb_families++;
-  assert(nb_families<NB_PAR_FAM_MAX);
+  assert(nb_families < NB_PAR_FAM_MAX);
 }
 
-void display_family(uint8_t family)
-{
-  int32_t j,l;
+void display_family(uint8_t family) {
+  int32_t j, l;
 
   assert(family < nb_families);
 
-  if (list_families[family].nb){
+  if (list_families[family].nb) {
     printf("  %s:\n", list_families[family].description);
     //printf("  %s (%d):\n", list_families[family].description, list_families[family].nb);
-    for(j=0; j<nb_params; j++){
-      if ((list_params[j].family == family) && (list_params[j].is_visible)){
+    for (j = 0; j < nb_params; j++) {
+      if ((list_params[j].family == family) && (list_params[j].is_visible)) {
         l = strlen(list_params[j].name);
-        printf("    %s%s %s\n", list_params[j].name, (l<=2)?"\t\t":"\t", list_params[j].usage);
+        printf("    %s%s %s\n", list_params[j].name, (l <= 2) ? "\t\t" : "\t", list_params[j].usage);
       }
     }
   }
 }
 
-uint8_t get_family(int8_t *name)
-{
+uint8_t get_family(char *name) {
   int8_t family = 0;
 
-  if (name){
-    int32_t i=1;
-    while ((i<nb_families) && (strcmp(name, list_families[i].name))) i++;
-    if (i<nb_families) family = i;
+  if (name) {
+    int32_t i = 1;
+    while ((i < nb_families) && (strcmp(name, list_families[i].name))) {
+      i++;
+    }
+    if (i < nb_families) {
+      family = i;
+    }
   }
 
   //LogPrintf("get_family: name=%s, family=%d\n", name, family);
   return family;
 }
 
-void init_list_params()
-{
+void init_list_params() {
   init_list_families();
 
-  AllocMemory(list_params,Parameter,NB_PARAM_MAX);
-  ResetMemory(list_params,Parameter,NB_PARAM_MAX);
+  AllocMemory(list_params, Parameter, NB_PARAM_MAX);
+  ResetMemory(list_params, Parameter, NB_PARAM_MAX);
 
   param_family("GENERAL", "General parameters");
 
@@ -132,8 +131,7 @@ void init_list_params()
 }
 
 
-void param_usage()
-{
+void param_usage() {
   int32_t i, j;
 
   printf("\nFORMAT OF PARAMETERS_FILE\n");
@@ -141,67 +139,63 @@ void param_usage()
   printf("  <parameter> = <value>\n\n");
 
   /// insert parameters within families
-  for(j=0; j<nb_params; j++){
+  for (j = 0; j < nb_params; j++) {
     i = get_family(list_params[j].family_name);
     list_params[j].family = i;
-    if (list_params[j].is_visible) list_families[i].nb++;
+    if (list_params[j].is_visible) {
+      list_families[i].nb++;
+    }
   }
 
   /// display list of parameters sorted by family
-  for(i=1; i<nb_families; i++) display_family(i);
+  for (i = 1; i < nb_families; i++) {
+    display_family(i);
+  }
   display_family(0);
 }
 
-void bad_args()
-{
+void bad_args() {
   ErrPrintf("ERROR: cannot read arguments in command-line\n");
 
   exit(-4);
 }
 
-void bad_params(int8_t *str)
-{
+void bad_params(char *str) {
   ErrPrintf("ERROR: cannot read parameter %s\n", str);
 
   exit(-4);
 }
 
 
-int32_t read_int(int8_t *s, int32_t *err)
-{
-  if (!isdigit(s[0]) && ((s[0]!='-') || !isdigit(s[1]))){
+int32_t read_int(char *s, int32_t *err) {
+  if (!isdigit(s[0]) && ((s[0] != '-') || !isdigit(s[1]))) {
     *err = 1;
     return 0;
   }
   return atoi(s);
 }
 
-double read_float(int8_t *s, int32_t *err)
-{
+double read_float(char *s, int32_t *err) {
   //LogPrintf("read_float : %s\n",s);
-  if (!isdigit(s[0]) && ((s[0]!='-') || !isdigit(s[1]))){
+  if (!isdigit(s[0]) && ((s[0] != '-') || !isdigit(s[1]))) {
     *err = 1;
     return 0;
   }
   return atof(s);
 }
 
-int32_t read_boolean(char* str, int32_t *err)
-{
-  if (!strcmp(str, "YES") || !strcmp(str, "1")){
+int32_t read_boolean(char* str, int32_t *err) {
+  if (!strcmp(str, "YES") || !strcmp(str, "1")) {
     return 1;
-  }
-  else if (!strcmp(str, "NO") || !strcmp(str, "0")){
+  } else if (!strcmp(str, "NO") || !strcmp(str, "0")) {
     return 0;
-  }
-  else{
+  } else {
     *err = 1;
     return 0;
   }
 }
 
-void parameter(int8_t *par_name, int8_t *par_usage, void *par_adr, uint8_t par_type, int8_t *par_family)
-{
+void parameter(char *par_name, char *par_usage, void *par_adr, uint8_t par_type, char *par_family) {
   list_params[nb_params].name = par_name;
   list_params[nb_params].usage = par_usage;
   list_params[nb_params].param = par_adr;
@@ -213,8 +207,7 @@ void parameter(int8_t *par_name, int8_t *par_usage, void *par_adr, uint8_t par_t
   assert(nb_params < NB_PARAM_MAX);
 }
 
-void parameter_hidden(int8_t *par_name, int8_t *par_usage, void *par_adr, uint8_t par_type, int8_t *par_family)
-{
+void parameter_hidden(char *par_name, char *par_usage, void *par_adr, uint8_t par_type, char *par_family) {
 
   list_params[nb_params].name = par_name;
   list_params[nb_params].usage = par_usage;
@@ -227,114 +220,113 @@ void parameter_hidden(int8_t *par_name, int8_t *par_usage, void *par_adr, uint8_
   assert(nb_params < NB_PARAM_MAX);
 }
 
-void init_val_param(int8_t *par_name, int8_t *par_val)
-{
-  int32_t i=0;
-  int32_t err=0;
+void init_val_param(char *par_name, char *par_val) {
+  int32_t i = 0;
+  int32_t err = 0;
 
-  while ((i<nb_params) && (strcmp(list_params[i].name, par_name))) i++;
+  while ((i < nb_params) && (strcmp(list_params[i].name, par_name))) {
+    i++;
+  }
 
-  if (i<nb_params){
+  if (i < nb_params) {
     LogPrintf("%s = %s\n", par_name, par_val);
     switch (list_params[i].type) {
-      case PARAM_STRING:
-        *(char**)list_params[i].param = (char*) malloc(strlen(par_val)+1);
-        strcpy(*(char**)list_params[i].param, par_val);
-        break;
-      case PARAM_BOOLEAN:
-        *(int*)list_params[i].param = read_boolean(par_val, &err);
-        break;
-      case PARAM_INT:
-        *(int*)list_params[i].param = read_int(par_val, &err);
-        break;
-      case PARAM_FLOAT:
-        *(float*)list_params[i].param = (float) read_float(par_val, &err);
-        break;
-      case PARAM_DOUBLE:
-        *(double*)list_params[i].param = read_float(par_val, &err);
-        break;
+    case PARAM_STRING:
+      *(char**)list_params[i].param = (char*) malloc(strlen(par_val) + 1);
+      strcpy(*(char**)list_params[i].param, par_val);
+      break;
+    case PARAM_BOOLEAN:
+      *(int*)list_params[i].param = read_boolean(par_val, &err);
+      break;
+    case PARAM_INT:
+      *(int*)list_params[i].param = read_int(par_val, &err);
+      break;
+    case PARAM_FLOAT:
+      *(float*)list_params[i].param = (float) read_float(par_val, &err);
+      break;
+    case PARAM_DOUBLE:
+      *(double*)list_params[i].param = read_float(par_val, &err);
+      break;
     }
-    if (err){
+    if (err) {
       ErrPrintf("ERROR: bad value \"%s\" for parameter %s\n", par_val, par_name);
       exit(-1);
     }
 
-    if (list_params[i].init){
+    if (list_params[i].init) {
       ErrPrintf("ERROR: %s parameter is duplicated\n", par_name);
       exit(-1);
     }
     list_params[i].init = 1;
-    if (!list_params[i].is_visible) WarnPrintf("WARNING: %s\n",list_params[i].usage);
-  }
-  else{
+    if (!list_params[i].is_visible) {
+      WarnPrintf("WARNING: %s\n", list_params[i].usage);
+    }
+  } else {
     LogPrintf("WARNING: unkown parameter - %s\n", par_name);
     //exit(-4);
   }
 }
 
-void read_line(FILE *fp, int8_t *str)
-{
-  int8_t *ptr, *ptrmax, c;
+void read_line(FILE *fp, char *str) {
+  char *ptr, *ptrmax, c;
 
   ptr = str;
-  ptrmax = str+LG_MAX;
+  ptrmax = str + LG_MAX;
 
   /// read complete line with all spaces removed
-  while (!feof(fp) && (ptr<ptrmax)){
+  while (!feof(fp) && (ptr < ptrmax)) {
     c = fgetc(fp);
-    if ((c == '\n') || (c == '\r') || (c == EOF)){
+    if ((c == '\n') || (c == '\r') || (c == EOF)) {
       break;
-    }
-    else if ((c > 32) && (c < 127)){
+    } else if ((c > 32) && (c < 127)) {
       *ptr++ = c;
     }
   }
 
-  if (ptr>=ptrmax) bad_params(str);
+  if (ptr >= ptrmax) {
+    bad_params(str);
+  }
 
-  *ptr=0;
+  *ptr = 0;
 }
 
 
-void read_parameters(int8_t *param_file)
-{
+void read_parameters(char *param_file) {
   FILE *fp;
-  int8_t *par_name;
-  int8_t *par_val;
-  int8_t str[LG_MAX];
-  int8_t *ptr;
-  int32_t n=0;
+  char *par_name;
+  char *par_val;
+  char str[LG_MAX];
+  char *ptr;
+  int32_t n = 0;
 
   LogPrintf("read parameters file : %s\n", param_file);
 
-  fp = fopen(param_file,"r");
-  if (!fp){
+  fp = fopen(param_file, "r");
+  if (!fp) {
     ErrPrintf("ERROR: cannot open file %s\n", param_file);
     exit(-4);
   }
 
-  while (!feof(fp)){
+  while (!feof(fp)) {
     *str = 0;
     read_line(fp, str);
     //LogPrintf("str=%s\n", str);
-    if (*str == '#'){  /// this is a comment
+    if (*str == '#') { /// this is a comment
       //LogPrintf("commentaire ...\n");
-    }
-    else if (*str == 0){ /// empty line
+    } else if (*str == 0) { /// empty line
       //LogPrintf("ligne vide ...\n");
-    }
-    else {
-      ptr = strchr(str,'=');
-      if (ptr){
+    } else {
+      ptr = strchr(str, '=');
+      if (ptr) {
         /// we split the string str at '=' character
         *ptr = 0;
         par_name = str;
-        par_val = ptr+1;
+        par_val = ptr + 1;
         init_val_param(par_name, par_val);
         n++;
-      }
-      else
+      } else {
         bad_params(str);
+      }
     }
   }
 
@@ -342,17 +334,20 @@ void read_parameters(int8_t *param_file)
 
   LogPrintf("read_parameters : %d parametres lus\n", n);
 
-  if (n<nb_params){
-    int32_t i=0;
-    for (i=0; i<nb_params; i++)
-      if (!list_params[i].init && list_params[i].is_visible) LogPrintf("WARNING: parameter %s not found\n", list_params[i].name);
+  if (n < nb_params) {
+    int32_t i = 0;
+    for (i = 0; i < nb_params; i++)
+      if (!list_params[i].init && list_params[i].is_visible) {
+        LogPrintf("WARNING: parameter %s not found\n", list_params[i].name);
+      }
   }
 }
 
-int32_t param_is_set(int8_t *str)
-{
-  int32_t i=0;
-  while ((i<nb_params) && (strcmp(list_params[i].name, str))) i++;
+int32_t param_is_set(char *str) {
+  int32_t i = 0;
+  while ((i < nb_params) && (strcmp(list_params[i].name, str))) {
+    i++;
+  }
 
   return list_params[i].init;
 }

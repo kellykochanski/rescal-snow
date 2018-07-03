@@ -34,13 +34,12 @@
 #include "cells.h"
 
 
-int32_t H=0, L=0, D=0, HL=0, HLD=0;       // les dimensions de la terre
-Cell  *TE=NULL;	           // la 'terre'
-double csp_time=0.0;
-int8_t *output_filename=NULL;
+int32_t H = 0, L = 0, D = 0, HL = 0, HLD = 0; // les dimensions de la terre
+Cell  *TE = NULL;          // la 'terre'
+double csp_time = 0.0;
+char *output_filename = NULL;
 
-void usage()
-{
+void usage() {
   printf("CSP to BIN conversion tool");
 #ifdef CELL_COLOR
   printf(", CELL_COLOR data");
@@ -52,21 +51,20 @@ void usage()
   exit(-1);
 }
 
-void general_options(int32_t argc, int8_t *argv[])
-{
+void general_options(int32_t argc, char *argv[]) {
   int32_t i;
-  for(i=1; i<argc; i++){
-    if (!strcmp(argv[i],"-o"))
+  for (i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-o")) {
       output_filename = argv[++i];
+    }
   }
 }
 
-int32_t main(int32_t argc, int8_t **argv)
-{
+int main(int argc, char **argv) {
   int32_t i;
-  int8_t *csp_filename;
+  char *csp_filename;
 
-  if (argc < 2){
+  if (argc < 2) {
     usage();
     exit(-4);
   }
@@ -78,20 +76,20 @@ int32_t main(int32_t argc, int8_t **argv)
 
   read_csp_header(csp_filename);
 
-  HL=H*L;
-  HLD=HL*D;
+  HL = H * L;
+  HLD = HL * D;
 
   AllocMemoryPrint("TE", TE, Cell, HLD);
 
-  csp_set_bounds(0,0,0);
+  csp_set_bounds(0, 0, 0);
 
   read_csp(csp_filename);
 
   //compress(csp_filename);
 
-  if (!output_filename){
+  if (!output_filename) {
     output_filename = csp_filename;
-    strcpy(output_filename+strlen(output_filename)-3, "bin");
+    strcpy(output_filename + strlen(output_filename) - 3, "bin");
   }
 
   write_csp(DUMP_BIN, output_filename);
