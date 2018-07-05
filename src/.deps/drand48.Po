@@ -1,1 +1,0 @@
-drand48.o: drand48.c
