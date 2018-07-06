@@ -1710,7 +1710,10 @@ void output_write(char *output_filename, char *output_content){
   output_path(path);
 
   fp = fopen(path, "a");
-  if (! fp ) ErrPrintf("ERROR: cannot open file: %s \n", path);
+  if (! fp ) {
+	  ErrPrintf("ERROR: cannot open file: %s \n", path);
+	  exit(-1);
+  }
   fprintf(fp, output_content);
   fclose(fp);
 }
