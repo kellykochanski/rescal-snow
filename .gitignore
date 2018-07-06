@@ -1,37 +1,10 @@
-.o
-*.Po
-.deps
-autom4te.cache
-config.log
-config.status
-configure
-.deps
-oprofile_data
-*.data
-*.csp
-*.png
-*.log
-Makefile
-Makefile.in
-config.h
-config.h.in
-bin2png
-csp2bin
-csp2png
-cspinfo
-genesis
-regenesis
-rescal
-stamp-h1
-zlib.pc
-zconf.h
-lib/libpng-1.6.34/Makefile.in
-lib/libpng-1.6.34/aclocal.m4
-lib/zlib-1.2.11/Makefile
-lib/zlib-1.2.11/zconf.h
+# Apple-specific 
 .DS_Store
 
-#Prerequisites
+# Editor backups
+.*.swp
+
+# Prerequisites
 *.d
 
 # Compiled Object files
@@ -63,35 +36,6 @@ lib/zlib-1.2.11/zconf.h
 # Executables
 *.exe
 *.out
-*.appe./genesis.py -f $PAR_FILE > $GENESIS_LOG_FILE
-## or with C code
-
-# ReSCAL outputs
-*.png
-*.log
-*.gz
-*.csp
-
-# LC log files
-*.core
-
-# Autoconf, libpng, make and  configure
-*.Po
-.deps
-autom4te.cache
-config.log
-config.status
-configure
-.deps
-oprofile_data
-*.data
-*.csp
-*.png
-*.log
-Makefile
-Makefile.in
-config.h
-config.h.in
 bin2png
 csp2bin
 csp2png
@@ -99,10 +43,72 @@ cspinfo
 genesis
 regenesis
 rescal
+
+# ReSCAL outputs
+*.png
+*.log
+*.gz
+*.csp
+*.data
+
+# LC log files
+*.core
+
+# Autoconf, make and  configure
+aclocal.m4
+*.Po
+.deps
+autom4te.cache
+config.log
+config.status
+configure
+oprofile_data
+Makefile
+Makefile.in
+config.h
+config.h.in
 stamp-h1
-zlib.pc
-zconf.h
+
+# libpng 
 lib/libpng-1.6.34/Makefile.in
 lib/libpng-1.6.34/aclocal.m4
+lib/libpng-1.6.34/Makefile.in
+lib/libpng-1.6.34/aclocal.m4
+lib/libpng-1.6.34/.libs/
+lib/libpng-1.6.34/contrib/libtests/.dirstamp
+lib/libpng-1.6.34/contrib/tools/.dirstamp
+lib/libpng-1.6.34/intel/.dirstamp
+lib/libpng-1.6.34/libpng-config
+lib/libpng-1.6.34/libpng.pc
+lib/libpng-1.6.34/libpng.vers
+lib/libpng-1.6.34/libpng16-config
+lib/libpng-1.6.34/libpng16.pc
+lib/libpng-1.6.34/libtool
+lib/libpng-1.6.34/mips/.dirstamp
+lib/libpng-1.6.34/png-fix-itxt
+lib/libpng-1.6.34/pngcp
+lib/libpng-1.6.34/pngfix
+lib/libpng-1.6.34/pngimage
+lib/libpng-1.6.34/pnglibconf.c
+lib/libpng-1.6.34/pnglibconf.h
+lib/libpng-1.6.34/pngprefix.h
+lib/libpng-1.6.34/pngstest
+lib/libpng-1.6.34/pngtest
+lib/libpng-1.6.34/pngunknown
+lib/libpng-1.6.34/pngvalid
+lib/libpng-1.6.34/powerpc/.dirstamp
+lib/libpng-1.6.34/timepng
+
+# zlib
+zconf.h
+zlib.pc
 lib/zlib-1.2.11/Makefile
 lib/zlib-1.2.11/zconf.h
+lib/zlib-1.2.11/example
+lib/zlib-1.2.11/example64
+lib/zlib-1.2.11/minigzip
+lib/zlib-1.2.11/minigzip64
+
+# scripts
+scripts/.dirstamp
+
