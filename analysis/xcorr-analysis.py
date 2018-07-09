@@ -19,16 +19,12 @@ else:
 show_graph = False
 alti_file_offset = 100
 time_correlation = True
-#output_to_file = False
 output_directory = 'output_files/' + output_dir + '/xcor/'
 
 # Output files
 cross_correlations_file = open( output_directory + '/cross-correlations.txt','w')
 #log_file = open(output_directory + '/xcorr.log', 'w')
 meta_analysis_file = open(output_directory + '/meta_analysis.txt', 'w')
-
-#if output_to_file:
-#    sys.stdout = open('post-run-analysis.txt', 'w')
 
 current_file_id = 00000
 next_file_id = current_file_id+alti_file_offset
@@ -45,8 +41,7 @@ print(alti_file_2)
 
 # Compute the velocity of dunes between altitude files while they exist
 while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
-    if current_file_id > 1000:
-        break
+    
     # Load the alittudes
     altitudes_1_matrix = np.loadtxt(alti_file_1).T
     altitudes_2_matrix = np.loadtxt(alti_file_2).T
@@ -97,47 +92,53 @@ x_values = x_values[1:]
 # Save the velocities for future use
 meta_analysis_file.write('\n\nVelocities omiting first, step size of ' + str(alti_file_offset) + ': ' + str(y_values))
 
+############# Try to fit the velocity points #############
 def function_to_fit(t, A, b, m, c):
     # Cast all elements of t to integers
     return ((A) * math.e**((t)/(-b))) + ((m) * (t) + (c))
+try:
+    popt, pcov = curve_fit(function_to_fit, x_values, y_values, p0 = [1,50,1,1])
+    A, b, m, c = popt
+    calc_y_values = function_to_fit(np.asarray(x_values), float(A), float(b), float(m), float(c))
 
-popt, pcov = curve_fit(function_to_fit, x_values, y_values, p0 = [1,50,1,1])
-A, b, m, c = popt
+    # Calculate R^2
+    y_bar = np.mean(y_values)
+    SS_tot = np.sum((y_values - y_bar)**2)
+    SS_res = np.sum((y_values - calc_y_values)**2)
+    r_squared = 1 - (SS_res/SS_tot)
 
-calc_y_values = function_to_fit(np.asarray(x_values), float(A), float(b), float(m), float(c))
+    # Save and print out calculated values
+    meta_analysis_file.write('\n')
+    meta_analysis_file.write('Initial state coefficient:    ' + str(A))
+    meta_analysis_file.write('Rate of approach:        ' + str(b))
+    meta_analysis_file.write('Slope of quasi-stable state:    ' + str(m))
+    meta_analysis_file.write('State intercept:        ' + str(c))
+    meta_analysis_file.write('Initial velocity:        ' + str(y_values[0]))
+    meta_analysis_file.write('Final velocity:            ' + str(y_values[-1]))
+    meta_analysis_file.write('R Squared value:        ' + str(r_squared))
+    meta_analysis_file.write('\n')
 
-# Calculate R^2
-y_bar = np.mean(y_values)
-SS_tot = np.sum((y_values - y_bar)**2)
-SS_res = np.sum((y_values - calc_y_values)**2)
-r_squared = 1 - (SS_res/SS_tot)
+#    print('\n')
+#    print('Initial state coefficient:    ' + str(A))
+#    print('Rate of approach:        ' + str(b))
+#    print('Slope of quasi-stable state:    ' + str(m))
+#    print('State intercept:        ' + str(c))
+#    print('Initial velocity:        ' + str(y_values[0]))
+#    print('Final velocity:            ' + str(y_values[-1]))
+#    print('R Squared value:        ' + str(r_squared))
+#    print('\n')
 
-# Save and print out calculated values
-meta_analysis_file.write('\n')
-meta_analysis_file.write('Initial state coefficient:    ' + str(A))
-meta_analysis_file.write('Rate of approach:        ' + str(b))
-meta_analysis_file.write('Slope of quasi-stable state:    ' + str(m))
-meta_analysis_file.write('State intercept:        ' + str(c))
-meta_analysis_file.write('Initial velocity:        ' + str(y_values[0]))
-meta_analysis_file.write('Final velocity:            ' + str(y_values[-1]))
-meta_analysis_file.write('R Squared value:        ' + str(r_squared))
-meta_analysis_file.write('\n')
+    # Graphing
+    plt.figure('plot')
+    plt.plot(x_values,y_values)
+    plt.plot(x_values, calc_y_values)
+    plt.savefig(output_directory + '/velocity_with_fit.png')
+    if show_graph:
+        plt.show()
 
-print('\n')
-print('Initial state coefficient:	' + str(A))
-print('Rate of approach:		' + str(b))
-print('Slope of quasi-stable state:	' + str(m))
-print('State intercept:		' + str(c))
-print('Initial velocity:		' + str(y_values[0]))
-print('Final velocity:			' + str(y_values[-1]))
-print('R Squared value:		' + str(r_squared))
-print('\n')
-
-# Graphing
-plt.figure('plot')
-plt.plot(x_values,y_values)
-plt.plot(x_values, calc_y_values)
-plt.savefig(output_directory + '/velocity_with_fit.png')
-if show_graph:
-    plt.show()
-
+except:
+    print('Error fitting function to velocity data, probably too few examples.')
+    meta_analysis_file.write('\n')
+    meta_analysis_file.write('Initial velocity:        ' + str(y_values[0]))
+    meta_analysis_file.write('Final velocity:            ' + str(y_values[-1]))
+    meta_analysis_file.write('\n')
