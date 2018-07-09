@@ -1,25 +1,26 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import math
 import time
 import glob
 import sys
 import os.path
-from scipy.optimize import curve_fit
+import numpy as np
+import matplotlib.pyplot as plt
 from scipy import signal
+from scipy.optimize import curve_fit
 
-if len(sys.argv) < 2:
-    print('Please provide a path to altitude files')
+if len(sys.argv) < 3:
+    print('Please provide a path to altitude files, and a output directory name')
     exit()
 else:
     alti_path = str(sys.argv[1])
+    output_dir = str(sys.argv[2])
 
 # Run options:
 show_graph = False
 alti_file_offset = 100
 time_correlation = True
 #output_to_file = False
-output_directory = 'xcorr-out/'
+output_directory = 'output_files/' + output_dir + '/xcor/'
 
 # Output files
 cross_correlations_file = open( output_directory + '/cross-correlations.txt','w')
