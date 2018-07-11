@@ -1,11 +1,8 @@
 import os
 import sys
 import time as t
-import imageio
 import numpy as np
-import matplotlib.pyplot as pl
 import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D as pl3d
 
 #Reads a file (1 row per line, each row should have same number of column values, separated by whitespaces), returns a numpy array
 #filename -> the name of the file to open
@@ -291,7 +288,7 @@ def fft2d_analysis(time_step, threshold, data, graph, both):
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
 #Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval=100):
+def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval=100,base_ext='.data'):
 
     MAIN_DATA_DIR = directory
     PNG_OUTPUT_DIR = output_dir + "png_output/"
@@ -306,7 +303,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
     FIG_SIZE = (10,10)
     SNAPSHOT_INTERVAL = image_interval #A png image of graph is saved at each interval
     BASE_FILE_NAME = "ALTI{:05d}_t0"
-    BASE_EXT = ".log"
+    BASE_EXT = base_ext
     THRESHOLD = 0.8
     DATA_TYPE = int
 
@@ -365,18 +362,25 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
     print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
 
     #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
-    t0 = t.time()
-    im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,'surf',FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
-    t1 = t.time()
-    t_plot = t1-t0
-    t_total = t_read + t_fft2d + t_amps + t_freqs + t_stats + t_plot
     if im_count > 0:
+        #Import graphing libraries if needed
+        import imageio
+        import matplotlib.pyplot as pl
+        from mpl_toolkits.mplot3d import Axes3D as pl3d
+
+        t0 = t.time()
+        im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,'surf',FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
+        t1 = t.time()
+        t_plot = t1-t0
+        t_total = t_read + t_fft2d + t_amps + t_freqs + t_stats + t_plot
         print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
     else:
         print("No PNG images or GIF animation made.\nAnalysis process complete!\nTotal time: {}s".format(t_total))
 args = sys.argv
 
-if len(args) > 3:
+if len(args) > 4:
+    main(args[1].args[2],int(args[3]),args[4])
+elif len(args) > 3:
     main(args[1],args[2],int(args[3]))
 elif len(args) > 2:
     main(args[1],args[2])

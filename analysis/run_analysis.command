@@ -27,11 +27,11 @@ if [ -d "input_data/$dir" ]; then
 	mkdir -p output_files/${dir}_OUT/xcor
 	read -p "Create png images and GIF animation from fft analysis? (y/n): " ans
 	if [ "$ans" == "n" ]; then
-      	    python fft2d_analysis.py "input_data/$dir" "output_files/${dir}_OUT/fft/" 0
+      	    python fft2d_analysis.py "input_data/$dir" "output_files/${dir}_OUT/fft/" 0 '.data'
         elif [ "$ans" == "y" ]; then
 	    fc=$(ls input_data/$dir/*.log | wc -l | xargs)
        	    read -p "Enter snapshot step size (1-$fc): " interval
-            python fft2d_analysis.py "input_data/$dir" "output_files/${dir}_OUT/fft/" $interval
+            python fft2d_analysis.py "input_data/$dir" "output_files/${dir}_OUT/fft/" $interval '.data'
         fi
 	echo Performing x-correlation analysis...
 	python xcorr-analysis.py "input_data/$dir" "${dir}_OUT"
