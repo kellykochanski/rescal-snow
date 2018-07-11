@@ -362,7 +362,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
     print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
 
     #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
-    if im_count > 0:
+    if image_interval > 0:
         #Import graphing libraries if needed
         import imageio
         import matplotlib.pyplot as pl
@@ -375,6 +375,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
         t_total = t_read + t_fft2d + t_amps + t_freqs + t_stats + t_plot
         print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
     else:
+        t_total = t_read + t_fft2d + t_amps + t_freqs + t_stats
         print("No PNG images or GIF animation made.\nAnalysis process complete!\nTotal time: {}s".format(t_total))
 args = sys.argv
 
