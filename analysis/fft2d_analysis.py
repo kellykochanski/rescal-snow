@@ -359,7 +359,6 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
     all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     t1 = t.time()
     t_stats = t1 - t0
-    print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
 
     #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
     if image_interval > 0:
@@ -367,6 +366,8 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
         import imageio
         import matplotlib.pyplot as pl
         from mpl_toolkits.mplot3d import Axes3D as pl3d
+
+        print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
 
         t0 = t.time()
         im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,'surf',FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
@@ -376,7 +377,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
         print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
     else:
         t_total = t_read + t_fft2d + t_amps + t_freqs + t_stats
-        print("No PNG images or GIF animation made.\nAnalysis process complete!\nTotal time: {}s".format(t_total))
+        print("No PNG images or GIF animation made.\nAnalysis process complete! Analysis complete time: {}\nTotal time: {}s".format(t_stats,t_total))
 args = sys.argv
 
 if len(args) > 4:
