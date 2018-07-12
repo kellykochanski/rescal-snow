@@ -367,7 +367,6 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_inte
     all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     t1 = t.time()
     t_stats = t1 - t0
-    print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
 
     #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
     if image_interval > 0:
@@ -376,6 +375,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_inte
         import matplotlib.pyplot as pl
         from mpl_toolkits.mplot3d import Axes3D as pl3d
 
+        print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
         t0 = t.time()
         im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,'surf',FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
         t1 = t.time()
