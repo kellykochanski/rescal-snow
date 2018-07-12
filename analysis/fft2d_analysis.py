@@ -23,7 +23,9 @@ def read_data(filename,datatype):
 #dir_path -> The directory containing data files
 #ext -> The extension of datafiles
 #datatype -> The type of data stored in each files (int or float data)
-def read_directory(dir_path,ext,datatype):
+#skip_files -> Number of data files to skip, e.g. 5 = every 5th file is read, instead of all files.
+#skip_file = 1 to not skip any files.
+def read_directory(dir_path,ext,datatype,skip_files):
     
     #Get array list of all files to open
     files = []
@@ -36,15 +38,16 @@ def read_directory(dir_path,ext,datatype):
 
     files.sort()
     count = 0.0
-    max = len(files)
+    max = len(files)/skip_files
     #Create list of numpy arrays containing data for each file
     all_data = []
-    for file in files:
-        all_data.append(read_data(file,datatype))
-        count += 1
-        progress = (count / max) * 100.0
-        sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
-        sys.stdout.flush()
+    for i, file in enumerate(files):
+        if i % skip_files == 0:
+            all_data.append(read_data(file,datatype))
+            count += 1
+            progress = (count / max) * 100.0
+            sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
+            sys.stdout.flush()
     return all_data
 
 
@@ -164,15 +167,16 @@ def get_stats(timestep,threshold,fft_data,amps,d_freqs):
     return pd.DataFrame(stats,columns=['Time','Dominant Freq.','X','Y','Amplitude','Phase','Wavelength','Amp/Wave'])
 
 #Returns one large dataframe containing all the results taken from fft analysis of all files in directory
+#skip_val -> The amount of timesteps skipped.
 #threshold -> the threshold value of data to track when providing the stats
 #d_freqs -> a list of the dominant frequencies found among all data
 #all_fft_data -> a list of numpy arrays containing the fft data taken from all the files
 #all_amps -> a list of numpy arrays conatining all the amplitude data
-def get_all_stats(threshold, d_freqs, all_fft_data, all_amps):
+def get_all_stats(skip_val, threshold, d_freqs, all_fft_data, all_amps):
     
     frames = []
     for i, amp in enumerate(all_amps):
-        frames.append(get_stats(i,threshold,all_fft_data[i],amp,d_freqs))
+        frames.append(get_stats(i*skip_val,threshold,all_fft_data[i],amp,d_freqs))
 
     #Create one large dataframe
     master_frame = pd.concat(frames[1:])
@@ -288,9 +292,10 @@ def fft2d_analysis(time_step, threshold, data, graph, both):
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
 #Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval=100,base_ext='.data'):
+def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_interval=100,base_ext='.data',skip_int=5):
 
     MAIN_DATA_DIR = directory
+    SKIP_FILES = skip_int
     PNG_OUTPUT_DIR = output_dir + "png_output/"
     DATA_OUTPUT_DIR = output_dir
     CSV_OUTPUT_NAME = "fft_analysis.csv"
@@ -308,8 +313,9 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
     DATA_TYPE = int
 
     #Check parent directories exists
-    directories = [MAIN_DATA_DIR, DATA_OUTPUT_DIR]
+    directories = [MAIN_DATA_DIR]
     for d in directories:
+        print(d)
         if not os.path.exists(d):
             print("The specified path: {} was not found. Analysis cancelled.".format(d))
             return 1
@@ -317,11 +323,13 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
     #Make png output directory if needed
     if image_interval > 0 and not os.path.exists(PNG_OUTPUT_DIR):
         os.makedirs(PNG_OUTPUT_DIR)
+    if not os.path.exists(DATA_OUTPUT_DIR):
+        os.makedirs(DATA_OUTPUT_DIR)
 
     #Get all data from the main directory
     print("Reading data files...")
     t0 = t.time()
-    all_data = read_directory(MAIN_DATA_DIR,BASE_EXT,DATA_TYPE)
+    all_data = read_directory(MAIN_DATA_DIR,BASE_EXT,DATA_TYPE,SKIP_FILES)
     t1 = t.time()
 
     #Check input files exists
@@ -355,10 +363,11 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
     
     #Concatenate and save data results
     t0 = t.time()
-    all_stats = get_all_stats(THRESHOLD,d_freqs,all_fft2d,all_amps)
+    all_stats = get_all_stats(SKIP_FILES,THRESHOLD,d_freqs,all_fft2d,all_amps)
     all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     t1 = t.time()
     t_stats = t1 - t0
+    print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
 
     #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
     if image_interval > 0:
@@ -366,8 +375,6 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
         import imageio
         import matplotlib.pyplot as pl
         from mpl_toolkits.mplot3d import Axes3D as pl3d
-
-        print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
 
         t0 = t.time()
         im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,'surf',FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
@@ -377,11 +384,14 @@ def main(directory="input_data/ALT_DATA1/",output_dir="results_1",image_interval
         print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
     else:
         t_total = t_read + t_fft2d + t_amps + t_freqs + t_stats
-        print("No PNG images or GIF animation made.\nAnalysis process complete! Analysis complete time: {}\nTotal time: {}s".format(t_stats,t_total))
+        print("No PNG images or GIF animation made.\nAnalysis process complete!\nTotal time: {}s".format(t_total))
+
 args = sys.argv
 
-if len(args) > 4:
-    main(args[1].args[2],int(args[3]),args[4])
+if len(args) > 5:
+    main(args[1],args[2],int(args[3]),args[4],int(args[5]))
+elif len(args) > 4:
+    main(args[1],args[2],int(args[3]),args[4])
 elif len(args) > 3:
     main(args[1],args[2],int(args[3]))
 elif len(args) > 2:
