@@ -5,7 +5,7 @@ cd "$parent_path"
 in_dir="input_data"
 out_dir="output_files"
 ext=".data"
-skip_files=5
+skip_files=1
 
 echo This script will run analysis scripts on ReSCAL-snow Altitude files.
 read -p "Enter directory to analyze: " dir
