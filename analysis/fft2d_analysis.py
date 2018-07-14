@@ -4,10 +4,13 @@ import time as t
 import numpy as np
 import pandas as pd
 
-#Import graphing libraries if needed
-import imageio
-import matplotlib.pyplot as pl
-from mpl_toolkits.mplot3d import Axes3D as pl3d
+try:
+    #Import graphing libraries if needed
+    import imageio
+    import matplotlib.pyplot as pl
+    from mpl_toolkits.mplot3d import Axes3D as pl3d
+except:
+    pass
 
 #Reads a file (1 row per line, each row should have same number of column values, separated by whitespaces), returns a numpy array
 #filename -> the name of the file to open
@@ -293,6 +296,8 @@ def get_all_stats(skip_val, threshold, d_freqs, all_phases, all_amps):
 #x_label,y_label,z_label -> (optional) labels to use for x,y and z-axis
 #title -> (optional) the title to use for plot, note if you have a title like: 'title a {id}' the {id} will be replaced by the index of that data snapshot
 def graph_all(interval,dir,GIF_name,basename,data,graph_type,fig_size,x_label,y_label,z_label,title):
+
+    import imageio
 
     if interval == 0:
         return 0
