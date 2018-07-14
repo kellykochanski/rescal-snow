@@ -128,6 +128,17 @@ def get_dominant_freqs(all_amps, threshold):
                 dominant_freqs.append(coords)
     return dominant_freqs
 
+#Creates a list of frequencies which meet the minimum amplitude threshold set
+def purge_noise_freqs(all_amps, threshold):
+    freqs = []
+
+    for amps in all_amps:
+        y, x = np.unravel_index(amps.argmax(),amps.shape)
+        if amps[y][x] >= threshold and not (x,y) in freqs:
+            freqs.append((x,y))
+
+    return freqs
+
 #Get the top values based on a percentile threshold. Returns a list of values [value, x, y]
 #E.g. .8 threshold will return data points with values >= (max-min)*.8 + min.
 #values -> 2d array containing the values to threshold
@@ -227,17 +238,18 @@ def build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs):
     return pd.DataFrame(stats,columns=['Time','Dominant','X','Y','Amplitude','Phase','PhaseVelocity','Wavelength','Amp/Wave'])
 
 #Creates a master dataframe that contains all data frames from all frequencies which have a max amplitude equal or above the threshold
-def build_all_frames(time_step,threshold,all_amps,all_phases,all_velocities,d_freqs):
+def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs):
     
     l, w = all_amps[0].shape
     frames = []
 
     #Build frames for each x, y frequency 
-    for y in range(l-1):
-        for x in range(w-1):
-            frame = build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs)
-            if frame["Amplitude"].max() >= threshold:
-                frames.append(frame)
+    for coords in freqs:
+        x = coords[0]
+        y = coords[1]
+        
+        frame = build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs)
+        frames.append(frame)
 
     #Concatenate all frames into single large data frame
     return pd.concat(frames)
@@ -375,7 +387,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_inte
     BASE_FILE_NAME = "ALTI{:05d}_t0"
     BASE_EXT = base_ext
     THRESHOLD = 0.8
-    AMP_THRESHOLD = 0.3
+    AMP_THRESHOLD = 0.5
     DATA_TYPE = int
     TIME_DELTA = 10 #Time change between data files
 
@@ -444,7 +456,8 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_inte
     
     #Concatenate and save data results
     t0 = t.time()
-    master_frame = build_all_frames(TIME_DELTA,AMP_THRESHOLD,all_amps,all_phase_data,all_velocities,d_freqs)
+    freqs = purge_noise_freqs(all_amps,AMP_THRESHOLD)
+    master_frame = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
     #all_stats = get_all_stats(SKIP_FILES,THRESHOLD,d_freqs,all_phase_data,all_amps)
     #all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
