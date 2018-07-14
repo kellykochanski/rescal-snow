@@ -4,12 +4,15 @@ import time as t
 import numpy as np
 import pandas as pd
 
+can_plot = True
 try:
     #Import graphing libraries if needed
     import imageio
     import matplotlib.pyplot as pl
     from mpl_toolkits.mplot3d import Axes3D as pl3d
+    
 except:
+    can_plot = False
     pass
 
 #Reads a file (1 row per line, each row should have same number of column values, separated by whitespaces), returns a numpy array
@@ -451,7 +454,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_inte
     print("Data calculation and concatenation time: {}".format(t_stats))
 
     #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
-    if image_interval > 0:
+    if image_interval > 0 and can_plot:
 
         print("Plotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
         t0 = t.time()
