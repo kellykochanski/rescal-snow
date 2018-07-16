@@ -44,7 +44,8 @@ def read_data(filename,datatype):
 #skip_files -> Number of data files to skip, e.g. 5 = every 5th file is read, instead of all files.
 #skip_file = 1 to not skip any files.
 def read_directory(dir_path,ext,datatype,skip_files):
-    
+
+    print("Sorting through data files...")
     #Get array list of all files to open
     files = []
     try:
@@ -58,6 +59,7 @@ def read_directory(dir_path,ext,datatype,skip_files):
     count = 0.0
     max = len(files)/skip_files
     #Create list of numpy arrays containing data for each file
+    print("Reading data files..")
     all_data = []
     for i, f in enumerate(files):
         if i % skip_files == 0:
@@ -92,7 +94,6 @@ def all_fft2d_analysis(all_data):
     
     all_fft_results = []
     for data in all_data:
-        print(data.shape)
         all_fft_results.append(fft2d_analyze(data))
     
     return all_fft_results
@@ -395,19 +396,18 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
     #Check parent directories exists
     directories = [MAIN_DATA_DIR]
     for d in directories:
-        print(d)
         if not os.path.exists(d):
             print("The specified path: {} was not found. Analysis cancelled.".format(d))
             return 1
 
-    #Make png output directory if needed
+    #Make directories if needed
     if image_interval > 0 and not os.path.exists(PNG_OUTPUT_DIR):
         os.makedirs(PNG_OUTPUT_DIR)
+        
     if not os.path.exists(DATA_OUTPUT_DIR):
         os.makedirs(DATA_OUTPUT_DIR)
 
     #Get all data from the main directory
-    print("Reading data files...")
     t0 = t.time()
     all_data = read_directory(MAIN_DATA_DIR,BASE_EXT,DATA_TYPE,SKIP_FILES)
     t1 = t.time()
