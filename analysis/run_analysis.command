@@ -17,15 +17,15 @@ if [ -d "${in_dir}/$dir" ]; then
     if [ "$option" == "1" ]; then
         read -p "Create png images and GIF animation? (y/n): " ans
         if [ "$ans" == "n" ]; then
-      	    python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "${dir}_results" 0 $ext $skip_files
+      	    python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_results" 0 $ext $skip_files
         elif [ "$ans" == "y" ]; then
             fc=$(ls ${in_dir}/$dir/*.data | wc -l | xargs)
        	    read -p "Enter snapshot step size (1-$fc): " interval
-            python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "${dir}_results" $interval $ext $skip_files
+            python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_results" $interval $ext $skip_files
         fi
     elif [ "$option" == "2" ]; then
 	echo Performing x-correlation analysis... 
-	python xcorr-analysis.py "${in_dir}/$dir" "${out_dir}/xcorr/" "${dir}"
+	python xcor-slices.py "${in_dir}/$dir" "${out_dir}/xcorr/" "${dir}"
     elif [ "$option" == "3" ]; then
 	read -p "Create png images and GIF animation from fft analysis? (y/n): " ans
 	if [ "$ans" == "n" ]; then
@@ -36,7 +36,7 @@ if [ -d "${in_dir}/$dir" ]; then
             python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "${dir}_results" $interval $ext $skip_files
         fi
 	echo Performing x-correlation analysis...
-	python xcorr-analysis.py "{in_dir}/$dir" "${out_dir}/xcorr/" "${dir}"
+	python xcor-slices.py "{in_dir}/$dir" "${out_dir}/xcorr/" "${dir}"
     else
         echo You entered an invalid option.
     fi
