@@ -1,0 +1,6 @@
+Cones turn into crescent (barchan) dunes.
+
+Exploration of parameter space to see effect of sintering rate, lambda_S, and wind strength parameter Tau_min on the shapes of the dunes.
+
+These files all overwrote each other on the same genesis DUN.csp, and may have initial conditions that do not match their parameter files. Filenames have been corrected to match cone/layer shape. Other errors not impossible, though they should be restricted to the initial
+configuration and not mar the parameters.

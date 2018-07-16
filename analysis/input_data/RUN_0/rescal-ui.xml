@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkWindow" id="window1">
+    <property name="title" translatable="yes">ReSCAL</property>
+    <property name="default_width">220</property>
+    <property name="default_height">250</property>
+    <signal name="destroy" handler="on_window_destroy"/>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkToolbar" id="toolbar1">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkToolButton" id="tool_button_go">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">Run/pause</property>
+                <property name="label" translatable="yes">Run</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-media-pause</property>
+                <accelerator key="space" signal="clicked"/>
+                <signal name="clicked" handler="on_tool_button_go_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="tool_button_snapshot">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">Snapshot</property>
+                <property name="related_action">action_snapshot</property>
+                <property name="use_action_appearance">True</property>
+                <property name="label" translatable="yes">Snapshot</property>
+                <property name="use_underline">True</property>
+                <accelerator key="s" signal="clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="tool_button_quit">
+                <property name="visible">True</property>
+                <property name="visible_horizontal">False</property>
+                <property name="visible_vertical">False</property>
+                <property name="label" translatable="yes">Quit</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-quit</property>
+                <signal name="clicked" handler="gtk_main_quit"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleToolButton" id="tool_button_info">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">Info. panel</property>
+                <property name="related_action">action_info</property>
+                <property name="use_action_appearance">True</property>
+                <property name="label" translatable="yes">Info.</property>
+                <property name="use_underline">True</property>
+                <accelerator key="i" signal="clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox1">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkDrawingArea" id="drawingarea1">
+                <property name="visible">True</property>
+                <property name="events">GDK_EXPOSURE_MASK | GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+                <signal name="expose_event" handler="on_drawingarea1_expose_event"/>
+                <signal name="button_press_event" handler="on_drawingarea1_button_press_event"/>
+                <signal name="motion_notify_event" handler="on_drawingarea1_motion_notify_event"/>
+                <signal name="button_release_event" handler="on_drawingarea1_button_release_event"/>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">label</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStatusbar" id="statusbar1">
+            <property name="visible">True</property>
+            <property name="spacing">2</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkAction" id="action_snapshot">
+    <property name="label">_Snapshot</property>
+    <property name="tooltip">Take a PNG snapshot</property>
+    <property name="is_important">True</property>
+    <signal name="activate" handler="on_action_snapshot_activate"/>
+  </object>
+  <object class="GtkAction" id="action_info">
+    <property name="label">Info. panel</property>
+    <property name="tooltip">Show/hide info. panel</property>
+    <property name="is_important">True</property>
+    <signal name="activate" handler="on_action_info_activate"/>
+  </object>
+</interface>

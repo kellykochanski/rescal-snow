@@ -28,14 +28,14 @@ def read_data(filename,datatype):
             sig_2d.append(map(datatype,line.split()))
     finally:
         f.close()
-        return np.array(sig_2d)
-
-def read_data2(filename,datatype):
-    df = pd.read_csv(filename,sep=" ",header=None)
-    df = df.dropna(axis=1,how="all")
-    df = df.astype(datatype)
-
-    return df.values
+        arr = np.array(sig_2d)
+        try:
+            x, y = arr.shape
+            return np.array(sig_2d)
+        except:
+            print("\nError in data in file: {}\nData is not formatted correctly or missing. Check file is correct.".format(filename))
+            exit()
+        return np.array([])
     
 #Reads all files in directory with specific extension and creates a list of numpy arrays containing numerical data
 #dir_path -> The directory containing data files
@@ -48,9 +48,9 @@ def read_directory(dir_path,ext,datatype,skip_files):
     #Get array list of all files to open
     files = []
     try:
-        for file in os.listdir(dir_path):
-            if file.endswith(ext):
-                files.append(os.path.join(dir_path,file))
+        for f in os.listdir(dir_path):
+            if f.endswith(ext):
+                files.append(os.path.join(dir_path,f))
     except:
         print("An error occured, check correct directory was passed.")    
 
@@ -59,9 +59,9 @@ def read_directory(dir_path,ext,datatype,skip_files):
     max = len(files)/skip_files
     #Create list of numpy arrays containing data for each file
     all_data = []
-    for i, file in enumerate(files):
+    for i, f in enumerate(files):
         if i % skip_files == 0:
-            all_data.append(read_data(file,datatype))
+            all_data.append(read_data(f,datatype))
             count += 1
             progress = (count / max) * 100.0
             sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
@@ -75,7 +75,7 @@ def fft2d_analyze(data):
 
     #Data points for x and y axis
     dpx, dpy = data.shape
-
+        
     #Create x, y axis for graphing 2d
     x = np.arange(0,dpx)
     y = np.arange(0,dpy)
@@ -92,6 +92,7 @@ def all_fft2d_analysis(all_data):
     
     all_fft_results = []
     for data in all_data:
+        print(data.shape)
         all_fft_results.append(fft2d_analyze(data))
     
     return all_fft_results
@@ -369,14 +370,14 @@ def save_to_png(figure, fname):
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
 #Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_interval=100,base_ext='.data',skip_int=5):
+def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_name="fft_analysis",image_interval=100,base_ext='.data',skip_int=5):
 
     MAIN_DATA_DIR = directory
     SKIP_FILES = skip_int
     PNG_OUTPUT_DIR = output_dir + "png_output/"
     DATA_OUTPUT_DIR = output_dir
-    CSV_OUTPUT_NAME = "fft_analysis.csv"
-    GIF_OUTPUT_NAME = "fft_results.gif"
+    CSV_OUTPUT_NAME = output_name + ".csv"
+    GIF_OUTPUT_NAME = output_name + ".gif"
     GRAPH_TYPE = 'surf' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
     XLABEL = 'x'
     YLABEL = 'y'
@@ -482,12 +483,14 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_inte
 
 args = sys.argv
 
-if len(args) > 5:
-    main(args[1],args[2],int(args[3]),args[4],int(args[5]))
+if len(args) > 6:
+    main(args[1],args[2],args[3],int(args[4]),args[5],int(args[6]))
+elif len(args) > 5:
+    main(args[1],args[2],args[3],int(args[4]),args[5])
 elif len(args) > 4:
-    main(args[1],args[2],int(args[3]),args[4])
+    main(args[1],args[2],args[3],int(args[4]))
 elif len(args) > 3:
-    main(args[1],args[2],int(args[3]))
+    main(args[1],args[2],args[3])
 elif len(args) > 2:
     main(args[1],args[2])
 elif len(args) > 1:
