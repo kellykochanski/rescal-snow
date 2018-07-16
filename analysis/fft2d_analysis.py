@@ -4,6 +4,17 @@ import time as t
 import numpy as np
 import pandas as pd
 
+can_plot = True
+try:
+    #Import graphing libraries if needed
+    import imageio
+    import matplotlib.pyplot as pl
+    from mpl_toolkits.mplot3d import Axes3D as pl3d
+    
+except:
+    can_plot = False
+    pass
+
 #Reads a file (1 row per line, each row should have same number of column values, separated by whitespaces), returns a numpy array
 #filename -> the name of the file to open
 #datatype -> the datatype of the values within the file (int, or float)
@@ -19,6 +30,13 @@ def read_data(filename,datatype):
         f.close()
         return np.array(sig_2d)
 
+def read_data2(filename,datatype):
+    df = pd.read_csv(filename,sep=" ",header=None)
+    df = df.dropna(axis=1,how="all")
+    df = df.astype(datatype)
+
+    return df.values
+    
 #Reads all files in directory with specific extension and creates a list of numpy arrays containing numerical data
 #dir_path -> The directory containing data files
 #ext -> The extension of datafiles
@@ -87,6 +105,15 @@ def all_amplitudes(all_fft):
         all_amps.append(np.abs(data))
     return all_amps
 
+#Calculates all the phases of the fft_analysis results
+#all_fft -> fft results taken from all the data in a directory
+def all_phases(all_fft):
+    
+    all_phases = []
+    for data in all_fft:
+        all_phases.append(np.angle(data)%(2*np.pi))
+    return all_phases
+
 #Locates the dominant frequencies within amplitude data by filtering with a threshold value
 #Returns a list of dominant frequencies as well as a full list of all data of interest
 #all_amps -> a list of numpy arrays containing amplitude data from fft results
@@ -101,7 +128,18 @@ def get_dominant_freqs(all_amps, threshold):
                 dominant_freqs.append(coords)
     return dominant_freqs
 
-#Get the top values based on a percentile threshold.
+#Creates a list of frequencies which meet the minimum amplitude threshold set
+def purge_noise_freqs(all_amps, threshold):
+    freqs = []
+
+    for amps in all_amps:
+        y, x = np.unravel_index(amps.argmax(),amps.shape)
+        if amps[y][x] >= threshold and not (x,y) in freqs:
+            freqs.append((x,y))
+
+    return freqs
+
+#Get the top values based on a percentile threshold. Returns a list of values [value, x, y]
 #E.g. .8 threshold will return data points with values >= (max-min)*.8 + min.
 #values -> 2d array containing the values to threshold
 #threshold -> thresholding percentage as a decimal (0.8=80%)
@@ -119,6 +157,21 @@ def top_percent(values, threshold):
                 top.append([x,ii,i])
                   
     return top
+
+
+#Filters out all values below specified threshold, returns a list of values [value, x, y]
+#values -> 2d array containing the values to filter
+#threshold -> values that are below threshold are removed
+def value_threshold(values, threshold):
+    
+    top = []
+    for i, y in enumerate(values):
+        for ii, x in enumerate(y):
+            if x >= thresh_value:
+                top.append([x,ii,i])
+                  
+    return top
+
 
 #Returns 
 def top_values(values, threshold, d_freqs):
@@ -138,13 +191,76 @@ def top_values(values, threshold, d_freqs):
                   
     return top
 
+#Calculates all of the phase velocities of all files
+#all_phases -> a list of 2d numpy arrays of all phase data
+#all_amps -> a list of 2d numpy arrays with all amplitudes
+#time_delta -> the time change between one array and another
+def get_all_velocities(all_phases, all_amps, time_delta):
+    
+    p_velocities = []
+
+    for i, phase in enumerate(all_phases[1:]):
+        p_velocities.append((phase-all_phases[i])/time_delta)
+
+    return p_velocities
+
+#Calculates features at a specific x,y frequency
+#time -> the current time to calculate
+#x, y -> frequencies to calculate
+#amps, phases, velocities -> set of amplitudes, phases and phase velocities for that specific time
+#d_freqs -> dominant frequencies that were discovered
+def get_data_at_freq(time,x,y,amps,phases,velocities,d_freqs):
+    dom = (x,y) in d_freqs
+    amp = amps[y][x]
+    phases = phases[y][x]
+    pv = velocities[y][x]
+    if x > 0:
+        wave = 1.0/x
+    else:
+        wave = 1
+    aspect = amp/wave
+    data = [time,dom,x,y,amp,phases,pv,wave,aspect]
+    return data
+
+#Creates a pandas dataframe containing all data for a specific frequency at all times of simulation
+#time_step -> the amount of time per data file
+#x,y -> frequency that the dataframe is about
+#all_amps, all_phases etc -> lists of 2d numpy arrays containing all the data taken from files
+#d_freqs -> dominant frequencies
+def build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs):
+
+    stats = []
+    total_time = len(all_amps)
+
+    for t in range(1,total_time):
+        stats.append(get_data_at_freq(t*time_step,x,y,all_amps[t],all_phases[t],all_velocities[t-1],d_freqs))
+
+    return pd.DataFrame(stats,columns=['Time','Dominant','X','Y','Amplitude','Phase','PhaseVelocity','Wavelength','Amp/Wave'])
+
+#Creates a master dataframe that contains all data frames from all frequencies which have a max amplitude equal or above the threshold
+def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs):
+    
+    l, w = all_amps[0].shape
+    frames = []
+
+    #Build frames for each x, y frequency 
+    for coords in freqs:
+        x = coords[0]
+        y = coords[1]
+        
+        frame = build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs)
+        frames.append(frame)
+
+    #Concatenate all frames into single large data frame
+    return pd.concat(frames)
+
 #Returns the fft results as a Pandas dataframe 
 #timestep -> the current frame/time of the data being passed
 #threshold -> the threshold value of data to track when providing the stats
 #amps -> 2d array that contains the amplitude results of fft
 #phases -> 2d array that contains the phase results of fft
 #d_freqs -> a list of the dominant frequencies found among all data
-def get_stats(timestep,threshold,fft_data,amps,d_freqs):
+def get_stats(timestep,threshold,amps,phases,d_freqs):
 
     #get stats for top values
     top_vals = top_values(amps, threshold, d_freqs)
@@ -156,7 +272,7 @@ def get_stats(timestep,threshold,fft_data,amps,d_freqs):
         x = data[1]
         y = data[2]
         dom = data[3]
-        phase = np.angle(fft_data[y][x])
+        phase = phases[y][x]
         if x > 0:
             wave = 1.0/x
         else:
@@ -170,15 +286,15 @@ def get_stats(timestep,threshold,fft_data,amps,d_freqs):
 #skip_val -> The amount of timesteps skipped.
 #threshold -> the threshold value of data to track when providing the stats
 #d_freqs -> a list of the dominant frequencies found among all data
-#all_fft_data -> a list of numpy arrays containing the fft data taken from all the files
+#all_phases -> a list of numpy arrays containing the phase data taken from all the files
 #all_amps -> a list of numpy arrays conatining all the amplitude data
-def get_all_stats(skip_val, threshold, d_freqs, all_fft_data, all_amps):
+def get_all_stats(skip_val, threshold, d_freqs, all_phases, all_amps):
     
     frames = []
     for i, amp in enumerate(all_amps):
-        frames.append(get_stats(i*skip_val,threshold,all_fft_data[i],amp,d_freqs))
+        frames.append(get_stats(i*skip_val,threshold,amp,all_phases[i],d_freqs))
 
-    #Create one large dataframe
+    #Create large dataframe, skip first one since its all noise
     master_frame = pd.concat(frames[1:])
     
     return master_frame
@@ -195,6 +311,8 @@ def get_all_stats(skip_val, threshold, d_freqs, all_fft_data, all_amps):
 #x_label,y_label,z_label -> (optional) labels to use for x,y and z-axis
 #title -> (optional) the title to use for plot, note if you have a title like: 'title a {id}' the {id} will be replaced by the index of that data snapshot
 def graph_all(interval,dir,GIF_name,basename,data,graph_type,fig_size,x_label,y_label,z_label,title):
+
+    import imageio
 
     if interval == 0:
         return 0
@@ -247,47 +365,6 @@ def plot_data(data,type='wire',fig_size=(10,10),x_label='x',y_label='y',z_label=
 #Saves the figure as a png image
 def save_to_png(figure, fname):
     figure.savefig(fname+'.png',bbox_inches='tight')
-    
-#Performs fft2d analysis on the data taken from input file.
-#time_step -> The time value of current data
-#data -> a 2d numpy array containing numerical values
-#input_type -> The data type of the input (int or float values for example)
-#graph -> if true a figure with graphs will be made using pyplot and function will return the figure, otherwise 0
-#both -> if true, both the amplitude and input data will be graphed (if graph is true), otherwise only amplitude data is graphed
-def fft2d_analysis(time_step, threshold, data, graph, both):
-
-    #Data points for x and y axis
-    dpx, dpy = data.shape
-
-    #Create x, y axis for graphing 2d
-    x = np.arange(0,dpx)
-    y = np.arange(0,dpy)
-
-    #Create x-y plane for graphing 3d
-    X, Y = np.meshgrid(x, y, indexing='ij')
-
-    #Set DC frequency bin to 0
-    file_data = data - np.mean(data)
-
-    #Get fft2d and resize to single quadrant
-    fft2 = np.fft.fft2(file_data)[0:dpx/2,0:dpy/2]*2/(dpx*dpy)
-    
-    #Get amplitude spectrum
-    amp_s = np.abs(fft2)
-    amp_x, amp_y = np.meshgrid(np.arange(0,dpx/2),np.arange(0,dpy/2), indexing='ij')    
-
-    #Get phase 
-    phases = np.angle(fft2)
-
-    #Get the stats from data
-    stats = get_stats(time_step,threshold,amp_s,phases)
-
-    if graph:
-        fig = plot_data([X, Y, data],[amp_x,amp_y,amp_s],both)
-
-        return fig, stats
-
-    return stats
 
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
@@ -310,7 +387,9 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_inte
     BASE_FILE_NAME = "ALTI{:05d}_t0"
     BASE_EXT = base_ext
     THRESHOLD = 0.8
+    AMP_THRESHOLD = 0.5
     DATA_TYPE = int
+    TIME_DELTA = 10 #Time change between data files
 
     #Check parent directories exists
     directories = [MAIN_DATA_DIR]
@@ -345,45 +424,60 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_inte
     all_fft2d = all_fft2d_analysis(all_data)
     t1 = t.time()
     t_fft2d = t1-t0
-    print("FFT calculations time: {}s\nCalculating amplitude data...".format(t_fft2d))
+    print("FFT calculations time: {}s\nCalculating phase data...".format(t_fft2d))
+
+    #Get all phase data
+    t0 = t.time()
+    all_phase_data = all_phases(all_fft2d)
+    t1 = t.time()
+    t_phases = t1 - t0
+    print("Phases calculation time: {}s\nCalculating amplitudes...".format(t_phases))
 
     #Get all amplitude data
     t0 = t.time()
     all_amps = all_amplitudes(all_fft2d)
     t1 = t.time()
     t_amps = t1-t0
-    print("Amplitude calculation time: {}s\nUsing amplitude data to find dominant frequencies...".format(t_amps))
+    print("Amplitude calculation time: {}s\nCalculating phase velocities...".format(t_amps))
+
+    #Get all phase velocities
+    t0 = t.time()
+    all_velocities = get_all_velocities(all_phase_data, all_amps, TIME_DELTA)
+    t1 = t.time()
+    t_velocities = t1-t0
+    print("Phase Velocity calculation time: {}s\nFinding dominant frequencies...".format(t_velocities))
 
     #Find dominant frequencies
     t0 = t.time()
     d_freqs = get_dominant_freqs(all_amps,THRESHOLD)
     t1 = t.time()
     t_freqs = t1-t0
-    print("{} dominant frequencies found at threshold {}%, time: {}s\nConcatenating all data and writing to csv...".format(len(d_freqs),THRESHOLD*100,t_freqs))
+    print("{} dominant frequencies found at threshold {}%, time: {}s\nDeriving all data and writing to csv...".format(len(d_freqs),THRESHOLD*100,t_freqs))
     
     #Concatenate and save data results
     t0 = t.time()
-    all_stats = get_all_stats(SKIP_FILES,THRESHOLD,d_freqs,all_fft2d,all_amps)
-    all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
+    freqs = purge_noise_freqs(all_amps,AMP_THRESHOLD)
+    master_frame = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
+    #all_stats = get_all_stats(SKIP_FILES,THRESHOLD,d_freqs,all_phase_data,all_amps)
+    #all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
+    master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     t1 = t.time()
     t_stats = t1 - t0
 
-    #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
-    if image_interval > 0:
-        #Import graphing libraries if needed
-        import imageio
-        import matplotlib.pyplot as pl
-        from mpl_toolkits.mplot3d import Axes3D as pl3d
+    print("Data calculation and concatenation time: {}".format(t_stats))
 
-        print("Analysis results complete time: {}s\nPlotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
+    #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
+    if image_interval > 0 and can_plot:
+
+        print("Plotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
         t0 = t.time()
         im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,'surf',FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
         t1 = t.time()
         t_plot = t1-t0
-        t_total = t_read + t_fft2d + t_amps + t_freqs + t_stats + t_plot
+        t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats + t_plot
         print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
     else:
-        t_total = t_read + t_fft2d + t_amps + t_freqs + t_stats
+        t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats
         print("No PNG images or GIF animation made.\nAnalysis process complete!\nTotal time: {}s".format(t_total))
 
 args = sys.argv
