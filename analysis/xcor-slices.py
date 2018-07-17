@@ -28,8 +28,8 @@ meta_analysis_file = open(output_dir + '/' + output_filename + '_meta_analysis.t
 # Add file offset to skip the first file as cross correlation with flat surface is ill defined
 current_file_id = 00000 + alti_file_offset
 next_file_id = current_file_id+alti_file_offset
-alti_file_1 = alti_path + '/ALTI%05.0f_t0.data' % current_file_id
-alti_file_2 = alti_path + '/ALTI%05.0f_t0.data' % next_file_id
+alti_file_1 = alti_path + '/ALTI%05.0f_t0.log' % current_file_id
+alti_file_2 = alti_path + '/ALTI%05.0f_t0.log' % next_file_id
 
 # Vector to store the calculated velocities
 y_values = []
@@ -64,12 +64,15 @@ if not(os.path.exists(alti_file_1)):
     print('\x1b[6;37;41m' + 'XCOR ERROR: unable to load file at path: ' + alti_file_1  + '\x1b[0m')
     exit()
 
+
 # Compute the velocity of dunes between altitude files while they exist
 while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
     
     # Load the alittudes
     altitudes_1_matrix = np.loadtxt(alti_file_1).T
     altitudes_2_matrix = np.loadtxt(alti_file_2).T
+    
+    print(altitudes_1_matrix.shape)
 
     # Cross correlate slices
     start = time.time()
@@ -88,8 +91,13 @@ while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
     # Increment file ids
     current_file_id += alti_file_offset
     next_file_id += alti_file_offset
-    alti_file_1 = alti_path + '/ALTI%05.0f_t0.data' % current_file_id
-    alti_file_2 = alti_path + '/ALTI%05.0f_t0.data' % next_file_id
+    alti_file_1 = alti_path + '/ALTI%05.0f_t0.log' % current_file_id
+    alti_file_2 = alti_path + '/ALTI%05.0f_t0.log' % next_file_id
+
+# Check that there are at least 2 velocities captured
+if len(y_values) < 2:
+    print('\x1b[6;37;41m' + 'XCOR ERROR: too few files to correlate' + '\x1b[0m')
+    exit()
 
 meta_analysis_file.write('Average correlation time: ' + str(np.mean(correlation_times)))
 meta_analysis_file.write('\nTotal correlation time: ' + str(np.sum(correlation_times)))
