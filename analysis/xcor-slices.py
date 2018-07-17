@@ -43,8 +43,8 @@ correlation_times = []
 def velocity_between(signal_1, signal_2):
     velocities = []
     if (signal_1.shape != signal_2.shape):
-        print('ERROR: trying to correlate differnt shaped signals')
-        return -1
+        print('\x1b[6;37;41m' + 'XCOR ERROR: trying to correlate differnt shaped signals' + '\x1b[0m')
+        exit()
     
     for slice_index in range(0,altitudes_1_matrix.shape[1]):
 
@@ -59,6 +59,10 @@ def velocity_between(signal_1, signal_2):
 
     return abs(np.mean(velocities))
 
+# Check that it is able to open at least the first
+if not(os.path.exists(alti_file_1)):
+    print('\x1b[6;37;41m' + 'XCOR ERROR: unable to load file at path: ' + alti_file_1  + '\x1b[0m')
+    exit()
 
 # Compute the velocity of dunes between altitude files while they exist
 while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
