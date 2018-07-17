@@ -133,11 +133,16 @@ def get_dominant_freqs(all_amps, threshold):
 #Creates a list of frequencies which meet the minimum amplitude threshold set
 def purge_noise_freqs(all_amps, threshold):
     freqs = []
+    l, w = all_amps[0].shape
 
     for amps in all_amps:
-        y, x = np.unravel_index(amps.argmax(),amps.shape)
-        if amps[y][x] >= threshold and not (x,y) in freqs:
-            freqs.append((x,y))
+        if np.amax(amps) < threshold:
+            continue
+        else:
+            for y in range(0,l-1):
+                for x in range(0,w-1):
+                    if amps[y][x] >= threshold and not (x,y) in freqs:
+                        freqs.append((x,y))
 
     return freqs
 
@@ -242,7 +247,6 @@ def build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs):
 #Creates a master dataframe that contains all data frames from all frequencies which have a max amplitude equal or above the threshold
 def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs):
     
-    l, w = all_amps[0].shape
     frames = []
 
     #Build frames for each x, y frequency 
@@ -389,7 +393,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
     BASE_FILE_NAME = "ALTI{:05d}_t0"
     BASE_PREF = base_pref
     THRESHOLD = 0.8
-    AMP_THRESHOLD = 0.5
+    AMP_THRESHOLD = 1.0
     DATA_TYPE = int
     TIME_DELTA = 10 #Time change between data files
 
