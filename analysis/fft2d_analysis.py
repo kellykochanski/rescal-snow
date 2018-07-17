@@ -39,18 +39,18 @@ def read_data(filename,datatype):
     
 #Reads all files in directory with specific extension and creates a list of numpy arrays containing numerical data
 #dir_path -> The directory containing data files
-#ext -> The extension of datafiles
+#pref -> The standard prefix of datafiles
 #datatype -> The type of data stored in each files (int or float data)
 #skip_files -> Number of data files to skip, e.g. 5 = every 5th file is read, instead of all files.
 #skip_file = 1 to not skip any files.
-def read_directory(dir_path,ext,datatype,skip_files):
+def read_directory(dir_path,pref,datatype,skip_files):
 
     print("Sorting through data files...")
     #Get array list of all files to open
     files = []
     try:
         for f in os.listdir(dir_path):
-            if f.endswith(ext):
+            if f.startswith(pref):
                 files.append(os.path.join(dir_path,f))
     except:
         print("An error occured, check correct directory was passed.")    
@@ -371,7 +371,7 @@ def save_to_png(figure, fname):
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
 #Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_name="fft_analysis",image_interval=100,base_ext='.data',skip_int=5):
+def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_name="fft_analysis",image_interval=100,base_pref='ALTI',skip_int=5):
 
     MAIN_DATA_DIR = directory
     SKIP_FILES = skip_int
@@ -387,7 +387,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
     FIG_SIZE = (10,10)
     SNAPSHOT_INTERVAL = image_interval #A png image of graph is saved at each interval
     BASE_FILE_NAME = "ALTI{:05d}_t0"
-    BASE_EXT = base_ext
+    BASE_PREF = base_pref
     THRESHOLD = 0.8
     AMP_THRESHOLD = 0.5
     DATA_TYPE = int
@@ -409,16 +409,16 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
 
     #Get all data from the main directory
     t0 = t.time()
-    all_data = read_directory(MAIN_DATA_DIR,BASE_EXT,DATA_TYPE,SKIP_FILES)
+    all_data = read_directory(MAIN_DATA_DIR,BASE_PREF,DATA_TYPE,SKIP_FILES)
     t1 = t.time()
 
     #Check input files exists
     file_count = len(all_data)
     if file_count == 0:
-        print("No files with the extension: '{}' were found. Analysis cancelled.".format(BASE_EXT))
+        print("No files with the prefix: '{}' were found. Analysis cancelled.".format(BASE_PREF))
         return 1
     t_read = t1-t0
-    print("\rTotal files read: {} (with ext: '{}')\nRead time: {}s\nCalculating fft2d data on all files...".format(file_count,BASE_EXT,t_read))
+    print("\rTotal files read: {} Read time: {}s\nCalculating fft2d data on all files...".format(file_count,t_read))
     
     #Get all fft2d data for calculating
     t0 = t.time()
