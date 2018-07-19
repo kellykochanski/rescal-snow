@@ -245,10 +245,11 @@ def build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs):
     return pd.DataFrame(stats,columns=['Time','Dominant','X','Y','Amplitude','Phase','PhaseVelocity','Wavelength','Amp/Wave'])
 
 #Creates a master dataframe that contains all data frames from all frequencies which have a max amplitude equal or above the threshold
+#Also creates a summary dataframe with information about the entire set
 def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs):
     
     frames = []
-
+    summary_data = []
     #Build frames for each x, y frequency 
     for coords in freqs:
         x = coords[0]
@@ -256,9 +257,18 @@ def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs)
         
         frame = build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs)
         frames.append(frame)
+        
+        #Use frame to get some more information about this frequency
+        avgPV = frame["PhaseVelocity"].mean()
+        wave = frame["Wavelength"].iloc(0)
+        avgAmp = frame["Amplitude"].mean()
+        totalTime = frame["Time"].iloc(-1)
+        summary_data.append([totalTime,frame["X"].iloc(0),frame["Y"].iloc(0),wave,avgPV,avgAmp])
+    
+    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","Wavelength","Avg. Phase Velocity","Avg. Amplitude"])
 
-    #Concatenate all frames into single large data frame
-    return pd.concat(frames)
+    #Concatenate all frames into single large data frame and return along with summary frame
+    return [pd.concat(frames),summary_frame]
 
 #Returns the fft results as a Pandas dataframe 
 #timestep -> the current frame/time of the data being passed
@@ -462,10 +472,11 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
     #Concatenate and save data results
     t0 = t.time()
     freqs = purge_noise_freqs(all_amps,AMP_THRESHOLD)
-    master_frame = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
+    master_frame, summary = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
     #all_stats = get_all_stats(SKIP_FILES,THRESHOLD,d_freqs,all_phase_data,all_amps)
     #all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
+    summary.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME + "summary")
     t1 = t.time()
     t_stats = t1 - t0
 
