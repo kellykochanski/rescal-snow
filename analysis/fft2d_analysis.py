@@ -260,9 +260,9 @@ def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs)
         
         #Use frame to get some more information about this frequency
         avgPV = frame["PhaseVelocity"].mean()
-        wave = frame["Wavelength"].iloc(0)
+        wave = frame.iloc("Wavelength",0)
         avgAmp = frame["Amplitude"].mean()
-        totalTime = frame["Time"].iloc(-1)
+        totalTime = frame.iloc("Time",-1)
         summary_data.append([totalTime,frame["X"].iloc(0),frame["Y"].iloc(0),wave,avgPV,avgAmp])
     
     summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","Wavelength","Avg. Phase Velocity","Avg. Amplitude"])
