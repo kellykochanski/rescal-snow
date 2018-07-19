@@ -4,6 +4,8 @@ cd "$parent_path"
 
 in_dir="input_data" #The main input directory relative to this script
 out_dir="output_files" #The main output directory
+fft_dir=""
+xcor_dir=""
 pref="ALTI"
 skip_files=1
 
@@ -17,11 +19,11 @@ if [ -d "${in_dir}/$dir" ]; then
     if [ "$option" == "1" ]; then
         read -p "Create png images and GIF animation? (y/n): " ans
         if [ "$ans" == "n" ]; then
-      	    python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_analysis" 0 $pref $skip_files
+      	    python ${fft_dir}fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_analysis" 0 $pref $skip_files
         elif [ "$ans" == "y" ]; then
-            fc=$(ls ${in_dir}/$dir/*.data | wc -l | xargs)
+            fc=$(ls ${in_dir}$dir/*.data | wc -l | xargs)
        	    read -p "Enter snapshot step size (1-$fc): " interval
-            python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_analysis" $interval $pref $skip_files
+            python ${fft_dir}/fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_analysis" $interval $pref $skip_files
         fi
     elif [ "$option" == "2" ]; then
 	echo Performing x-correlation analysis... 
