@@ -3,7 +3,7 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
 in_dir="input_data" #The main input directory relative to this script
-out_dir="output_files" #The main output directory
+out_dir="output_data" #The main output directory
 fft_dir=""
 xcor_dir=""
 pref="ALTI"

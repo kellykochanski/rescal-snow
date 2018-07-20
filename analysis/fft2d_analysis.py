@@ -260,10 +260,10 @@ def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs)
         
         #Use frame to get some more information about this frequency
         avgPV = frame["PhaseVelocity"].mean()
-        wave = frame.iloc("Wavelength",0)
+        wave = frame.at[0,"Wavelength"]
         avgAmp = frame["Amplitude"].mean()
-        totalTime = frame.iloc("Time",-1)
-        summary_data.append([totalTime,frame["X"].iloc(0),frame["Y"].iloc(0),wave,avgPV,avgAmp])
+        totalTime = frame["Time"].values[-1]
+        summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],wave,avgPV,avgAmp])
     
     summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","Wavelength","Avg. Phase Velocity","Avg. Amplitude"])
 
@@ -392,6 +392,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
     PNG_OUTPUT_DIR = output_dir + "png_output/"
     DATA_OUTPUT_DIR = output_dir
     CSV_OUTPUT_NAME = output_name + ".csv"
+    SUMMARY_NAME = output_name + "_summary.csv"
     GIF_OUTPUT_NAME = output_name + ".gif"
     GRAPH_TYPE = 'surf' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
     XLABEL = 'x'
@@ -476,7 +477,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
     #all_stats = get_all_stats(SKIP_FILES,THRESHOLD,d_freqs,all_phase_data,all_amps)
     #all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
-    summary.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME + "summary")
+    summary.to_csv(DATA_OUTPUT_DIR + SUMMARY_NAME)
     t1 = t.time()
     t_stats = t1 - t0
 
