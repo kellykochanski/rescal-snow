@@ -101,7 +101,7 @@ void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
 
 //available CSP template types
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
-enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
+enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
 #else
 enum CSP_TEMPLATES {CSP_CUSTOM};
 #endif
@@ -123,6 +123,7 @@ void init_template_list() {
   init_template(CSP_RWALL, "RWALL", "RWALL(rh=0.5, rx=0.3):\twall of relative height <rh>*H and relative position <rx>*L", 2, 0.5, 0.3);
   init_template(CSP_WAVES_2D, "WAVES_2D", "WAVES_2D(per_min=10, per_max=60, ufd=0, amp=4, mh=30):\t2d sand waves with increasing periods from <per_min> to <per_max>, amplitude <amp> and mean height <mh> for stability analysis\n\t\t\t\tIt has uniform frequency distribution when <ufd> flag is set", 5, 10.0, 60.0, 0.0, 4.0, 30.0);
   init_template(CSP_WAVY_NS_LAYER, "WAVY_NS_LAYER", "WAVY_NS_LAYER(per=40, amp=15, h=5):\tnorth-south sand layer with wavy east boundary of period <per>, amplitude <amp> and height <h> for stability analysis", 3, 40.0, 15.0, 5.0);
+  init_template(CSP_WAVE, "WAVE", "WAVE(height=15, ground=0):\tnorth-south wave of sand/snow with height h on top of hardened ground of thickness hg=0", 2, 15.0, 0.0);
   init_template(CSP_TRIANGLES, "TRIANGLES", "TRIANGLES(n=8, h=10, mh=20):\t<n> east-west periodic triangles of local height <h> and mean height <mh>", 3, 8.0, 10.0, 20.0);
   init_template(CSP_SRC_DISK, "SRC_DISK", "SRC_DISK(w=40, x=100, y=D/2):\tcircular source of sand on the ground with width <w> and centered on (x,y)", 3, 40.0, 100.0, 0.0);
   init_template(CSP_SRC_DISK_CEIL, "SRC_DISK_CEIL", "SRC_DISK_CEIL(w=40, x=100, y=D/2):\tcircular source of sand in the ceiling with width <w> and centered on (x,y)", 3, 40.0, 100.0, 0.0);
@@ -439,6 +440,20 @@ void genesis() {
           if ((k & 1) || (j > H0) || (j == 0)) {
             aux->celltype = DUM;  //ground + ceiling + walls east-west
           }
+        } else if (csp_template.type == CSP_WAVE) {
+            // north-south triangular wave
+	    float h = csp_template.args[0];
+	    float hg = csp_template.args[1];
+	    float i2 = i - L/4.0;
+	    // Hardened layer below wave
+	    if ( j >= H - hg ) aux -> celltype = GRV;
+	    // Downwind half of triangular wave
+	    else if ( ( i2 >= 0 ) && ( i2 < 2.0*h )
+			    && (j >= H - hg - h*(1.0-2*i2/h)) ) aux -> celltype = GR;
+	    // Upwind half of triangular wave
+	    else if ( ( i2 <  0 ) && ( i2 >= -2.0*h )
+			    && (j >= H - hg - h*(1.0+2*i2/h)) ) aux -> celltype = GR;
+
         } else if (csp_template.type == CSP_WAVY_NS_LAYER) {
           //CSP_WAVY_NS_LAYER: north-south sand layer with wavy east boundary for stability analysis
           float per = csp_template.args[0];
