@@ -205,6 +205,42 @@ class Parameters():
 		# must be commented appropriately.
 		self.header_body = new_header
 
+        def read(self, filename):
+                #Read a parameter file into all parameters
+                with open(filename, "r") as f:
+                        prev_line = ""
+                        for i, line in enumerate(f):
+                                if line.strip() == "":
+                                        continue
+                                elif line.startswith("#"):
+                                        prev_line = line
+                                        continue
+                                else:
+                                        try:
+                                                #Capture parameter description if it has one
+                                                desc = ""
+                                                if prev_line != "":
+                                                        desc = prev_line.replace("#","").replace("\n",'')[1:]
+                                                        prev_line = ""
+                                                        
+                                                par = line.split(' ')
+
+                                                #Try reading string as int, then float before assuming string
+                                                value = par[2].replace('\n','')
+                                                try:
+                                                        value = int(par[2])
+                                                except:
+                                                        try:
+                                                                value = float(par[2])
+                                                        except:
+                                                                pass
+                                                
+                                                self.new_parameter(par[0], desc, value)
+                                        except:
+                                                print("Error occurred when trying to read parameter from file on line {}.\n".format(i+1))
+                                                print("Line read: {}".format(line))
+                
+                
 	def write(self, filename):
 		# Write all parameters to a parameter file
 		with open(filename, "w") as f:
