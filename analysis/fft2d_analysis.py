@@ -3,6 +3,9 @@ import sys
 import time as t
 import numpy as np
 import pandas as pd
+import rescal_utilities as ru
+import cPickle as pickle
+from multiprocessing import Process as pr
 
 can_plot = True
 try:
@@ -14,6 +17,8 @@ try:
 except:
     can_plot = False
     pass
+
+#fft_results = {"summary":"",data_frame:""}
 
 #Reads a file (1 row per line, each row should have same number of column values, separated by whitespaces), returns a numpy array
 #filename -> the name of the file to open
@@ -36,22 +41,50 @@ def read_data(filename,datatype):
             print("\nError in data in file: {}\nData is not formatted correctly or missing. Check file is correct.".format(filename))
             exit()
         return np.array([])
+
+#Writes to a textfile the basic summary of the data, using parameter file and summary dataframe
+def write_summary(directory,filename,par_file_path,summary_data):
+    params = ru.Parameters()
+    try:
+        params.read(par_file_path)
+    except:
+        print("Parameter file not found at: {}".format(par_file_path))
+        params = None
     
-#Reads all files in directory with specific extension and creates a list of numpy arrays containing numerical data
+    f = open(directory+filename,"w")
+
+    #Write summary data
+    if params:
+        freqs, fields = summary_data.shape
+        lam_s = params.get("Lambda_S")
+        tau = params.get("Tau_min")
+        Ava = params.get("Ava_angle")
+        h = params.get("H")
+        d = params.get("D")
+        l = params.get("L")
+        f.write("Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n".format(lam_s,tau,Ava,h,d,l,freqs))
+
+    f.write("Summary data below:\n{}".format(summary_data))
+    f.close()
+    print("Summary for directory at: {}{}".format(directory,filename))
+
+#Reads all files in directory with specific extension and returns it as a sorted list
 #dir_path -> The directory containing data files
 #pref -> The standard prefix of datafiles
 #datatype -> The type of data stored in each files (int or float data)
-#skip_files -> Number of data files to skip, e.g. 5 = every 5th file is read, instead of all files.
-#skip_file = 1 to not skip any files.
-def read_directory(dir_path,pref,datatype,skip_files):
+def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
 
-    print("Sorting through data files...")
+    if verbose:
+        print("Sorting through data files...")
     #Get array list of all files to open
     files = []
+    par_file_path = ""
     try:
         for f in os.listdir(dir_path):
             if f.startswith(pref):
                 files.append(os.path.join(dir_path,f))
+            elif f.endswith(par_ext):
+                par_file_path = dir_path+"/"+f
     except:
         print("An error occured, check correct directory was passed.")    
 
@@ -59,17 +92,19 @@ def read_directory(dir_path,pref,datatype,skip_files):
     count = 0.0
     max = len(files)/skip_files
     #Create list of numpy arrays containing data for each file
-    print("Reading data files..")
+    if verbose:
+        print("Reading data files..")
     all_data = []
     for i, f in enumerate(files):
         if i % skip_files == 0:
             all_data.append(read_data(f,datatype))
-            count += 1
-            progress = (count / max) * 100.0
-            sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
-            sys.stdout.flush()
-    return all_data
+            if verbose:
+                count += 1
+                progress = (count / max) * 100.0
+                sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
+                sys.stdout.flush()
 
+    return [all_data, par_file_path]
 
 #Performs fft2d analysis on the data taken from input file and returns single quadrant fft result.
 #data -> data to perform fft on
@@ -265,7 +300,7 @@ def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs)
         totalTime = frame["Time"].values[-1]
         summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],wave,avgPV,avgAmp])
     
-    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","Wavelength","Avg. Phase Velocity","Avg. Amplitude"])
+    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","Avg. Amplitude","Wavelength","Avg. Phase Velocity"])
 
     #Concatenate all frames into single large data frame and return along with summary frame
     return [pd.concat(frames),summary_frame]
@@ -382,17 +417,16 @@ def plot_data(data,type='wire',fig_size=(10,10),x_label='x',y_label='y',z_label=
 def save_to_png(figure, fname):
     figure.savefig(fname+'.png',bbox_inches='tight')
 
-#directory -> The directory that holds the log files to analyze
-#image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
-#Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_name="fft_analysis",image_interval=100,base_pref='ALTI',skip_int=5):
+#Performs fft analysis on specified directory
+def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, image_interval, skip_files, verbose=True):
 
-    MAIN_DATA_DIR = directory
-    SKIP_FILES = skip_int
+    MAIN_DATA_DIR = dir_name
+    PARAMETER_FILE = par_ext
+    SKIP_FILES = skip_files
     PNG_OUTPUT_DIR = output_dir + "png_output/"
     DATA_OUTPUT_DIR = output_dir
     CSV_OUTPUT_NAME = output_name + ".csv"
-    SUMMARY_NAME = output_name + "_summary.csv"
+    SUMMARY_NAME = output_name + "_summary.txt"
     GIF_OUTPUT_NAME = output_name + ".gif"
     GRAPH_TYPE = 'surf' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
     XLABEL = 'x'
@@ -407,7 +441,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
     AMP_THRESHOLD = 1.0
     DATA_TYPE = int
     TIME_DELTA = 10 #Time change between data files
-
+    
     #Check parent directories exists
     directories = [MAIN_DATA_DIR]
     for d in directories:
@@ -424,7 +458,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
 
     #Get all data from the main directory
     t0 = t.time()
-    all_data = read_directory(MAIN_DATA_DIR,BASE_PREF,DATA_TYPE,SKIP_FILES)
+    all_data, par_file_path = read_directory(MAIN_DATA_DIR,BASE_PREF,par_ext,DATA_TYPE,SKIP_FILES,verbose)
     t1 = t.time()
 
     #Check input files exists
@@ -433,42 +467,49 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
         print("No files with the prefix: '{}' were found. Analysis cancelled.".format(BASE_PREF))
         return 1
     t_read = t1-t0
-    print("\rTotal files read: {} Read time: {}s\nCalculating fft2d data on all files...".format(file_count,t_read))
+    
+    if verbose:
+        print("\rTotal files read: {} Read time: {}s\nCalculating fft2d data on all files...".format(file_count,t_read))
     
     #Get all fft2d data for calculating
     t0 = t.time()
     all_fft2d = all_fft2d_analysis(all_data)
     t1 = t.time()
     t_fft2d = t1-t0
-    print("FFT calculations time: {}s\nCalculating phase data...".format(t_fft2d))
+    if verbose:
+        print("FFT calculations time: {}s\nCalculating phase data...".format(t_fft2d))
 
     #Get all phase data
     t0 = t.time()
     all_phase_data = all_phases(all_fft2d)
     t1 = t.time()
     t_phases = t1 - t0
-    print("Phases calculation time: {}s\nCalculating amplitudes...".format(t_phases))
+    if verbose:
+        print("Phases calculation time: {}s\nCalculating amplitudes...".format(t_phases))
 
     #Get all amplitude data
     t0 = t.time()
     all_amps = all_amplitudes(all_fft2d)
     t1 = t.time()
     t_amps = t1-t0
-    print("Amplitude calculation time: {}s\nCalculating phase velocities...".format(t_amps))
+    if verbose:
+        print("Amplitude calculation time: {}s\nCalculating phase velocities...".format(t_amps))
 
     #Get all phase velocities
     t0 = t.time()
     all_velocities = get_all_velocities(all_phase_data, all_amps, TIME_DELTA)
     t1 = t.time()
     t_velocities = t1-t0
-    print("Phase Velocity calculation time: {}s\nFinding dominant frequencies...".format(t_velocities))
+    if verbose:
+        print("Phase Velocity calculation time: {}s\nFinding dominant frequencies...".format(t_velocities))
 
     #Find dominant frequencies
     t0 = t.time()
     d_freqs = get_dominant_freqs(all_amps,THRESHOLD)
     t1 = t.time()
     t_freqs = t1-t0
-    print("{} dominant frequencies found at threshold {}%, time: {}s\nDeriving all data and writing to csv...".format(len(d_freqs),THRESHOLD*100,t_freqs))
+    if verbose:
+        print("{} dominant frequencies found at threshold {}%, time: {}s\nDeriving all data and writing to csv...".format(len(d_freqs),THRESHOLD*100,t_freqs))
     
     #Concatenate and save data results
     t0 = t.time()
@@ -477,16 +518,19 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
     #all_stats = get_all_stats(SKIP_FILES,THRESHOLD,d_freqs,all_phase_data,all_amps)
     #all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
-    summary.to_csv(DATA_OUTPUT_DIR + SUMMARY_NAME)
+    #summary.to_csv(DATA_OUTPUT_DIR + SUMMARY_NAME)
+    write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
     t1 = t.time()
     t_stats = t1 - t0
 
-    print("Data calculation and concatenation time: {}".format(t_stats))
+    if verbose:
+        print("Data calculation and concatenation time: {}".format(t_stats))
 
     #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
     if image_interval > 0 and can_plot:
 
-        print("Plotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
+        if verbose:
+            print("Plotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
         t0 = t.time()
         im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,'surf',FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
         t1 = t.time()
@@ -495,21 +539,62 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",output_nam
         print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
     else:
         t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats
-        print("No PNG images or GIF animation made.\nAnalysis process complete!\nTotal time: {}s".format(t_total))
+        print("Analysis of direcory: {} complete! Analysis time: {}s".format(MAIN_DATA_DIR,t_total))
 
+def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_files):
+
+    t0 = t.time()
+    
+    #Get list of sub directories to analyze
+    dirs = []
+    try:
+        for d in os.listdir(main_dir):
+            if os.path.isdir(main_dir+d):
+                dirs.append(d)
+    except:
+        print("An error occured, check that main directory path is correct.")
+
+    proc = []
+    for d in dirs:
+        main_d = main_dir + d
+        print("Processing directory: {}".format(main_d))
+        p = pr(target=analyze_directory,args=(main_d,output_dir,base_pref,par_ext,d,img_int,skip_files,False))
+        p.start()
+        proc.append(p)
+
+    for p in proc:
+        p.join()
+
+    t1 = t.time()
+    if len(dirs) >= 1:
+        print("All directories analyzed! Total Time: {}".format(t1-t0))
+    else:
+        print("No directories were analyzed. Check the main directory path.")
+    #analyze_directory(dir_name, par_ext, output_dir, output_name, skip_files, verbose=True)
+    
+    
+#directory -> The directory that holds the log files to analyze
+#image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
+#Note: if image interval is set to 0, no graphs are made.
+def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_interval=100,base_pref='ALTI',skip_int=1,verbose=True):
+
+#    analyze_directory(directory,output_dir,base_pref,".par","test_results",image_interval,skip_int,verbose)
+    analyze_many_dir(directory,output_dir,base_pref,".par",image_interval,skip_int)
+    
 args = sys.argv
+argcount = len(args)
 
-if len(args) > 6:
-    main(args[1],args[2],args[3],int(args[4]),args[5],int(args[6]))
-elif len(args) > 5:
-    main(args[1],args[2],args[3],int(args[4]),args[5])
-elif len(args) > 4:
-    main(args[1],args[2],args[3],int(args[4]))
-elif len(args) > 3:
-    main(args[1],args[2],args[3])
-elif len(args) > 2:
+if argcount > 6:
+    main(args[1],args[2],int(args[3]),args[4],int(args[5]),bool(args[6]))
+elif argcount > 5:
+    main(args[1],args[2],int(args[3]),args[4],int(args[5]))
+elif argcount > 4:
+    main(args[1],args[2],int(args[3]),args[4])
+elif argcount > 3:
+    main(args[1],args[2],int(args[3]))
+elif argcount > 2:
     main(args[1],args[2])
-elif len(args) > 1:
+elif argcount > 1:
     main(args[1])
 else:
     main()
