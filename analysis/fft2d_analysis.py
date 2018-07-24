@@ -580,25 +580,17 @@ def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_fil
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
 #Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",image_interval=100,base_pref='ALTI',skip_int=1,verbose=True):
-
-#    analyze_directory(directory,output_dir,base_pref,".par","test_results",image_interval,skip_int,verbose)
-    analyze_many_dir(directory,output_dir,base_pref,".par",image_interval,skip_int)
+def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="",image_interval=100):
+    
+    if filename=="":
+        analyze_many_dir(directory,output_dir,"ALTI",".par",0,1)
+    else:
+        analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
     
 args = sys.argv
 argcount = len(args)
 
-if argcount > 6:
-    main(args[1],args[2],int(args[3]),args[4],int(args[5]),bool(args[6]))
-elif argcount > 5:
-    main(args[1],args[2],int(args[3]),args[4],int(args[5]))
-elif argcount > 4:
-    main(args[1],args[2],int(args[3]),args[4])
-elif argcount > 3:
-    main(args[1],args[2],int(args[3]))
-elif argcount > 2:
-    main(args[1],args[2])
-elif argcount > 1:
-    main(args[1])
+if argcount > 4:
+    main(args[1],args[2],args[3],int(args[4]))
 else:
-    main()
+    print("Not enough arguments passed to function.")
