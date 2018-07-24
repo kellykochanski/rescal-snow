@@ -64,7 +64,9 @@ def write_summary(directory,filename,par_file_path,summary_data):
         l = params.get("L")
         f.write("Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n".format(lam_s,tau,Ava,h,d,l,freqs))
 
-    f.write("Summary data below:\n{}".format(summary_data))
+    pd.set_option('display.max_columns',None)
+    pd.set_option('expand_frame_repr',False)
+    f.write("Summary data below:\n{}\n".format(summary_data))
     f.close()
     print("Summary for directory at: {}{}".format(directory,filename))
 
@@ -295,12 +297,14 @@ def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs)
         
         #Use frame to get some more information about this frequency
         avgPV = frame["PhaseVelocity"].mean()
+        stdPV = frame["PhaseVelocity"].std()
         wave = frame.at[0,"Wavelength"]
         avgAmp = frame["Amplitude"].mean()
+        stdAmp = frame["Amplitude"].std()
         totalTime = frame["Time"].values[-1]
-        summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],wave,avgPV,avgAmp])
+        summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],stdAmp,avgAmp,wave,stdPV,avgPV])
     
-    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","Avg. Amplitude","Wavelength","Avg. Phase Velocity"])
+    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","S.D. Amplitude","Avg. Amplitude","Wavelength","S.D. Phase Velocity","Avg. Phase Velocity"])
 
     #Concatenate all frames into single large data frame and return along with summary frame
     return [pd.concat(frames),summary_frame]
