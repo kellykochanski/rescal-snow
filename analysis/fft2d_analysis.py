@@ -455,10 +455,10 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
 
     #Make directories if needed
     if image_interval > 0 and not os.path.exists(PNG_OUTPUT_DIR):
-        os.makedirs(PNG_OUTPUT_DIR)
+        os.makedirs(PNG_OUTPUT_DIR,0777)
         
     if not os.path.exists(DATA_OUTPUT_DIR):
-        os.makedirs(DATA_OUTPUT_DIR)
+        os.makedirs(DATA_OUTPUT_DIR,0777)
 
     #Get all data from the main directory
     t0 = t.time()
