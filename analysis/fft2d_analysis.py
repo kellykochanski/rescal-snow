@@ -50,24 +50,29 @@ def write_summary(directory,filename,par_file_path,summary_data):
     except:
         print("Parameter file not found at: {}".format(par_file_path))
         params = None
-    
-    f = open(directory+filename,"w")
 
-    #Write summary data
-    if params:
-        freqs, fields = summary_data.shape
-        lam_s = params.get("Lambda_S")
-        tau = params.get("Tau_min")
-        Ava = params.get("Ava_angle")
-        h = params.get("H")
-        d = params.get("D")
-        l = params.get("L")
-        f.write("Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n".format(lam_s,tau,Ava,h,d,l,freqs))
+    filepath = directory+filename
+    f = open(filepath,"w")
 
-    pd.set_option('display.max_columns',None)
-    pd.set_option('expand_frame_repr',False)
-    f.write("Summary data below:\n{}\n".format(summary_data))
-    f.close()
+    try:
+        #Write summary data
+        if params:
+            freqs, fields = summary_data.shape
+            lam_s = params.get("Lambda_S")
+            tau = params.get("Tau_min")
+            Ava = params.get("Ava_angle")
+            h = params.get("H")
+            d = params.get("D")
+            l = params.get("L")
+            f.write("Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n".format(lam_s,tau,Ava,h,d,l,freqs))
+
+        pd.set_option('display.max_columns',None)
+        pd.set_option('expand_frame_repr',False)
+        f.write("Summary data below:\n{}\n".format(summary_data))
+    finally:
+        f.close()
+        
+
     print("Summary for directory at: {}{}".format(directory,filename))
 
 #Reads all files in directory with specific extension and returns it as a sorted list
@@ -519,11 +524,12 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     t0 = t.time()
     freqs = purge_noise_freqs(all_amps,AMP_THRESHOLD)
     master_frame, summary = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
-    #all_stats = get_all_stats(SKIP_FILES,THRESHOLD,d_freqs,all_phase_data,all_amps)
-    #all_stats.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
     master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
-    #summary.to_csv(DATA_OUTPUT_DIR + SUMMARY_NAME)
+
+    #Change permissions to read/write for all
+    os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
     write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
+    os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
     t1 = t.time()
     t_stats = t1 - t0
 
