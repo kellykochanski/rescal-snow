@@ -88,7 +88,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
             elif f.endswith(par_ext):
                 par_file_path = dir_path+"/"+f
     except:
-        print("An error occured, check correct directory was passed.")    
+        print("An error occured, check correct directory was passed.\nDirectory used: {}".format(dir_path))    
 
     files.sort()
     count = 0.0
@@ -573,7 +573,7 @@ def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_fil
     if len(dirs) >= 1:
         print("All directories analyzed! Total Time: {}".format(t1-t0))
     else:
-        print("No directories were analyzed. Check the main directory path.")
+        print("No directories were analyzed. Check the main directory path.\nMain directory used: {}".format(main_dir))
     #analyze_directory(dir_name, par_ext, output_dir, output_name, skip_files, verbose=True)
     
     
