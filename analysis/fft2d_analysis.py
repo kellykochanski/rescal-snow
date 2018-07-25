@@ -105,7 +105,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
     for i, f in enumerate(files):
         if i % skip_files == 0:
             np_arr = read_data(f,datatype)
-            if np_arr == None:
+            if np_arr is None:
                 error_count += 1
                 print("\nIgnoring incorrect file and proceeding...\n")
             else:
