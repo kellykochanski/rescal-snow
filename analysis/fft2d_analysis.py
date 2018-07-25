@@ -107,7 +107,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
             np_arr = read_data(f,datatype)
             if np_arr is None:
                 error_count += 1
-                print("\nIgnoring incorrect file and proceeding...\n")
+                print("\nIgnoring incorrect file and proceeding...")
             else:
                 all_data.append(read_data(f,datatype))
             
@@ -117,7 +117,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
                 sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
                 sys.stdout.flush()
     if error_count > 0:
-        print("{} errors occured when reading in file data.")
+        print("{} errors occured when reading in file data.".format(error_count))
 
     return [all_data, par_file_path]
 
