@@ -4,7 +4,6 @@ import time as t
 import numpy as np
 import pandas as pd
 import rescal_utilities as ru
-import cPickle as pickle
 from multiprocessing import Process as pr
 
 can_plot = True
@@ -17,8 +16,6 @@ try:
 except:
     can_plot = False
     pass
-
-#fft_results = {"summary":"",data_frame:""}
 
 #Reads a file (1 row per line, each row should have same number of column values, separated by whitespaces), returns a numpy array
 #filename -> the name of the file to open
@@ -38,8 +35,8 @@ def read_data(filename,datatype):
             x, y = arr.shape
             return np.array(sig_2d)
         except:
-            print("\nError in data in file: {}\nData is not formatted correctly or missing. Check file is correct.".format(filename))
-            exit()
+            print("\nError in data in file: {}\nData is not formatted correctly or missing. Data was skipped.".format(filename))
+            return None
         return np.array([])
 
 #Writes to a textfile the basic summary of the data, using parameter file and summary dataframe
@@ -98,18 +95,29 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
     files.sort()
     count = 0.0
     max = len(files)/skip_files
+
+    error_count = 0 #Track how many error files encountered
+
     #Create list of numpy arrays containing data for each file
     if verbose:
         print("Reading data files..")
     all_data = []
     for i, f in enumerate(files):
         if i % skip_files == 0:
-            all_data.append(read_data(f,datatype))
+            np_arr = read_data(f,datatype)
+            if np_arr == None:
+                error_count += 1
+                print("\nIgnoring incorrect file and proceeding...\n")
+            else:
+                all_data.append(read_data(f,datatype))
+            
             if verbose:
                 count += 1
                 progress = (count / max) * 100.0
                 sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
                 sys.stdout.flush()
+    if error_count > 0:
+        print("{} errors occured when reading in file data.")
 
     return [all_data, par_file_path]
 
@@ -437,7 +445,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     CSV_OUTPUT_NAME = output_name + ".csv"
     SUMMARY_NAME = output_name + "_summary.txt"
     GIF_OUTPUT_NAME = output_name + ".gif"
-    GRAPH_TYPE = 'surf' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
+    GRAPH_TYPE = 'cont' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
     XLABEL = 'x'
     YLABEL = 'y'
     ZLABEL = 'Amplitude'
@@ -542,7 +550,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
         if verbose:
             print("Plotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
         t0 = t.time()
-        im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,'surf',FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
+        im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,GRAPH_TYPE,FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
         t1 = t.time()
         t_plot = t1-t0
         t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats + t_plot
