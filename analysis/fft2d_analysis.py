@@ -20,7 +20,7 @@ except:
 #Reads a file (1 row per line, each row should have same number of column values, separated by whitespaces), returns a numpy array
 #filename -> the name of the file to open
 #datatype -> the datatype of the values within the file (int, or float)
-def read_data(filename,datatype):
+def read_data(filename,datatype,show_error=True):
     
     sig_2d = []
     f = open(filename, 'r')
@@ -35,7 +35,7 @@ def read_data(filename,datatype):
             x, y = arr.shape
             return np.array(sig_2d)
         except:
-            print("\nError in data in file: {}\nData is not formatted correctly or missing. Data was skipped.".format(filename))
+            print("Error in data in file: {}\nData is not formatted correctly or missing. Data was skipped.".format(filename))
             return None
         return np.array([])
 
@@ -97,17 +97,19 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
     max = len(files)/skip_files
 
     error_count = 0 #Track how many error files encountered
-
+    show_errors = True
     #Create list of numpy arrays containing data for each file
     if verbose:
         print("Reading data files..")
     all_data = []
     for i, f in enumerate(files):
         if i % skip_files == 0:
-            np_arr = read_data(f,datatype)
+            np_arr = read_data(f,datatype,True)
             if np_arr is None:
                 error_count += 1
-                print("\nIgnoring incorrect file and proceeding...")
+                if show_errors:
+                    print("Ignoring incorrect files and proceeding...")
+                    show_errors = False
             else:
                 all_data.append(read_data(f,datatype))
             
@@ -117,7 +119,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
                 sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
                 sys.stdout.flush()
     if error_count > 0:
-        print("{} errors occured when reading in file data.".format(error_count))
+        print("{} files caused errors when reading in data.".format(error_count))
 
     return [all_data, par_file_path]
 
