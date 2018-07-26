@@ -534,10 +534,11 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     master_frame, summary = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
     master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
 
-    #Change permissions to read/write for all
+    #Change permissions to read/write for all and directories
     os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
     write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
     os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
+    os.chmod(DATA_OUTPUT_DIR, 0o777)
     t1 = t.time()
     t_stats = t1 - t0
 
