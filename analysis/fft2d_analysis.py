@@ -35,7 +35,8 @@ def read_data(filename,datatype,show_error=True):
             x, y = arr.shape
             return np.array(sig_2d)
         except:
-            print("Error in data in file: {}\nData is not formatted correctly or missing. Data was skipped.".format(filename))
+            if show_error:
+                print("Error in data in file: {}\nData is not formatted correctly or missing. Data was skipped.".format(filename))
             return None
         return np.array([])
 
@@ -78,6 +79,8 @@ def write_summary(directory,filename,par_file_path,summary_data):
 #datatype -> The type of data stored in each files (int or float data)
 def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
 
+    MAX_ERRORS = 10 #Stop reading in files if max is reached
+    
     if verbose:
         print("Sorting through data files...")
     #Get array list of all files to open
@@ -104,6 +107,11 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
     all_data = []
     for i, f in enumerate(files):
         if i % skip_files == 0:
+
+            if error_count > MAX_ERRORS:
+                print("Max file reading errors has been reached. {} files had errors in data.".format(error_count))
+                print("Total files read successfully: {}. Skipping to analysis process...".format(i+1-error_count))
+                break
             np_arr = read_data(f,datatype,True)
             if np_arr is None:
                 error_count += 1
@@ -451,7 +459,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     CSV_OUTPUT_NAME = output_name + ".csv"
     SUMMARY_NAME = output_name + "_summary.txt"
     GIF_OUTPUT_NAME = output_name + ".gif"
-    GRAPH_TYPE = 'cont' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
+    GRAPH_TYPE = 'wire' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
     XLABEL = 'x'
     YLABEL = 'y'
     ZLABEL = 'Amplitude'
