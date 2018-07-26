@@ -260,10 +260,10 @@ def get_all_velocities(all_phases, all_amps, time_delta):
 
     for i, phase in enumerate(all_phases[1:]):
         diff = phase-all_phases[i]
-        if diff > 5:
+        if np.amax(diff) > 5:
             diff -= 2*np.pi
-        else:
-            p_velocities.append((phase-all_phases[i])/time_delta)
+            
+        p_velocities.append(diff/time_delta)
 
     return p_velocities
 
