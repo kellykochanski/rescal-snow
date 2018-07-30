@@ -4,7 +4,7 @@ import time as t
 import numpy as np
 import pandas as pd
 import rescal_utilities as ru
-from multiprocessing import Process as pr
+import multiprocessing as mp
 
 can_plot = True
 try:
@@ -323,12 +323,13 @@ def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs)
         avgPV = frame["PhaseVelocity"].mean()
         stdPV = frame["PhaseVelocity"].std()
         wave = frame.at[0,"Wavelength"]
+        velocity = avgPV*wave
         avgAmp = frame["Amplitude"].mean()
         stdAmp = frame["Amplitude"].std()
         totalTime = frame["Time"].values[-1]
-        summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],stdAmp,avgAmp,wave,stdPV,avgPV])
+        summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],stdAmp,avgAmp,stdPV,avgPV,wave,velocity])
     
-    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","S.D. Amplitude","Avg. Amplitude","Wavelength","S.D. Phase Velocity","Avg. Phase Velocity"])
+    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","S.D. Amplitude","Avg. Amplitude","S.D. Phase Velocity","Avg. Phase Velocity","Wavelength","Velocity"])
 
     #Concatenate all frames into single large data frame and return along with summary frame
     return [pd.concat(frames),summary_frame]
@@ -449,7 +450,7 @@ def save_to_png(figure, fname):
     figure.savefig(fname+'.png',bbox_inches='tight')
 
 #Performs fft analysis on specified directory
-def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, image_interval, skip_files, verbose=True):
+def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, image_interval, skip_files, verbose=True, shared_q=None):
 
     MAIN_DATA_DIR = dir_name
     PARAMETER_FILE = par_ext
@@ -473,110 +474,134 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     DATA_TYPE = int
     TIME_DELTA = 10 #Time change between data files
     
-    #Check parent directories exists
-    directories = [MAIN_DATA_DIR]
-    for d in directories:
-        if not os.path.exists(d):
-            print("The specified path: {} was not found. Analysis cancelled.".format(d))
+    try:
+        #Check parent directories exists
+        directories = [MAIN_DATA_DIR]
+        for d in directories:
+            if not os.path.exists(d):
+                err = "The specified path: {} was not found. Analysis cancelled.".format(d)
+                print(err)
+                if shared_q is not None:
+                    shared_q.put({"Error":err,"Summary":SUMMARY_NAME})
+                    shared_q.close()
+                return 1
+
+        #Make directories if needed
+        if image_interval > 0 and not os.path.exists(PNG_OUTPUT_DIR):
+            os.makedirs(PNG_OUTPUT_DIR,0777)
+        
+        if not os.path.exists(DATA_OUTPUT_DIR):
+            os.makedirs(DATA_OUTPUT_DIR,0777)
+
+        #Get all data from the main directory
+        t0 = t.time()
+        all_data, par_file_path = read_directory(MAIN_DATA_DIR,BASE_PREF,par_ext,DATA_TYPE,SKIP_FILES,verbose)
+        t1 = t.time()
+
+        #Check input files exists
+        file_count = len(all_data)
+        if file_count == 0:
+            err = "No files with the prefix: '{}' were found. Analysis cancelled.".format(BASE_PREF)
+            print(err)
+            if shared_q is not None:
+                shared_q.put({"Error":err,"Summary":SUMMARY_NAME})
+                shared_q.close()
+            return 1
+        t_read = t1-t0
+        
+        if verbose:
+            print("\rTotal files read: {} Read time: {}s\nCalculating fft2d data on all files...".format(file_count,t_read))
+        
+        #Get all fft2d data for calculating
+        t0 = t.time()
+        all_fft2d = all_fft2d_analysis(all_data)
+        t1 = t.time()
+        t_fft2d = t1-t0
+        if verbose:
+            print("FFT calculations time: {}s\nCalculating phase data...".format(t_fft2d))
+
+        #Get all phase data
+        t0 = t.time()
+        all_phase_data = all_phases(all_fft2d)
+        t1 = t.time()
+        t_phases = t1 - t0
+        if verbose:
+            print("Phases calculation time: {}s\nCalculating amplitudes...".format(t_phases))
+
+        #Get all amplitude data
+        t0 = t.time()
+        all_amps = all_amplitudes(all_fft2d)
+        t1 = t.time()
+        t_amps = t1-t0
+        if verbose:
+            print("Amplitude calculation time: {}s\nCalculating phase velocities...".format(t_amps))
+
+        #Get all phase velocities
+        t0 = t.time()
+        all_velocities = get_all_velocities(all_phase_data, all_amps, TIME_DELTA)
+        t1 = t.time()
+        t_velocities = t1-t0
+        if verbose:
+            print("Phase Velocity calculation time: {}s\nFinding dominant frequencies...".format(t_velocities))
+
+        #Find dominant frequencies
+        t0 = t.time()
+        d_freqs = get_dominant_freqs(all_amps,THRESHOLD)
+        t1 = t.time()
+        t_freqs = t1-t0
+        if verbose:
+            print("{} dominant frequencies found at threshold {}%, time: {}s\nDeriving all data and writing to csv...".format(len(d_freqs),THRESHOLD*100,t_freqs))
+        
+        #Concatenate and save data results
+        t0 = t.time()
+        freqs = purge_noise_freqs(all_amps,AMP_THRESHOLD)
+        master_frame, summary = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
+        master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
+
+        #Change permissions to read/write for all and directories
+        try:
+            os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
+            write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
+            os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
+            os.chmod(DATA_OUTPUT_DIR, 0o777)
+        except:
+            err = "Directory and file permissions could not be set to all. Check directory permissions."
+            print(err)
+            if shared_q is not None:
+                shared_q.put({"Error":err,"Summary":SUMMARY_NAME})
+                shared_q.close()
             return 1
 
-    #Make directories if needed
-    if image_interval > 0 and not os.path.exists(PNG_OUTPUT_DIR):
-        os.makedirs(PNG_OUTPUT_DIR,0777)
-        
-    if not os.path.exists(DATA_OUTPUT_DIR):
-        os.makedirs(DATA_OUTPUT_DIR,0777)
-
-    #Get all data from the main directory
-    t0 = t.time()
-    all_data, par_file_path = read_directory(MAIN_DATA_DIR,BASE_PREF,par_ext,DATA_TYPE,SKIP_FILES,verbose)
-    t1 = t.time()
-
-    #Check input files exists
-    file_count = len(all_data)
-    if file_count == 0:
-        print("No files with the prefix: '{}' were found. Analysis cancelled.".format(BASE_PREF))
-        return 1
-    t_read = t1-t0
-    
-    if verbose:
-        print("\rTotal files read: {} Read time: {}s\nCalculating fft2d data on all files...".format(file_count,t_read))
-    
-    #Get all fft2d data for calculating
-    t0 = t.time()
-    all_fft2d = all_fft2d_analysis(all_data)
-    t1 = t.time()
-    t_fft2d = t1-t0
-    if verbose:
-        print("FFT calculations time: {}s\nCalculating phase data...".format(t_fft2d))
-
-    #Get all phase data
-    t0 = t.time()
-    all_phase_data = all_phases(all_fft2d)
-    t1 = t.time()
-    t_phases = t1 - t0
-    if verbose:
-        print("Phases calculation time: {}s\nCalculating amplitudes...".format(t_phases))
-
-    #Get all amplitude data
-    t0 = t.time()
-    all_amps = all_amplitudes(all_fft2d)
-    t1 = t.time()
-    t_amps = t1-t0
-    if verbose:
-        print("Amplitude calculation time: {}s\nCalculating phase velocities...".format(t_amps))
-
-    #Get all phase velocities
-    t0 = t.time()
-    all_velocities = get_all_velocities(all_phase_data, all_amps, TIME_DELTA)
-    t1 = t.time()
-    t_velocities = t1-t0
-    if verbose:
-        print("Phase Velocity calculation time: {}s\nFinding dominant frequencies...".format(t_velocities))
-
-    #Find dominant frequencies
-    t0 = t.time()
-    d_freqs = get_dominant_freqs(all_amps,THRESHOLD)
-    t1 = t.time()
-    t_freqs = t1-t0
-    if verbose:
-        print("{} dominant frequencies found at threshold {}%, time: {}s\nDeriving all data and writing to csv...".format(len(d_freqs),THRESHOLD*100,t_freqs))
-    
-    #Concatenate and save data results
-    t0 = t.time()
-    freqs = purge_noise_freqs(all_amps,AMP_THRESHOLD)
-    master_frame, summary = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
-    master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
-
-    #Change permissions to read/write for all and directories
-    try:
-        os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
-        write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
-        os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
-        os.chmod(DATA_OUTPUT_DIR, 0o777)
-    except:
-        print("Directory and file permissions could not be set to all. Check directory permissions.")
-
-    t1 = t.time()
-    t_stats = t1 - t0
-    
-    if verbose:
-        print("Data calculation and concatenation time: {}".format(t_stats))
-
-    #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
-    if image_interval > 0 and can_plot:
-
-        if verbose:
-            print("Plotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
-        t0 = t.time()
-        im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,GRAPH_TYPE,FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
         t1 = t.time()
-        t_plot = t1-t0
-        t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats + t_plot
-        print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
-    else:
-        t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats
-        print("Analysis of direcory: {} complete! Analysis time: {}s".format(MAIN_DATA_DIR,t_total))
+        t_stats = t1 - t0
+        
+        if verbose:
+            print("Data calculation and concatenation time: {}".format(t_stats))
+
+        #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
+        if image_interval > 0 and can_plot:
+
+            if verbose:
+                print("Plotting data at intervals of {} and creating PNG images...".format(t_stats,SNAPSHOT_INTERVAL))
+            t0 = t.time()
+            im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,GRAPH_TYPE,FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
+            t1 = t.time()
+            t_plot = t1-t0
+            t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats + t_plot
+            print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
+        else:
+            t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats
+            print("Analysis of direcory: {} complete! Analysis time: {}s".format(MAIN_DATA_DIR,t_total))
+
+        if shared_q is not None:
+            shared_q.put({"Error":None,"Summary":summary})
+            shared_q.close()
+    except:
+        err = "An uncaught error occured."
+        print(err)
+        if shared_q is not None:
+            shared_q.put({"Error":err,"Summary":summary})
+            shared_q.close()
 
 def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_files):
 
@@ -592,10 +617,11 @@ def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_fil
         print("An error occured, check that main directory path is correct.")
 
     proc = []
+    shared_q = mp.Queue()
     for d in dirs:
         main_d = main_dir + d
         print("Processing directory: {}".format(main_d))
-        p = pr(target=analyze_directory,args=(main_d,output_dir,base_pref,par_ext,d,img_int,skip_files,False))
+        p = mp.Process(target=analyze_directory,args=(main_d,output_dir,base_pref,par_ext,d,img_int,skip_files,False,shared_q))
         p.start()
         proc.append(p)
 
@@ -605,9 +631,19 @@ def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_fil
     t1 = t.time()
     if len(dirs) >= 1:
         print("All directories analyzed! Total Time: {}".format(t1-t0))
+
+        #Create a summary of summaries for all successful processes
+        try:
+            f = open(output_dir+"MAIN_SUMMARY.TXT","a+")
+            while not shared_q.empty():
+                p_data = shared_q.get()
+                if p_data["Error"] is None:
+                    f.write(p_data["Summary"]+"\n")
+            f.close()
+        except:
+            print("An error occured while writing main summary file.")
     else:
         print("No directories were analyzed. Check the main directory path.\nMain directory used: {}".format(main_dir))
-    #analyze_directory(dir_name, par_ext, output_dir, output_name, skip_files, verbose=True)
     
 def plot_only(dir_name, output_dir, base_pref, par_ext, output_name, image_interval, skip_files, verbose=True):
     MAIN_DATA_DIR = dir_name
