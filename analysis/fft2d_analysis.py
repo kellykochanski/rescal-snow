@@ -399,13 +399,15 @@ def graph_all(interval,dir,GIF_name,basename,data,graph_type,fig_size,x_label,y_
     count = 0.0
     max = len(data)/interval
     images = []
+    cmin = np.amin(data)
+    cmax = np.amax(data)*.9
     for i, d in enumerate(data):
         if i % interval == 0:
             count += 1
             progress = count / max * 100
             sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
             sys.stdout.flush()
-            fig = plot_data(d,graph_type,fig_size,x_label,y_label,z_label,title.format(id=i))
+            fig = plot_data(d,cmin,cmax,graph_type,fig_size,x_label,y_label,z_label,title.format(id=i))
             fname = dir + basename.format(i)
             save_to_png(fig,fname)
             pl.close()
@@ -422,7 +424,7 @@ def graph_all(interval,dir,GIF_name,basename,data,graph_type,fig_size,x_label,y_
 #fig_size -> (optional) size of the figure to plot
 #x_label,y_label,z_label -> (optional) labels to use for x,y and z-axis
 #title -> (optional) the title to use for plot
-def plot_data(data,type='wire',fig_size=(10,10),x_label='x',y_label='y',z_label='Amplitude',title='Graph of FFT2d Amplitude Spectrum'):
+def plot_data(data,min,max,type='wire',fig_size=(10,10),x_label='x',y_label='y',z_label='Amplitude',title='Graph of FFT2d Amplitude Spectrum'):
     w, l = data.shape
     data_x, data_y = np.meshgrid(np.arange(0,w),np.arange(0,l), indexing='ij')        
     fig = pl.figure(figsize=fig_size)
@@ -435,7 +437,8 @@ def plot_data(data,type='wire',fig_size=(10,10),x_label='x',y_label='y',z_label=
     elif type == 'scat':
         ax.scatter(data_x,data_y,data,s=5)
     elif type == 'cont':
-        ax.contour(data_x,data_y,data)
+        ax = fig.add_subplot(111)
+        pl.contourf(data[0:15,0:30],vmin=min,vmax=max,cmap=pl.cm.get_cmap("BuPu"))
     else:
         ax.plot_wireframe(data_x,data_y,data)
 
@@ -456,7 +459,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     CSV_OUTPUT_NAME = output_name + ".csv"
     SUMMARY_NAME = output_name + "_summary.txt"
     GIF_OUTPUT_NAME = output_name + ".gif"
-    GRAPH_TYPE = 'wire' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
+    GRAPH_TYPE = 'cont' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
     XLABEL = 'x'
     YLABEL = 'y'
     ZLABEL = 'Amplitude'
@@ -466,7 +469,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     BASE_FILE_NAME = "ALTI{:05d}_t0"
     BASE_PREF = base_pref
     THRESHOLD = 0.8
-    AMP_THRESHOLD = 1.0
+    AMP_THRESHOLD = 0.1 #Should be
     DATA_TYPE = int
     TIME_DELTA = 10 #Time change between data files
     
@@ -602,16 +605,94 @@ def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_fil
         print("No directories were analyzed. Check the main directory path.\nMain directory used: {}".format(main_dir))
     #analyze_directory(dir_name, par_ext, output_dir, output_name, skip_files, verbose=True)
     
+def plot_only(dir_name, output_dir, base_pref, par_ext, output_name, image_interval, skip_files, verbose=True):
+    MAIN_DATA_DIR = dir_name
+    PARAMETER_FILE = par_ext
+    SKIP_FILES = skip_files
+    PNG_OUTPUT_DIR = output_dir + "png_output/"
+    DATA_OUTPUT_DIR = output_dir
+    CSV_OUTPUT_NAME = output_name + ".csv"
+    SUMMARY_NAME = output_name + "_summary.txt"
+    GIF_OUTPUT_NAME = output_name + ".gif"
+    GRAPH_TYPE = 'cont' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
+    XLABEL = 'x'
+    YLABEL = 'y'
+    ZLABEL = 'Amplitude'
+    TITLE = 'Graph of FFT2d Amplitudes at t={id}' #id is replaced by index of snapshot
+    FIG_SIZE = (10,10)
+    SNAPSHOT_INTERVAL = image_interval #A png image of graph is saved at each interval
+    BASE_FILE_NAME = "ALTI{:05d}_t0"
+    BASE_PREF = base_pref
+    THRESHOLD = 0
+    AMP_THRESHOLD = 0 #Should be
+    DATA_TYPE = int
+    TIME_DELTA = 10 #Time change between data files
     
+    #Check parent directories exists
+    directories = [MAIN_DATA_DIR]
+    for d in directories:
+        if not os.path.exists(d):
+            print("The specified path: {} was not found. Analysis cancelled.".format(d))
+            return 1
+
+    #Make directories if needed
+    if image_interval > 0 and not os.path.exists(PNG_OUTPUT_DIR):
+        os.makedirs(PNG_OUTPUT_DIR,0777)
+    
+    if not os.path.exists(DATA_OUTPUT_DIR):
+        os.makedirs(DATA_OUTPUT_DIR,0777)
+
+    #Get all data from the main directory
+    t0 = t.time()
+    all_data, par_file_path = read_directory(MAIN_DATA_DIR,BASE_PREF,par_ext,DATA_TYPE,SKIP_FILES,verbose)
+    t1 = t.time()
+
+    #Check input files exists
+    file_count = len(all_data)
+    if file_count == 0:
+        print("No files with the prefix: '{}' were found. Analysis cancelled.".format(BASE_PREF))
+        return 1
+        t_read = t1-t0
+        
+        if verbose:
+            print("\rTotal files read: {} Read time: {}s\nCalculating fft2d data on all files...".format(file_count,t_read))
+
+    #Get all fft2d data for calculating
+    t0 = t.time()
+    all_fft2d = all_fft2d_analysis(all_data)
+    t1 = t.time()
+    t_fft2d = t1-t0
+    if verbose:
+        print("FFT calculations time: {}s\nCalculating amplitude data...".format(t_fft2d))
+
+    #Get all amplitude data
+    t0 = t.time()
+    all_amps = all_amplitudes(all_fft2d)
+    t1 = t.time()
+    t_amps = t1-t0
+    if verbose:
+        print("Amplitude calculation time: {}s".format(t_amps))
+
+    #Graph resulting data at specific intervals and save as images to directory, create GIF of pngs
+    if image_interval > 0 and can_plot:
+        if verbose:
+            print("Graphing data")
+        im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,GRAPH_TYPE,FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
+
+    print("\nPlotting done! {} images graphed.".format(im_count))
+
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
 #Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="",image_interval=100):
-    
-    if filename=="":
-        analyze_many_dir(directory,output_dir,"ALTI",".par",0,1)
+def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="",image_interval=100, plot=False):
+
+    if plot:
+        plot_only(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
     else:
-        analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
+        if filename=="":
+            analyze_many_dir(directory,output_dir,"ALTI",".par",0,1)
+        else:
+            analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
     
 args = sys.argv
 argcount = len(args)
