@@ -93,7 +93,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
             elif f.endswith(par_ext):
                 par_file_path = dir_path+"/"+f
     except:
-        print("An error occured, check correct directory was passed.\nDirectory used: {}".format(dir_path))    
+        print("An error occured, check directory path and the read/write permissions.\nDirectory: {}".format(dir_path))    
 
     files.sort()
     count = 0.0
@@ -112,14 +112,14 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
                 print("Max file reading errors has been reached. {} files had errors in data.".format(error_count))
                 print("Total files read successfully: {}. Skipping to analysis process...".format(i+1-error_count))
                 break
-            np_arr = read_data(f,datatype,True)
+            np_arr = read_data(f,datatype,show_errors)
             if np_arr is None:
                 error_count += 1
                 if show_errors:
                     print("Ignoring incorrect files and proceeding...")
                     show_errors = False
             else:
-                all_data.append(read_data(f,datatype))
+                all_data.append(np_arr)
             
             if verbose:
                 count += 1
@@ -549,13 +549,17 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
 
     #Change permissions to read/write for all and directories
-    os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
-    write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
-    os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
-    os.chmod(DATA_OUTPUT_DIR, 0o777)
+    try:
+        os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
+        write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
+        os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
+        os.chmod(DATA_OUTPUT_DIR, 0o777)
+    except:
+        print("Directory and file permissions could not be set to all. Check directory permissions.")
+
     t1 = t.time()
     t_stats = t1 - t0
-
+    
     if verbose:
         print("Data calculation and concatenation time: {}".format(t_stats))
 
