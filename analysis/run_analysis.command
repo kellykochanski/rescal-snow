@@ -19,15 +19,15 @@ if [ -d "${in_dir}/$dir" ]; then
     if [ "$option" == "1" ]; then
 	read -p "Enter output name (leave blank if multiple directories): " outname
         if [[ -z "$outname" ]]; then
-  	    python ${fft_dir}/fft2d_analysis.py "${in_dir}/${dir}/" "${out_dir}/fft/${dir}/" "" 0
+  	    python ${fft_dir}fft2d_analysis.py "${in_dir}/${dir}/" "${out_dir}/fft/${dir}/" "" 0
 	else
 	    read -p "Create png images and GIF animation? (y/n): " ans
       	    if [ "$ans" == "n" ]; then
 	        python ${fft_dir}fft2d_analysis.py "${in_dir}/${dir}/" "${out_dir}/fft/" $outname 0
             elif [ "$ans" == "y" ]; then
-                fc=$(ls ${in_dir}$dir/*.data | wc -l | xargs)
+                fc=$(ls ${in_dir}/$dir/*.data | wc -l | xargs)
        	        read -p "Enter snapshot step size (1-$fc): " interval
-                python ${fft_dir}/fft2d_analysis.py "${in_dir}/${dir}/" "${out_dir}/fft/" $outname $interval
+                python ${fft_dir}fft2d_analysis.py "${in_dir}/${dir}/" "${out_dir}/fft/" $outname $interval
             fi
 	fi
     elif [ "$option" == "2" ]; then
@@ -42,10 +42,10 @@ if [ -d "${in_dir}/$dir" ]; then
             elif [ "$ans" == "y" ]; then
                 fc=$(ls ${in_dir}$dir/*.data | wc -l | xargs)
        	        read -p "Enter snapshot step size (1-$fc): " interval
-                python ${fft_dir}/fft2d_analysis.py "${in_dir}/$dir/" "${out_dir}/fft/" $outname $interval
+                python ${fft_dir}fft2d_analysis.py "${in_dir}/$dir/" "${out_dir}/fft/" $outname $interval
             fi
 	else
-	    python ${fft_dir}/fft2d_analysis.py "${in_dir}/$dir/" "${out_dir}/fft/" "" 0
+	    python ${fft_dir}fft2d_analysis.py "${in_dir}/$dir/" "${out_dir}/fft/" "" 0
 	fi
 	echo Performing x-correlation analysis...
 	python ${xcor_dir}xcor-slices.py "{in_dir}/$dir" "${out_dir}/xcorr/" "$(basename $dir)"

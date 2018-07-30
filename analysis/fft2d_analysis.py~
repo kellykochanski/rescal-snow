@@ -684,15 +684,13 @@ def plot_only(dir_name, output_dir, base_pref, par_ext, output_name, image_inter
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
 #Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="",image_interval=100, plot=False):
+def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="",image_interval=100):
 
-    if plot:
-        plot_only(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
-    else:
-        if filename=="":
-            analyze_many_dir(directory,output_dir,"ALTI",".par",0,1)
-        else:
-            analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
+    plot_only(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
+    #if filename=="":
+    #    analyze_many_dir(directory,output_dir,"ALTI",".par",0,1)
+    #else:
+#    analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
     
 args = sys.argv
 argcount = len(args)
