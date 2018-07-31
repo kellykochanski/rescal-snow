@@ -52,7 +52,11 @@ def velocity_between(signal_1, signal_2):
         slice_2_tiled = np.tile(signal_2[:, slice_index], [3])
 
         one_d_correlation = signal.correlate(slice_1, slice_2_tiled, mode='same')
-
+        
+        plt.figure('1D xcor')
+        plt.plot(one_d_correlation)
+        plt.show()
+        
         location_of_max = np.argmax(one_d_correlation)
         offset = location_of_max - (altitudes_1_matrix.shape[0] / 2)
         velocities.append(offset)
@@ -77,7 +81,7 @@ while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
     # Cross correlate slices
     start = time.time()
     velocity = velocity_between(altitudes_1_matrix, altitudes_2_matrix)
-    
+    exit()
     # Scale the velocity to the time steps between each measurement
     velocity = float(velocity) / alti_file_offset
     correlation_times.append(time.time() - start)
@@ -111,7 +115,9 @@ def function_to_fit(t, A, b, m, c):
     return ((A) * math.e**((t)/(-b))) + ((m) * (t) + (c))
 
 try:
-    popt, pcov = curve_fit(function_to_fit, x_values, y_values, p0 = [1,50,-1,1])
+    popt, pcov = curve_fit(function_to_fit, x_values, y_values, p0 = [1,50,-1,1], sigma=np.full(len(y_values), 0.005))
+    perr = np.sqrt(np.diag(pcov))
+    print(perr)
     A, b, m, c = popt
     calc_y_values = function_to_fit(np.asarray(x_values), float(A), float(b), float(m), float(c))
 
@@ -130,6 +136,7 @@ try:
     meta_analysis_file.write('Initial velocity:        ' + str(y_values[0]) + '\n')
     meta_analysis_file.write('Final velocity:            ' + str(y_values[-1]) + '\n')
     meta_analysis_file.write('R Squared value:        ' + str(r_squared) + '\n')
+    meta_analysis_file.write('Error bars:           ' + str(perr) + '\n')
     meta_analysis_file.write('\n\n')
 
     # Graphing
