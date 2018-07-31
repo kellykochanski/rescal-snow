@@ -1,5 +1,0 @@
-Average correlation time: 0.022726893425
-Total correlation time: 0.04545378685
-
-Velocities omiting first, step size of 100: [0.3331, 0.2235]
-Initial velocity:        0.3331Final velocity:            0.2235

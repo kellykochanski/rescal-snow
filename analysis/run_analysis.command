@@ -4,8 +4,8 @@ cd "$parent_path"
 
 in_dir="input_data" #The main input directory relative to this script
 out_dir="output_data" #The main output directory
-fft_dir=""
-xcor_dir=""
+fft_dir="downie4_snowcal/rescal-snow/analysis/"
+xcor_dir="robeson3_snowcal/rescal-snow/analysis/"
 pref="ALTI"
 skip_files=1
 
@@ -17,28 +17,38 @@ if [ -d "${in_dir}/$dir" ]; then
     echo Option 3 - Run all analysis scripts
     read -p 'Which option do you want? (1-3): ' option
     if [ "$option" == "1" ]; then
-        read -p "Create png images and GIF animation? (y/n): " ans
-        if [ "$ans" == "n" ]; then
-      	    python ${fft_dir}fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_analysis" 0 $pref $skip_files
-        elif [ "$ans" == "y" ]; then
-            fc=$(ls ${in_dir}$dir/*.data | wc -l | xargs)
-       	    read -p "Enter snapshot step size (1-$fc): " interval
-            python ${fft_dir}/fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_analysis" $interval $pref $skip_files
-        fi
+	read -p "Enter output name (leave blank if multiple directories): " outname
+        if [[ -z "$outname" ]]; then
+  	    python ${fft_dir}fft2d_analysis.py "${in_dir}/${dir}/" "${out_dir}/fft/${dir}/" "" 0
+	else
+	    read -p "Create png images and GIF animation? (y/n): " ans
+      	    if [ "$ans" == "n" ]; then
+	        python ${fft_dir}fft2d_analysis.py "${in_dir}/${dir}/" "${out_dir}/fft/" $outname 0
+            elif [ "$ans" == "y" ]; then
+                fc=$(ls ${in_dir}/$dir/*.data | wc -l | xargs)
+       	        read -p "Enter snapshot step size (1-$fc): " interval
+                python ${fft_dir}fft2d_analysis.py "${in_dir}/${dir}/" "${out_dir}/fft/" $outname $interval
+            fi
+	fi
     elif [ "$option" == "2" ]; then
 	echo Performing x-correlation analysis... 
-	python xcor-slices.py "${in_dir}/$dir" "${out_dir}/xcorr/" "$(basename $dir)"
+	python ${xcor_dir}xcor-slices.py "${in_dir}/$dir" "${out_dir}/xcorr/" "$(basename $dir)"
     elif [ "$option" == "3" ]; then
-	read -p "Create png images and GIF animation from fft analysis? (y/n): " ans
-	if [ "$ans" == "n" ]; then
-      	    python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_analysis" 0 $pref $skip_files
-        elif [ "$ans" == "y" ]; then
-	    fc=$(ls input_data/$dir/*.log | wc -l | xargs)
-       	    read -p "Enter snapshot step size (1-$fc): " interval
-            python fft2d_analysis.py "${in_dir}/$dir" "${out_dir}/fft/" "$(basename $dir)_analysis" $interval $pref $skip_files
-        fi
+	read -p "Enter output name (leave blank if multiple directories): " outname
+        if [ "$outname" != "" ]; then
+  	    read -p "Create png images and GIF animation? (y/n): " ans
+      	    if [ "$ans" == "n"]; then
+	        python ${fft_dir}fft2d_analysis.py "${in_dir}/$dir/" "${out_dir}/fft/" $outname 0
+            elif [ "$ans" == "y" ]; then
+                fc=$(ls ${in_dir}$dir/*.data | wc -l | xargs)
+       	        read -p "Enter snapshot step size (1-$fc): " interval
+                python ${fft_dir}fft2d_analysis.py "${in_dir}/$dir/" "${out_dir}/fft/" $outname $interval
+            fi
+	else
+	    python ${fft_dir}fft2d_analysis.py "${in_dir}/$dir/" "${out_dir}/fft/" "" 0
+	fi
 	echo Performing x-correlation analysis...
-	python xcor-slices.py "{in_dir}/$dir" "${out_dir}/xcorr/" "$(basename $dir)"
+	python ${xcor_dir}xcor-slices.py "{in_dir}/$dir" "${out_dir}/xcorr/" "$(basename $dir)"
     else
         echo You entered an invalid option.
     fi

@@ -1,0 +1,4 @@
+Average correlation time: nan
+Total correlation time: 0.0
+
+Velocities omiting first, step size of 100: []
