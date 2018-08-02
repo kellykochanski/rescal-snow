@@ -93,8 +93,10 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
             elif f.endswith(par_ext):
                 par_file_path = dir_path+"/"+f
     except:
-        print("An error occured, check directory path and the read/write permissions.\nDirectory: {}".format(dir_path))    
-
+        if verbose:
+            print("An error occured, check directory path and the read/write permissions.\nDirectory: {}".format(dir_path))    
+        return
+    
     files.sort()
     count = 0.0
     max = len(files)/skip_files
@@ -108,7 +110,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
     for i, f in enumerate(files):
         if i % skip_files == 0:
 
-            if error_count > MAX_ERRORS:
+            if error_count > MAX_ERRORS and verbose:
                 print("Max file reading errors has been reached. {} files had errors in data.".format(error_count))
                 print("Total files read successfully: {}. Skipping to analysis process...".format(i+1-error_count))
                 break
@@ -116,7 +118,6 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
             if np_arr is None:
                 error_count += 1
                 if show_errors:
-                    print("Ignoring incorrect files and proceeding...")
                     show_errors = False
             else:
                 all_data.append(np_arr)
@@ -126,7 +127,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
                 progress = (count / max) * 100.0
                 sys.stdout.write('\r[{}] {}%'.format('#'*int(progress/5), round(progress,2)))
                 sys.stdout.flush()
-    if error_count > 0:
+    if error_count > 0 and verbose:
         print("{} files caused errors when reading in data.".format(error_count))
 
     return [all_data, par_file_path]
@@ -470,7 +471,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     BASE_FILE_NAME = "ALTI{:05d}_t0"
     BASE_PREF = base_pref
     THRESHOLD = 0.8
-    AMP_THRESHOLD = 0.1 #Should be
+    AMP_THRESHOLD = 0.3 #Should be around 1
     DATA_TYPE = int
     TIME_DELTA = 10 #Time change between data files
     
@@ -502,7 +503,8 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
         file_count = len(all_data)
         if file_count == 0:
             err = "No files with the prefix: '{}' were found. Analysis cancelled.".format(BASE_PREF)
-            print(err)
+            if verbose:
+                print(err)
             if shared_q is not None:
                 shared_q.put({"Error":err,"Summary":SUMMARY_NAME})
                 shared_q.close()
@@ -559,14 +561,16 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
         master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
 
         #Change permissions to read/write for all and directories
+        err = "Error changing CSV output permissions. File: {}".format(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
         try:
             os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
+            err = "Issue writing summary file"
             write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
+            err = "Error changing summary file permissions."
             os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
-            os.chmod(DATA_OUTPUT_DIR, 0o777)
         except:
-            err = "Directory and file permissions could not be set to all. Check directory permissions."
-            print(err)
+            if verbose:
+                print(err)
             if shared_q is not None:
                 shared_q.put({"Error":err,"Summary":SUMMARY_NAME})
                 shared_q.close()
@@ -588,8 +592,9 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
             t1 = t.time()
             t_plot = t1-t0
             t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats + t_plot
-            print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
-        else:
+            if verbose:
+                print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
+        elif verbose:
             t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats
             print("Analysis of direcory: {} complete! Analysis time: {}s".format(MAIN_DATA_DIR,t_total))
 
@@ -598,9 +603,10 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
             shared_q.close()
     except:
         err = "An uncaught error occured."
-        print(err)
+        if verbose:
+            print(err)
         if shared_q is not None:
-            shared_q.put({"Error":err,"Summary":summary})
+            shared_q.put({"Error":err,"Summary":SUMMARY_NAME})
             shared_q.close()
 
 def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_files):
@@ -639,7 +645,10 @@ def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_fil
                 p_data = shared_q.get()
                 if p_data["Error"] is None:
                     f.write(p_data["Summary"]+"\n")
+                else:
+                    print("Creating {} file not successful.\nError: {}".format(p_data["Summary"],p_data["Error"]))
             f.close()
+            os.chmod(output_dir+"MAIN_SUMMARY.TXT", 0o777)
         except:
             print("An error occured while writing main summary file.")
     else:
