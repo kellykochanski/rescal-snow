@@ -50,10 +50,10 @@ try:
         h = params.get('H')
         d = params.get('D')
         l = params.get('L')
-        meta_analysis_file.write('Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n'.format(lam_s,tau,Ava,h,d,l,freqs))
+        analysis_file.write('Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n'.format(lam_s,tau,Ava,h,d,l,freqs))
 except:
     log_file.write('\nFailed to write parameters to output file\n')
-    print('\x1b[6;37;43m' + 'XCOR WARNING: Falide to write parameters to output file' + '\x1b[0m')
+    print('\x1b[6;37;43m' + 'XCOR WARNING: Failed to write parameters to output file' + '\x1b[0m')
 
 # Add file offset to skip the first file as cross correlation with flat surface is ill defined
 current_file_id = 00000 + alti_file_offset
@@ -136,11 +136,11 @@ if len(y_values) < 2:
     print('\x1b[6;37;41m' + 'XCOR ERROR: too few files to correlate' + '\x1b[0m')
     exit()
 
-meta_analysis_file.write('Average correlation time: ' + str(np.mean(correlation_times)))
-meta_analysis_file.write('\nTotal correlation time: ' + str(np.sum(correlation_times)))
+analysis_file.write('Average correlation time: ' + str(np.mean(correlation_times)))
+analysis_file.write('\nTotal correlation time: ' + str(np.sum(correlation_times)))
 
 # Save the velocities for future use
-meta_analysis_file.write('\n\nVelocities omiting first, step size of ' + str(alti_file_offset) + ': ' + str(y_values))
+analysis_file.write('\n\nVelocities omiting first, step size of ' + str(alti_file_offset) + ': ' + str(y_values))
 
 ############# Try to fit the velocity points #############
 def function_to_fit(t, A, b, m, c):
@@ -160,16 +160,16 @@ try:
     r_squared = 1 - (SS_res/SS_tot)
 
     # Save and print out calculated values
-    meta_analysis_file.write('\n\n')
-    meta_analysis_file.write('Initial state coefficient:    ' + str(A) + '\n')
-    meta_analysis_file.write('Rate of approach:        ' + str(b) + '\n')
-    meta_analysis_file.write('Slope of quasi-stable state:    ' + str(m) + '\n')
-    meta_analysis_file.write('State intercept:        ' + str(c) + '\n')
-    meta_analysis_file.write('Initial velocity:        ' + str(y_values[0]) + '\n')
-    meta_analysis_file.write('Final velocity:            ' + str(y_values[-1]) + '\n')
-    meta_analysis_file.write('R Squared value:        ' + str(r_squared) + '\n')
-    meta_analysis_file.write('Error bars:           ' + str(perr) + '\n')
-    meta_analysis_file.write('\n\n')
+    analysis_file.write('\n\n')
+    analysis_file.write('Initial state coefficient:    ' + str(A) + '\n')
+    analysis_file.write('Rate of approach:        ' + str(b) + '\n')
+    analysis_file.write('Slope of quasi-stable state:    ' + str(m) + '\n')
+    analysis_file.write('State intercept:        ' + str(c) + '\n')
+    analysis_file.write('Initial velocity:        ' + str(y_values[0]) + '\n')
+    analysis_file.write('Final velocity:            ' + str(y_values[-1]) + '\n')
+    analysis_file.write('R Squared value:        ' + str(r_squared) + '\n')
+    analysis_file.write('Error bars:           ' + str(perr) + '\n')
+    analysis_file.write('\n\n')
 
     # Graphing
     plt.figure('plot')
@@ -181,10 +181,10 @@ except:
     plt.figure('Velocities')
     plt.plot(x_values,y_values)
     plt.savefig(output_dir + '/' + output_filename + '_velocity.png')
-    meta_analysis_file.write('\n')
-    meta_analysis_file.write('Initial velocity:        ' + str(y_values[0]))
-    meta_analysis_file.write('Final velocity:            ' + str(y_values[-1]))
-    meta_analysis_file.write('\n')
+    analysis_file.write('\n')
+    analysis_file.write('Initial velocity:        ' + str(y_values[0]))
+    analysis_file.write('Final velocity:            ' + str(y_values[-1]))
+    analysis_file.write('\n')
     
     log_file.write('\nERROR: Unable to fit velocities with function\n')
     print('\x1b[6;37;41m' + 'XCOR ERROR: unable to fit velocities with function' + '\x1b[0m')
