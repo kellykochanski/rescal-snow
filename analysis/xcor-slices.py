@@ -30,29 +30,29 @@ log_file = open( output_dir + '/' + output_filename + '_' + timestamp_string + '
 analysis_file = open(output_dir + '/' + output_filename + '_' + timestamp_string +  '_analysis.txt', 'w')
 
 # Write the parameters from the par file
-    # get par file
-    par_file_name = glob.glob('./*.par')[0]
-    
-    params = ru.Parameters()
-    try:
-        params.read(par_file_name)
-    except:
-        print("Parameter file not found at: {}".format(par_file_path))
-        params = None
+# get par file
+par_file_name = glob.glob('./*.par')[0]
 
-    try:
-        #Write summary data
-        if params:
-            lam_s = params.get('Lambda_S')
-            tau = params.get('Tau_min')
-            Ava = params.get('Ava_angle')
-            h = params.get('H')
-            d = params.get('D')
-            l = params.get('L')
-            meta_analysis_file.write('Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n'.format(lam_s,tau,Ava,h,d,l,freqs))
-    except:
-        log_file.write('\nFailed to write parameters to output file\n')
-        print('\x1b[6;37;43m' + 'XCOR WARNING: Falide to write parameters to output file' + '\x1b[0m')
+params = ru.Parameters()
+try:
+    params.read(par_file_name)
+except:
+    print("Parameter file not found at: {}".format(par_file_path))
+    params = None
+
+try:
+    #Write summary data
+    if params:
+        lam_s = params.get('Lambda_S')
+        tau = params.get('Tau_min')
+        Ava = params.get('Ava_angle')
+        h = params.get('H')
+        d = params.get('D')
+        l = params.get('L')
+        meta_analysis_file.write('Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n'.format(lam_s,tau,Ava,h,d,l,freqs))
+except:
+    log_file.write('\nFailed to write parameters to output file\n')
+    print('\x1b[6;37;43m' + 'XCOR WARNING: Falide to write parameters to output file' + '\x1b[0m')
 
 # Add file offset to skip the first file as cross correlation with flat surface is ill defined
 current_file_id = 00000 + alti_file_offset
