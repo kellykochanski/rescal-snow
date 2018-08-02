@@ -31,7 +31,8 @@ analysis_file = open(output_dir + '/' + output_filename + '_' + timestamp_string
 
 # Write the parameters from the par file
 # get par file
-par_file_name = glob.glob('./*.par')[0]
+print(alti_path + '/*.par')
+par_file_name = glob.glob(alti_path + '/*.par')[0]
 
 params = ru.Parameters()
 try:
