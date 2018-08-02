@@ -28,8 +28,8 @@ meta_analysis_file = open(output_dir + '/' + output_filename + '_meta_analysis.t
 # Add file offset to skip the first file as cross correlation with flat surface is ill defined
 current_file_id = 00000 + alti_file_offset
 next_file_id = current_file_id+alti_file_offset
-alti_file_1 = alti_path + '/ALTI%05.0f_t0.log' % current_file_id
-alti_file_2 = alti_path + '/ALTI%05.0f_t0.log' % next_file_id
+alti_file_1 = alti_path + '/ALTI%05.0f_t0.data' % current_file_id
+alti_file_2 = alti_path + '/ALTI%05.0f_t0.data' % next_file_id
 
 # Vector to store the calculated velocities
 y_values = []
@@ -42,9 +42,6 @@ correlation_times = []
 # Function to compute the velocity between
 def velocity_between(signal_1, signal_2):
     velocities = []
-    if (signal_1.shape != signal_2.shape):
-        print('\x1b[6;37;41m' + 'XCOR ERROR: trying to correlate differnt shaped signals' + '\x1b[0m')
-        exit()
     
     for slice_index in range(0,altitudes_1_matrix.shape[1]):
 
@@ -53,9 +50,9 @@ def velocity_between(signal_1, signal_2):
 
         one_d_correlation = signal.correlate(slice_1, slice_2_tiled, mode='same')
         
-        plt.figure('1D xcor')
-        plt.plot(one_d_correlation)
-        plt.show()
+        #plt.figure('1D xcor')
+        #plt.plot(one_d_correlation)
+        #plt.show()
         
         location_of_max = np.argmax(one_d_correlation)
         offset = location_of_max - (altitudes_1_matrix.shape[0] / 2)
@@ -76,12 +73,15 @@ while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
     altitudes_1_matrix = np.loadtxt(alti_file_1).T
     altitudes_2_matrix = np.loadtxt(alti_file_2).T
     
-    print(altitudes_1_matrix.shape)
+    if (altitudes_1_matrix.shape != altitudes_2_matrix.shape):
+        print('\x1b[6;37;43m' + 'XCOR WARNING: trying to correlate differnt shaped signals early termination' + '\x1b[0m')
+        break
+    
+    print('Analyzing: ' + str(current_file_id))
 
     # Cross correlate slices
     start = time.time()
     velocity = velocity_between(altitudes_1_matrix, altitudes_2_matrix)
-    exit()
     # Scale the velocity to the time steps between each measurement
     velocity = float(velocity) / alti_file_offset
     correlation_times.append(time.time() - start)
@@ -95,8 +95,8 @@ while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
     # Increment file ids
     current_file_id += alti_file_offset
     next_file_id += alti_file_offset
-    alti_file_1 = alti_path + '/ALTI%05.0f_t0.log' % current_file_id
-    alti_file_2 = alti_path + '/ALTI%05.0f_t0.log' % next_file_id
+    alti_file_1 = alti_path + '/ALTI%05.0f_t0.data' % current_file_id
+    alti_file_2 = alti_path + '/ALTI%05.0f_t0.data' % next_file_id
 
 # Check that there are at least 2 velocities captured
 if len(y_values) < 2:
