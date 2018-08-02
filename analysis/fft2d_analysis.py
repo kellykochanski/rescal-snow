@@ -572,7 +572,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
             if verbose:
                 print(err)
             if shared_q is not None:
-                shared_q.put({"Error":e,"Summary":SUMMARY_NAME})
+                shared_q.put({"Error":err,"Summary":SUMMARY_NAME})
                 shared_q.close()
             return 1
 
