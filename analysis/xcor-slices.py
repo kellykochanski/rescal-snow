@@ -31,7 +31,6 @@ analysis_file = open(output_dir + '/' + output_filename + '_' + timestamp_string
 
 # Write the parameters from the par file
 # get par file
-print(alti_path + '/*.par')
 par_file_name = glob.glob(alti_path + '/*.par')[0]
 
 params = ru.Parameters()
@@ -43,17 +42,16 @@ except:
 
 try:
     #Write summary data
-    if params:
-        lam_s = params.get('Lambda_S')
-        tau = params.get('Tau_min')
-        Ava = params.get('Ava_angle')
-        h = params.get('H')
-        d = params.get('D')
-        l = params.get('L')
-        analysis_file.write('Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n'.format(lam_s,tau,Ava,h,d,l,freqs))
+    lam_s = params.get('Lambda_S')
+    tau = params.get('Tau_min')
+    Ava = params.get('Ava_angle')
+    h = params.get('H')
+    d = params.get('D')
+    l = params.get('L')
+    analysis_file.write('Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\n\n'.format(lam_s,tau,Ava,h,d,l))
 except:
     log_file.write('\nFailed to write parameters to output file\n')
-    print('\x1b[6;37;43m' + 'XCOR WARNING: Failed to write parameters to output file' + '\x1b[0m')
+    print('\x1b[0;33;40m' + 'XCOR WARNING: Failed to write parameters to output file' + '\x1b[0m')
 
 # Add file offset to skip the first file as cross correlation with flat surface is ill defined
 current_file_id = 00000 + alti_file_offset
@@ -93,7 +91,7 @@ def velocity_between(signal_1, signal_2):
 # Check that it is able to open at least the first
 if not(os.path.exists(alti_file_1)):
     log_file.write('\nERROR: unable to load file at path: ' + alti_file_1 + '\n')
-    print('\x1b[6;37;41m' + 'XCOR ERROR: unable to load file at path: ' + alti_file_1  + '\x1b[0m')
+    print('\x1b[0;31;40m' + 'XCOR ERROR: unable to load file at path: ' + alti_file_1  + '\x1b[0m')
     exit()
 
 
@@ -106,7 +104,7 @@ while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
     
     if (altitudes_1_matrix.shape != altitudes_2_matrix.shape):
         log_file.write('\nWARNING: Trying to correlate differently shaped signals, terminating early\n')
-        print('\x1b[6;37;43m' + 'XCOR WARNING: trying to correlate differnt shaped signals early termination' + '\x1b[0m')
+        print('\x1b[0;33;40m' + 'XCOR WARNING: trying to correlate differnt shaped signals early termination' + '\x1b[0m')
         break
     
     print('Analyzing: ' + str(current_file_id))
@@ -133,7 +131,7 @@ while (os.path.exists(alti_file_1) and os.path.exists(alti_file_2)):
 # Check that there are at least 2 velocities captured
 if len(y_values) < 2:
     log_file.write('\nERROR: Too few output files to correlate\n')
-    print('\x1b[6;37;41m' + 'XCOR ERROR: too few files to correlate' + '\x1b[0m')
+    print('\x1b[0;31;40m' + 'XCOR ERROR: too few files to correlate' + '\x1b[0m')
     exit()
 
 analysis_file.write('Average correlation time: ' + str(np.mean(correlation_times)))
@@ -175,7 +173,7 @@ try:
     plt.figure('plot')
     plt.plot(x_values,y_values)
     plt.plot(x_values, calc_y_values)
-    plt.savefig(output_dir + '/' + output_filename + '_velocity_with_fit.png')
+    plt.savefig(output_dir + '/' + output_filename + '_' + timestamp_string + '_velocity_with_fit.png')
 
 except:
     plt.figure('Velocities')
@@ -187,4 +185,4 @@ except:
     analysis_file.write('\n')
     
     log_file.write('\nERROR: Unable to fit velocities with function\n')
-    print('\x1b[6;37;41m' + 'XCOR ERROR: unable to fit velocities with function' + '\x1b[0m')
+    print('\x1b[0;31;40m' + 'XCOR ERROR: unable to fit velocities with function' + '\x1b[0m')
