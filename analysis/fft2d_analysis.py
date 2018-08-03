@@ -458,8 +458,8 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     SKIP_FILES = skip_files
     PNG_OUTPUT_DIR = output_dir + "png_output/"
     DATA_OUTPUT_DIR = output_dir
-    CSV_OUTPUT_NAME = output_name + ".csv"
-    SUMMARY_NAME = output_name + "_summary.txt"
+    CSV_OUTPUT_NAME = output_name + "_{}.csv".format(int(t.time()))
+    SUMMARY_NAME = output_name + "_summary_{}.txt".format(int(t.time()))
     GIF_OUTPUT_NAME = output_name + ".gif"
     GRAPH_TYPE = 'cont' #Options available to use, 'surf'->surface, 'wire'->wireframe, 'scat'->scatter, 'cont'->contour
     XLABEL = 'x'
@@ -741,7 +741,7 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="
         if filename=="":
             analyze_many_dir(directory,output_dir,"ALTI",".par",0,1)
         else:
-            analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
+            analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,False)
     
 args = sys.argv
 argcount = len(args)
