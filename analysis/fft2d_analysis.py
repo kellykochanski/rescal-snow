@@ -41,7 +41,7 @@ def read_data(filename,datatype,show_error=True):
         return np.array([])
 
 #Writes to a textfile the basic summary of the data, using parameter file and summary dataframe
-def write_summary(directory,filename,par_file_path,summary_data):
+def write_summary(directory,filename,par_file_path,summary_data,top_amp_data):
     params = ru.Parameters()
     try:
         params.read(par_file_path)
@@ -64,9 +64,19 @@ def write_summary(directory,filename,par_file_path,summary_data):
             l = params.get("L")
             f.write("Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n".format(lam_s,tau,Ava,h,d,l,freqs))
 
+        #Obtain trendline/function equations from analysis
+        #Summary fields: "Total Time","X","Y","SD_Amplitude","Avg_Amplitude","SD_Phase_Velocity","Avg_Phase_Velocity","Wavelength","Velocity","Avg_Aspect_Ratio"
+        #Top amp fields: "Time","Dominant","X","Y","Amplitude","Phase","PhaseVelocity","Wavelength","Amp/Wave"
+        dispersion = str(np.poly1d(np.polyfit(summary_data["Wavelength"],summary_data["Velocity"],1)))[4:]
+        wave_aspect = str(np.poly1d(np.polyfit(summary_data["Wavelength"],summary_data["Avg_Aspect_Ratio"],4)))[4:]
+        wave_time = str(np.poly1d(np.polyfit(top_amp_data["Time"],top_amp_data["Wavelength"],4)))[4:]
+        f.write("Functions:\n\nDispersion: {}\nWavelength/Aspect: {}\nWavelength/Time: {}\n".format(dispersion,wave_aspect,wave_time))
+
         pd.set_option('display.max_columns',None)
+        pd.set_option('display.max_rows',None)
         pd.set_option('expand_frame_repr',False)
         f.write("Summary data below:\n{}\n".format(summary_data))
+        f.write("\nTop Frequencies Per Timestep:\n{}\n".format(top_amp_data))
     finally:
         f.close()
         
@@ -164,9 +174,13 @@ def all_fft2d_analysis(all_data):
 def all_amplitudes(all_fft):
     
     all_amps = []
+    top_amps = []
     for data in all_fft:
-        all_amps.append(np.abs(data))
-    return all_amps
+        amp = np.abs(data)
+        top_amps.append(np.unravel_index(np.argmax(amp),amp.shape))
+        all_amps.append(amp)
+    
+    return all_amps, top_amps
 
 #Calculates all the phases of the fft_analysis results
 #all_fft -> fft results taken from all the data in a directory
@@ -308,7 +322,7 @@ def build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs):
 
 #Creates a master dataframe that contains all data frames from all frequencies which have a max amplitude equal or above the threshold
 #Also creates a summary dataframe with information about the entire set
-def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs):
+def build_all_frames(freqs,time_step,top_amps,all_amps,all_phases,all_velocities,d_freqs):
     
     frames = []
     summary_data = []
@@ -327,13 +341,22 @@ def build_all_frames(freqs,time_step,all_amps,all_phases,all_velocities,d_freqs)
         velocity = avgPV*wave
         avgAmp = frame["Amplitude"].mean()
         stdAmp = frame["Amplitude"].std()
+        avgAspec = avgAmp / avgPV
         totalTime = frame["Time"].values[-1]
-        summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],stdAmp,avgAmp,stdPV,avgPV,wave,velocity])
+        summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],stdAmp,avgAmp,stdPV,avgPV,wave,velocity,avgAspec])
     
-    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","S.D. Amplitude","Avg. Amplitude","S.D. Phase Velocity","Avg. Phase Velocity","Wavelength","Velocity"])
+    top_amp_stats = []
+    total_time = len(all_amps)
+    for t in range(1,total_time):
+        x, y = top_amps[t]
+        top_amp_stats.append(get_data_at_freq(t*time_step,x,y,all_amps[t],all_phases[t],all_velocities[t-1],d_freqs))
+    
+    #Create summary dataframes
+    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","SD_Amplitude","Avg_Amplitude","SD_Phase_Velocity","Avg_Phase_Velocity","Wavelength","Velocity","Avg_Aspect_Ratio"])
+    top_amp_frame = pd.DataFrame(top_amp_stats,columns=["Time","Dominant","X","Y","Amplitude","Phase","PhaseVelocity","Wavelength","Amp/Wave"])
 
     #Concatenate all frames into single large data frame and return along with summary frame
-    return [pd.concat(frames),summary_frame]
+    return [pd.concat(frames),summary_frame,top_amp_frame]
 
 #Returns the fft results as a Pandas dataframe 
 #timestep -> the current frame/time of the data being passed
@@ -471,7 +494,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
     BASE_FILE_NAME = "ALTI{:05d}_t0"
     BASE_PREF = base_pref
     THRESHOLD = 0.8
-    AMP_THRESHOLD = 0.3 #Should be around 1
+    AMP_THRESHOLD = 0.7 #Should be around 1
     DATA_TYPE = int
     TIME_DELTA = 10 #Time change between data files
     
@@ -532,7 +555,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
 
         #Get all amplitude data
         t0 = t.time()
-        all_amps = all_amplitudes(all_fft2d)
+        all_amps, top_amps = all_amplitudes(all_fft2d)
         t1 = t.time()
         t_amps = t1-t0
         if verbose:
@@ -557,15 +580,17 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
         #Concatenate and save data results
         t0 = t.time()
         freqs = purge_noise_freqs(all_amps,AMP_THRESHOLD)
-        master_frame, summary = build_all_frames(freqs,TIME_DELTA,all_amps,all_phase_data,all_velocities,d_freqs)
+        master_frame, summary, top_amp_summary = build_all_frames(freqs,TIME_DELTA,top_amps,all_amps,all_phase_data,all_velocities,d_freqs)
         master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
+
+        #List top amplitude data over time
 
         #Change permissions to read/write for all and directories
         err = "Error changing CSV output permissions. File: {}".format(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
         try:
             os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
             err = "Issue writing summary file"
-            write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary)
+            write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary,top_amp_summary)
             err = "Error changing summary file permissions."
             os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
         except:
@@ -733,7 +758,7 @@ def plot_only(dir_name, output_dir, base_pref, par_ext, output_name, image_inter
 #directory -> The directory that holds the log files to analyze
 #image_interval -> A graph will be made and saved at every interval. E.g 50 = every 50th data file will be graphed.
 #Note: if image interval is set to 0, no graphs are made.
-def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="",image_interval=100, plot=False):
+def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="",image_interval=100, verbose=False, plot=False):
 
     if plot:
         plot_only(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
@@ -741,12 +766,14 @@ def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="
         if filename=="":
             analyze_many_dir(directory,output_dir,"ALTI",".par",0,1)
         else:
-            analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,False)
+            analyze_directory(directory,output_dir,"ALTI",".par",filename,image_interval,1,verbose)
     
 args = sys.argv
 argcount = len(args)
 
-if argcount > 4:
-    main(args[1],args[2],args[3],int(args[4]))
+if argcount > 6:
+    main(args[1],args[2],args[3],int(args[4]),bool(args[5]),bool(args[6]))
+elif argcount > 5:
+    main(args[1],args[2],args[3],int(args[4]),bool(args[5]))
 else:
     print("Not enough arguments passed to function.")
