@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import rescal_utilities as ru
 import multiprocessing as mp
+from scipy.optimize import curve_fit
 
 can_plot = True
 try:
@@ -41,7 +42,8 @@ def read_data(filename,datatype,show_error=True):
         return np.array([])
 
 #Writes to a textfile the basic summary of the data, using parameter file and summary dataframe
-def write_summary(directory,filename,par_file_path,summary_data,top_amp_data):
+#run_stats = [input_directory, total_files, analysis_time, d_freq_count,dominant_threshold_percentage,amplitude_threshold]
+def write_summary(run_stats,directory,filename,par_file_path,summary_data,top_amp_data):
     params = ru.Parameters()
     try:
         params.read(par_file_path)
@@ -53,8 +55,20 @@ def write_summary(directory,filename,par_file_path,summary_data,top_amp_data):
     f = open(filepath,"w")
 
     try:
+        #Function for wave_time curve_fit
+        def func(t,a,b,c,d):
+            return a*np.exp(-t/b)-c*t+d
+        
         #Write summary data
         if params:
+            in_dir = run_stats[0]
+            f_count = run_stats[1]
+            a_time = run_stats[2]
+            d_freq_count = run_stats[3]
+            d_thresh = run_stats[4]*100
+            thresh = run_stats[5]
+            s_time = top_amp_data["Time"].iloc[-1]
+            
             freqs, fields = summary_data.shape
             lam_s = params.get("Lambda_S")
             tau = params.get("Tau_min")
@@ -62,21 +76,24 @@ def write_summary(directory,filename,par_file_path,summary_data,top_amp_data):
             h = params.get("H")
             d = params.get("D")
             l = params.get("L")
-            f.write("Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nFrequencies logged: {}\n\n".format(lam_s,tau,Ava,h,d,l,freqs))
+            f.write("Analysis Info:\nInput Directory: {}\nTotal files read: {}\nAnalysis time: {}\nSimulation Time: {}\nDominant Threshold: Top {}%\nDominant Frequencies: {}\n\n".format(in_dir,f_count,a_time,s_time,d_thresh,d_freq_count))
+            f.write("Parameter info:\nLambda S: {}\nTau_min: {}\nAva_angle: {}\nHeight: {} Depth: {} Length: {}\nTotal Frequencies (amplitude above {}): {}\n\n".format(lam_s,tau,Ava,h,d,l,thresh,freqs))
 
-        #Obtain trendline/function equations from analysis
-        #Summary fields: "Total Time","X","Y","SD_Amplitude","Avg_Amplitude","SD_Phase_Velocity","Avg_Phase_Velocity","Wavelength","Velocity","Avg_Aspect_Ratio"
-        #Top amp fields: "Time","Dominant","X","Y","Amplitude","Phase","PhaseVelocity","Wavelength","Amp/Wave"
-        dispersion = str(np.poly1d(np.polyfit(summary_data["Wavelength"],summary_data["Velocity"],1)))[4:]
-        wave_aspect = str(np.poly1d(np.polyfit(summary_data["Wavelength"],summary_data["Avg_Aspect_Ratio"],4)))[4:]
-        wave_time = str(np.poly1d(np.polyfit(top_amp_data["Time"],top_amp_data["Wavelength"],4)))[4:]
-        f.write("Functions:\n\nDispersion: {}\nWavelength/Aspect: {}\nWavelength/Time: {}\n".format(dispersion,wave_aspect,wave_time))
-
+            #Obtain trendline/function equations from analysis
+            #Summary fields: "Total Time","X","Y","SD_Amplitude","Avg_Amplitude","SD_Phase_Velocity","Avg_Phase_Velocity","Wavelength","Velocity","Avg_Aspect_Ratio"
+            #Top amp fields: "Time","Dominant","X","Y","Amplitude","Phase","PhaseVelocity","Wavelength","Amp/Wave"
+            dispersion = str(np.poly1d(np.polyfit(summary_data["Wavelength"],summary_data["Velocity"],1)))
+            wave_time = str(np.poly1d(curve_fit(func,top_amp_data["Time"],(top_amp_data["X"]+(top_amp_data["Y"])*d))[0]))
+            f.write("Curve Fit Functions:\n\nDispersion:{}\n\nWavelength/Time:\n{}\n\n".format(dispersion,wave_time))
+        
         pd.set_option('display.max_columns',None)
         pd.set_option('display.max_rows',None)
         pd.set_option('expand_frame_repr',False)
         f.write("Summary data below:\n{}\n".format(summary_data))
         f.write("\nTop Frequencies Per Timestep:\n{}\n".format(top_amp_data))
+    except Exception as e:
+        print(e.message)
+        return
     finally:
         f.close()
         
@@ -205,7 +222,7 @@ def get_dominant_freqs(all_amps, threshold):
                 dominant_freqs.append(coords)
     return dominant_freqs
 
-#Creates a list of frequencies which meet the minimum amplitude threshold set
+#Creates a list of frequencies which meet the minimum amplitude threshold set, includes dominant frequencies
 def purge_noise_freqs(all_amps, threshold):
     freqs = []
     l, w = all_amps[0].shape
@@ -294,6 +311,7 @@ def get_all_velocities(all_phases, all_amps, time_delta):
 #d_freqs -> dominant frequencies that were discovered
 def get_data_at_freq(time,x,y,amps,phases,velocities,d_freqs):
     dom = (x,y) in d_freqs
+    flat_coord = np.ravel_multi_index((x,y),amps.shape)
     amp = amps[y][x]
     phases = phases[y][x]
     pv = velocities[y][x]
@@ -302,7 +320,7 @@ def get_data_at_freq(time,x,y,amps,phases,velocities,d_freqs):
     else:
         wave = 1
     aspect = amp/wave
-    data = [time,dom,x,y,amp,phases,pv,wave,aspect]
+    data = [time,flat_coord,x,y,dom,amp,phases,pv,wave,aspect]
     return data
 
 #Creates a pandas dataframe containing all data for a specific frequency at all times of simulation
@@ -318,7 +336,7 @@ def build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs):
     for t in range(1,total_time):
         stats.append(get_data_at_freq(t*time_step,x,y,all_amps[t],all_phases[t],all_velocities[t-1],d_freqs))
 
-    return pd.DataFrame(stats,columns=['Time','Dominant','X','Y','Amplitude','Phase','PhaseVelocity','Wavelength','Amp/Wave'])
+    return pd.DataFrame(stats,columns=['Time','Flat-Coord','X','Y','Dominant','Amplitude','Phase','PhaseVelocity','Wavelength','Amp/Wave'])
 
 #Creates a master dataframe that contains all data frames from all frequencies which have a max amplitude equal or above the threshold
 #Also creates a summary dataframe with information about the entire set
@@ -326,10 +344,11 @@ def build_all_frames(freqs,time_step,top_amps,all_amps,all_phases,all_velocities
     
     frames = []
     summary_data = []
+    dom_freq_stats = []
+    top_amp_stats = []
     #Build frames for each x, y frequency 
     for coords in freqs:
-        x = coords[0]
-        y = coords[1]
+        x, y = coords
         
         frame = build_frame(time_step,x,y,all_amps,all_phases,all_velocities,d_freqs)
         frames.append(frame)
@@ -342,18 +361,17 @@ def build_all_frames(freqs,time_step,top_amps,all_amps,all_phases,all_velocities
         avgAmp = frame["Amplitude"].mean()
         stdAmp = frame["Amplitude"].std()
         avgAspec = avgAmp / avgPV
-        totalTime = frame["Time"].values[-1]
-        summary_data.append([totalTime,frame.at[0,"X"],frame.at[0,"Y"],stdAmp,avgAmp,stdPV,avgPV,wave,velocity,avgAspec])
-    
-    top_amp_stats = []
+        summary_data.append([frame.at[0,"Dominant"],frame.at[0,"X"],frame.at[0,"Y"],stdAmp,avgAmp,stdPV,avgPV,wave,velocity,avgAspec])
+
     total_time = len(all_amps)
     for t in range(1,total_time):
         x, y = top_amps[t]
         top_amp_stats.append(get_data_at_freq(t*time_step,x,y,all_amps[t],all_phases[t],all_velocities[t-1],d_freqs))
+
     
     #Create summary dataframes
-    summary_frame = pd.DataFrame(summary_data,columns=["Total Time","X","Y","SD_Amplitude","Avg_Amplitude","SD_Phase_Velocity","Avg_Phase_Velocity","Wavelength","Velocity","Avg_Aspect_Ratio"])
-    top_amp_frame = pd.DataFrame(top_amp_stats,columns=["Time","Dominant","X","Y","Amplitude","Phase","PhaseVelocity","Wavelength","Amp/Wave"])
+    summary_frame = pd.DataFrame(summary_data,columns=["Dominant","X","Y","SD_Amplitude","Avg_Amplitude","SD_Phase_Velocity","Avg_Phase_Velocity","Wavelength","Velocity","Avg_Aspect_Ratio"])
+    top_amp_frame = pd.DataFrame(top_amp_stats,columns=["Time","Flat_X-Y","X","Y","Dominant","Amplitude","Phase","PhaseVelocity","Wavelength","Amp/Wave"])
 
     #Concatenate all frames into single large data frame and return along with summary frame
     return [pd.concat(frames),summary_frame,top_amp_frame]
@@ -582,15 +600,15 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
         freqs = purge_noise_freqs(all_amps,AMP_THRESHOLD)
         master_frame, summary, top_amp_summary = build_all_frames(freqs,TIME_DELTA,top_amps,all_amps,all_phase_data,all_velocities,d_freqs)
         master_frame.to_csv(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
-
-        #List top amplitude data over time
+        analysis_time = t_read + t_fft2d + t_phases + t_amps + t_freqs
 
         #Change permissions to read/write for all and directories
         err = "Error changing CSV output permissions. File: {}".format(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME)
         try:
             os.chmod(DATA_OUTPUT_DIR + CSV_OUTPUT_NAME, 0o777)
             err = "Issue writing summary file"
-            write_summary(DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary,top_amp_summary)
+            run_stats = [MAIN_DATA_DIR, file_count, analysis_time, len(d_freqs),THRESHOLD,AMP_THRESHOLD]
+            write_summary(run_stats,DATA_OUTPUT_DIR,SUMMARY_NAME,par_file_path,summary,top_amp_summary)
             err = "Error changing summary file permissions."
             os.chmod(DATA_OUTPUT_DIR + SUMMARY_NAME, 0o777)
         except:
@@ -603,7 +621,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
 
         t1 = t.time()
         t_stats = t1 - t0
-        
+                    
         if verbose:
             print("Data calculation and concatenation time: {}".format(t_stats))
 
@@ -616,18 +634,16 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
             im_count = graph_all(SNAPSHOT_INTERVAL,PNG_OUTPUT_DIR,DATA_OUTPUT_DIR+GIF_OUTPUT_NAME,BASE_FILE_NAME,all_amps,GRAPH_TYPE,FIG_SIZE,XLABEL,YLABEL,ZLABEL,TITLE)
             t1 = t.time()
             t_plot = t1-t0
-            t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats + t_plot
             if verbose:
-                print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,t_total))
+                print("\r{} PNG's created in: {}s.\nGIF animation complete.\nAnalysis process complete!\nTotal time: {}s".format(im_count,t_plot,analysis_time + t_stats + t_plot))
         elif verbose:
-            t_total = t_read + t_fft2d + t_phases + t_amps + t_freqs + t_stats
-            print("Analysis of direcory: {} complete! Analysis time: {}s".format(MAIN_DATA_DIR,t_total))
+            print("Analysis of direcory: {} complete! Analysis time: {}s".format(MAIN_DATA_DIR,analysis_time + t_stats))
 
         if shared_q is not None:
             shared_q.put({"Error":None,"Summary":summary})
             shared_q.close()
-    except:
-        err = "An uncaught error occured."
+    except Exception as e:
+        err = e.message
         if verbose:
             print(err)
         if shared_q is not None:
