@@ -83,8 +83,9 @@ def write_summary(run_stats,directory,filename,par_file_path,summary_data,top_am
             #Summary fields: "Total Time","X","Y","SD_Amplitude","Avg_Amplitude","SD_Phase_Velocity","Avg_Phase_Velocity","Wavelength","Velocity","Avg_Aspect_Ratio"
             #Top amp fields: "Time","Dominant","X","Y","Amplitude","Phase","PhaseVelocity","Wavelength","Amp/Wave"
             dispersion = str(np.poly1d(np.polyfit(summary_data["Wavelength"],summary_data["Velocity"],1)))
-            wave_time = str(np.poly1d(curve_fit(func,top_amp_data["Time"],(top_amp_data["X"]+(top_amp_data["Y"])*d))[0]))
-            f.write("Curve Fit Functions:\n\nDispersion:{}\n\nWavelength/Time:\n{}\n\n".format(dispersion,wave_time))
+            fit = curve_fit(func,top_amp_data["Time"],(top_amp_data["X"]+(top_amp_data["Y"])*d))[0]
+            wave_time = "({})e^(-t/({})) - ({})t + ({})".format(fit[0],fit[1],fit[2],fit[3])
+            f.write("Dispersion:{}\n\nWavelength/Time:\n{}\n\n".format(dispersion,wave_time))
         
         pd.set_option('display.max_columns',None)
         pd.set_option('display.max_rows',None)
@@ -96,7 +97,6 @@ def write_summary(run_stats,directory,filename,par_file_path,summary_data,top_am
         return
     finally:
         f.close()
-        
 
     print("Summary for directory at: {}{}".format(directory,filename))
 
@@ -212,11 +212,11 @@ def all_phases(all_fft):
 #Returns a list of dominant frequencies as well as a full list of all data of interest
 #all_amps -> a list of numpy arrays containing amplitude data from fft results
 #threshold -> the value used to filter out and detect dominant frequencies
-def get_dominant_freqs(all_amps, threshold):
+def get_dominant_freqs(all_amps, threshold, noise_thresh):
     dominant_freqs = []
     for amps in all_amps:
         top = top_percent(amps, threshold)
-        if len(top) == 1:
+        if len(top) == 1 and top[0][0] > noise_thresh:
             coords = (top[0][1],top[0][2])
             if coords not in dominant_freqs:
                 dominant_freqs.append(coords)
@@ -257,7 +257,6 @@ def top_percent(values, threshold):
                   
     return top
 
-
 #Filters out all values below specified threshold, returns a list of values [value, x, y]
 #values -> 2d array containing the values to filter
 #threshold -> values that are below threshold are removed
@@ -270,7 +269,6 @@ def value_threshold(values, threshold):
                 top.append([x,ii,i])
                   
     return top
-
 
 #Returns 
 def top_values(values, threshold, d_freqs):
@@ -589,7 +587,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
 
         #Find dominant frequencies
         t0 = t.time()
-        d_freqs = get_dominant_freqs(all_amps,THRESHOLD)
+        d_freqs = get_dominant_freqs(all_amps,THRESHOLD,AMP_THRESHOLD)
         t1 = t.time()
         t_freqs = t1-t0
         if verbose:
