@@ -102,15 +102,15 @@ Lgca_speedup = 1000
 Tau_max = 1000
 
 
-Output_directory = ../../runs/snow_R_size100_tau30_sinter0001
+Output_directory = ../../runs/sand_R_size100_tau00
  
-Lambda_S = 0.001
+Lambda_S = 0 
  
-Tau_min = 30
+Tau_min = 00
  
-Phys_prop_file = real_data/niwot_snow.prop
+Phys_prop_file = real_data/desert_sand.prop
  
-Ava_angle = 38.0 
+Ava_angle = 35.0 
  
 H = 100
  
@@ -118,5 +118,3 @@ D = 200
  
 L = 600
  
-Csp_template = RCONE
-

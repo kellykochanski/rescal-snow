@@ -192,10 +192,16 @@ def all_amplitudes(all_fft):
     
     all_amps = []
     top_amps = []
+    max_a = np.argmax
+    shape = all_fft[0].shape
+    coord = np.unravel_index
+    append_t = top_amps.append
+    append_a = all_amps.append
+    amp = np.abs
     for data in all_fft:
-        amp = np.abs(data)
-        top_amps.append(np.unravel_index(np.argmax(amp),amp.shape))
-        all_amps.append(amp)
+        a = amp(data)
+        append_t(coord(max_a(a),shape))
+        append_a(a)
     
     return all_amps, top_amps
 
@@ -310,9 +316,9 @@ def get_all_velocities(all_phases, all_amps, time_delta):
 def get_data_at_freq(time,x,y,amps,phases,velocities,d_freqs):
     dom = (x,y) in d_freqs
     flat_coord = np.ravel_multi_index((x,y),amps.shape)
-    amp = amps[y][x]
-    phases = phases[y][x]
-    pv = velocities[y][x]
+    amp = amps[x][y]
+    phases = phases[x][y]
+    pv = velocities[x][y]
     if x > 0:
         wave = 1.0/x
     else:
@@ -576,7 +582,7 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
         t_amps = t1-t0
         if verbose:
             print("Amplitude calculation time: {}s\nCalculating phase velocities...".format(t_amps))
-
+            
         #Get all phase velocities
         t0 = t.time()
         all_velocities = get_all_velocities(all_phase_data, all_amps, TIME_DELTA)
@@ -774,6 +780,16 @@ def plot_only(dir_name, output_dir, base_pref, par_ext, output_name, image_inter
 #Note: if image interval is set to 0, no graphs are made.
 def main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="",image_interval=100, verbose=False, plot=False):
 
+    if verbose in ["True", "TRUE", "true", "1", "t"]:
+        verbose = True
+    else:
+        verbose = False
+
+    if plot in ["True", "TRUE", "true", "1", "t"]:
+        plot = True
+    else:
+        plot = False
+        
     if plot:
         plot_only(directory,output_dir,"ALTI",".par",filename,image_interval,1,True)
     else:
@@ -786,8 +802,8 @@ args = sys.argv
 argcount = len(args)
 
 if argcount > 6:
-    main(args[1],args[2],args[3],int(args[4]),bool(args[5]),bool(args[6]))
+    main(args[1],args[2],args[3],int(args[4]),args[5],args[6])
 elif argcount > 5:
-    main(args[1],args[2],args[3],int(args[4]),bool(args[5]))
+    main(args[1],args[2],args[3],int(args[4]),args[5])
 else:
     print("Not enough arguments passed to function.")
