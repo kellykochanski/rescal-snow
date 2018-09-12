@@ -1,12 +1,10 @@
 #!/bin/bash
-#MSUB -A intelpwr
-#MSUB -q pbatch
-#MSUB -m abe
-#MSUB -M kochanski1@llnl.gov
-#MSUB -l partition=quartz
-#MSUB -l nodes=1
-#MSUB -V
-#MSUB -l walltime=24:00:00
+#SBATCH --qos normal
+#SBATCH --mail-user=adam.rubin@colorado.edu
+#SBATCH --time=04:00:00
+#SBATCH --ntasks 1
+
+echo "starting to run"
 
 # Job file submitted via "msub <filename>".  
 # In this case, N tasks are launched by srun, each of which executes 
@@ -15,7 +13,7 @@
 
 # This file will run N tasks, with PMI ranks 0 to N
 
-srun --nodes=1 --cpus-per-task=1 --ntasks=34 --wait=0 submit.sh
-
+#srun --nodes=1 --cpus-per-task=1 --ntasks=34 --wait=0 submit.sh
+./run
 
 
