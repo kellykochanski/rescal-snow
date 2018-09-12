@@ -17,22 +17,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
 
 #include <stdio.h>
 #include <locale.h>
+#include <stdint.h>
 
 #include "defs.h"
 #include "macros.h"
 #include "rescal.h"
-//#include "monitor.h"
-#include "interface.h"
-#ifdef PARALLEL
-#include "synchro.h"
-#endif
 #include "cells.h"
 #include "space.h"
 #include "surface.h"
@@ -44,23 +40,21 @@
 #include "trace.h"
 #include "lgca.h"
 
-extern unsigned char opt_info, opt_nv;
-extern unsigned long int iter;        // nombre d'iterations
+extern uint8_t opt_info, opt_nv;
+extern uint64_t iter;        // nombre d'iterations
 extern double csp_time;                    // temps reel simule
-extern int use_lgca;
-#ifdef PARALLEL
-extern int mode_par;    //mode parallele
-#endif
+extern int32_t use_lgca;
 
-//int stop_simul = 0;                 //semaphore (pour le multithreading)
-int fin_simul = 0;                  //semaphore (pour l'arret des callbacks)
+//int32_t stop_simul = 0;                 //semaphore (pour le multithreading)
+int32_t fin_simul = 0;                  //semaphore (pour l'arret des callbacks)
 
 
-void rescal_params()
-{
-  static int done = 0;
+void rescal_params() {
+  static int32_t done = 0;
 
-  if (done) return;
+  if (done) {
+    return;
+  }
 
   init_list_params();
   params_modele();
@@ -76,18 +70,16 @@ void rescal_params()
   done = 1;
 }
 
-void rescal_usage()
-{
+void rescal_usage() {
   printf("\nusage: rescal PARAMETERS_FILE [OPTIONS]\n");
-  printf(  "       rescal -h\n");
-  printf(  "       rescal -hm\n");
+  printf("       rescal -h\n");
+  printf("       rescal -hm\n");
   //rescal_params();
   //param_usage();
 }
 
 //initialization of rescal thread
-void rescal_init(char *param_filename)
-{
+void rescal_init(char *param_filename) {
 #ifdef NUM_MODE
   setlocale(LC_NUMERIC, NUM_MODE);
 #endif
@@ -96,10 +88,6 @@ void rescal_init(char *param_filename)
   read_parameters(param_filename);
   //init_signal();
 
-#ifdef PARALLEL
-  if (mode_par) synchro_init();
-#endif
-
   init_simul();
 
   cree_terre();
@@ -107,19 +95,15 @@ void rescal_init(char *param_filename)
   compute_v_walls();
   compute_h_ceil();
   compute_h_floor();
-#ifdef PARALLEL
-  cree_tunnels();
-#endif
 
   init_Ncel();
   init_modele();
   init_transitions();
   init_db_pos();
 
-  if (opt_info){
+  if (opt_info) {
     log_cell();
     dump_doublets();
-    dump_transitions();
   }
 
 #ifdef ALTI
@@ -128,15 +112,13 @@ void rescal_init(char *param_filename)
 #endif
 
 #ifdef LGCA
-  if (use_lgca) init_collisions();
+  if (use_lgca) {
+    init_collisions();
+  }
 #endif
 
 #if defined(MODEL_DUN) && defined(LGCA)
   //dump_cgv();
-#endif
-
-#ifdef SURRECTIONS
-  //regul_niveau();
 #endif
 
 #if MODE_TRACE
@@ -147,25 +129,21 @@ void rescal_init(char *param_filename)
 
 }
 
-int rescal()
-{
-  static unsigned char start=0;
-  unsigned char stop=0;
+int32_t rescal() {
+  static uint8_t start = 0;
+  uint8_t stop = 0;
 
   if (!start) {
-#ifdef PARALLEL
-    if (mode_par) synchro_start();
-#endif
-    //monitor_signal();
     LogPrintf("debut de la simulation ...\n");
-    push_status("running",0);
     start = 1;
   }
 
-  while (!stop){
+  while (!stop) {
 #if defined(TRACE_SRC) || defined(TRACE_AIRE) || defined(TRACE_PAR)
     stop = trace_init_loop(0);
-    if (stop) break;
+    if (stop) {
+      break;
+    }
 #endif
     stop = simul_csp();
 #if defined(TRACE_AIRE) || defined(TRACE_PAR)
@@ -174,28 +152,10 @@ int rescal()
 #endif
   }
 
-  if (stop){
+  if (stop) {
     LogPrintf("fin de la simulation\n");
     fin_simul = 1;
-    pop_status(0);
   }
 
   return 0;
 }
-
-/*
-
-void rescal_quit()
-{
-  rescal_stop();
-#ifdef TRACE_TRANS
-  trace_trans_quit();
-#endif
-#ifdef TRACE3D_CEL
-  trace3d_cel_quit();
-#endif
-  fin_db_pos();
-  apocalypse();
-}
-*/
-

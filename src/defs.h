@@ -41,26 +41,19 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 /// ======================================================
 
 /// choice of a model
-#define MODEL_DUN    //Dune morphodynamics
-//#define MODEL_AVA    //Avalanches
-//#define MODEL_CMB    //Core-mantle boundary
-//#define MODEL_ICB    //Innercore-core boundary
-//#define MODEL_RIV    //River (landscape evolution)
-//#define MODEL_CRY    //Crystallization (of calcite)
-//#define MODEL_DIF    //Diffusion
-//#define MODEL_D2G    //Diffusion 2d with gravity
-//#define MODEL_LIFE   //Stochastic game of life (2D)
+//#define MODEL_DUN    //Dune morphodynamics
+#define MODEL_SNO    //Snow bedform morphodynamics
 
 /// ======================================================
 
 /// common options
-#define OPENMP		//use OpenMP parallelization (on lattice gas)
-#define GUI		//graphical interface
+// #define OPENMP   //use OpenMP parallelization (on lattice gas)
+// #define GUI    //graphical interface
 #define CYCLAGE_HOR     //enable horizontal cycling
 #define INFO_CEL        //log the number of cells
 #define INFO_DBL        //log the number of active doublets
 #define INFO_TRANS      //log the number of effective transitions
-#define DETERMINISTIC	  //try to keep a deterministic execution: same parameters produce same results (it may be slower when DETERMINISTIC is defined, but not always !)
+#define DETERMINISTIC   //try to keep a deterministic execution: same parameters produce same results (it may be slower when DETERMINISTIC is defined, but not always !)
 #define DUMP_SIGNATURE  //footprints for the comparison of two simulations (identical simulations => identical footprints)
 //#define LOG_FILE        //ReSCAL logs redirected into a file
 #define USE_LIBPNG        //use of libpng
@@ -69,46 +62,22 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 #define REORIENT_AUTO   //automatic reorientation when saving (images of) the cellular space
 #define CSP_MUTEX       //mutual exclusion on the cellular space (no transition while saving data)
 //#define GTK_OLD_SYNTAX  //compile with old version of GTK+2.x (obsolete)
-#define PARALLEL_AUTOMATA //enable concurrent execution of stochastic engine and lattice gas  (non-deterministic only, not working on MacOS X)
+// #define PARALLEL_AUTOMATA //enable concurrent execution of stochastic engine and lattice gas  (non-deterministic only, not working on MacOS X)
 
-#if !defined(_OPENMP) || defined(__CYGWIN32__)
-#undef OPENMP
-#endif
 
-#if !defined(USE_AVX) && defined(__AVX__)
-#define USE_AVX
-#endif
 
-/// ===================== CMB MODEL =====================
-#ifdef MODEL_CMB
-
+/// ===================== SNO MODEL =====================
+// KK 10 May 2018
+// Most cell types are inherited from the DUN MODEL (below)
+#ifdef MODEL_SNO
 /// name of the model
-#define MOD_NAME "CMB"
+#define MOD_NAME "SNO"
+#define MOD_DESC "simulation of snow surface under air flow"
 
-/// description
-#define MOD_DESC "simulation of the core-mantle boundary"
-
-/// cell states
-#define PLUS  0 //solide
-#define ZERO  1 //liquide sature en elements legers
-#define MOINS 2 //liquide non-sature
-#define BORD  3 //bord
-#define DUM   4 //inerte
-#define PIERRE 7 //granit
-#define TUNNEL 9 //tunnel vers une terre parallele
-
-/// names of cell states
-#define ETATS { "PLUS", "ZERO", "MOINS", "BORD", "DUM", "", "", "GRANIT", "", "TUNNEL" }
-
-/// phases of cell states
-#define PHASES { SOLID, FLUID, FLUID, SOLID, SOLID, SOLID, SOLID, SOLID, SOLID, SOLID }
-
-/// specific options of the model
-#define DUMP_RUGOSI
-//#define ROTATIONS
 #endif
 
 /// ===================== DUN MODEL =====================
+//  Most properties of dunes - except name and vegetation - are inherited by SNO MODEL
 #ifdef MODEL_DUN
 
 /// name of the model
@@ -116,7 +85,9 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 
 /// description
 #define MOD_DESC "simulation of sand dunes under fluid flow"
+#endif // MODEL_DUN
 
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
 /// cell states
 #define GR    0 //grain
 #define GRJ   1 //mobile grain
@@ -144,232 +115,22 @@ enum PROGS {PROG_RESCAL, PROG_TOOL};
 #define ALTI GR //compute elevation map for cells of type GR
 #define AVALANCHES
 #define ROTATIONS
+#define VARIABLE_FLOW // KK - vary the intensity of the flow
 #define CENTERING_AUTO //automatic centering
 #define LIENS_TRANSITIONS //correlations of transitions
 #define LGCA //lattice gas
 #define CGV //compute shear stress (with LGCA option)
 #define WIND_DATA //option for importing wind data from a file (with ROTATIONS option)
 #define TIME_SCALE //option for computing the time scale (using additional physical parameters)
-//#define CELL_TIME GR //save time for each cell of type GR
-//#define CELL_COLOR //use colored cells
+#define CELL_TIME GR //save time for each cell of type GR
 //#define NORM2D //CGV with 2d normals
-//#define TRACE_TRANS
 //#define TRACE3D_CEL
-//#define TRACE_PAR_COL //save the courses of colored cells (one cell per color)
 //#define TRACE_FLUX //save the mean flux of grains (2d)
 //#define STABILITY_ANALYSIS //produce data for the 2D linear stability analysis (find the length scale of the model)
-//#define DUMP_SIGMA //computation of the standard deviation in height (when using WAVES_2D template)
-//#define DUMP_AUTOCORREL //computation of the auto-correlation in height (when using WAVES_2D template)
 //#define APPEL_MCC //external matlab application
-//#define USE_VEGETATION //option for using cells in VEG state
-#endif
 
-/// ===================== AVA MODEL =====================
-#ifdef MODEL_AVA
+#endif // DUN or SNO
 
-/// name of the model
-#define MOD_NAME "AVA"
-
-/// description
-#define MOD_DESC "simulation of granular avalanches"
-
-/// cell states
-#define GR    0 //grain stable
-#define AIR   1 //air
-#define BORD  2 //bord
-#define DUM   3 //inerte
-#define IN    4 //source de grains
-#define OUT   5 //sortie de grains
-#define TUNNEL 9 //tunnel vers une terre parallele
-
-#define TERRE    GR
-
-/// names of cell states
-#define ETATS { "GR", "AIR", "BORD", "DUM", "IN", "OUT", "", "", "", "TUNNEL" }
-
-/// phases of cell states
-#define PHASES { SOLID, FLUID, SOLID, SOLID, SOLID, SOLID }
-
-/// specific options of the model
-#define ALTI GR //calcul de la hauteur des piles de cellules GR
-#define AVALANCHES  //avalanches
-//#define ROTATIONS //table tournante
-//#define CELL_TIME GR //datation des cellules GR
-#define CELL_COLOR //cellules colorees
-//#define NORM2D //pour l'affichage
-//#define TRACE_TRANS
-#endif
-
-/// ===================== ICB MODEL =====================
-#ifdef MODEL_ICB
-
-/// name of the model
-#define MOD_NAME "ICB"
-
-/// description
-#define MOD_DESC "simulation of the Earth's inner-core boundary"
-
-/// cell states
-#define PLUS  0 //fer solide
-#define ZERO  1 //liquide sature en elements legers
-#define MOINS 2 //liquide non-sature
-#define BORD  3 //bord
-#define DUM   4 //inerte
-#define TUNNEL 9 //tunnel vers une terre parallele
-
-/// names of cell states
-#define ETATS { "PLUS", "ZERO", "MOINS", "BORD" , "DUM"}
-
-/// phases of cell states
-#define PHASES { SOLID, FLUID, FLUID, SOLID, SOLID }
-
-/// specific options of the model
-#define DUMP_RUGOSI
-
-#endif
-
-/// ===================== RIV MODEL =====================
-#ifdef MODEL_RIV
-
-/// name of the model
-#define MOD_NAME "RIV"
-
-/// description
-#define MOD_DESC "simulation of erosion by runoff"
-
-/// cell states
-#define TERRE  0 //terre
-#define BOUE   1 //boue
-#define EAU    2 //eau
-#define BT     3 //boue turbulent
-#define PIERRE 4 //pierre
-#define BORD   5 //bord
-#define DUM    6 //inerte
-#define IN     7 //source
-#define OUT    8 //sortie
-#define TUNNEL 9 //tunnel vers une terre parallele
-
-/// names of cell states
-#define ETATS { "TERRE", "BOUE", "EAU", "BT", "PIERRE", "BORD", "DUM", "IN", "OUT", "TUNNEL"}
-
-/// phases of cell states
-#define PHASES { SOLID, FLUID, FLUID, FLUID, SOLID, SOLID, SOLID, SOLID, SOLID, SOLID }
-
-/// specific options of the model
-#define LIENS_TRANSITIONS
-#define ALTI TERRE //calcul de la hauteur des piles de cellules TERRE
-#define AVALANCHES
-#define SURRECTIONS
-//#define TRACE_SRC //calcul bassin versant
-//#define TRACE_AIRE  //calcul aires drainees
-//#define TRACE_TRANS
-//#define TRACE_PAR //calcul debit + pente
-//#define APPEL_GMT
-//#define LISSAGE  //couche uniforme de BOUE + cristallisation BOUE->TERRE + pas de transport vers le haut => lissage avant mode TRACE
-//#define CELL_TIME TERRE //datation des cellules TERRE
-
-
-#endif
-
-
-/// ===================== CRYSTAL MODELE =====================
-#ifdef MODEL_CRY
-
-/// name of the model
-#define MOD_NAME "CRYSTAL"
-
-/// description
-#define MOD_DESC "simulation of calcite crystal growth"
-
-/// cell states
-#define PLUS  0 //solide
-#define ZERO  1 //gaz
-#define BORD  3 //bord
-#define DUM   4 //inerte
-#define IN    5 //source du gaz
-#define AIR   6 //air
-#define TUNNEL 9 //tunnel vers une terre parallele
-
-/// names of cell states
-#define ETATS { "SOLIDE", "GAZ", "", "BORD", "DUM", "SOURCE", "AIR" }
-
-/// phases of cell states
-#define PHASES { SOLID, FLUID, SOLID, SOLID, SOLID, SOLID, FLUID }
-
-#endif
-
-/// ===================== DIF MODEL =====================
-#ifdef MODEL_DIF
-
-/// name of the model
-#define MOD_NAME "DIF"
-
-/// description
-#define MOD_DESC "isotropic diffusion"
-
-/// cell states
-#define ZERO  0 //gaz 0
-#define ONE   1 //gaz 1
-#define IN    2 //source
-#define BORD  3 //bord
-#define DUM   4 //inerte
-
-
-/// names of cell states
-#define ETATS { "ZERO", "ONE", "IN", "BORD", "DUM" }
-
-/// phases of cell states
-#define PHASES { FLUID, FLUID, SOLID, SOLID, SOLID }
-
-#endif
-
-/// ===================== D2G MODEL =====================
-#ifdef MODEL_D2G
-
-/// name of the model
-#define MOD_NAME "D2G"
-
-/// description
-#define MOD_DESC "diffusion 2d with gravity"
-
-/// cell states
-#define TERRE 0 //terre
-#define EAU  1 //eau
-#define AIR   2 //air
-#define BORD  3 //bord
-#define DUM   4 //inerte
-#define IN    5 //source
-#define BOUE  6 //boue
-
-/// names of cell states
-#define ETATS { "TERRE", "EAU", "AIR", "BORD", "DUM", "SOURCE", "BOUE" }
-
-/// phases of cell states
-#define PHASES { SOLID, FLUID, FLUID, SOLID, SOLID, SOLID, FLUID }
-
-#endif
-
-/// ===================== LIFE MODEL =====================
-#ifdef MODEL_LIFE
-
-/// name of the model
-#define MOD_NAME "LIFE"
-
-/// description
-#define MOD_DESC "stochastic game of life (2D)"
-
-/// cell states
-#define DEAD 0
-#define ALIVE 1
-#define BORD  2 //bord
-#define DUM   3 //inerte
-
-/// names of cell states
-#define ETATS { "DEAD", "ALIVE", "BORD", "DUM" }
-
-#endif
-
-/// ======================================================
 
 /// verification of compatibility between the options
 
