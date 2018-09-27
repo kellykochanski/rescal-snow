@@ -11,9 +11,9 @@ Csp_file = DUN.csp
 #H = 50
 H = 50
 #L = 400
-L = 500
+L = 100
 #D = 200
-D = 350
+D = 50
 
 ## CSP template (genesis)
 #Csp_template = FORSTEP(height of steps, number of steps, initial thickness of loose grains, TRUE/FALSE perturb step with sine wave)
@@ -44,7 +44,7 @@ Lambda_F = 400
 Lambda_S = 0.00
 
 ## Snowfall (Injection Rate) - Parameter to vary
-Lambda_I = 1
+Lambda_I = .1
 
 ## Deposition rate
 Lambda_C = 2
