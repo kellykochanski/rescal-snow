@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set up this run in the correct directory
-
+#Configured for LL CPU not RC
 
 output_root="../new_runs3"
 echo ${output_root}
