@@ -1,4 +1,4 @@
-/* ReSCAL - genesis entry
+/*ReSCAL - genesis entry
  *
  * Copyright (C) 2011-2012
  *
@@ -101,7 +101,7 @@ void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
 
 //available CSP template types
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
-enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
+enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_SNOWFALL,  CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
 #else
 enum CSP_TEMPLATES {CSP_CUSTOM};
 #endif
@@ -111,6 +111,7 @@ void init_template_list() {
   init_template(CSP_CUSTOM, "CUSTOM", "CUSTOM:\t\t\tno template", 0);
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
   init_template(CSP_LAYER, "LAYER", "LAYER(h=1.0):\t\t\tsand layer of height <h>", 1, 1.0);
+  init_template(CSP_SNOWFALL, "SNOWFALL", "SNOWFALL(h=1.0):\t\t\tsand layer of height <h> with IN cells along ceiling", 1, 1.0);
   init_template(CSP_BLOCK, "BLOCK", "BLOCK(xmin, xmax, ymin, ymax, h):\tsand block of height <h>", 5, 30.0, 50.0, 50.0, 150.0, 20.0);
   init_template(CSP_CYLINDER, "CYLINDER", "CYLINDER(h=20, w=100):\tcylinder of height <h> and width <w>", 2, 20.0, 100.0);
   //init_template(CSP_CONE, "CONE", "CONE(h=30, w=100):\t\tcone of height <h> and width <w>", 2, 30.0, 100.0);
@@ -276,7 +277,24 @@ void genesis() {
               aux->celltype = GR;
             }
           }
-        } else if (csp_template.type == CSP_BLOCK) {
+	} else if (csp_template.type == CSP_SNOWFALL) {        
+	  //CSP_SNOWFALL: sand layer with injection grains at the top
+	  //format: SNOWFALL(h)
+	  if (j == 1) {
+		if (i == L - 1)
+		aux->celltype = IN;
+	  }
+	  hh = (int)csp_template.args[0];
+          float frac = fmodf(csp_template.args[0], 1.0);
+          if (j > H - 2 - hh) {
+		aux->celltype = GR;
+          }
+          if ((j == H - 2 - hh) && frac) { //h is not an integer
+            if (drand48() < frac) {
+		 aux->celltype = GR;
+            }
+          }	
+	} else if (csp_template.type == CSP_BLOCK) {
           //CSP_BLOCK: sand block
           //format: BLOCK(xmin, xmax, ymin, ymax, h)
           xmin = (int)csp_template.args[0];
