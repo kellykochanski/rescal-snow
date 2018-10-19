@@ -5,8 +5,8 @@
 ###################################
 
 ## remove all previously generated files
-#./clean -f
-./clean
+./clean -f
+#./clean
 
 ## make an archive from the sources
 #./dobackup
@@ -32,6 +32,7 @@ fi
 #PAR_FILE="dun_scale.par"
 #PAR_FILE="sno_cone.par"
 PAR_FILE="sno_snowfall.par"
+#PAR_FILE="sno_layer.par"
 echo PAR_FILE=$PAR_FILE
 
 ### number of OpenMP threads

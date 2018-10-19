@@ -326,6 +326,7 @@ void view_palette(int32_t *colors) {
   palette[GR]   = 0x00ffffff; // white grain
   palette[GRJ]  = 0x00ff0000; // red mobile grain
   palette[GRV]  = 0x00adcbe3; // light-blue hardened grain
+  palette[IN]   = 0x0000ff00; // bright green injection grain
 #ifdef BR
   palette[BR]   = 0x00000000; // black bedrock
 #endif
