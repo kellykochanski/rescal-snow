@@ -281,7 +281,6 @@ void genesis() {
 	  //CSP_SNOWFALL: sand layer with injection grains at the top
 	  //format: SNOWFALL(h)
 	  if (j == 1) {
-		if (i == L - 1)
 		aux->celltype = IN;
 	  }
 	  hh = (int)csp_template.args[0];

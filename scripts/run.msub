@@ -7,7 +7,7 @@
 #MSUB -l nodes=2
 #MSUB -V
 #MSUB -l walltime=00:01:00
-i
+
 
 ###################################
 ## Dune simulation
@@ -45,7 +45,8 @@ fi
 #PAR_FILE="dun_kk.par"
 #PAR_FILE="dun_small.par"
 #PAR_FILE="step.par"
-PAR_FILE="sno_cone.par"
+#PAR_FILE="sno_cone.par"
+PAR_FILE="sno_snowfall.par"
 
 echo PAR_FILE=$PAR_FILE
 

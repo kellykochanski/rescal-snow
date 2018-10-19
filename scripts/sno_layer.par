@@ -9,62 +9,60 @@ Output_directory = ./output/
 
 Csp_file = DUN.csp
 #H = 50
-H = 100
+H = 60
 #L = 400
-L = 600
+L = 200
 #D = 200
-D = 300
+D = 50
 
 ## CSP template (genesis)
 #Csp_template = FORSTEP(height of steps, number of steps, initial thickness of loose grains, TRUE/FALSE perturb step with sine wave)
 #Csp_template = FORSTEP(20.0, 5.0, 0.1, 1)
 #Csp_template = RCONE
-#Csp_template = LAYER(5)
-Csp_template = SNOWFALL(8)
+Csp_template = LAYER(5)
 
 ## Boundary conditions
 #Boundary = REINJECTION
-#Boundary = PERIODIC
-Boundary = OPEN
+Boundary = PERIODIC
 
 ## Initial time
 Time = 0.0
 
 ## Physical parameters file
-Phys_prop_file = real_data/sealevel_snow.prop
+Phys_prop_file = real_data/desert_earth.prop
 
 ## Qsat data file
 Qsat_file = real_data/PDF.data
 
 ## Erosion rate
-Lambda_E = 1
+Lambda_E = 4
 
 ## Erosion ratio for cohesive snow
-Lambda_F = 1
+Lambda_F = 400
 
-## Sintering rate
-Lambda_S = 0
+## Sintering rate - PARAMETER TO VARY
+Lambda_S = 0.02
 
 ## Deposition rate
-Lambda_C = 0.5
+Lambda_C = 2
 
 ## Transport rate
 #Lambda_T = 6
-Lambda_T = 1.5
+Lambda_T = 30
 
 ## Coefficient for the vertical transport of mobile grains
 #Coef_A = 0
 #Coef_A = 0.2
 #Coef_A = 1
-Coef_A = 0.1
+Coef_A = 1.6
 
 ## Coefficient for the deposition against an obstacle
 #Coef_B = 10
 #Coef_B = 2
-Coef_B = 10
+Coef_B = 1
 
 # Coefficient for the deposition behind an obstacle
-Coef_C = 10
+Coef_C = 3
 
 ## Probability of the transition links
 Prob_link_ET = 0.5
@@ -75,14 +73,14 @@ High_mobility = 1
 
 ## Diffusion rate
 #Lambda_D = 0.02
-Lambda_D = 0.01
+Lambda_D = 0.06
 
 ## Injection rate
 #Lambda_I = 0.1
-Lambda_I = 0.00
+Lambda_I = 1
 
 ## Gravity
-Lambda_G = 100000 #1000
+Lambda_G = 1000 #1000
 
 ## Mode of avalanches
 Ava_mode = TRANS
@@ -97,7 +95,7 @@ Lambda_A = 1
 #Ava_duration = 1.0
 
 ## Angle of avalanches (degrees)
-Ava_angle = 38.0 #35.0
+Ava_angle = 35.0 #35.0
 
 ## Height limit in avalanches (cells)
 Ava_h_lim = 1
@@ -115,10 +113,10 @@ Init_ncycl = 150
 Lgca_speedup = 1000
 
 ## Min shear stress value
-Tau_min = 100
+Tau_min = 0
 
 ## Max shear stress value
-Tau_max = 200
+Tau_max = 1000
 
 ## Automatic centering
-Centering_delay = 0
+Centering_delay = 200
