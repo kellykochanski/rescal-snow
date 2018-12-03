@@ -52,8 +52,8 @@ for Lambda_I in [0.0, 0.0001, 0.001, 0.01, 0.1] :
 			os.mkdir(this_directory)
 		this_run.set_directory(this_directory)
 		parameters['Lambda_I'] = Lambda_I
-		parameters['Tau_Min'] = Tau_min
-		parameters['Tau_Max'] = Tau_min + 1000
+		parameters['Tau_min'] = Tau_min
+		parameters['Tau_max'] = Tau_min + 1000
 		this_run.set_parameters(parameters)
 		this_run.write()
 		# copy executables for this run into this run directory
