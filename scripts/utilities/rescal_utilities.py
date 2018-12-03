@@ -125,11 +125,12 @@ class Parameters():
 		self.new_parameter('Lambda_F',  'Ratio of sintered:unsintered erosion thresholds', 3)
 		self.new_parameter('Coef_A', 	'Ratio of vertical:horizontal transport of mobile grains', 0.1)
 		self.new_parameter('Coef_B', 	'Ratio of deposition against an obstacle : deposition', 1)
-		self.new_parameter('Coef_B',	'Ratio of deposition behind an obstacle : deposition', 3)
+		self.new_parameter('Coef_C',	'Ratio of deposition behind an obstacle : deposition', 3)
 		self.new_parameter('Prob_link_ET', 'Probability of the transition links', 0.5)
 		self.new_parameter('Prob_link_TT', 'Probability of the transition links', 1)
 		self.new_parameter('High_mobility', 'Higher mobility of grains', 1)
 		self.new_parameter('Lambda_I', 	'Injection rate', 0)
+		self.new_parameter('Lambda_A', 	'??', 1)
 
 		# Parameters describing avalanching
 		self.new_parameter('Ava_mode', 	'Mode of avalanching', 'TRANS')
@@ -375,7 +376,7 @@ class Run_Script():
 			f.write("./genesis -f $PAR_FILE -s 2000 > $GENESIS_LOG_FILE\n\n")
 
 			# Run rescal
-			self.__write_run_rescal(self, f)
+			self.__write_run_rescal(f)
 
 			# Automatic analysis
 

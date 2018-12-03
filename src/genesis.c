@@ -101,7 +101,7 @@ void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
 
 //available CSP template types
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
-enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_SNOWFALL,  CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
+enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_SNOWFALL,  CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_SNOWCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
 #else
 enum CSP_TEMPLATES {CSP_CUSTOM};
 #endif
@@ -298,7 +298,7 @@ void genesis() {
           //CSP_SNOWCONE: snow layer seeded with a singular cone of a specified size
           //format: SNOWCONE(h, w, x, y, d)
           //parameters for the cone
-          cone = csp_template.args[0];
+          hcone = csp_template.args[0];
           lcone = csp_template.args[1];
           x = csp_template.args[2];
           y = csp_template.args[3];
