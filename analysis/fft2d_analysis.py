@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.insert(0, "../scripts/utilities") #Find rescal_utilities here
 import time as t
 import numpy as np
 import pandas as pd
@@ -18,22 +19,26 @@ except:
     can_plot = False
     pass
 
+#Reads ReSCAL simulation output file (the input files for postprocessing)
 #Reads a file (1 row per line, each row should have same number of column values, separated by whitespaces), returns a numpy array
 #filename -> the name of the file to open
 #datatype -> the datatype of the values within the file (int, or float)
 def read_data(filename,datatype,show_error=True):
-    
     sig_2d = []
     f = open(filename, 'r')
     try:
         for line in f.readlines():
             line=line.strip()
-            sig_2d.append(map(datatype,line.split()))
+            # PY3 Note: map is iterable, numpy requires a list
+            sig_2d.append([datatype(x) for x in line.split()])
+            # sig_2d.append(map(datatype,line.split()))
     finally:
         f.close()
         arr = np.array(sig_2d)
         try:
             x, y = arr.shape
+            # PY3 Note: indexing 0-50 because input data .log files are repetitive (imshow to verify)
+            # return np.array(sig_2d)[0:50]
             return np.array(sig_2d)
         except:
             if show_error:
@@ -100,7 +105,7 @@ def write_summary(run_stats,directory,filename,par_file_path,summary_data,top_am
 
     print("Summary for directory at: {}{}".format(directory,filename))
 
-#Reads all files in directory with specific extension and returns it as a sorted list
+#Reads all files (simulation output) in directory with specific extension and returns it as a sorted list
 #dir_path -> The directory containing data files
 #pref -> The standard prefix of datafiles
 #datatype -> The type of data stored in each files (int or float data)
@@ -144,8 +149,9 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
             np_arr = read_data(f,datatype,show_errors)
             if np_arr is None:
                 error_count += 1
-                if show_errors:
-                    show_errors = False
+                # PY3 Note: Debugging Purposes, show all errors
+                # if show_errors:
+                    # show_errors = False
             else:
                 all_data.append(np_arr)
             
@@ -162,7 +168,7 @@ def read_directory(dir_path,pref,par_ext,datatype,skip_files,verbose=True):
 #Performs fft2d analysis on the data taken from input file and returns single quadrant fft result.
 #data -> data to perform fft on
 def fft2d_analyze(data):
-
+   
     #Data points for x and y axis
     dpx, dpy = data.shape
         
@@ -174,8 +180,10 @@ def fft2d_analyze(data):
     fft_data = data - np.mean(data)
 
     #Get fft2d and resize to single quadrant
-    return np.fft.fft2(fft_data)[0:dpx/2,0:dpy/2]*2/(dpx*dpy)
+    # PY3 Note: need indeces to be integers
+    return np.fft.fft2(fft_data)[0:int(dpx/2),0:int(dpy/2)]*2/(dpx*dpy)
 
+# Run fft2d_analyze on a list of many files
 #Performs fft2d analysis on all data in data list
 #all_data -> a list of 2d numpy arrays containing data
 def all_fft2d_analysis(all_data):
@@ -301,7 +309,7 @@ def top_values(values, threshold, d_freqs):
 def get_all_velocities(all_phases, all_amps, time_delta):
     
     p_velocities = []
-
+    
     for i, phase in enumerate(all_phases[1:]):
         diff = ((phase-all_phases[i]+2*np.pi) % 2*np.pi) - 2*np.pi
         p_velocities.append(diff/time_delta)
@@ -534,10 +542,12 @@ def analyze_directory(dir_name, output_dir, base_pref, par_ext, output_name, ima
 
         #Make directories if needed
         if image_interval > 0 and not os.path.exists(PNG_OUTPUT_DIR):
-            os.makedirs(PNG_OUTPUT_DIR,0777)
+            # PY3 Note: 0777 permissions are default
+            os.makedirs(PNG_OUTPUT_DIR)
         
         if not os.path.exists(DATA_OUTPUT_DIR):
-            os.makedirs(DATA_OUTPUT_DIR,0777)
+            # PY3 Note: 0777 permissions are default            
+            os.makedirs(DATA_OUTPUT_DIR)
 
         #Get all data from the main directory
         t0 = t.time()
@@ -698,7 +708,9 @@ def analyze_many_dir(main_dir, output_dir, base_pref, par_ext, img_int, skip_fil
             print("An error occured while writing main summary file.")
     else:
         print("No directories were analyzed. Check the main directory path.\nMain directory used: {}".format(main_dir))
-    
+
+# KK: how is this different from analyse directory?
+# Should it exist as an independent function?
 def plot_only(dir_name, output_dir, base_pref, par_ext, output_name, image_interval, skip_files, verbose=True):
     MAIN_DATA_DIR = dir_name
     PARAMETER_FILE = par_ext
@@ -731,10 +743,12 @@ def plot_only(dir_name, output_dir, base_pref, par_ext, output_name, image_inter
 
     #Make directories if needed
     if image_interval > 0 and not os.path.exists(PNG_OUTPUT_DIR):
-        os.makedirs(PNG_OUTPUT_DIR,0777)
+        # PY3 Note: 0777 permissions are default
+        os.makedirs(PNG_OUTPUT_DIR)
     
     if not os.path.exists(DATA_OUTPUT_DIR):
-        os.makedirs(DATA_OUTPUT_DIR,0777)
+        # PY3 Note: 0777 permissions are default
+        os.makedirs(DATA_OUTPUT_DIR)
 
     #Get all data from the main directory
     t0 = t.time()
@@ -807,3 +821,8 @@ elif argcount > 5:
     main(args[1],args[2],args[3],int(args[4]),args[5])
 else:
     print("Not enough arguments passed to function.")
+
+# PY# Note: Testing Calls
+# main(directory="input_data/ALT_DATA1/",output_dir="ALT_DATA1_OUT",filename="ALT_DATA1",image_interval=1, verbose=True, plot=True)
+
+# main(directory="input_data/Series", output_dir="ALT_DATA1_OUT",filename="Series",image_interval=1, verbose=True, plot=True)
