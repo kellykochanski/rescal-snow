@@ -1,6 +1,7 @@
 rescal-snow is adapted from the software ReSCAL. 
 
 The adaptation was performed at Lawrence Livermore National Laboratory, Livermore, CA, from 2018-2019, by Kelly Kochanski and Barry Rountree, with assistance from Carlos Downie, Adam Rubin, Diya Mohan, and Aaron Robeson.
+This has included minor adaptations to most files in src, as well as the additions documented in NEWS and in the commit history.
 
 Contact for rescal-snow: 
 Kelly Kochanski <kelly.kochanski@colorado.edu> 

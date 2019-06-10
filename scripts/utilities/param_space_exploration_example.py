@@ -2,9 +2,21 @@ from rescal_utilities import *
 import os
 import shutil
 
-# where does the rescal executable start out (when it gets compiled)?
-executable_location = ".."
+# Kelly Kochanski and Adam Rubin, 2018
 
+# This is an example file showing how to run a parameter space exploration
+# The exploration fixes most simluations parameters (the `parameters' dictionary')
+#  then explores five snowfall rates, controlled by parameter Lambda_I,
+#  six wind speeds, controlled by parameter Tau_min,
+#  and all combinations thereof.
+
+# The script creates new directories and manages the locations of input, output and executable files
+#  so that all 30 simulations can be run in parallel.
+
+
+executable_location = ".." # location of the compiled rescal executable
+
+# Parameters held constant for all simulations
 parameters = {
         'Model':  'SNO',
         'Output_directory': './out',
@@ -39,9 +51,10 @@ parameters = {
         'Lgca_delay': 1,
         'Lgca_speedup': 1000,
         'Init_ncycl': 150,
-	'rescallocation': '.' # this is where run script looks for rescal+genesis
+	'rescallocation': '.' # this is where run script looks for rescal+genesis executables
 }
 
+# These for loops vary the parameters for snowfall rate and wind speed
 for Lambda_I in [0.0, 0.0001, 0.001, 0.01, 0.1] :
 	for Tau_min in [0, 10, 100, 200, 300, 1000] :
 		this_run = Design_a_run()

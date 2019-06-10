@@ -1,6 +1,9 @@
 # KK Jun 25 20180
+# Utilities to set up run scripts quickly and easily; these tools are designed to aid parameter space
+# explorations, sensitivity analyses, and large batches of runs.
 # Parameters : Class to hold, update, change, or write all the parameters that ReSCAL needs to run
 # Run_Script : Class to hold, update, change, or write a ReSCAL run script with appropriate flags
+# This includes almost all options and inputs, except those in the "real_data" file.
 
 class Design_a_run():
 	# Design a ReSCAL run
@@ -379,89 +382,4 @@ class Run_Script():
 			self.__write_run_rescal(f)
 
 			# Automatic analysis
-
-
-##----------------------------------------------------------------------------------------------------------
-##----------------------------------------------------------------------------------------------------------
-##----------------------------------------------------------------------------------------------------------
-# Rate constants
-
-# Rescal has three dimensionless parameters: time t0, length l0, and a stress ratio tau1
-
-def calc_qsat(stress, threshold_stress):
-	# Saturated flux qsat
-	# Using formula in Narteau et al 2009 section 5.2
-	# Qsat is returned in whatever-system-of-real-units stress is calculated in
-	# Gamme is a horrible constant with units..?
-
-	# After Anderson and Haff, 1988, Eq 1
-	gamma = 0
-	
-	# For simplicity
-	alpha = 1
-
-	excess_stress	= max(0, stress-threshold_stress)
-	return alpha*stress**gamma*excess_stress
-
-
-def calc_l0():
-	# Takes in a run, returns a value for its length scale, l0
-	print "Warning: l0 calculation assumes physical values are snow"
-	air_density		= 0.860
-	grain_density		= 900
-	gravity			= 9.8
-	grain_diameter		= 10.0**(-4)
-
-	# After Elbelrhiti et al, 2005
-	lambda_max		= 50.0*grain_density/air_density*grain_diameter
-	
-	# After Narteau et al 2009 section 5.3
-	l0			= lambda_max/40.0
-	return l0
-
-def flux_ratio_2_stress_ratio(flux_ratio):
-	# Use Narteau et al 2009 Fig 7 to convert between
-	# tau1 (the modelled stress ratio)
-	# Flux_ratio ( Qsat(tau=tau1)/Qsat(tau=0) )
-	# (either the modelled one, or the measured one that one wants to model)
-
-	a = 23.558
-	b = 0.172
-	y = flux_ratio
-	return (-a*y**2 + a*y + b)/y
-
-def stress_ratio_2_flux_ratio(modelled_stress_ratio):
-	# Converts a ratio of model stresses, tau1/tau0, to a ratio of fluxes
-	#, saturated flux with modelled threshold stress : saturated flux with 0 threshold
-
-	s = 0.043
-	d = 16
-	x = modelled_stress_ratio
-	return -0.5*s*( x-1.0/s ) + np.sqrt(d + (x-1.0/s)**2 )
-
-
-def calc_t0(tau1, measured_flux):
-	# Takes in a Design_a_run object
-	# And a real value of saturated flux, qsat_real, in the modeled system
-	# Typically tau1 will be run.get('Tau_min')
-	# (the modelled stress ratio)
-
-	l0	= calc_l0()
-	
-	# Saturated flux in this model times still-unknown t0
-	#  Recognizing that Qsat(tau1) = ( Qsat(tau=tau1)/Qsat(tau=0) )*Qsat(tau=0)
-
-	#    Knowing from Figure 7 in Narteau et al 2009 that
-	#    ( Qsat(tau=tau1)/Qsat(tau=0) ) is a monotonic function of tau1:
-	modelled_flux_ratio = stress_ratio_2_flux_ratio(tau1)
-
-	#  And seeing from Narteau et al 2009 Fig 8 that Qsat(tau=0) = 0.23*l0^2/t0
-	modelled_flux_per_t0	= 0.23*l0**2*modelled_flux_ratio
-	
-	# We can combine all the above to
-	# Match the real and modelled values of saturated flux
-	t0 			= modelled_flux_per_t0/measured_flux
-	return t0
-
-	
 

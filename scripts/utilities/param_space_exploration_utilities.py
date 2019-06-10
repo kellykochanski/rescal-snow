@@ -1,4 +1,16 @@
 # KK July 03 2018
+
+# This is a shell script designed to start organizing ReSCAL to perform a parameter space exploration;
+#  it could be adapted to perform any set of runs with variable parameters
+
+# The "explore_parameter_space" function creates an array of subdirectories, each containing:
+#   - a run script (bash), generally called run.run
+#   - a parameter file (txt), generally caled run.par
+# Note that the multi-directory structure is useful for several reasons:
+#   1. The output for each run stays in its own subdirectory, attached to the appropriate input files
+#   2. If multiple processors are available, they may simultaneously run separate instances of rescal-snow, one per directory,
+#       without any communication, race conditions, or other problems
+
 # Set up a bunch of runs to go in parallel
 
 import rescal_utilities
@@ -18,7 +30,7 @@ def explore_parameter_space(output_root, executable_location, parameter_ranges, 
 		os.mkdir(output_root)
 
 	# Get some lists of parameter combos to explore
-	parameter_combos = _parameter_search(parameter_ranges, n_runs, 'uniform')
+	parameter_combos = _uniform_random_search(parameter_ranges, n_runs)
  	
 	# Write parameter files for each set of parameters
 	now = datetime.datetime.now()
@@ -39,33 +51,6 @@ def explore_parameter_space(output_root, executable_location, parameter_ranges, 
 
 		os.mkdir(run_output_dir)
 		this_run.write()
-
-
-###---------------------------------------------------------------------------
-###---------------------------------------------------------------------------
-
-def _parameter_search(parameter_ranges, n_runs, search_type):
-	# Return n_runs lists of parameter value
-	# in lists with entries of forms { parameter_name : value }
-	# (note that this is preferred format for scikit-learn searches)
-
-	if search_type not in ['grid']:
-		print "Search type " + search_type + " not yet implemented."
-		print "Defaulting to a uniform random search."
-		return _uniform_random_search(parameter_ranges, n_runs)
-	
-	elif search_type == 'grid':
-		return _grid_search(parameter_ranges, n_runs)
-
-	elif search_type == 'uniform':
-		return _uniform_random_search(parameter_ranges, n_runs)
-
-
-def _grid_search(parameter_ranges, n_runs):
-	# Grid search of parameter spacee - TODO
-
-	print("Grid search incomplete. Doing a uniform search instead.")
-	return _uniform_random_search(parameter_ranges, n_runs)
 
 def _uniform_random_search(parameter_ranges, n_runs):
 	# For each run, each parameter takes a value drawn from a uniform distribution
