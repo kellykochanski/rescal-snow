@@ -5,8 +5,8 @@
 ###################################
 
 ## remove all previously generated files
-#./clean -f
-./clean
+./clean -f
+#./clean
 
 ## make an archive from the sources
 #./dobackup
@@ -30,7 +30,9 @@ fi
 #PAR_FILE="dun_star.par"
 #PAR_FILE="dun_col.par"
 #PAR_FILE="dun_scale.par"
-PAR_FILE="sno_cone.par"
+#PAR_FILE="sno_cone.par"
+PAR_FILE="sno_snowfall.par"
+#PAR_FILE="sno_layer.par"
 echo PAR_FILE=$PAR_FILE
 
 ### number of OpenMP threads
@@ -51,7 +53,8 @@ RESCAL_LOG_FILE="RESCAL.log"
 #nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
 
 ## generation of png images, CSP files and info logs, then stop after 30 minutes
-nice ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -dcsp 5t0 -stop 30 >> $RESCAL_LOG_FILE
+## -stop 1t0
+./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 1t0 -dcsp 5t0  >> $RESCAL_LOG_FILE
 
 ## generation of png images with delay in t0 unit
 #nice ./rescal $PAR_FILE -cv0 -ls 45 -vel -vss -info -dpng 100t0 >> $RESCAL_LOG_FILE

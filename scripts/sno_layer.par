@@ -1,24 +1,25 @@
 ## PARAMETER FILE
 ## High mobility DUNE model with transitions of avalanches and lattice gas
-## A cone of sand will evolve into a barchan
+## A layer of sand will evolve into ripples
 
-# KK created this to play with the parameters of the dune model.
+# AR created this file to mess with an injection cell border
 
 Model = SNO
 Output_directory = ./output/
 
 Csp_file = DUN.csp
 #H = 50
-H = 50
+H = 60
 #L = 400
-L = 500
+L = 200
 #D = 200
-D = 350
+D = 50
 
 ## CSP template (genesis)
 #Csp_template = FORSTEP(height of steps, number of steps, initial thickness of loose grains, TRUE/FALSE perturb step with sine wave)
 #Csp_template = FORSTEP(20.0, 5.0, 0.1, 1)
-Csp_template = RCONE
+#Csp_template = RCONE
+Csp_template = LAYER(5)
 
 ## Boundary conditions
 #Boundary = REINJECTION
