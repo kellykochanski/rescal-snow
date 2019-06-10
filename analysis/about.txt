@@ -1,6 +1,9 @@
-Cones turn into crescent (barchan) dunes.
+These scripts take time series of elevation maps and analyse the wavelengths and speeds of the elevated features.
 
-Exploration of parameter space to see effect of sintering rate, lambda_S, and wind strength parameter Tau_min on the shapes of the dunes.
+Example input: a set of ALTI files produced by a ReSCAL simulation, alphabetically named ALTI0001_t0.log, ALTI0002_t0.log, etc.
 
-These files all overwrote each other on the same genesis DUN.csp, and may have initial conditions that do not match their parameter files. Filenames have been corrected to match cone/layer shape. Other errors not impossible, though they should be restricted to the initial
-configuration and not mar the parameters.
+Contributors: 
+Kelly Kochanski organized/defined the workflow
+Carlos Downie wrote the fourier analysis (fft) script (2018)
+Divya Mohan updated the fft script for python 3 (2019)
+Aaron Robeson wrote the cross-correlation script(s) (2018)
