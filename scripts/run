@@ -3,10 +3,13 @@
 ###################################
 ## Dune simulation
 ###################################
+## KK made this script to run using the 
+## parameters in dun_kk.par.
+## Other users: run with ./run not ./run_kk
 
-## remove all previously generated files
-./clean -f
-#./clean
+## remove all previously generated files; -f does not ask for user responses
+#./clean -f
+./clean
 
 ## make an archive from the sources
 #./dobackup
@@ -20,19 +23,8 @@ if [ ! -e rescal ]; then
 fi
 
 ## parameters file (input)
-#PAR_FILE="dun.par"
-#PAR_FILE="dun_fast.par"
-#PAR_FILE="barchan.par"
-#PAR_FILE="dun_rot.par"
-#PAR_FILE="dun_wind.par"
-#PAR_FILE="dun_full.par"
-#PAR_FILE="dun_coarsening.par"
-#PAR_FILE="dun_star.par"
-#PAR_FILE="dun_col.par"
-#PAR_FILE="dun_scale.par"
-#PAR_FILE="sno_cone.par"
-PAR_FILE="sno_snowfall.par"
-#PAR_FILE="sno_layer.par"
+# PAR_FILE="snowfall.par"
+PAR_FILE="snow_cone.par"
 echo PAR_FILE=$PAR_FILE
 
 ### number of OpenMP threads
@@ -52,9 +44,10 @@ RESCAL_LOG_FILE="RESCAL.log"
 ## default execution with light shading, vertical layers of cells and velocity of the flow
 #nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
 
+date
 ## generation of png images, CSP files and info logs, then stop after 30 minutes
-## -stop 1t0
-./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 1t0 -dcsp 5t0  >> $RESCAL_LOG_FILE
+nice ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 50t0 -nv -dcsp 50t0 -stop 120 >> $RESCAL_LOG_FILE
+date
 
 ## generation of png images with delay in t0 unit
 #nice ./rescal $PAR_FILE -cv0 -ls 45 -vel -vss -info -dpng 100t0 >> $RESCAL_LOG_FILE
