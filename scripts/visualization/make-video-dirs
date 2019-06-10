@@ -1,0 +1,48 @@
+#!/bin/bash
+
+if [ "$#" == 0 ]; then
+  echo "usage: $0 <list of directories>"
+  echo "Make a video from PNG files in a list of directories. Video encoded in the first directory."
+  exit
+fi
+
+dir1=`basename $1`
+
+if [ ! -d $dir1 ]; then
+  echo "no directory '$dir1' found"
+  exit
+fi
+
+video="${dir1}_$#.mov"
+
+cp $0 $dir1/
+
+cd $dir1
+
+if [ -e $video ]; then
+  echo "file '$video' already exists"
+  exit
+fi
+
+for dir in $*
+do
+  echo "read $dir ..."
+  list_png="$list_png "`ls -1 ../$dir/*.png`
+done
+
+#echo "list_png: $list_png"
+
+../convert-images $list_png
+#./convert-images $list_png
+
+../encode-video $video
+#./encode-video $video
+
+echo -n "Delete all im_*.jpg files [y|n] ?"
+read ans
+if [ "$ans" == "y" ] || [ "$ans" == "yes" ] ; then
+  rm im_*.jpg
+fi
+
+#ffplay $video
+
