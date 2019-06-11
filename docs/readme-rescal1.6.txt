@@ -2,6 +2,10 @@ ReSCAL: a Real-Space Cellular Automaton Laboratory
 --------------------------------------------------
 Copyright (C) 2011-2016
 
+(2019 note: this readme describes ReSCAL v1.6 in 2016.
+The current software has been modified from this;
+see README.md for a description of the current state
+of this software)
 
 Description
 -----------
