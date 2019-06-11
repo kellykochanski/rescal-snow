@@ -1,0 +1,54 @@
+#!/bin/bash
+
+if [ "$#" != 1 ]; then
+  echo "usage: $0 <video output filename>"
+  echo "Make a video from files named im_%05d.jpg" 
+  echo "Supported encoders: ffmpeg, avconv."
+  echo "Use of H264 codec if available"
+  exit
+fi
+
+video=$1
+echo "creating $video"
+
+#frame rate
+fr=16
+#fr=8
+
+#bitrate
+#br="2500k"
+#br="1500k"
+#br="1000k"
+#br="500k"
+
+if [ -n "$fr" ]; then
+  echo "set frame-rate to $fr fps"
+  opt_fr="-r $fr"
+fi
+
+if [ -n "$br" ]; then
+  echo "set bit-rate to $br"
+  opt_br="-b $br"
+fi
+
+chk_ffmpeg=$(which ffmpeg)
+chk_avconv=$(which avconv)
+if [ -x "$chk_ffmpeg" ] ; then
+  echo encode: ffmpeg
+  probe_codec=ffprobe
+  encode=ffmpeg
+elif [ -x "$chk_avconv" ] ; then
+  echo encode: avconv
+  probe_codec=avprobe
+  encode=avconv
+else
+  echo "No encoder found. Please install ffmpeg or avconv."
+  exit
+fi
+$probe_codec -codecs | grep -c "h264" >> /dev/null && opt_codec="-vcodec libx264"
+if [ -n "$opt_codec" ]; then
+  echo "H264 codec found"
+fi
+$encode $opt_fr -i im_%05d.jpg $opt_br -y -an $opt_codec $video
+du -hs $video
+

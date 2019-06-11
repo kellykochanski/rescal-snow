@@ -4,17 +4,17 @@
 #MSUB -m abe
 #MSUB -M kochanski1@llnl.gov
 #MSUB -l partition=quartz
-#MSUB -l nodes=2
+#MSUB -l nodes=1
 #MSUB -V
-#MSUB -l walltime=00:01:00
+#MSUB -l walltime=00:30:00
 
 
 ###################################
 ## Dune simulation
 ###################################
-## KK made this script to run using the 
-## parameters in dun_kk.par.
-## Other users: run with ./run not ./run_kk
+# This is a variation of the run script (run or run.run)
+#  designed to be one of many runs, executed in parallel, 
+#  with the parallel runs controlled by slurm commands
 
 ## remove all previously generated files
 #./clean -f
@@ -71,7 +71,7 @@ RESCAL_LOG_FILE="RESCAL.log"
 export PMI_RANK
 
 ## generation of png images, CSP files and info logs, then stop after 30 minutes
-srun ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -dcsp 5 -stop 150t0i --wait=0 >> $RESCAL_LOG_FILE
+srun ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -dcsp 5 -stop 30 --wait=0 >> $RESCAL_LOG_FILE
 
 ## generation of png images with delay in t0 unit
 #nice ./rescal $PAR_FILE -cv0 -ls 45 -vel -vss -info -dpng 100t0 >> $RESCAL_LOG_FILE

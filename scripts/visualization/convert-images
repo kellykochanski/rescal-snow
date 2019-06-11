@@ -1,0 +1,115 @@
+#!/bin/bash
+
+if [ "$#" == 0 ]; then
+  echo "usage: $0 <list of images>"
+  echo "convert all images into a different format"
+  exit
+fi
+
+img_list=$*
+
+#prefix for output images
+prefix="im_"
+
+#set to 1 to change the resolution
+change_res=0
+
+#new resolution
+x=200
+y=200
+
+#set to 1 to crop all images
+crop=0
+
+#crop geometry 
+crop_l=300
+crop_h=300
+offset_x=1
+offset_y=1
+crop_geom="${crop_l}x${crop_h}+${offset_x}+${offset_y}"
+
+#set to 1 to use a modulo
+use_mod=0
+
+#convert one in $mod images
+mod=3
+
+#do not convert more than $imax images
+imax=10000
+
+#repeat first image
+nb_rep_first=0
+
+#set to 1 to use tiling
+use_tile=0
+
+#tile full resolution
+tile_x=800
+tile_y=400
+
+echo "converting PNG images"
+if [ $change_res != 0 ] && [ $use_tile == 0 ]; then
+  echo "change resolution: ${x}x${y}"
+  list_opt="-resize ${x}x${y}"
+fi
+
+if [ $use_tile != 0 ]; then
+  #x2=$((x*2))
+  #y2=$((y*2))
+  echo "tile images to size: ${tile_x}x${tile_y}"
+  x1=$((tile_x/2))
+  y1=$((tile_y/2))
+  list_opt="-resize ${x1}x${y1}"
+  list_files="tmp.png"
+fi
+
+if [ $crop != 0 ]; then
+  echo "crop geometry: $crop_geom"
+  list_opt="-crop $crop_geom $list_opt"
+fi
+
+if [ $use_mod != 0 ]; then
+  echo "modulo: $mod"
+fi
+
+#echo "list_opt=$list_opt"
+
+i=0
+c=0
+nb=0
+for img_file in $img_list
+do
+  if [ $use_mod != 0 ]; then
+    c=$((i % mod))
+  fi
+  if [ $c == 0 ] && [ $i -le $imax ]; then
+    echo "converting $img_file"
+    #jpg_file=`basename $img_file .png`.jpg
+    jpg_file=`printf "${prefix}%05d.jpg" $nb`
+    #echo "jpg_file = $jpg_file"
+    list_files="$list_files $jpg_file"
+    if [ $use_tile == 0 ]; then
+      convert $img_file $list_opt $jpg_file
+    else
+      convert $img_file $list_opt tmp.png
+      convert -size ${tile_x}x${tile_y} tile:tmp.png $jpg_file
+    fi
+    if [ $i == 0 ] && [ $nb_rep_first -ge 1 ]; then
+      echo "repeating first image $nb_rep_first times"
+      for nb in `seq 1 $nb_rep_first`
+      do
+        jpg_file=`printf "${prefix}%05d.jpg" $nb`
+        cp ${prefix}00000.jpg $jpg_file
+      done
+    fi
+    let nb++
+  fi
+  let i++
+done
+
+echo "number of images: $nb"
+
+#rm im_*.jpg tmp.png
+#rm $list_files
+rm tmp.png
+

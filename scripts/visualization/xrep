@@ -1,0 +1,88 @@
+#!/bin/bash
+
+if [ "$#" != 1 ]; then
+  echo "usage: xrep <directory>"
+  echo "compress and move all output files into <directory>, then copy the last image into images/<directory>.png"
+  exit
+fi
+
+if [ -e "$1" ]; then
+  echo "sorry, this directory already exists !"
+  exit
+fi
+
+COM_FILE="comment.txt"
+if [ ! -f $COM_FILE ]; then
+  vi $COM_FILE
+fi
+
+echo "creating $1"
+mkdir $1
+
+NB_VEL=$(ls -1 *.vel 2>/dev/null | wc -l)
+if [ $NB_VEL != 0 ]; then
+  echo -n "compression of .vel files (y/n) ?"
+  read ans
+  if [ "$ans" == "y" ] || [ "$ans" == "yes" ]; then
+    echo "compressing velocity files"
+    gzip *.vel
+  fi
+fi
+
+LOG_FILE="RESCAL.log"
+PAR_FILE=$(awk '/\.par$/ {print $NF; exit}' $LOG_FILE )
+echo "parameter file: $PAR_FILE"
+WIND_FILE=$(awk -F'=' '/^Wind_file/ {print $NF}' $PAR_FILE )
+echo "wind file: $WIND_FILE"
+
+echo "compressing data files"
+gzip *.bin 2>/dev/null
+gzip *.csp 2>/dev/null
+gzip *.data 2>/dev/null
+gzip *.tar 2>/dev/null
+gzip *.car 2>/dev/null
+#gzip ALTI*.txt
+#gzip AUTOCORREL*.txt
+
+echo "moving output files into $1"
+mv *.png $1/ 2>/dev/null
+mv *.jpg $1/ 2>/dev/null
+mv *.jpeg $1/ 2>/dev/null
+#mv *.txt $1/
+mv $COM_FILE $1/ 2>/dev/null
+mv *.log $1/ 2>/dev/null
+mv *.out $1/ 2>/dev/null
+mv *.bin.gz $1/ 2>/dev/null
+mv *.csp.gz $1/ 2>/dev/null
+mv *.data.gz $1/ 2>/dev/null
+mv *.vel.gz $1/ 2>/dev/null
+mv *.car.gz $1/ 2>/dev/null
+mv *.vel $1/ 2>/dev/null
+mv ReSCAL.tar.gz $1/ 2>/dev/null
+
+echo "copying input files"
+#cp *.m $1/
+cp $PAR_FILE $1/
+#cp -r ./wind $1/
+if [ $WIND_FILE ]; then
+  cp -a $WIND_FILE $1/
+fi
+cp genesis $1/ 2>/dev/null
+cp regenesis $1/ 2>/dev/null
+#cp rescal $1/ 2>/dev/null
+#cp rescal*.tar.gz $1/ 2>/dev/null
+#cp genesis*.tar.gz $1/ 2>/dev/null
+#rm -f *.bin 2>/dev/null
+
+if [ -e images ]; then
+  img=$(ls -1 $1/*.png 2>/dev/null | tail -1)
+  if [ -e "$img" ] && [ ! -f images/$1.png ]; then
+    echo "creating $1.png"
+    cp $img images/$1.png 
+  else
+    echo "file images/$1.png already exists"
+  fi
+fi
+
+echo "done"
+
