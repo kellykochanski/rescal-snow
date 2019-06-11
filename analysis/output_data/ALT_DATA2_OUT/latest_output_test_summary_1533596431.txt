@@ -1,7 +1,0 @@
-Parameter info:
-Lambda S: 0.0970398669097
-Tau_min: 21.4812107177
-Ava_angle: 77.1693137056
-Height: 143.5111956 Depth: 400 Length: 1500
-Frequencies logged: 29
-
