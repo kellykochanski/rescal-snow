@@ -2,8 +2,8 @@
 #SBATCH --qos normal
 #SBATCH --mail-user=yourusername@yourserver.com
 #SBATCH --mail-type=ALL
-#SBATCH --time=01:00:00
-#SBATCH --ntasks 4
+#SBATCH --time=00:05:00
+#SBATCH --ntasks 10
 
 
 # This is an example script for submitting runs to a computing cluster
@@ -22,4 +22,4 @@
 
 echo "run_parallel_rescal.sbatch : starting to run ReSCAL in parallel"
 
-srun --nodes=1 --cpus-per-task=1 --ntasks=4 --wait=0 submit.sh
+srun --nodes=1 --cpus-per-task=1 --ntasks=10 --wait=0 submit.sh
