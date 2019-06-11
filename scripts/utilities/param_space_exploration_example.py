@@ -15,19 +15,23 @@ import shutil
 
 
 executable_location = ".." # location of the compiled rescal executable
+experiment_name = "test_parallel_runs" # header directory which all generated input goes into
+experiment_directory = os.path.join("../../", experiment_name)
+if not os.path.isdir(experiment_directory):
+	os.mkdir(experiment_directory)
 
 # Parameters held constant for all simulations
 parameters = {
         'Model':  'SNO',
         'Output_directory': './out',
         'Csp_file': 'DUN.csp',
-        'Csp_template': 'SNOWFALL(8)',
+        'Csp_template': 'SNOWFALL(4)',
         'parfile': 'run.par',
 	'Boundary':  'OPEN',
         'Time': 0.0,
-        'H': 100,
-        'L': 600,
-        'D': 300,
+        'H': 50,
+        'L': 400,
+        'D': 100,
         'Centering_delay': 0,
         'Phys_prop_file': 'real_data/sealevel_snow.prop',
         'Qsat_file': 'real_data/PDF.data',
@@ -50,17 +54,17 @@ parameters = {
         'Ava_h_lim': 1,
         'Lgca_delay': 1,
         'Lgca_speedup': 1000,
-        'Init_ncycl': 150,
 	'rescallocation': '.' # this is where run script looks for rescal+genesis executables
 }
 
 # These for loops vary the parameters for snowfall rate and wind speed
-for Lambda_I in [0.0, 0.0001, 0.001, 0.01, 0.1] :
-	for Tau_min in [0, 10, 100, 200, 300, 1000] :
+for Lambda_I in [0.001, 0.01] :
+	for Tau_min in [0, 100, 200, 300, 1000] :
 		this_run = Design_a_run()
 		this_run.set_header("Baseline Lambda_I values at a specified tau_min")
 		this_run.set_name("run")
-		this_directory = "../runs/" + "tauMin" + str(Tau_min) + "_lambdaI" + str(Lambda_I)
+		# Where should the input for this single run go?
+		this_directory = os.path.join(experiment_directory, "tauMin" + str(Tau_min) + "_lambdaI" + str(Lambda_I))
 		if not os.path.isdir(this_directory):
 			os.mkdir(this_directory)
 		this_run.set_directory(this_directory)
@@ -77,6 +81,10 @@ for Lambda_I in [0.0, 0.0001, 0.001, 0.01, 0.1] :
 		shutil.copyfile('../real_data/sealevel_snow.prop', this_directory+'/real_data/sealevel_snow.prop')
 		shutil.copyfile('../real_data/PDF.data', this_directory+'/real_data/PDF.data')
 		# while we're at it, make sure there's a place for output
-		if not os.path.isdir(parameters['Output_directory']):
-			os.mkdir(this_directory + '/out')
+		output_dir = parameters['Output_directory']
+		if output_dir[0:1] == "./":
+			output_dir = output_dir[2:]
+			output_dir = os.path.join(experiment_directory, output_dir)
+		if not os.path.isdir(output_dir):
+			os.mkdir(output_dir)
 
