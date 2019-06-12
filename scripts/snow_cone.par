@@ -6,27 +6,27 @@
 
 
 Model = SNO
-Output_directory = ./output/
+Output_directory = ./out/
 
 Csp_file = DUN.csp
 #H = 50
 H = 50
 #L = 400
-L = 500
+L = 200
 #D = 200
-D = 350
+D = 80
 
 ## CSP template (genesis)
-Csp_template = RCONE
+Csp_template = CONE(20,40,50)
 
 ## Boundary conditions
-Boundary = REINJECTION
+Boundary = OPEN
 
 ## Initial time
 Time = 0.0
 
 ## Physical parameters file
-Phys_prop_file = real_data/desert_earth.prop
+Phys_prop_file = real_data/sealevel_snow.prop
 
 ## Qsat data file
 Qsat_file = real_data/PDF.data
@@ -35,10 +35,10 @@ Qsat_file = real_data/PDF.data
 Lambda_E = 4
 
 ## Erosion ratio for cohesive snow
-Lambda_F = 400
+Lambda_F = 0
 
 ## Sintering rate - PARAMETER TO VARY
-Lambda_S = 0.02
+Lambda_S = 0.00
 
 ## Deposition rate
 Lambda_C = 2
@@ -87,7 +87,7 @@ Lambda_A = 1
 #Ava_duration = 1.0
 
 ## Angle of avalanches (degrees)
-Ava_angle = 35.0 #35.0
+Ava_angle = 38.0 #35.0
 
 ## Height limit in avalanches (cells)
 Ava_h_lim = 1
@@ -105,7 +105,7 @@ Init_ncycl = 150
 Lgca_speedup = 1000
 
 ## Min shear stress value
-Tau_min = 0
+Tau_min = 200
 
 ## Max shear stress value
 Tau_max = 1000
