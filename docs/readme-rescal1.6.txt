@@ -1,3 +1,8 @@
+2019 update: 
+This is the readme for ReSCAL v1.6, 2016, 
+and the examples and dependencies are now outdated.
+Refer to README.md for up-to-date information.
+
 ReSCAL: a Real-Space Cellular Automaton Laboratory
 --------------------------------------------------
 Copyright (C) 2011-2016

@@ -1,8 +1,6 @@
 ===============================
-Welcome to rescal-snow!
+Installation guide
 ===============================
-
-This installation script will help you build the rescal-snow dune simulator, run some test cases, and start exploring the world of snow dunes using our analysis, visualization, and parameter-exploration tools.
 
 The main rescal-snow package is compiled from the C source code in 'src'.
 Bash scripts for initializing, starting, and controlling runs are located in 'scripts', along with input parameter files.
@@ -49,10 +47,17 @@ At this point, ReSCAL may be compiled with as on Linux with:
   ./configure
   make
 
+3. Windows build procedure
+-----------------------------
+If you'd like to run rescal-snow on Windows, we recommend you don't. 
+We suspect it will take less time to install a linux virtual machine, or get access to a computing cluster with a good C development environment.
+
 ==============================================
-Alternative build instructions (ReSCAL v1.6)
+Alternative build instructions
 ==============================================
 
+0. Compatibility: running ReSCAL v1.6
+-------------------------------------
 The following build instructions are from ReSCAL v1.6. 
 We do not guarantee that these builds are all compatible with rescal-snow.
 
@@ -116,8 +121,15 @@ make -f makefile.default
 If errors still occur, please check the variables in makefile.default
 and/or install missing libraries.
 
+6. Reconfiguring
+-------------------
+The ./configure script can be regenerated with autoconf and aclocal by running:
+    autoreconf
+    aclocal
+    
  
-6. Contacts for ReSCAL 1.6
+7. Contacts for ReSCAL 1.6
+
 -----------------------------
 Olivier Rozier - rozier@ipgpfr
 Antoine Lucas - dralucas@geophysx.edu.eu.org (MacOS)
