@@ -10,10 +10,11 @@ Simulating snow dunes with cellular automata
     3. [Installation](#Installation)
     4. [Example 1: a snow cone](#test1)
 2. [Controlling the simulations](#modifying)
-    1. [Example 3: dune growth by snowfall](#test3)
-    2. [Example 4: dune arrest by sintering](#test4)
+    1. [Example 2: dune growth by snowfall](#test3)
+    2. [Visualizing the output](#visualizing)
+    2. [Example 3: dune arrest by sintering](#test4)
 3. [Setting up parallel runs](#parallel)
-    1. [Example 5: parameter space exploration](#test5)
+    1. [Example 4: parameter space exploration](#test5)
 4. [Community guidelines](#community)
     1. [Citation](#Citation)
     2. [Support](#Support)
@@ -95,55 +96,71 @@ As time progresses, the dune gradually loses grains. These are not replaced, and
 
 Your output may not match the example images precisely due to deliberate stochastic behavior in rescal-snow, but the overall pattern should be the same.
 
-## Visualizing the simulation output <a name="visualizing"></a>
-
-Several scripts for analysing and visualizing the runs are available in the scripts/utilities directory.
-
-
 
 ## Controlling the simulation <a name="modifying"></a>
 
 To use rescal-snow for scientific projects, you will likely wish to modify its behaviors.
-In the above scripts, we used two pre-generated run files (snow_cone.run and snow_cone_x5.run). This section will show you how to modify the run files and model parameters yourself.
-Here, we focus on the two most important snow parameters: snowfall and sintering.
-Other parameters are described in more detail in docs/rescal-snow-input.md.
+In this section, we walk through the .run and .par scripts that control the behavior of the simulation, and present example simulations that include the two most important snow parameters: snowfall and sintering.
 
-### Example 2: 5 snow cones <a name="test2"></a>
 
-This test run uses a different size and initial condition of the simulation. The simulation has a larger domain, and is likely to run slowly: this is a good test of the performance of rescal-snow on your machine.
-If it runs slowly, stop it after a few minutes (Ctrl-C), check that the first few outputs are reasonable, and continue to examples 3 and 4.
+### Example 2: dune growth by snowfall <a name="test3"></a>
 
+The [first example dune](#test1) we discussed was unstable. The grains that blew away were not replenished, and the dune shrank over time.
+
+Snow dunes, however, often have a significant source of new grains, because snow falls from the sky.
+
+We have set up a snowfall simulation in the scripts directory that you can run with:
 ```bash
-rm scripts/out/*
-./snow_cone_x5.run
->> PAR_FILE=snow_cone_x5.par
->> OMP_NUM_THREADS=1
->> Wed Jun 12 15:06:20 PDT 2019
+cd scripts
+./snowfall.run
+```
+As above, this will produce png output, csp files, and an out directory with various .log files. Unlike the simulation above, however, this simulation starts with a thin layer of flat snow, and fills with snowfall. As the snow falls, the wind sweeps it into dunes. 
+
+The only change between `snowfall.run` and the previous script, `snow_cone.run` (excepting a few changes to the comments) is the parameter file:
+```bash
+diff snowfall.run snow_cone.run
+>> < PAR_FILE="snowfall.par"
+>> > PAR_FILE="snow_cone.par"
 ```
 
-This run uses a different set of input parameters to the previous test run, contained in the file scripts/snow_cone_x5.par instead of scripts/snow_cone.par. The two sets of inputs differ on 4 parameters:
-
-```bash
-diff scripts/snow_cone.par scripts/snow_cone_x5.par 
->> < L = 200
->> > L = 400
->> < D = 80
->> > D = 225
+The parameter files have more differences, but the critical ones are:
+```
+diff snowfall.run snow_cone.run
+>> > Csp_template = SNOWFALL(4)
 >> < Csp_template = CONE(20,40,50)
->> > Csp_template = CONE5(20,50)
->> < Boundary = OPEN
->> > Boundary = PERIODIC
+>> > Lambda_I = 0.001
+>> < Lambda_I = 0
 ```
+The new run uses the SNOWFALL template (templates are described fully in [src/genesis.c](src/genesis.c). This sets the initial condition to be a flat layer of snow of thickness 4, and creates a layer of snowfall injection cells across the ceiling of the simulation. 
+The new cells inject snow from the top of the simulation at rate Lambda\_I cells per unit of simulted time (t0).
 
-The snow_cone_x5 run uses a larger domain (described by dimensions `L` and `D`); a different initial template (`Csp_template`); and a periodic `Boundary` condition which keeps the total number of grains in the simulation constant. As a result, the output looks like: 
-
-TODO: add images/gif
+The parameters (.par) files contain another couple dozen parameters; more details are included in the parameter files and throughout the code.
 
 The full set of inputs to rescal-snow are described in [docs/rescal-snow-inputs.md](docs/rescal-snow-inputs.md).
 
-### Example 3: dune growth by snowfall <a name="test3"></a>
+### Visualizing the simulation output <a name="visualizing"></a>
 
-### Example 4: dune arrest by sintering <a name="test4"></a>
+The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface.
+
+To see the output clearly, we will recolor the dunes' topography, output as arrays of elevations in the 'ALTIxxx.log' files, to create new images.
+
+This is demonstrated for three images output from the Example 2 simulation here:
+
+```bash
+cd docs/example_images/snowfall
+python recolor.py
+```
+
+|--- |---|---|---|
+| Default image, SNO00050_t0.png | ALTI00050_recolored.png | ALTI00100_recolored.png | ALTI00150_recolored.png |
+|--- |---|---|---|
+| ![](docs/example_images/snowfall/SNO00050_t0.png)|![](docs/example_images/snowfall/ALTI00050_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00100_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00150_t0_recolored.png) |
+
+The full evolution of this simulation is shown in the gif at the top of ![](README.md).
+
+Additional scripts for analysing and visualizing the runs are available in the scripts/utilities and analysis directories.
+
+### Example 3: dune arrest by sintering <a name="test4"></a>
 
 ## Setting up parallel runs
 
@@ -158,7 +175,7 @@ We have therefore added utilities that make it easy to run batches of dozens of 
 ReSCAL v1.6 is technically configured to run in parallel (see the OPENMP flag in src/defs.h; this allows the lattice gas the the cellular automaton to run on separate processors). 
 We have not emphasized this feature in rescal-snow because we have not been able to achieve satisfying parallel efficiency; thus far, we have found it more useful to perform larger numbers of serial runs.
 
-### Example 5: parameter space exploration
+### Example 4: parameter space exploration
 
 This test presumes you have access to parallel computing resources, such as a university computing cluster or a supercomputer. 
 If you do not have access to a computing cluster, the Community Surface Dynamics Modelling System (CSDMS) organization provides free high-performance computing resources for Earth surfaces research.

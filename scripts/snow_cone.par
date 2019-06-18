@@ -9,11 +9,8 @@ Model = SNO
 Output_directory = ./out/
 
 Csp_file = DUN.csp
-#H = 50
 H = 50
-#L = 400
 L = 200
-#D = 200
 D = 80
 
 ## CSP template (genesis)
