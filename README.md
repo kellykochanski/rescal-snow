@@ -140,7 +140,8 @@ The full set of inputs to rescal-snow are described in [docs/rescal-snow-inputs.
 
 ### Visualizing the simulation output <a name="visualizing"></a>
 
-The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface.
+The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface (left-most picture in image below; airborne
+grains are red).
 
 To see the output clearly, we will recolor the dunes' topography, output as arrays of elevations in the 'ALTIxxx.log' files, to create new images.
 
@@ -151,10 +152,9 @@ cd docs/example_images/snowfall
 python recolor.py
 ```
 
-|--- |---|---|---|
 | Default image, SNO00050_t0.png | ALTI00050_recolored.png | ALTI00100_recolored.png | ALTI00150_recolored.png |
-|--- |---|---|---|
-| ![](docs/example_images/snowfall/SNO00050_t0.png)|![](docs/example_images/snowfall/ALTI00050_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00100_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00150_t0_recolored.png) |
+|-----------|----------------|------------|---------------|
+| ![](docs/example_images/snowfall/SNO00050_t0.png) | ![](docs/example_images/snowfall/ALTI00050_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00100_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00150_t0_recolored.png) |
 
 The full evolution of this simulation is shown in the gif at the top of ![](README.md).
 
