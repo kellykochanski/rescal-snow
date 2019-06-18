@@ -1,6 +1,8 @@
 # rescal-snow <a name="introduction"></a>
 Simulating snow dunes with cellular automata
 
+![](docs/example_images/snowfall_example.gif)
+
 1. [Introduction](#introduction)
 2. [Getting started](#starting)
     1. [Prerequisites](#Prerequisites)
@@ -40,22 +42,24 @@ rescal-snow can model the growth of ripples from a flat bed of snow; the accumul
 We assume you have reasonable familiarity with bash and terminal commands.
 If you have never used bash, we recommend you stop and work through a short tutorial.
 (Our favorite is ['The Unix Shell' from Software Carpentry](http://swcarpentry.github.io/shell-novice/).)
-If you modify rescal-snow, you will need to modify and compile C tools. We have also included some setup and analysis tools (used in Example 5) written in Python.
+If you modify rescal-snow, you will need to modify and compile C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
 
 ### Dependencies
 rescal-snow requires glib-2.0, zlib-1.6, libpng, and pthread, as well as a C compiler. We have included compatible versions of libpng and zlib in the 'lib' directory. The included configure script will automatically build them and point rescal toward those directories. 
 
-Many of the auxiliary tools (see the 'analysis' and 'scripts/utilities' directories) are written in Python. These are written for Python3 and rely on libraries os, sys, numpy, scipy, csv and pandas; this is all packaged with the Anaconda Python distribution.
+Many of the auxiliary tools (see the 'analysis' and 'scripts/utilities' directories) are written in Python. These are written for Python3 and rely on libraries os, sys, numpy, scipy, csv and pandas.
 
 ### Installation
 
 These instructions will get rescal-snow running on most linux environments; for additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see `how_to_install.txt'.
 
 In a terminal, navigate into the main rescal-snow directory (the one containing this readme, as well as 'scripts', 'src', etc'). Run:
+```bash
   ./configure
   make
+```
   
-If this doesn't work, see 'how_to_install.txt'.
+If this doesn't work, or for additional installation options, tips on avoiding/installing missing dependencies, and MacOS instructions, see ['docs/how_to_install.txt'](docs/how_to_install.txt).
 
 Unless stated otherwise, every command in this README starts from the top directory.
 
@@ -73,12 +77,12 @@ cd scripts
 
 This command may take several minutes to run, but it will produce output at intervals of a few seconds; you may terminate it at any time.
 
-The easiest way to examine the output is to look at rescal-snow's natively generated png files.
+The easiest way to examine the output is to look at rescal-snow's natively generated png files:
 
 ```bash
 eog scripts/*.png
 ```
-on most Linux systems. If `eog` is not available, use `open` (MacOS) or any image viewer. This will display a series of png images, including these:
+on most Linux systems. If `eog` is not available, use `open` (MacOS) or any image viewer.
 
 |Initial condition, SNO00000_t0.png 	|  SNO00003_t0.png   | SNO00009_t0.png  |
 |------------------------|--------------------|------------------|
@@ -88,6 +92,7 @@ Each of the three images above shows a shaded top-down view of a dune (top left)
 
 Here, the initial condition is a small cone of sand. As the simulation runs, the cone quickly self-organizes into an elongate dune, and moves downwind.
 As time progresses, the dune gradually loses grains. These are not replaced, and the dune dwindles away: this dune is not stable in these (high-wind, no resupply) conditions.
+
 Your output may not match the example images precisely due to deliberate stochastic behavior in rescal-snow, but the overall pattern should be the same.
 
 ## Visualizing the simulation output <a name="visualizing"></a>
@@ -213,7 +218,7 @@ ALTI00004_t0.log  DOUBLETS.log             TIME.log
 
 Example output (the 100th output images, at t0=1000) for each run can be combined to create the following phase diagram:
 
-![snowfall-wind phase diagram](docs/example_images/phase_space_exploration/phase_diagram.png)
+![snowfall-wind phase diagram](docs/example_images/phase_space_exploration/phase_diagram1.png)
 
 *Why did my parallel run fail?*
 
@@ -279,4 +284,5 @@ To learn the underlying principles of the lattice gas cellular automaton (LGCA) 
 See [AUTHORS.md](AUTHORS.md).
 
 ## License
-GNU GPL 3.0. See Full text in [docs/LICENSE](docs/LICENSE).
+GNU GPL 3.0 or any later version. See [docs/LICENSE](docs/LICENSE).
+
