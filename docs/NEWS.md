@@ -1,7 +1,7 @@
-### News and development history
+# News and development history
 
 ## rescal-snow 1.0
-*Models, templates and functionality*
+#### Models, templates and functionality
 
 Added SNO model
 
@@ -11,7 +11,7 @@ Added sintering ability to SNOW model
 
 Removed non-dune-related models including RIV, CMB, etc
 
-*Tools for set-up, post-processing, and parameter space exploration*
+#### Tools for set-up, post-processing, and parameter space exploration
 
 Added 'scripts/utilities' folder containing python tools for setting up large numbers of runs for parameter space explorations
 
@@ -19,9 +19,15 @@ Added cross-correlation analysis tool
 
 Added fft analysis and visualization tool
 
-*Code performance*
+#### Organization
 
 Removed many regions of commented-out code
+
+Model output now funnelled through 'write_output' files for standardization
+
+Model output may now be organized in output directories
+
+#### Performance and compatibility
 
 Converted all instances of 'int' to 'int32_t' for cross-platform compatibility
 
