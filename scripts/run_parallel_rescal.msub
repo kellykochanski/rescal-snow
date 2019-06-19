@@ -1,9 +1,8 @@
 #!/bin/bash
 #MSUB -q pbatch
-#MSUB -A intelpwr 
-#MSUB -M kochanski1@llnl.gov
+#MSUB -M yourname@yourserver.com
 #MSUB -l nodes=1
-#MSUB -l walltime=01:00:00
+#MSUB -l walltime=00:05:00
 
 # This is an example script for submitting runs to a computing cluster
 # Current options:

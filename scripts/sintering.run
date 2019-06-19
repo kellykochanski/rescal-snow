@@ -3,9 +3,9 @@
 ###################################
 ## Dune simulation
 ###################################
-## KK made this script to run using the 
-## parameters in dun_kk.par.
-## Other users: run with ./run not ./run_kk
+## KK made this script to run 
+## Test case 1, with snow_cone.par
+## run with ./snow_cone.run
 
 ## remove all previously generated files; -f does not ask for user responses
 #./clean -f
@@ -23,8 +23,7 @@ if [ ! -e rescal ]; then
 fi
 
 ## parameters file (input)
-# PAR_FILE="snowfall.par"
-PAR_FILE="snow_cone.par"
+PAR_FILE="sintering.par"
 echo PAR_FILE=$PAR_FILE
 
 ### number of OpenMP threads
@@ -44,14 +43,6 @@ RESCAL_LOG_FILE="RESCAL.log"
 ## default execution with light shading, vertical layers of cells and velocity of the flow
 #nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
 
-date
-## generation of png images, CSP files and info logs, then stop after 30 minutes
-nice ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -nv -dcsp 10t0 -stop 2000t0 >> $RESCAL_LOG_FILE
-date
-
-## generation of png images with delay in t0 unit
-#nice ./rescal $PAR_FILE -cv0 -ls 45 -vel -vss -info -dpng 100t0 >> $RESCAL_LOG_FILE
-
-## plot probability function between shear stress and erosion
-#./plot_cgv
+## generation of png images, CSP files and info logs, then stop after 300 simulated time steps
+./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -nv -dcsp 10t0 -stop 300t0 >> $RESCAL_LOG_FILE
 
