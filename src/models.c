@@ -130,7 +130,7 @@ int32_t flag_hm = 0;
 
 #ifdef MODEL_SNO // options for sno but not dun model
 // how much harder is it to erode GRV than GR grains
-float lambda_F = 3.0;
+float lambda_F = 0.1;
 // how fast do grains sinter into place
 float lambda_S;
 #endif // SNO
@@ -207,7 +207,7 @@ void params_modele() {
 #endif // sno or dun
 
 #ifdef MODEL_SNO
-  parameter("Lambda_F", "Factor decrease in erosion rate if particle is sintered (3 by default)", &lambda_F, PARAM_FLOAT, "MODEL");
+  parameter("Lambda_F", "Factor decrease in erosion rate if particle is sintered (0.1 by default)", &lambda_F, PARAM_FLOAT, "MODEL");
   parameter("Lambda_S", "Sintering rate (turns loose grains into cohesive)", &lambda_S, PARAM_FLOAT, "MODEL");
 #endif //sno
 
@@ -234,7 +234,8 @@ void init_modele()
 
   /************cohesion******************/
 /* Parameters:
- * lambda_F   ratio of erosion of loose to sintered snow (>=1)
+ * lambda_F   ratio of erosion of loose to sintered snow (<=1)
+ *              lambda_F = 0 -> sintered grains are not erodible at all
  * lambda_S   rate of sintering (turns loose snow into sintered snow)
 */
   double vert_erosion = 100000.0; // ratio of horizontal:vertical erosion
@@ -243,8 +244,10 @@ void init_modele()
   /****** erosion of cohesive (sintered) grains ******/
   // grains turn from GRV (cohesive) into GRJ (moving)
   // when they land, they will be loose (GR), their cohesive bonds broken
-  trans_ref(101, EST_OUEST, EAUC, GRV, EAUC, GRJ, lambda_E*lambda_F );
-  trans_ref(102, VERTICAL,  EAUC, GRV, GRJ, EAUC, lambda_E*lambda_F/vert_erosion );
+  if ( lambda_F > 0){
+  	trans_ref(101, EST_OUEST, EAUC, GRV, EAUC, GRJ, lambda_E*lambda_F );
+  	trans_ref(102, VERTICAL,  EAUC, GRV, GRJ, EAUC, lambda_E*lambda_F/vert_erosion );
+  }
 
   // KK -- loose grains (GR) to turn cohesive (GRV)
   // This requires a grain to transition in place, does not appear to be implemented yet

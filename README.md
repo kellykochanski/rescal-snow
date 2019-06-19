@@ -10,9 +10,9 @@ Simulating snow dunes with cellular automata
     3. [Installation](#Installation)
     4. [Example 1: a snow cone](#test1)
 2. [Controlling the simulations](#modifying)
-    1. [Example 2: dune growth by snowfall](#test3)
-    2. [Visualizing the output](#visualizing)
-    2. [Example 3: dune arrest by sintering](#test4)
+    1. [Example 3: sintering snow](#test4)
+    2. [Example 2: dune growth by snowfall](#test3)
+    3. [Visualizing the output](#visualizing)
 3. [Setting up parallel runs](#parallel)
     1. [Example 4: parameter space exploration](#test5)
 4. [Community guidelines](#community)
@@ -102,8 +102,50 @@ Your output may not match the example images precisely due to deliberate stochas
 To use rescal-snow for scientific projects, you will likely wish to modify its behaviors.
 In this section, we walk through the .run and .par scripts that control the behavior of the simulation, and present example simulations that include the two most important snow parameters: snowfall and sintering.
 
+### Example 2: sintering snow <a name="test4"></a>
 
-### Example 2: dune growth by snowfall <a name="test3"></a>
+The [first example dune](#test1) we discussed disappeared quickly, as grains blew away in the wind. Real snow dunes, however, often persist for days (sometimes for months) after snowfall.
+This is likely to happen because real snow hardens, or sinters, in time.
+We mimic this process in rescal-snow by adding sintered grains, which erode less easily than regular grains.
+
+We have set up a sintering example in the scripts directory, that you can run with:
+
+```bash
+cd scripts
+./sintering.run
+```
+
+It produces the following series of png images, with sintered grains shown in light purple and non-sintered grains shown in tan:
+
+![](../docs/example_images/sintering/sintering.gif)
+
+This image shows a triangular wave of snow. It quickly leans over to the right. Like the first dune, it begins to blow away in the wind. Some grains at the bottom of the dune, however, sinter (turning light purple in the top left panel of the image). These grains persist for
+much longer than the non-sintered grains, but eventually they too blow away.
+
+*Why is this run different from the first one?*
+
+The only change between `snowfall.run` and the previous script, `snow_cone.run` (excepting a few changes to the comments) is the parameter file:
+```bash
+diff scripts/snowfall.run scripts/snow_cone.run
+>> < PAR_FILE="sintering.par"
+>> > PAR_FILE="snow_cone.par"
+```
+
+If we look at the differences between parameter files, we see:
+```bash
+>> < Csp_template = WAVE(15)
+>> > Csp_template = CONE(20,40,50)
+>> < Lambda_S = 0.01
+>> > Lambda_S = 0.00
+>> < Lambda_F = 0.05
+>> > Lambda_F = 0
+```
+These parameters are all given brief descriptions in the .par file, and in [docs/rescal-snow-inputs.md](docs/rescal-snow-inputs.md).
+ - Csp\_templeate selects one of several initial conditions defined in [src/genesis.c](src/genesis.c); we changed a 20-cell-high cone for a 15-cell-high triangular wave
+ - Lambda\_S controls the rate of sintering: we increased it from 0 to 0.01/t0.
+ - Lambda\_F controls the relative erodibility of the sintered grains: we set it to 0.05/t0, or 5% of the erodibility of the non-sintered grains
+
+### Example 3: dune growth by snowfall <a name="test3"></a>
 
 The [first example dune](#test1) we discussed was unstable. The grains that blew away were not replenished, and the dune shrank over time.
 
@@ -114,17 +156,15 @@ We have set up a snowfall simulation in the scripts directory that you can run w
 cd scripts
 ./snowfall.run
 ```
-As above, this will produce png output, csp files, and an out directory with various .log files. Unlike the simulation above, however, this simulation starts with a thin layer of flat snow, and fills with snowfall. As the snow falls, the wind sweeps it into dunes. 
-
-The only change between `snowfall.run` and the previous script, `snow_cone.run` (excepting a few changes to the comments) is the parameter file:
+Again, this run script calls a new parameter file:
 ```bash
-diff snowfall.run snow_cone.run
->> < PAR_FILE="snowfall.par"
->> > PAR_FILE="snow_cone.par"
+diff scripts/snowfall.run snow_cone.run
+>> > PAR_FILE="snowfall.par"
+>> < PAR_FILE="snow_cone.par"
 ```
 
-The parameter files have more differences, but the critical ones are:
-```
+The parameter file for this run has numerous differences from the ones before. The critical ones are:
+```bash
 diff snowfall.run snow_cone.run
 >> > Csp_template = SNOWFALL(4)
 >> < Csp_template = CONE(20,40,50)
@@ -156,11 +196,10 @@ python recolor.py
 |-----------|----------------|------------|---------------|
 | ![](docs/example_images/snowfall/SNO00050_t0.png) | ![](docs/example_images/snowfall/ALTI00050_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00100_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00150_t0_recolored.png) |
 
-The full evolution of this simulation is shown in the gif at the top of ![](README.md).
+The full evolution of this simulation is shown in the gif at the top of [README.md](README.md).
 
 Additional scripts for analysing and visualizing the runs are available in the scripts/utilities and analysis directories.
 
-### Example 3: dune arrest by sintering <a name="test4"></a>
 
 ## Setting up parallel runs
 
@@ -170,7 +209,7 @@ We believe that building robust, trustworthy models is much simpler when it's ea
  - Uncertainty quantification
 and a general ability to run the model often enough to trust that our results are robust, reproducible, and difficult to skew by cherry-picking.
 
-We have therefore added utilities that make it easy to run batches of dozens of runs of rescal-snow.
+We have therefore added utilities to help you set up batches of many runs of rescal-snow.
 
 ReSCAL v1.6 is technically configured to run in parallel (see the OPENMP flag in src/defs.h; this allows the lattice gas the the cellular automaton to run on separate processors). 
 We have not emphasized this feature in rescal-snow because we have not been able to achieve satisfying parallel efficiency; thus far, we have found it more useful to perform larger numbers of serial runs.
@@ -233,7 +272,9 @@ ALTI00003_t0.log  DENSITE.log              SIGN_HPP.log
 ALTI00004_t0.log  DOUBLETS.log             TIME.log
 ```
 
-Example output (the 100th output images, at t0=1000) for each run can be combined to create the following phase diagram:
+The following phase diagram shows the 100th images produced by each of these runs (t0 = 1000; snowfall rate = lambda\_I; wind strength = Tau\_min). 
+The runs with the higher snowfall rate have a much deeper average snow depth than the runs with lower snowfall rate.
+The runs with high wind speed (low Tau\_min) have less even snow cover, with better-defined ripples and dunes.
 
 ![snowfall-wind phase diagram](docs/example_images/phase_space_exploration/phase_diagram1.png)
 
