@@ -1,6 +1,11 @@
+
+#Inputs to rescal-snow
+
+Inputs controlling the behavior of rescal-snow simulations
+
 Author: Kelly Kochanski, kelly.kochanski@gmail.com, Jun 12 2019
 
-***Inputs to rescal-snow***
+## Finding the input files
 
 rescal-snow inputs are controlled in three files:
  - The run script (called run.run, snow_cone.run, etc) controls meta-parameters for the run, like the run length, the locations of input/output files, and the output frequency
@@ -11,7 +16,7 @@ We have created a python script containing Parameter_file and Run_script classes
 
 All three input files are sensitive to changes in whitespace. Sorry.
 
-**Configuring a run**
+### The run script
 The run script (run.run, snow_cone.run, etc) is a bash script. You can modify it to change the run in the following ways:
  - `./clean` : asks user if they want to remove previous output; use -f flag to skip request (useful for remote/queued/parallel runs)
  - `ln -s ../src/genesis .` : tells the run where to find the genesis executable; must be modified if you change the directory structure
@@ -22,7 +27,8 @@ The run script (run.run, snow_cone.run, etc) is a bash script. You can modify it
  - `nice` : rescal-snow will run more slowly to avoid interfering with other applications on your computer, useful for local runs
  - run flags : 
 
-**Model parameters**
+### The parameter script
+
 This file contains a list of parameters controlling simulation physics.
  - Output_directory : output goes here, useful for data management.
  - Model: rescal-snow can be compiled to allow or disallow certain physics. To ensure the compiled version works with the model you want to run, this must match the compiler flag in src/defs.h. Example: `Model = SNO` here, `#define MODEL_SNO` in src/defs.h.
@@ -32,7 +38,7 @@ This file contains a list of parameters controlling simulation physics.
  - Boundary conditions : OPEN, PERIODIC, or REINJECTION. Determines what happens to cells that pass the downwind boundary of the simulation.
  - Lambda_X, Coef_X : control the rates of cell transitions, the main control on model physics. These are best shown graphically: see Fig. 2 of [Narteau et al., 2009](dx.doi.org/10.1029/2008JF001127).
 
-The parameters you are most likely to want to modify for snow studies are:
+The parameters you are likely to want to modify for snow studies include:
  - Csp_template : the initial conditions, see src/genesis.c
  - Tau_min : the control for wind speed - note that wind speed *decreases* non-linearly as you increase Tau_min
  - Lambda_I : the snowfall rate (must use `Csp_template = SNOWFALL`)
@@ -40,7 +46,8 @@ The parameters you are most likely to want to modify for snow studies are:
  - Lambda_F : the hardness of sintered snow, relative to the hardness of freshly-fallen snow
  - Coef_A : the ratio between vertical and horizontal transport of snow in air; controls the particle settling speed
 
-**Real data**
+### The real_data folder
+
 All of the information we have given rescal-snow so far has been non-dimensional. This is useful insofar as it makes rescal simulations easy to generalize, but not useful for comparing the results to specific situations. 
 This file contains information about the physical situation that rescal-snow represents. For more discussion on converting rescal-snow output to reality, see 'docs/calibration_and_validation.md'.
 
