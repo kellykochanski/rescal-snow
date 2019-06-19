@@ -364,6 +364,13 @@ guide](https://docs.lavasoftware.org/lava/contribution.html)
 
 ## References and further reading <a name="references"></a>
 
+The [docs](docs) folder contains additional information on 
+[alternate installations](docs/how_to_install.md), 
+[performance and parallelization issues](docs/performance_and_parallelization.md), 
+[model inputs and configuration](docs/rescal-snow-inputs.md),
+[model calibration and validation](docs/calibration_and_validation.md),
+and [development history](docs/NEWS.md)
+
 For more background on snow dunes, sintering, and self-organization, see:
  - ['Snow bedforms: A review, new data, and a formation model', Filhol and Sturm, 2015](https://doi.org/10.1002/2015JF003529)
  - ['The evolution of snow bedforms in the Colorado Front Range', Kochanski, Anderson and Tucker, 2019](https://doi.org/10.5194/tc-13-1267-2019)
