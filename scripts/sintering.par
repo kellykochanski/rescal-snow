@@ -14,10 +14,16 @@ L = 200
 D = 80
 
 ## CSP template (genesis)
-Csp_template = CONE(20,40,50)
+Csp_template = WAVE(15)
 
 ## Boundary conditions
 Boundary = OPEN
+
+# Sintering rate
+Lambda_S = 0.01
+
+# Erodibility of sintered snow relative to unsintered
+Lambda_F = 0.05
 
 ## Initial time
 Time = 0.0
@@ -30,12 +36,6 @@ Qsat_file = real_data/PDF.data
 
 ## Erosion rate
 Lambda_E = 4
-
-## Erosion ratio for cohesive snow
-Lambda_F = 0
-
-## Sintering rate
-Lambda_S = 0.00
 
 ## Deposition rate
 Lambda_C = 2
