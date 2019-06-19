@@ -4,7 +4,7 @@ This software, rescal-snow, was conceived and adapted at Lawrence Livermore Nati
 It is a significant modification of the Real-Space Cellular Automaton Laboratory (ReSCAL), which was developed at IPGP beginning in 2014.
 
 ## LLNL contributors (2018-2019)
- - Kelly Kochanski, <kelly.kochanski@gmail.com>, (designed rescal-snow features, added rescal_utilities, cleaned up I/O, wrote docs)
+ - Kelly Kochanski*, <kelly.kochanski@gmail.com>, (designed rescal-snow features, added rescal_utilities, cleaned up I/O, wrote docs)
  - Barry Rountree, <rountree4@llnl.gov>, (configured software for parallel/Mac use, misc debugging)
  - Eric Green (removed extraneous code, simplified configuration/dependencies, optimized random number generator, misc debugging)
  - Carlos Downie (added fft utility and tests)
@@ -27,9 +27,7 @@ Olivier Rozier <rozier@ipgp.fr>
 
 Clement Narteau <narteau@ipgp.fr> and coauthors of:
 
-On a small scale roughness of the core-mantle boundary
-171 C. Narteau, J.L. Le MouC+l, J.P. Poirier, E. Sepulveda and M. Shnirman
-172 Earth and Planetary Science Letters, 191, 49-60 (2001).
+['On a small scale roughness of the core-mantle boundary' C. Narteau, J.L. Le Mouel, J.P. Poirier, E. Sepulveda and M. Shnirman. Earth and Planetary Science Letters, 191, 49-60 (2001).](https://doi.org/10.1016/S0012-821X(01)00401-0)
 
 
 **Cellular engine based on dissol program (2d)**
