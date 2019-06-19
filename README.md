@@ -76,7 +76,7 @@ INSTALL		README		config.h.in	install-sh
 
 ### Installation
 
-These instructions will get rescal-snow running on most linux environments; for additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.txt](how_to_install.txt).
+These instructions will get rescal-snow running on most linux environments; for additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
 
 All of the instructions in this README are run from a terminal in the main rescal-snow directory. It should look like this:
 ```bash
@@ -92,8 +92,6 @@ In a terminal, navigate into the main rescal-snow directory (the one containing 
   ./configure
   make
 ```
-  
-If this doesn't work, or for additional installation options, tips on avoiding/installing missing dependencies, and MacOS instructions, see ['docs/how_to_install.txt'](docs/how_to_install.txt).
 
 ### Example 1: a snow cone <a name="test-cone"><a>
 
@@ -139,7 +137,7 @@ In the next two examples, we walk through the .run and .par scripts that control
 
 ### Example 2: sintering snow <a name="test-sinter"></a>
 
-The [first example dune](#test1) we discussed disappeared quickly as grains blew away in the wind.
+The [first example dune](#test-cone) we discussed disappeared quickly as grains blew away in the wind.
 Real snow, however, hardens over time. This allows real dunes to persist for days, or even months.
 We mimic this process in rescal-snow by adding sintered grains, which erode less easily than regular grains.
 
@@ -248,7 +246,7 @@ We have therefore added utilities to help you set up batches of many runs of res
 This example requires access to parallel computing resources, such as a university computing cluster. 
 
 > If you do not have access to a computing cluster, the Community Surface Dynamics Modelling System (CSDMS) organization provides free high-performance computing resources for Earth surfaces research.
-See [csdms.colorado.edu/wiki/HPC](csdms.colorado.edu/wiki/HPC) for details.
+See [csdms.colorado.edu/wiki/HPC](https://csdms.colorado.edu/wiki/HPC) for details.
 
 
 In this example, we're going to run 10 instances of rescal. Begin by downloading and installing rescal-snow on your computing cluster, and running one of the above examples to test the installation.
