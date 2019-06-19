@@ -1,6 +1,10 @@
-===============================
-Installation guide
-===============================
+# Installation guide
+
+This file contains information for installing and compiling rescal-snow.
+
+Author: Kelly Kochanski, 11 June 2019
+
+## Code overview
 
 The main rescal-snow package is compiled from the C source code in 'src'.
 Bash scripts for initializing, starting, and controlling runs are located in 'scripts', along with input parameter files.
@@ -8,35 +12,28 @@ Additional packages for pre- and post-processing are located in the 'utilities' 
 
 We tested rescal-snow on Ubuntu 18.04 and on Lawrence Livermore National Laboratory high-performance computing resources (Linux, gcc 4.9.3) and on University of Colorado high-performance computer Summit (Linux, gcc 6.9) and on MacOSX High Sierra 10.13.4.
 
-Yours,
-Kelly Kochanski
-kelly.kochanski@colorado.edu
-github.com/kellykochanski
+## Standard builds
 
-================================
-Building rescal-snow
-================================
-
-1. Linux build procedure (recommended)
---------------------------------------
+### Linux build procedure (recommended)
 
 On a platform with access to autoconf and aclocal:
+```bash
   ./autogen.sh
   ./configure
   make
+```
 
-This requires libraries glib-2.0, libpng, and pthread.
+This requires libraries glib-2.0 and pthread.
 
-2. MacOSX build procedure
-------------------------------
+### MacOSX build procedure
 
 In the likely case that autoconf and aclocal are not available,
 build them from source. 
 As of 2019, useful instructions for this were available at:
- https://gist.github.com/justinbellamy/2672db1c78f024f2d4fe or
- http://jsdelfino.blogspot.com.au/2012/08/autoconf-and-automake-on-mac-os-x.html
+- https://gist.github.com/justinbellamy/2672db1c78f024f2d4fe or
+- http://jsdelfino.blogspot.com.au/2012/08/autoconf-and-automake-on-mac-os-x.html
 
-rescal-snow and ReSCAL-1.6 include openmp optimizations that do not run on MacOS.
+Rescal-snow and ReSCAL-1.6 include openmp optimizations that do not run on MacOS.
 Before compiling, go into src/defs.h and comment out:
   #def PARALLEL
   #def OPENMP
@@ -47,89 +44,75 @@ At this point, ReSCAL may be compiled with as on Linux with:
   ./configure
   make
 
-3. Windows build procedure
------------------------------
-If you'd like to run rescal-snow on Windows, we recommend you don't. 
-We suspect it will take less time to install a linux virtual machine, or get access to a computing cluster with a good C development environment.
+### Windows build procedure
 
-==============================================
-Alternative build instructions
-==============================================
+Rescal-snow is designed to run in a linux-like environment, and we do not recommend installing it on Windows.
 
-0. Compatibility: running ReSCAL v1.6
--------------------------------------
-The following build instructions are from ReSCAL v1.6. 
-We do not guarantee that these builds are all compatible with rescal-snow.
+If you have no alternative, the most linux-like environment on Windows (at time of writing) is [Cygwin](https://www.cygwin.com/).
+To run rescal-snow in Cygwin,
+install 64-bit Cygwin with gcc/g++ (best obtained through the MinGW package) and glib.
+Adding openssh and git will allow you to clone the github repository.
+Once you have satisfied all of the rescal-snow dependencies, follow the Linux build procedure above.
+
+We suspect that getting access to a linux machine (virtual, computing cluster, etc) will be a more effective use of your time.
+
+## Alternative builds
+
+###  Compatibility: running ReSCAL v1.6
 
 To build ReSCAL v1.6 from the rescal-snow repository, use:
-  git clone https://www.github.com/kellykochanski/rescal-snow.git
-  git checkout rescal-1.6
+```bash
+ git clone https://www.github.com/kellykochanski/rescal-snow.git
+ git checkout rescal-1.6
+```
 This will remove snow functionality, including sintering and snowfall,
 and introduce additional dependencies on libraries:
-  glib-2.0, gtk+-2.0, gdk-pixbuf
+-  glib-2.0, gtk+-2.0, gdk-pixbuf
+  
+Contacts: 
+ - Olivier Rozier - rozier@ipgpfr
+ - Antoine Lucas - dralucas@geophysx.edu.eu.org (MacOS)
 
-1. AVX optimizations
----------------------
+### AVX optimizations
+
 To compile with AVX optimizations, use the following syntax:
 ./configure --enable-avx
 
 and pthread.
 
-2 Clang on Mac OSX
--------------------
+### Clang on MacOSX
+
 It is likely that your version of Clang does not support OpenMP,
 in which case you'll have to install OpenMP libraries:
 brew install clang-omp
 
 Then (on Mac OS X 10.11):
+```bash
 export CFLAGS='-I/usr/local/include/libiomp -liomp5' 
 ./configure
 make
+```
 
 Alternatively, one may discard OpenMP code by commenting out the 
 OPENMP option in src/defs.h file.
 
 
-3. Compiling with ICC (Intel C compiler)
-----------------------------------------
-To take advantage of Intel's compiler specifities, just type:
+### Compiling with ICC (Intel C compiler)
+
+To compile with the intel compiler (icc):
+
+```bash
 cd src
 make -f makefile.icc
+```
 
-Note: ReSCAL seems to run faster with ICC than with GCC, at least on
-Intel Xeon processors.
+Tested with ICC 13.0 and 15.0 (64bits) as of ReSCAL v1.6
 
-Tested with ICC 13.0 and 15.0 (64bits).
+### Reconfiguring
 
-
-4. Compiling on Windows
------------------------
-The ReSCAL softwares may be compiled using Cygwin/X environment.
-Web site: x.cygwin.com 
-
-Note: Since OpenMP is not yet supported by the 32 bits version of gcc
-in Cygwin, you should rather install Cygwin in 64 bits.
-
-
-5. Alternative procedure
-------------------------
-There is a the customizable makefile located in src directory, that 
-may work out of the box on most Unix-like systems.
-cd src
-make -f makefile.default
-
-If errors still occur, please check the variables in makefile.default
-and/or install missing libraries.
-
-6. Reconfiguring
--------------------
 The ./configure script can be regenerated with autoconf and aclocal by running:
+```bash
     autoreconf
     aclocal
+```
     
- 
-7. Contacts for ReSCAL 1.6
-
------------------------------
-Olivier Rozier - rozier@ipgpfr
-Antoine Lucas - dralucas@geophysx.edu.eu.org (MacOS)
