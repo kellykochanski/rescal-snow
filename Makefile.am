@@ -1,5 +1,6 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src 
+DIST_SUBDIRS = lib src
+SUBDIRS = lib src
 
 EXTRA_DIST = \
 	NEWS \

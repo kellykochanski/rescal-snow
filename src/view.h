@@ -17,10 +17,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
 
 #define IMG_W_MAX 5000
 
@@ -37,23 +38,23 @@
 //enum IMG_FORMATS {IMG_PNG, IMG_JPEG};
 enum VIEW_DIR {VDIR_NONE, VDIR_NORTH, VDIR_WIND};
 
-typedef struct{
-  int col0;
-  int col1;
-  int nb_val;
-  int start;
+typedef struct {
+  int32_t col0;
+  int32_t col1;
+  int32_t nb_val;
+  int32_t start;
 } Shade;
 
 void show_view_options();
-int view_init(int, char **);
-void view_img_size(int *, int *);
-void view_palette(int *);
+int32_t view_init(int, char **);
+void view_img_size(int32_t *, int32_t *);
+void view_palette(int32_t *);
 void rotate_light(float angle);
 unsigned char* view();
 void reset_zoom();
-unsigned char* view_zoom(int w, int h, float coef);
+unsigned char* view_zoom(int32_t w, int32_t h, float coef);
 void view_quit();
-int update_cv(int x, int y, int flag);
+int32_t update_cv(int32_t x, int32_t y, int32_t flag);
 
 #ifdef USE_LIBPNG
 void view_dump_init();
@@ -62,11 +63,11 @@ void view_dump_png(char *nom);
 
 #ifdef USE_GD
 void view_dump_init();
-//void view_dump_inter(int inter, int format);
+//void view_dump_inter(int32_t inter, int32_t format);
 void view_dump_png(char *nom);
 void view_dump_jpeg(char *nom);
 #endif
 
 void dump_image(char *filename, char *format);
-void dump_image_inter(int inter, char *format);
+void dump_image_inter(int32_t inter, char *format);
 
