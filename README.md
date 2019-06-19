@@ -8,13 +8,13 @@ Simulating snow dunes with cellular automata
     1. [Prerequisites](#Prerequisites)
     2. [Dependencies](#Dependencies)
     3. [Installation](#Installation)
-    4. [Example 1: a snow cone](#test1)
+    4. [Example 1: a snow cone](#test-cone)
 2. [Controlling the simulations](#modifying)
-    1. [Example 3: sintering snow](#test4)
-    2. [Example 2: dune growth by snowfall](#test3)
+    1. [Example 2: sintering snow](#test-sinter)
+    2. [Example 3: dune growth by snowfall](#test-snowfall)
     3. [Visualizing the output](#visualizing)
 3. [Setting up parallel runs](#parallel)
-    1. [Example 4: parameter space exploration](#test5)
+    1. [Example 4: parameter space exploration](#test-parallel)
 4. [Community guidelines](#community)
     1. [Citation](#Citation)
     2. [Support](#Support)
@@ -22,6 +22,7 @@ Simulating snow dunes with cellular automata
     4. [Contributing](#contributing)
 5. [References and further reading](#references)
 6. [Contributors](#authors)
+7. [License](#License)
 
 ### Background
 
@@ -64,7 +65,7 @@ If this doesn't work, or for additional installation options, tips on avoiding/i
 
 Unless stated otherwise, every command in this README starts from the top directory.
 
-### Example 1: a snow cone <a name="test1"><a>
+### Example 1: a snow cone <a name="test-cone"><a>
 
 The first test run simulates a field of conical dunes under a strong wind. To run the example:
 ```bash
@@ -102,7 +103,7 @@ Your output may not match the example images precisely due to deliberate stochas
 To use rescal-snow for scientific projects, you will likely wish to modify its behaviors.
 In this section, we walk through the .run and .par scripts that control the behavior of the simulation, and present example simulations that include the two most important snow parameters: snowfall and sintering.
 
-### Example 2: sintering snow <a name="test4"></a>
+### Example 2: sintering snow <a name="test-sinter"></a>
 
 The [first example dune](#test1) we discussed disappeared quickly, as grains blew away in the wind. Real snow dunes, however, often persist for days (sometimes for months) after snowfall.
 This is likely to happen because real snow hardens, or sinters, in time.
@@ -145,7 +146,7 @@ These parameters are all given brief descriptions in the .par file, and in [docs
  - Lambda\_S controls the rate of sintering: we increased it from 0 to 0.01/t0.
  - Lambda\_F controls the relative erodibility of the sintered grains: we set it to 0.05/t0, or 5% of the erodibility of the non-sintered grains
 
-### Example 3: dune growth by snowfall <a name="test3"></a>
+### Example 3: dune growth by snowfall <a name="test-snowfall"></a>
 
 The [first example dune](#test1) we discussed was unstable. The grains that blew away were not replenished, and the dune shrank over time.
 
@@ -201,7 +202,7 @@ The full evolution of this simulation is shown in the gif at the top of [README.
 Additional scripts for analysing and visualizing the runs are available in the scripts/utilities and analysis directories.
 
 
-## Setting up parallel runs
+## Setting up parallel runs <a name="parallel"></a>
 
 We believe that building robust, trustworthy models is much simpler when it's easy to make many model runs. This enables:
  - Parameter space exploration
@@ -214,7 +215,7 @@ We have therefore added utilities to help you set up batches of many runs of res
 ReSCAL v1.6 is technically configured to run in parallel (see the OPENMP flag in src/defs.h; this allows the lattice gas the the cellular automaton to run on separate processors). 
 We have not emphasized this feature in rescal-snow because we have not been able to achieve satisfying parallel efficiency; thus far, we have found it more useful to perform larger numbers of serial runs.
 
-### Example 4: parameter space exploration
+### Example 4: parameter space exploration <a name="test-parallel"></a>
 
 This test presumes you have access to parallel computing resources, such as a university computing cluster or a supercomputer. 
 If you do not have access to a computing cluster, the Community Surface Dynamics Modelling System (CSDMS) organization provides free high-performance computing resources for Earth surfaces research.
