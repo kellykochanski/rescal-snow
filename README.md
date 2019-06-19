@@ -72,7 +72,7 @@ COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
 ChangeLog	NEWS		compile		depcomp		src
 INSTALL		README		config.h.in	install-sh
 ```
-> *Navigation* All further blocks of bash instructions start from this directory for consistency.
+**All further blocks of bash instructions start from this directory for consistency.**
 
 ### Installation
 
@@ -110,6 +110,7 @@ This command will take a few minutes to run, and produces terminal output like:
 >> Wed Jun 12 15:11:53 PDF 2019
 ```
 > *Nothing happening?*
+>
 > This is mostly a good sign - if something is wrong, rescal-snow almost always crashes in the first few seconds. The simulations, however, are computationally expensive, and may take an unreasonably long time to run on slower machines.
 > Fortunately, the substantive output from rescal-snow is saved at regular intervals. You can view intermediate output while the simulation is still running, and you can stop the simulation (usually `Ctrl-C`) without losing that output. 
 
@@ -179,7 +180,7 @@ diff scripts/snowfall.par scripts/snow_cone.par
  - Lambda\_S controls the rate of sintering: we increased it from 0 to 0.01/t0.
  - Lambda\_F controls the relative erodibility of the sintered grains: we set it to 0.05/t0, or 5% of the erodibility of the non-sintered grains
 
-> All rescal-snow parameters are all given brief descriptions in the .par file, and in [docs/rescal-snow-inputs.md](docs/rescal-snow-inputs.md).
+**All rescal-snow parameters are all given brief descriptions in the .par file, and in [docs/rescal-snow-inputs.md](docs/rescal-snow-inputs.md).**
 
 ### Example 3: dune growth by snowfall <a name="test-snowfall"></a>
 
@@ -315,12 +316,12 @@ The following phase diagram shows the 100th images produced by each of these run
 The runs with the higher snowfall rate have a much deeper average snow depth than the runs with lower snowfall rate.
 The runs with high wind speed (low Tau\_min) have less even snow cover, with better-defined ripples and dunes.
 
-*Why did my parallel run fail?*
-
- - msub/sbatch commands not allowed by your computing cluster -> seek support from someone familiar with the cluster
- - permissions errors -> run `chmod u+rwx \*` in test_parallel_runs; contact administrator if this is disallowed
- - script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun param_space_exploration_example.py and confirm that it produced the output above; check that you're running msub/sbatch from scripts; check relative directory references in msub/sbatch script and submit.sh
- - runs time out before producing useful output -> increase walltime; large simulations on slow machines may ultimately take a few hours
+>*Parallel run errors?*
+>
+> - msub/sbatch commands not allowed by your computing cluster -> seek support from someone familiar with the cluster
+> - permissions errors -> run `chmod u+rwx \*` in test_parallel_runs; contact administrator if this is disallowed
+> - script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun param_space_exploration_example.py and confirm that it produced the output above; check that you're running msub/sbatch from scripts; check relative directory references in msub/sbatch script and submit.sh
+> - runs time out before producing useful output -> increase walltime; large simulations on slow machines may ultimately take a few hours
 
 ## Community guidelines <a name="community"></a>
 
