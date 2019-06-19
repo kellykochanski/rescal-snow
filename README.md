@@ -109,7 +109,8 @@ This command will take a few minutes to run, and produces terminal output like:
 ```
 > *Nothing happening?*
 >
-> This is mostly a good sign - if something is wrong, rescal-snow almost always crashes in the first few seconds. The simulations, however, are computationally expensive, and may take an unreasonably long time to run on slower machines.
+> This is mostly a good sign - if something is wrong, rescal-snow almost always crashes in the first few seconds. The simulations, however, are computationally expensive, and may take an unreasonably long time to run on slower machines. 
+> If this is the case for you, we've put some tips for improving performance in [docs/performance_and_parallelization.md](docs/performance_and_parallelization.md).
 > Fortunately, the substantive output from rescal-snow is saved at regular intervals. You can view intermediate output while the simulation is still running, and you can stop the simulation (usually `Ctrl-C`) without losing that output. 
 
 The easiest way to examine the output is to look at rescal-snow's natively generated png files:
@@ -250,6 +251,9 @@ See [csdms.colorado.edu/wiki/HPC](https://csdms.colorado.edu/wiki/HPC) for detai
 
 
 In this example, we're going to run 10 instances of rescal. Begin by downloading and installing rescal-snow on your computing cluster, and running one of the above examples to test the installation.
+
+> *Why are we running 10 instances of rescal-snow, not one instance on 10 cores?*
+> Rescal-snow doesn't parallelize well: see [docs/performance_and_parallelization.md](docs/performance_and_parallelization.md)
 
 *Writing large numbers of input files*
 [scripts/utilities/rescal_utilities.py](scripts/utilities/rescal_utilities.py) contains tools for writing .run and .par scripts automatically. This is much easier, and more bug-free, than writing 10 parameter files by hand.

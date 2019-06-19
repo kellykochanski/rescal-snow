@@ -1,12 +1,12 @@
-# Computational performance and parallelization of rescal-snow
+# Performance and parallelization of rescal-snow
 
 This is a quick description of how rescal run-time varies with domain size and parallelization options.
 
 Author: Kelly Kochanski, 18 June 2019
 
-## Summary
+## Major observations and recommendations
 
-1. *Rescal-snow performance is largely limited by the cost of doublet transitions between grains.*
+### Rescal-snow performance is largely limited by the cost of doublet transitions between grains.
 
 The simulation speed decreases as the number of available grain transitions increases. This can occur when:
  - many transition types are enabled
@@ -17,7 +17,7 @@ The simulation speed decreases as the number of available grain transitions incr
  Changes to the fluid depth (set by height H) has negligible effect on run time.
  Parallelizing the lattice gas component is also largely ineffective.
  
-2. *Rescal-snow is highly resistant to parallelization*
+### Rescal-snow is highly resistant to parallelization
 
 During the course of this development, we attempted many parallelizations for rescal-snow.
 The details are beyond the scope of this document, but our attempts included
@@ -28,7 +28,15 @@ The details are beyond the scope of this document, but our attempts included
  
  We therefore emphasise applications, such as parameter space explorations, that leverage many processors to perform many serial runs, rather than applications that require parallelizing rescal-snow.
 
-3. *Recommendations for increasing performance*
+*Why is parallelizing rescal-snow hard?*
+
+In algorithmic terms, rescal-snow looks a lot like a [discrete event simulation](https://en.wikipedia.org/wiki/Discrete-event_simulation). These are a notoriously hard class of simulations to parallelize.
+
+In rescal-snow terms, the simulation is very hard to parallelize because it has no 'maximum speed'. Some events, like avalanches, cover large distances nearly instantaneously. It is not easy to identify parts of the simulation that are independent over a given time scale.
+
+Parallelizing cellular automata is an interesting HPC problem. We're still working on it.
+
+### Recommendations for increasing performance
 
 In order of ease and likely effectiveness:
 
@@ -42,7 +50,7 @@ In order of ease and likely effectiveness:
  - Try using AVX optimizations (see [docs/how_to_install.md](how_to_install.md) )
  - Try compiling with intel compiler vs gcc
  
- We suspect that the largest performance gain would be obtained by replacing some of rescal-snow's stochastic cellular automaton transitions with deterministic transitions.
+ We suspect that the largest performance gain would be obtained by replacing some stochastic cellular automaton transitions with deterministic transitions.
  This would reduce the frequency with which random numbers must be generated and random doublets must be selected.
  Such changes could be implemented in [src/models.c](src/models.c), though they would change the structure of rescal-snow,
  and might lead to systematic biases in its behavior.
