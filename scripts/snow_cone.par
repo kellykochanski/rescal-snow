@@ -1,0 +1,109 @@
+## PARAMETER FILE
+#
+# Creates a cone of snow, which will evolve into a barchan during rescal-snow simulation
+#
+# - KK
+
+
+Model = SNO
+Output_directory = ./out/
+
+Csp_file = DUN.csp
+H = 50
+L = 200
+D = 80
+
+## CSP template (genesis)
+Csp_template = CONE(20,40,50)
+
+## Boundary conditions
+Boundary = OPEN
+
+## Initial time
+Time = 0.0
+
+## Physical parameters file
+Phys_prop_file = real_data/sealevel_snow.prop
+
+## Qsat data file
+Qsat_file = real_data/PDF.data
+
+## Erosion rate
+Lambda_E = 4
+
+## Erosion ratio for cohesive snow
+Lambda_F = 0
+
+## Sintering rate
+Lambda_S = 0.00
+
+## Deposition rate
+Lambda_C = 2
+
+## Transport rate
+#Lambda_T = 6
+Lambda_T = 30
+
+## Coefficient for the vertical transport of mobile grains
+Coef_A = 1.6
+
+## Coefficient for the deposition against an obstacle
+Coef_B = 1
+
+# Coefficient for the deposition behind an obstacle
+Coef_C = 3
+
+## Probability of the transition links
+Prob_link_ET = 0.5
+Prob_link_TT = 1.0
+
+## Higher mobility of grains
+High_mobility = 1
+
+## Diffusion rate
+#Lambda_D = 0.02
+Lambda_D = 0.06
+
+## Injection rate
+#Lambda_I = 0.1
+Lambda_I = 0
+
+## Gravity
+Lambda_G = 1000 #1000
+
+## Mode of avalanches
+Ava_mode = TRANS
+
+## Avalanches rate in TRANS mode
+Lambda_A = 1
+
+## Delay between avalanches
+#Ava_delay = 10.0
+
+## Duration of avalanches
+#Ava_duration = 1.0
+
+## Angle of avalanches (degrees)
+Ava_angle = 38.0 #35.0
+
+## Height limit in avalanches (cells)
+Ava_h_lim = 1
+
+## Global flow forcing coefficient
+#Lgca_gfor = 0.002
+
+## Delay between flow cycles
+Lgca_delay = 1.0
+
+## Initial number of flow cycles without transitions
+Init_ncycl = 150
+
+## Speedup of the stabilization of the flow
+Lgca_speedup = 1000
+
+## Min shear stress value
+Tau_min = 200
+
+## Max shear stress value
+Tau_max = 1000
+

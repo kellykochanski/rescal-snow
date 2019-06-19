@@ -1,0 +1,9 @@
+These scripts take time series of elevation maps and analyse the wavelengths and speeds of the elevated features.
+
+Example input: a set of ALTI files produced by a ReSCAL simulation, alphabetically named ALTI0001_t0.log, ALTI0002_t0.log, etc.
+
+Contributors: 
+Kelly Kochanski organized/defined the workflow
+Carlos Downie wrote the fourier analysis (fft) script (2018)
+Divya Mohan updated the fft script for python 3 (2019)
+Aaron Robeson wrote the cross-correlation script(s) (2018)

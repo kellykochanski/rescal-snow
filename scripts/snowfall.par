@@ -1,0 +1,106 @@
+## Parameter file for ReSCAL written from Parameters utility
+# Written for snowfall example by KK, June 2019
+ 
+# Height of model domain (cells)
+H = 50
+# Length, longitudinal, of model domain (cells)
+L = 400
+# Depth, transverse to flow, of model domain (cells)
+D = 100
+ 
+# Genesis template?
+Csp_file = DUN.csp
+
+# Type of boundary conditions, e.g. OPEN, PERIODIC, REINJECTION
+Boundary = OPEN
+
+# Angle of repose, steeper slopes avalanche (degrees)
+Ava_angle = 38
+ 
+# Shear stress threshold for grain erosion, controls flow strength
+Tau_min = 0
+ 
+# Delay between flow cycles
+Lgca_delay = 1 
+ 
+# Ratio of vertical:horizontal transport of mobile grains
+Coef_A = 0.1
+ 
+# Ratio of deposition against an obstacle : deposition
+Coef_B = 10
+ 
+# Erosion rate (when threshold exceeded)
+Lambda_E = 1
+ 
+# Automatic re-centering of model domain on dune
+Centering_delay = 0
+ 
+# Mode of avalanching
+Ava_mode = TRANS
+ 
+# Template containing initial shape for run
+Csp_template = SNOWFALL(4)
+ 
+# Speedup of the flow stabilization
+Lgca_speedup = 1000
+ 
+# Probability of the transition links
+Prob_link_TT = 1.0
+ 
+# Parameters for size, depth etc of template shape
+Csp_params = []
+ 
+# File containing important physical properties e.g. gravity
+Phys_prop_file = real_data/sealevel_snow.prop
+ 
+# Higher mobility of grains
+High_mobility = 1
+ 
+# Initial time
+Time = 0.0
+ 
+# Height limit in avalanches (cells)
+Ava_h_lim = 1
+ 
+# Defines a set of transitions for grains in the cellular automaton e.g. DUN or SNO
+Model = SNO
+ 
+# Transition rate for mobile grains
+Lambda_T = 1.5
+ 
+# Max shear stress, used in grain erosion/flow speed relation
+Tau_max = 1000
+ 
+# Transition rate for sintering/cohesion
+Lambda_S = 0
+ 
+# Ratio of deposition behind an obstacle : deposition
+Coef_C = 10
+ 
+# Probability of the transition links
+Prob_link_ET = 0.5
+ 
+# Directory where output files go
+Output_directory = ./out
+ 
+# Transition rate for diffusion
+Lambda_D = 0.01
+ 
+# File containing relationship between saturated and threshold flux
+Qsat_file = real_data/PDF.data
+ 
+# Ratio of sintered:unsintered erosion thresholds
+Lambda_F = 1
+ 
+# Gravity - rate of fall of not-in-transport grains in air
+Lambda_G = 100000
+ 
+# ??
+Lambda_A = 1
+ 
+# Deposition rate for mobile grains on surface
+Lambda_C = 0.5
+ 
+# Injection rate
+Lambda_I = 0.001
+ 

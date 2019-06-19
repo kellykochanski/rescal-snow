@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+
 #include "defs.h"
 //#include "bin2png.h"
 #include "macros.h"
@@ -39,14 +41,13 @@
 #include "view.h"
 #include "format.h"
 
-int prog=PROG_TOOL;
-unsigned char opt_nv=1, opt_info=0;
-char *output_filename=NULL;
+int32_t prog = PROG_TOOL;
+unsigned char opt_nv = 1, opt_info = 0;
+char *output_filename = NULL;
 
 extern char *csp_filename;
 
-void usage()
-{
+void usage() {
   printf("ReSCAL image generator from a CSP file");
   //printf(", %s model", MOD_NAME);
 #ifdef CELL_COLOR
@@ -55,27 +56,26 @@ void usage()
 #ifdef CELL_TIME
   printf(", CELL_TIME data");
 #endif
-  printf("\nversion %s (%s)\n",VER_NUM,VER_DAT);
+  printf("\nversion %s (%s)\n", VER_NUM, VER_DAT);
   //printf("size of cells : %lu byte(s)\n", sizeof(Cell));
   printf("\nusage : csp2png <CSP-file> [GRAPHICAL OPTIONS] [-o <output PNG file>]\n");
   show_view_options();
   exit(-1);
 }
 
-void general_options(int argc, char *argv[])
-{
-  int i;
-  for(i=1; i<argc; i++){
-    if (!strcmp(argv[i],"-o"))
+void general_options(int32_t argc, char *argv[]) {
+  int32_t i;
+  for (i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-o")) {
       output_filename = argv[++i];
+    }
   }
 }
 
-int main(int argc, char **argv)
-{
-  int i;
+int main(int argc, char **argv) {
+  int32_t i;
 
-  if (argc < 2){
+  if (argc < 2) {
     usage();
     exit(-4);
   }
@@ -87,9 +87,9 @@ int main(int argc, char **argv)
 
   cree_terre();
 
-  if (!output_filename){
+  if (!output_filename) {
     output_filename = csp_filename;
-    strcpy(output_filename+strlen(output_filename)-3, "png");
+    strcpy(output_filename + strlen(output_filename) - 3, "png");
   }
 
   //calcule_couloir();
@@ -114,31 +114,24 @@ int main(int argc, char **argv)
 
 //// empty functions, for linking with simul.c
 
-void do_thread_sched()
-{
+void do_thread_sched() {
 }
 
-void wait_lgca_thread()
-{
+void wait_lgca_thread() {
 }
 
-void push_status(char* str)
-{
+void push_status(char* str) {
 }
 
-void pop_status()
-{
+void pop_status() {
 }
 
-void lock_display(int log_flag)
-{
+void lock_display(int32_t log_flag) {
 }
 
-void unlock_display(int log_flag)
-{
+void unlock_display(int32_t log_flag) {
 }
 
-int elapsed(double *sec)
-{
+int32_t elapsed(double *sec) {
 }
 
