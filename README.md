@@ -117,7 +117,7 @@ cd scripts
 
 It produces the following series of png images, with sintered grains shown in light purple and non-sintered grains shown in tan:
 
-![](../docs/example_images/sintering/sintering.gif)
+![](docs/example_images/sintering/sintering.gif)
 
 This image shows a triangular wave of snow. It quickly leans over to the right. Like the first dune, it begins to blow away in the wind. Some grains at the bottom of the dune, however, sinter (turning light purple in the top left panel of the image). These grains persist for
 much longer than the non-sintered grains, but eventually they too blow away.
