@@ -14,10 +14,11 @@ It is a significant modification of the Real-Space Cellular Automaton Laboratory
 
 *University of Colorado Boulder
 
-## IPGP contributors (2004-2016)
-The original software, ReSCAL, was written (2004-2014) in the Laboratoire de Dynamique des Fluides Geologiques, Institut de Physique du Globe de Paris.
-This work would not exist without this development.
-However, these authors are not responsible for changes in rescal-snow after 2016; see docs/NEWS.md for details. For their continued and parallel work with ReSCAL, see http://www.ipgp.fr/~rozier/rescal/rescal.html .
+## IPGP work (2004-2016)
+Rescal-snow would not have been possible without the development of ReSCAL, which was written 2004-2014 at the Laboratoire de Dynamique des Fluides Geologiques, Institute de Physique du Globe de Paris.
+
+We thank the authors of ReSCAL (listed below) for providing ReSCAL freely under the terms of the GNU General Public License. We do not, however, hold them in any way responsible for changes to the code after 2016. See [docs/NEWS.md](docs/NEWS.md) for details.
+For their ongoing work with ReSCAL, which is not directly related to this project, see [http://www.ipgp.fr/~rozier/rescal/rescal.html](http://www.ipgp.fr/~rozier/rescal/rescal.html)
 
 **ReSCAL development and maintenance at IPGP**
 
