@@ -67,10 +67,10 @@ You may also download the repository manually from [https://github.com/kellykoch
 The downloaded repository should create a rescal-snow directory with the following contents (as of 18 June 2019):
 ```bash
 ls
-AUTHORS		Makefile.am	TODO		configure	missing
-COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
-ChangeLog	NEWS		compile		depcomp		src
-INSTALL		README		config.h.in	install-sh
+>> AUTHORS		Makefile.am	TODO		configure	missing
+>> COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
+>> ChangeLog		NEWS		compile		depcomp		src
+>> INSTALL		README		config.h.in	install-sh
 ```
 **All further blocks of bash instructions start from this directory for consistency.**
 
@@ -78,16 +78,7 @@ INSTALL		README		config.h.in	install-sh
 
 These instructions will get rescal-snow running on most linux environments; for additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
 
-All of the instructions in this README are run from a terminal in the main rescal-snow directory. It should look like this:
-```bash
-ls
-AUTHORS		Makefile.am	TODO		configure	missing
-COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
-ChangeLog	NEWS		compile		depcomp		src
-INSTALL		README		config.h.in	install-sh
-```
-
-In a terminal, navigate into the main rescal-snow directory (the one containing this readme, as well as 'scripts', 'src', etc'). Run:
+In a terminal, navigate into the main rescal-snow directory (shown above). Run:
 ```bash
   ./configure
   make
