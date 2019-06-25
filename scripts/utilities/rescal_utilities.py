@@ -1,9 +1,27 @@
-# KK Jun 25 20180
-# Utilities to set up run scripts quickly and easily; these tools are designed to aid parameter space
-# explorations, sensitivity analyses, and large batches of runs.
-# Parameters : Class to hold, update, change, or write all the parameters that ReSCAL needs to run
-# Run_Script : Class to hold, update, change, or write a ReSCAL run script with appropriate flags
-# This includes almost all options and inputs, except those in the "real_data" file.
+"""
+Rescal-snow: a cellular automaton model of self-organized snow
+Copyright (C) 2019 Kelly Kochanski
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+"""
+KK Jun 25 20180
+Utilities to set up run scripts quickly and easily; these tools are designed to aid parameter space
+explorations, sensitivity analyses, and large batches of runs.
+Parameters : Class to hold, update, change, or write all the parameters that ReSCAL needs to run
+Run_Script : Class to hold, update, change, or write a ReSCAL run script with appropriate flags
+This includes almost all options and inputs, except those in the "real_data" file.
+"""
 
 class Design_a_run():
 	# Design a ReSCAL run
