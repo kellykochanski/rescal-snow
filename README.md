@@ -382,5 +382,5 @@ To learn the underlying principles of the lattice gas cellular automaton (LGCA) 
 See [AUTHORS.md](AUTHORS.md).
 
 ## License
-GNU GPL 3.0 or any later version. See [docs/LICENSE](docs/LICENSE).
+GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md).
 
