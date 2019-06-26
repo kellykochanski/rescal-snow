@@ -9,14 +9,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
-dirname = '.'
+dirname = '..'
 for filename in os.listdir(dirname):
 	if filename[:4] == 'ALTI':
 		if filename[-8:] == '0_t0.log':
 			raw = pd.read_csv(os.path.join(dirname, filename))
 			data = [[int(num) for num in filter(None, value[0].split(' '))] for value in raw.values]
 			vmx = 20
-			if vmx < max(data):
+			if vmx < max(max(data)):
 				print("Warning: some values saturated")
 			plt.imshow(data, cmap='magma', vmin=2, vmax=vmx)
 			plt.colorbar()

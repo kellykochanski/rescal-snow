@@ -60,5 +60,5 @@ RESCAL_LOG_FILE="RESCAL.log"
 #nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
 
 ## generation of png images, CSP files and info logs, then stop after 300 simulated time steps
-./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -nv -dcsp 10t0 -stop 300t0 >> $RESCAL_LOG_FILE
+nice ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -nv -dcsp 10t0 -stop 300t0 >> $RESCAL_LOG_FILE
 
