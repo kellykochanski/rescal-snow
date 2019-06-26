@@ -95,8 +95,6 @@ This command will take a few minutes to run, and produces terminal output like:
 ```bash
 >> PAR_FILE=snow_cone.par
 >> OMP_NUM_THREADS=1
->> Wed Jun 12 15:06:20 PDT 2019
->> Wed Jun 12 15:11:53 PDF 2019
 ```
 > *Nothing happening?*
 >
@@ -150,14 +148,14 @@ much longer than the non-sintered grains, but eventually they too blow away.
 
 The only change between `snowfall.run` and the previous script, `snow_cone.run` (excepting a few changes to the comments) is the parameter file:
 ```bash
-diff scripts/snowfall.run scripts/snow_cone.run
+diff scripts/sintering.run scripts/snow_cone.run
 >> < PAR_FILE="sintering.par"
 >> > PAR_FILE="snow_cone.par"
 ```
 
 If we look at the differences between parameter files, we see:
 ```bash
-diff scripts/snowfall.par scripts/snow_cone.par
+diff scripts/sintering.par scripts/snow_cone.par
 >> < Csp_template = WAVE(15)
 >> > Csp_template = CONE(20,40,50)
 >> < Lambda_S = 0.01
