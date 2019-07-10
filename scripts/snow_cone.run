@@ -1,0 +1,48 @@
+#!/bin/bash
+
+###################################
+## Dune simulation
+###################################
+## KK made this script to run 
+## Test case 1, with snow_cone.par
+## run with ./snow_cone.run
+
+## remove all previously generated files; -f does not ask for user responses
+#./clean -f
+./clean
+
+## make an archive from the sources
+#./dobackup
+
+
+if [ ! -e genesis ]; then
+  ln -s ../src/genesis .
+fi
+if [ ! -e rescal ]; then
+  ln -s ../src/rescal .
+fi
+
+## parameters file (input)
+PAR_FILE="snow_cone.par"
+echo PAR_FILE=$PAR_FILE
+
+### number of OpenMP threads
+export OMP_NUM_THREADS=1
+echo OMP_NUM_THREADS=$OMP_NUM_THREADS
+
+## general log files (output)
+GENESIS_LOG_FILE="GENESIS.log"
+RESCAL_LOG_FILE="RESCAL.log"
+
+## generation of binary cellular space 
+## with python code
+#./genesis.py -f $PAR_FILE > $GENESIS_LOG_FILE
+## or with C code
+./genesis -f $PAR_FILE -s 2000 > $GENESIS_LOG_FILE
+
+## default execution with light shading, vertical layers of cells and velocity of the flow
+#nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
+
+## generation of png images, CSP files and info logs, then stop after 300 simulated time steps
+nice ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -nv -dcsp 10t0 -stop 300t0 >> $RESCAL_LOG_FILE
+

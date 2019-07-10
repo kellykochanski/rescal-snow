@@ -17,29 +17,31 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * aint64_t with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <stdint.h>
 
 #define NB_PAR_FAM_MAX 100 /// max number of (parameter) families
 
 #define NB_PARAM_MAX 200 /// max number of parameters
 
 
-typedef struct{
+typedef struct {
   char *name;
   char *description;
-  int nb;
+  int32_t nb;
 } Family;
 
-typedef struct{
+typedef struct {
   char *name;
   char *usage;
   void *param;
-  unsigned char type;
-  unsigned char init;
-  unsigned char is_visible;
-  unsigned char family;
+  uint8_t type;
+  uint8_t init;
+  uint8_t is_visible;
+  uint8_t family;
   char *family_name;
 } Parameter;
 
@@ -48,10 +50,10 @@ enum PARAM_TYPES {PARAM_STRING, PARAM_BOOLEAN, PARAM_INT, PARAM_FLOAT, PARAM_DOU
 void init_list_params();
 void param_usage();
 void param_family(char *name, char *desc);
-void parameter(char *par_nom, char *par_usage, void *par_adr, unsigned char par_type, char *par_family);
-void parameter_hidden(char *par_nom, char *par_usage, void *par_adr, unsigned char par_type, char *par_family);
-int read_int(char *s, int *err);
-double read_float(char *s, int *err);
+void parameter(char *par_nom, char *par_usage, void *par_adr, uint8_t par_type, char *par_family);
+void parameter_hidden(char *par_nom, char *par_usage, void *par_adr, uint8_t par_type, char *par_family);
+int32_t read_int(char *s, int32_t *err);
+double read_float(char *s, int32_t *err);
 void read_parameters(char *param_file);
-int param_is_set(char *str);
+int32_t param_is_set(char *str);
 

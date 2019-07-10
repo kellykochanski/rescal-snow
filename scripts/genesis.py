@@ -2,6 +2,8 @@
 
 ## Generation of a 3d cellular space (raw binary format)
 
+## From Rescal v1.6  (2016) -- not tested with rescal-snow (2019)
+
 import sys
 
 #model DUN
