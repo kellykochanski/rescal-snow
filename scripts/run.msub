@@ -1,0 +1,25 @@
+#!/bin/bash
+#MSUB -q pbatch
+#MSUB -A intelpwr 
+#MSUB -M kochanski1@llnl.gov
+#MSUB -l nodes=1
+#MSUB -l walltime=01:00:00
+
+# This is an example script for submitting runs to a computing cluster
+# Current options:
+#   -M           : set to your email to receive notifications about run start/stop/crash
+#   -l walltime  : time for run (currently: 1 hour, 01:00:00)
+#   -l nodes     : number of nodes requested (expect many processors per node 1 processor per ReSCAL instance)
+#   -q           : your queue, e.g. "batch" or "debug"
+# The syntax of these commands will almost certainly need to be modified for your computing resources
+#  along with the number of processors per node, the run time for a given simulation, the queue names, etc.
+
+# Srun launches N instances of the "submit.sh" script,
+#  which in turn will direct each of N processors to a separate directory
+#  where each processor will run an instance of ReSCAL.
+# Use the "--wait=0" (or equivalent for your system) flag 
+#  to prevent one finished/failed run from stopping others.
+
+echo "run_parallel_rescal.msub : starting to run ReSCAL in parallel"
+
+srun --nodes=1 --cpus-per-task=1 --ntasks=10 --wait=0 submit.sh
