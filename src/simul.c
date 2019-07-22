@@ -95,7 +95,7 @@ extern RefDoublets_Ind *RefDB_Ind;       // references des cellules de la terre 
 #endif //REFDB_PTR
 #ifdef CGV
 extern float cgv_coef;
-#endif
+#endif 
 extern int32_t vdir_mode; //display mode of the current orientation
 extern uint8_t reorient_flag;
 uint64_t iter = 0, md_iter = 0; // nombre d'iterations (unites, milliards d'unites)
@@ -137,6 +137,7 @@ float lambda_A_stable = 0.0;
 int32_t ava_upwind = 1;
 uint8_t simul_dump_flag = 0;
 uint8_t csphpp_flag = 0;
+uint8_t alti_only_flag; // flag that causes heightmap (ALTI*) files to be written to a file, but not cellspace files (*.csp)
 float dump_delay_png = 0.0;
 float dump_delay_csp = 0.0;
 float stop_delay_t0 = 0.0;
@@ -1567,7 +1568,10 @@ void simul_dump() {
         }
       }
       if (dump_delay_csp && (time_threshold == time_threshold_dcsp)) {
-        dump_terre(DUMP_CSP, cpt_dump, UNIT_T0);
+        // edited to allow dumping of ALTI files but not .csp files using the altionly flag
+        if (!alti_only_flag) {
+          dump_terre(DUMP_CSP, cpt_dump, UNIT_T0);
+        }
 #ifdef ALTI
         dump_surface("ALTI", cpt_dump, UNIT_T0);
 #endif
