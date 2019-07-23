@@ -23,7 +23,10 @@ import os
 import sys
 import argparse
 import scipy.ndimage
+import random
+
 import heightmap
+
 
 # import drawing modules if they exist
 ocan_plot = True
@@ -72,6 +75,25 @@ _cell_colors_list = ['khaki',         # grain
                     'lemonchiffon', # colored_grain
                     ]
 
+# cell typew from rescal defs.h
+cell_types = {'grain' : 0,
+              'mobile_grain' : 1,
+              'vegetated_grain' : 2,
+              'air' : 3,
+              'vegetation' : 4,
+              'boundary' : 5,
+              'neutral' : 6,
+              'input_of_sand' : 7,
+              'ouput_of_sand' : 8,
+              'tunnel' : 9,
+              'EAUT' : 10, # not sure, used only graphically
+              'colored_grain' : 11 # used graphically
+}
+
+# types of mods available
+mods = ['sine', 'noise', 'guassian hill', 'space_invader', 'clip']
+
+
 
 # takes a list of colors and creats a colormap
 # that maps the index of the color to the color when drawing
@@ -102,20 +124,6 @@ exclude_globs = ['DUN.csp']
 #### than ReSCAL :-(
 class CellSpace:
 
-    # cell typew from rescal defs.h
-    cell_types = {'grain' : 0,
-                  'mobile_grain' : 1,
-                  'vegetated_grain' : 2,
-                  'air' : 3,
-                  'vegetation' : 4,
-                  'boundary' : 5,
-                  'neutral' : 6,
-                  'input_of_sand' : 7,
-                  'ouput_of_sand' : 8,
-                  'tunnel' : 9,
-                  'EAUT' : 10, # not sure, used only graphically
-                  'colored_grain' : 11 # used graphically
-    }
 
     ## description of the header using the struct library formatting strings
 
@@ -194,7 +202,10 @@ class CellSpace:
         # made during analysis
         self.height_map = None
         self.surface_map = None
+
+        # also makes surface_map
         self.make_height_map()
+        self.make_ceiling_map()
 
 
 
@@ -433,7 +444,44 @@ class CellSpace:
         else:
             return 0
 
+    # get the position of the bottom of the ceiling
+    def _find_ceiling_one_column(self, column):
 
+        # get the indices of each type
+        boundary = cell_types['boundary'] 
+        neutral = cell_types['neutral']
+        input_of_sand =  cell_types['input_of_sand']
+        boundary_indices = np.nonzero(column == boundary)[0]
+        neutral_indices = np.nonzero(column == neutral)[0]
+        input_of_sand_indices = np.nonzero(column == input_of_sand)[0]
+
+        # iterate through the types of indices
+        indices_lists = [boundary_indices, neutral_indices, input_of_sand_indices]
+        min_position = 0
+        for indices in indices_lists:
+            if indices.size == 0:
+                continue
+            elif indices.size == 1:
+                min_position = max(min_position, indices[0])
+            # find the longes contiguous streak of ceiling cell types starting from 0
+            # the highest index value is the bottom of the ceiling for this column
+            else:
+                for i in range(1,len(indices)):
+                    if indices[i] == 1 + indices[i-1]:
+                        min_position = max(min_position, indices[i])
+                    else:
+                        break
+        return min_position
+                
+                # look for break in contiguous values
+                
+    # create a heightmap of the celing and get the lowest point                
+    def make_ceiling_map(self):
+        self.ceiling_map = np.apply_along_axis(self._find_ceiling_one_column, 1, self.cells)  
+        
+        
+
+        
     # creates a surface map
     # like an inverted and offset heightmap, gives the positions
     # of the air cells at the surface of the sand
@@ -459,9 +507,9 @@ class CellSpace:
     # add sand grain at (depth, surface_map[depth, length], length)]
     def add_sand(self, depth, length):
         # get surface map or immobile sand
-        sm = self.surface_map()
+        sm = self.surface_map
         height = sm[depth, length]
-        self.cells[depth, height, length] = CellSpace.cell_types['grain']
+        self.cells[depth, height, length] = cell_types['grain']
 
     # adds a randomly placed grain of sand to the surface
     def add_sand_random(self):
@@ -473,16 +521,16 @@ class CellSpace:
 
     # prototype to add grains to surface
     def add_square(self, depth, length, k, temp_mod=False):
-        sm = self.surface_map()
+        sm = self.surface_map
         for d in range(depth-5, depth+6):
             for l in range(length-5, length+6):
                 h = sm[d, l]
                 # was range(h-k, h+1):
                 for i in range(h-k, h+1):
                     if temp_mod:
-                        self.temp_mod_cells[d,i,l] = CellSpace.cell_types['grain']
+                        self.temp_mod_cells[d,i,l] = cell_types['grain']
                     else:
-                        self.cells[d,i,l] = CellSpace.cell_types['grain']
+                        self.cells[d,i,l] = cell_types['grain']
 
 
     # perform multiple random edits and write out the edited versions
@@ -537,26 +585,98 @@ class CellSpace:
         x_len, y_len, = height_map.shape
         #image_window = self.cells[x_min:x_min + x, y_min:y_min + y]
 
-        sm = self.surface_map()
+        sm = self.surface_map
         for x in range(x_len):
             for y in range(y_len):
                 h = sm[x_min + x, y_min + y]
                 for i in range(h-height_map[x,y]+1, h+1):
                     if temp_mod:
-                        self.temp_mod_cells[x_min+x,i,y_min+y] = CellSpace.cell_types['grain']
+                        self.temp_mod_cells[x_min+x,i,y_min+y] = cell_types['grain']
                     else:
-                        self.cells[x_min+x,i,y_min+y] = CellSpace.cell_types['grain']
+                        self.cells[x_min+x,i,y_min+y] = cell_types['grain']
 
     # add a sin wave to the cellspace
-    def add_sine(self, amp=5, f=10):
+    def add_sine(self, amp=5, f=10, temp_mod=False):
         # mgrid of (l,d) values
         a = np.mgrid[f*-1.0:f*1.0:f*2.0/self.length, f*-1.0:f*1.0:f*2.0/self.depth]
         s = np.sin(a[0]) + 1.0
         s = (s.T * amp)
         s = (np.round(s)).astype(np.uint8)
         hm(s)
-        self.add_height_map((0,0),s)
+        self.add_height_map((0,0),s, temp_mod=temp_mod)
 
+
+    # types of mods available
+    mods = ['sine', 'noise', 'guassian hill', 'space_invader', 'clip']
+
+
+    
+    # applies a random modification of the given type
+    def random_mods(self, file_prefix, mod_type='gaussian', num_mods=1, temp_mod=False):
+
+        # get heightest sand to avoid going out of the space
+        
+        sand_top = np.min(self.surface_map)
+        ceiling_bottom = np.max(self.ceiling_map)
+        
+        # max alteration height
+        h = sand_top - ceiling_bottom - 1
+        if h < 2:
+            # TODO deal with not enough space to modify
+            return None
+
+        paths = []
+        # do the modification
+        for i in range(num_mods):
+
+            if temp_mod:
+                self.temp_mod_cells = self.cells.copy()
+
+            if mod_type == 'sine':
+                # calculate frequency and amplitude values
+                amp = random.randint(2,h)
+                f = random.randint(1, 20)
+                self.add_sine(amp, f, temp_mod)
+            elif mod_type == 'gaussian':
+                # create a gaussian
+                
+                pass
+            elif mod_type == 'space_invader':
+                # create the image
+                image_depth, image_length = heightmap.invader.shape
+                depth, _, length = self.cells.shape
+                max_length_scaling = length // image_length
+                max_depth_scaling = depth // image_depth
+                length_scaling = random.randint(1, max_length_scaling)
+                depth_scaling = random.randint(1, max_depth_scaling)
+                height_scaling = random.randint(2,h)
+                scaling_matrix = heightmap.make_scaler(depth_scaling, length_scaling)
+                scaled_image = np.kron(heightmap.invader, scaling_matrix) * height_scaling
+
+                # now place the image
+                scaled_image_depth, scaled_image_length = scaled_image.shape
+                breakpoint()
+                top_left_depth = random.randint(0, depth - scaled_image_depth - 1)
+                top_left_length = random.randint(0, length - scaled_image_length - 1)
+                top_left = (top_left_depth, top_left_length)
+                self.add_height_map(top_left, scaled_image, temp_mod)
+            else:
+                pass
+
+            
+
+            # now write out the modification fo file
+            file_out = file_prefix + '--' + mod_type + '--' + str(i) + '.csp'
+            self.write(filename=file_out, temp_mod=temp_mod)
+            paths.append(file_out)
+
+
+        # make path names absolute
+        for i in range(len(paths)):
+            paths[i] = os.path.abspath(paths[i])
+            
+        return paths
+            
 
     ###################################
     #########      drawing      #######
