@@ -8,6 +8,7 @@ It was developed from version 1.6 of the Real-Space Cellular Automaton Laborator
  - Eric Green (simplified configuration/dependencies, simplified and selectively modularized source code, optimized random number generator, misc debugging)
  - Barry Rountree, <rountree4@llnl.gov>, (configured software for parallel/Mac use, misc debugging)
  - Carlos Downie (added fft utility and tests)
+ - Gian-Carlo Defazio (added heightmap and cellspace utilities, measured effects of stochastic behavior in rescal-snow)
  - Adam Rubin* (added snowfall feature)
  - Aaron Robeson (added xcorr utility)
  - Divya Mohan (misc debugging)
