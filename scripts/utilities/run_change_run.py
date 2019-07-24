@@ -48,11 +48,14 @@ parameters_par_1 = {
 
 # command line arguments for rescal which will be in the .run file
 parameters_run_1 = {
-    'stop after' : '200_t0',
+    'stop after' : '400_t0',
     'output interval' : '200_t0',
     'png interval' : False,
     'quit' : True,
     'random seed' : 6,
+    'usage info' : False,
+    'show params' : False,
+    'info interval' : False,
 }
 
 # parameters that are not given to genesis or rescal
@@ -107,13 +110,18 @@ def random_initial_states(num_states, parameters, top_dir, run_header='run', run
     # create num_states random seeds
     seed_numbers = random.sample(range(1,1000000), num_states)
     seeds = [['random seed', seed_numbers]]
-    
-    run_files = rescal_utilities.make_run_directories(parameters, seeds, top_dir, run_header, run_name)
+
+    if run_files == None:
+        run_files = rescal_utilities.make_run_directories(parameters, seeds, top_dir, run_header, run_name)
 
     rescal_utilities.run_rescals(run_files)
 
     paths = rescal_utilities.get_files_to_process(top_dir, cellspace.path_glob, cellspace.exclude_globs)
     paths_last = [x[-1] for x in paths]
+
+
+    print(paths_last)
+    
     return paths_last
 
 
@@ -127,8 +135,7 @@ def modify_outputs(top_dir, paths, mod_types, num_mods, exp_name='exp', ):
     if not os.path.isdir(top_dir):
         os.mkdir(top_dir)
 
-    
-    
+        
     # the 3D list of paths to all the mods
     mod_paths = []
     for i,path in enumerate(paths):
@@ -138,11 +145,133 @@ def modify_outputs(top_dir, paths, mod_types, num_mods, exp_name='exp', ):
             # entire path name will be:
             # top_dir + '/' + exp_name + str(i) + '--' + mod_type '--' str(j) + '.csp'
             # where j indexes num_mods
-            file_prefix = top_dir + '/' + exp_name + str(i) 
+            file_prefix = top_dir + '/' +  str(i) 
             mod_paths_inner.append(c.random_mods(file_prefix, mod_type,
                                                  num_mods=num_mods, temp_mod=True))
         mod_paths.append(mod_paths_inner)
+
+    print(mod_paths)
+        
     return mod_paths
+
+
+# takes the paths to the modded .csp files, creates a bunch of run folders for each with
+# differnt random seeds
+def make_modded_runs(num_runs, paths3D, parameters, top_dir, run_header='run', run_name='run'):
+
+    # top dir to put the .csp files
+    if not os.path.isdir(top_dir):
+        os.mkdir(top_dir)
+
+    
+    # create num_states random seeds
+    seed_numbers = random.sample(range(1,1000000), num_runs)
+    seeds = [['random seed', seed_numbers]]
+
+    # 4D array of paths once filled
+    all_paths = []
+
+    # paths comes from modify outputs, so it's 3D
+    for paths2D in paths3D:
+        for paths1D in paths2D:
+            for path in paths1D:
+                # set top_dir
+                # remove .csp from paths names
+                # TODO, only use filename of path for file_prefix
+                path_file_part = os.path.basename(path)[:-4]
+                file_prefix = top_dir + '/' + path_file_part
+                # set each run up to use a premade .csp
+                csp_loc = {'premade_csp' : path}
+                parameters_new = {**parameters, **csp_loc}
+                all_paths.append(rescal_utilities.make_run_directories(parameters_new,
+                                                                       seeds, 
+                                                                       file_prefix,
+                                                                       run_header,
+                                                                       run_name))
+    return all_paths
+    
+
+# sets up a set of files to be run
+# starts with some initial conditions
+# creates num_rand_initials
+# then |mod_types| x num_mods 
+# then num_runs
+# the result is lists of file paths, a 1D lists of controls
+# and a 4D list of modded versions
+# the 1D list is length rand_initials
+# the 4D list is num_rand_initials x |mod_types| x num_mods x num_runs
+def set_up_data_run(parameters_initial, parameters_after_mod,
+                    num_rand_initials, mod_types, num_mods, num_runs,
+                    top_dir_rand_initials, top_dir_mods, top_dir_experiment_runs,
+                    rand_initial_files=None):
+
+    # start with some initial configuration
+    # run it to some time and get the csp files from the end of the run
+    if rand_initial_files == None:
+        rand_initial_files = random_initial_states(num_rand_initials,
+                                                   parameters_initial,
+                                                   top_dir_rand_initials)
+
+    # create a bunch of modified versions of each .csp
+    modded_csps = modify_outputs(top_dir_mods, rand_initial_files, mod_types, num_mods)
+
+    # create run directories for all the modded .csp files, using differnt seeds
+    run_paths = make_modded_runs(num_runs, modded_csps, parameters_after_mod,
+                                 top_dir_experiment_runs)
+
+    print(run_paths)
+    make_submit_file(run_paths)
+    
+
+    make_sbatch_file(run_paths)
+
+    
+    return rand_initial_files, modded_csps, run_paths
+    
+
+
+# given the output dirs, make sbatch
+# TODO, maybe add the rand_initial_files to do the control run
+def make_run_files(run_paths):
+    pass
+
+
+# the sbatch file that does the big set of parallel runs
+def make_sbatch_file(run_paths2D, output_file='test.sbatch'):
+    with open(output_file, 'w') as f:
+        # get the data needed
+        email = 'defazio1@llnl.gov'
+        ntasks = len(run_paths2D) * len(run_paths2D[0])
+        time = '08:00:00'
+        
+        f.write('#!/bin/bash\n')
+        f.write('#SBATCH --qos normal\n')
+        f.write('#SBATCH --mail-user={e}\n'.format(e=email))
+        f.write('#SBATCH --mail-type=ALL\n')      
+        f.write('#SBATCH --time={t}\n'.format(t=time))
+        f.write('#SBATCH --ntasks {nt}\n'.format(nt=ntasks))
+        
+
+# the submit.h file that sbatch calls
+def make_submit_file(run_paths2D, output_file='submit.sh'):
+    with open(output_file, 'w') as f:
+        f.write('#!/bin/bash\n')
+        dirs = []
+        for run_paths1D in run_paths2D:
+            for run_path in run_paths1D:
+                dirs.append(os.path.dirname(run_path))
+        f.write('run_dirs=(\n')
+        for d in dirs:
+            f.write('\"' + d + '\"\n')
+        f.write(')\n')
+        f.write('my_run_dir=\"{run_dirs[${PMI_RANK}]}\"\n')
+        f.write('cd ${my_run_dir}\n')
+        f.write('chmod u+rwx *\n')
+        f.write('./run.run\n')
+        
+
+
+
 
 
 # # TODO change function name
@@ -232,31 +361,25 @@ def modify_outputs(top_dir, paths, mod_types, num_mods, exp_name='exp', ):
     
 
 if __name__ == '__main__':
-#    randos = random_initial_states(2, parameters_1, '../../rr')
 
+    p_mods = {
+        'stop after' : '3600_t0',
+        'output interval' : '100_t0',
+        'alti only' : True,
+    }
 
-    saved_randos = ['/g/g13/defazio1/summer_2019/rescal-snow/rr/random_seed-518542/SNO00001_t0.csp.gz',
-                    '/g/g13/defazio1/summer_2019/rescal-snow/rr/random_seed-561509/SNO00001_t0.csp.gz']
-    
- #   print(randos)
-
-    
-    modded_randos = modify_outputs('../../ss',
-                                   saved_randos,
-                                   ['space_invader'],
-                                   2)
-    print(modded_randos)
-
-    saved_modded_randos = [[['/g/g13/defazio1/summer_2019/rescal-snow/ss/exp0--invader--0.csp',
-                             '/g/g13/defazio1/summer_2019/rescal-snow/ss/exp0--invader--1.csp'],
-                            ['/g/g13/defazio1/summer_2019/rescal-snow/ss/exp0--gaussian--0.csp',
-                             '/g/g13/defazio1/summer_2019/rescal-snow/ss/exp0--gaussian--1.csp']],
-                           
-                           [['/g/g13/defazio1/summer_2019/rescal-snow/ss/exp1--invader--0.csp',
-                             '/g/g13/defazio1/summer_2019/rescal-snow/ss/exp1--invader--1.csp'],
-                            ['/g/g13/defazio1/summer_2019/rescal-snow/ss/exp1--gaussian--0.csp',
-                             '/g/g13/defazio1/summer_2019/rescal-snow/ss/exp1--gaussian--1.csp']]]
-    #modify_csp_and_restart()
-    #just_run_it()
 
     
+    parameters_2 = {**parameters_1, **p_mods}
+
+
+    rif_s = ['/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-175495/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-349/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-447778/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-475580/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-495303/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-525175/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-582451/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-909448/SNO00002_t0.csp.gz'] 
+    
+    rif, mc, rp = set_up_data_run(parameters_1, parameters_2,
+                                  8, ['space_invader', 'sine'], 8, 8,
+                                  '../../tdi', '../../tdm', '../../tdr',
+                                  rand_initial_files=rif_s)
+    
+
+
+

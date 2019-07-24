@@ -602,7 +602,7 @@ class CellSpace:
         s = np.sin(a[0]) + 1.0
         s = (s.T * amp)
         s = (np.round(s)).astype(np.uint8)
-        hm(s)
+        #hm(s)
         self.add_height_map((0,0),s, temp_mod=temp_mod)
 
 
@@ -647,17 +647,20 @@ class CellSpace:
                 depth, _, length = self.cells.shape
                 max_length_scaling = length // image_length
                 max_depth_scaling = depth // image_depth
-                length_scaling = random.randint(1, max_length_scaling)
-                depth_scaling = random.randint(1, max_depth_scaling)
+                #length_scaling = random.randint(1, max_length_scaling)
+                #depth_scaling = random.randint(1, max_depth_scaling)
+                length_scaling = random.randint(max_length_scaling - 1, max_length_scaling)
+                depth_scaling = random.randint(max_depth_scaling - 1, max_depth_scaling)
+                
                 height_scaling = random.randint(2,h)
                 scaling_matrix = heightmap.make_scaler(depth_scaling, length_scaling)
                 scaled_image = np.kron(heightmap.invader, scaling_matrix) * height_scaling
 
                 # now place the image
                 scaled_image_depth, scaled_image_length = scaled_image.shape
-                breakpoint()
-                top_left_depth = random.randint(0, depth - scaled_image_depth - 1)
-                top_left_length = random.randint(0, length - scaled_image_length - 1)
+                #breakpoint()
+                top_left_depth = random.randint(0, depth - scaled_image_depth)
+                top_left_length = random.randint(0, length - scaled_image_length)
                 top_left = (top_left_depth, top_left_length)
                 self.add_height_map(top_left, scaled_image, temp_mod)
             else:

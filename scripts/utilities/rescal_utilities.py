@@ -456,7 +456,7 @@ def make_run_directories(fixed_params, variable_params, experiment_name, run_hea
        The paths to the run scripts are returned for easy execution on the
        power-lab machines.'''
 
-    breakpoint()
+    #breakpoint()
     # make the top level directory, but don't overwrite a directory that
     # already exists
     experiment_directory_name = experiment_name
