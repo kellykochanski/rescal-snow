@@ -9,9 +9,11 @@ tags:
 authors:
   - name: Kelly Kochanski
     orcid: 0000-0003-0754-0184
-    affiliation: "1" # (Multiple affiliations must be quoted)
+    affiliation: "1,2" # (Multiple affiliations must be quoted)
   - name: Eric Green
     affiliation: 2
+  - name: Gian-Carlo Defazio
+    affiliation: "2,3"
   - name: Carlos Downie
     affiliation: 2
   - name: Adam Rubin
@@ -24,7 +26,9 @@ affiliations:
    index: 1
  - name: Computing Division, Lawrence Livermore National Laboratory, Livermore, CA, USA
  - index: 2
-date: 21 June 2019
+ - name: Western Washington University, Bellingham, WA, USA
+   index: 3
+date: 21 July 2019
 bibliography: docs/paper.bib
 ---
 
@@ -34,11 +38,29 @@ bibliography: docs/paper.bib
 
 *Snow redistribution by wind is important (emph on med length scales)*
 
-Snow cover and accumulation are vital to many ecosystems.
-Each winter, snow drifts from the sky onto the polar ice sheets and sea ice.
-It adds mass, brightness, and insulation that cool the Earth in the face of climate change.
-In southern regions, snow whirls over prairies and tundra. Where it lands, it covers plants and animals against the winter cold, and melts into their fresh water in the spring.
-Most snow that falls, however, does not stay on the ground: it blows away.
+Snow blows in the wind. This movement has many effects on polar climates and ecosystems.
+It dulls the reflectivity of the snow that insulates the polar regions; it increases the rate of sublimation of snow in dry air; and it strips the winter insulation from tundra.
+One of the most intriguing effects of the wind on snow, however, is the creation of mysterious and captivating shapes known as snow bedforms (Fig 1a-c). These features ornament Antarctica, Arctic sea ice, tundra, and many mountain tops.
+They change the reflectivity and average thermal conductivity of the snow, and may well change the patterns of snow accumulation and transport.
+They also present a range of interesting self-organized shapes that might interest geomorphologists and Earth surface process scientists.
+Despite these effects, however, they are poorly understood and not yet included in major snow models.
+
+Several recent field studies have pointed to the missing theoretical components needed for a good understanding of snow bedforms.
+Most known bedforms are between 0.1 and 5 m in length, with a few long-wavelength features (such as snow-waves) reaching wavelengths of 5-30 m.
+The features are clearly shaped by their interaction with the wind and may well be sustained by turbulent eddies or large-scale turbulent structures.
+A significant fraction of snow bedforms resemble features found in sand, such as dunes and ripples, and experience some granular properties, such as avalanches of dry grains,
+ but other bedforms show evidence of time-dependent cohesion, a feature not yet well understood in the Earth surface processes community.
+The bedforms also tend to grow during blizzards and snowfall events.
+
+Rescal-snow is designed to enable the quantitative study of snow bedforms.
+In contrast to previous snow models, it covers 0.1-100 m length scales. 
+The simulation is adapted from a sand dune model, which has been used successfully in geomorphology to model granular processes including aeolian transport and avalanching, plus processes that are unique to snow,
+like time-dependent cohesion and snowfall.
+The backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modelling self-organization.
+Fluid processes are modelled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
+
+We illustrate each of these features in the example simulations in our `README` file, which is designed to walk readers through a previously-unmodelled scientific question: how does falling snow collect into bedforms, and how does loose blowing snow end up stuck to the
+ground?
 
 *Previous models do not cover small length scales or self-organization -> Statement of need*
 
@@ -46,17 +68,7 @@ Previous snow models do not cover <100m length scales. This means they miss impo
 They also entirely miss snow dunes and bedforms.
 Several authors have shown that these features are shaped by processes such as time-dep cohesion that have not been included in previous geomorph models, and that are not easy to modify in existing snow models --- need space for process-based geomorph
 
-*rescal-snow covers wind redistribution + snow self-orgazation in a process-based framework on <100m length scales*
-
-We address all of these difficulties:
-rescal-snow covers 0.1-100m length scales
-it is designed to capture self-org w cellular automata
-we have added time-dep cohesion, in a framework easy for user to alter
-
-*Ongoing work with rescal-snow*
-
-My stuff
-Authors interested in rescal for snow dunes; we'll make their work easier for them
+Also there are models of snow microstructure but these are too small. However, they do inform some of our physics choices like sensible rates of cohesion increase.
 
 *Good practices - make review easy for JOSS*
 
@@ -66,38 +78,13 @@ installation instructions,
 new files carefully documented (though some inherited from older work, clearly stated at top of each file),
 community guidelines to encourage future contribution, inc. tutorials designed to be accessible to researchers with diverse computational experience.
 
-Examples: walk through an obv. problem this software aims to solve: 'how does snow stick through the ground?', unique new features of this software. 
 Also designed to be accessible to scientists with different levels of computational background by including clear prerequisites and pointers towards useful tutorials where those may be necessary.
 
 Also have done our best to set an example of good contribution for the snow science community: continued dev of open-source software, clear acknowledgement of previous work and authors, developing in a direction that encourages good, robust, reproducible computational science by updating performance, giving directions for parallel runs for UQ/rigorous param space exploration, etc.
 
+
+TODO: Figure with maybe real dune and wave, then rescal dune and wave 
 ---
-
-Rescal-snow is designed to give snow scientists new tools for studying the redistribution of snow by wind. In particular, it is designed to capture
-snow self-organization and redistribution on 0.1-10m length scales.
-Previous snow models of wind-blown snow have focused on
-0.1-10 km scales [@Liston:2007; Lehning2002], continental scales [@Gallee2012; @Lenaerts2012] or global scales [@Blanchard2015].
-These models have been useful for calculating the large-scale effect of snow on ice sheet mass balances, but still have significant discrepancies when compared to real Antarctic snow measurements (e.g. @Gallee2012)
-We know the small length scales are important because...
-So we address this with a model focused on 0.1-10m length scales.
-
-Also these models dont get snow dunes...
-Which are important because...
-The closest models to get those are Liston2018, new Cryosphere paper... 
-These are applications of models with a smaller capability, they show the need for a new model that scientists can apply
-To address this, we built a model using a cellular automaton, well known for being good for self-organization...
-We also add features (snowfall, sintering) that several field authors studying snow dunes have identified as important...
-
-# Mathematics
-
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
-
-Double dollars make self-standing equations:
-
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
 
 
 # Citations
@@ -117,9 +104,9 @@ Figures can be included like this: ![Example figure.](figure.png)
 
 # Acknowledgements
 
-We thank Clement Narteau, Oliver Rozier for their advice and support in development beginning with ReSCAL 1.6,
-Robert Anderson and Gregory Tucker for their advice on the scientific direction of this software,
-and Tapasya Patki, Divya Mohan, Jeff Booher-Kaeding and Aaron Robeson for contributions to the quality and performance of rescal-snow.
+We thank Clement Narteau and Oliver Rozier (IPGP) for their advice and support in development beginning with ReSCAL 1.6,
+Robert Anderson and Gregory Tucker (CU) for their advice on the scientific direction of this software,
+and Tapasya Patki, Divya Mohan, Jeff Booher-Kaeding and Aaron Robeson (LLNL) for contributions to the quality and performance of rescal-snow.
 
 This work was supported by a Department of Energy Computational Science Graduate Fellowship (DE-FG02-97ER25308), by support from the Data Science Summer Institute at Lawrence Livermore National Laboratory, and by an UROP award from the University of Colorado.
 
