@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.1)
 
-project (rescal-snow 
+project (rescal-snow
   VERSION 0.0.1
   DESCRIPTION "TODO"
   LANGUAGES C
@@ -62,10 +62,11 @@ add_executable(csp2bin
   src/csp2bin.c
 )
 
-target_link_libraries(rescal    PRIVATE PNG::PNG pthread)
-target_link_libraries(genesis   PRIVATE PNG::PNG)  
-target_link_libraries(bin2png   PRIVATE PNG::PNG)  
-target_link_libraries(csp2png   PRIVATE PNG::PNG)  
+target_link_libraries(rescal    PRIVATE PNG::PNG pthread m)
+target_link_libraries(genesis   PRIVATE PNG::PNG m)
+target_link_libraries(regenesis PRIVATE m)
+target_link_libraries(bin2png   PRIVATE PNG::PNG m)
+target_link_libraries(csp2png   PRIVATE PNG::PNG m)
 
 target_include_directories(rescal    PRIVATE src)
 target_include_directories(genesis   PRIVATE src)
