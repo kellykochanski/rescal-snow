@@ -12,6 +12,10 @@ project (rescal-snow
 add_subdirectory(lib/libpng-1.6.37)
 add_subdirectory(lib/zlib-1.2.11)
 
+#Ugly hack needed to fix a mysterious issue on Mac
+include_directories(lib/libpng-1.6.37)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/lib/libpng-1.6.37)
+
 set(COMMON_SOURCES
   src/cells.c
   src/lgca.c
