@@ -64,13 +64,9 @@ cd rescal-snow
 ```
 You may also download the repository manually from [https://github.com/kellykochanski/rescal-snow](https://github.com/kellykochanski/rescal-snow).
 
-The downloaded repository should create a rescal-snow directory with the following contents (as of 18 June 2019):
-```bash
-ls
->> AUTHORS		Makefile.am	TODO		configure	missing
->> COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
->> ChangeLog		NEWS		compile		depcomp		src
->> INSTALL		README		config.h.in	install-sh
+The downloaded repository should create a rescal-snow directory with the following contents (as of 02019-07-25):
+```
+analysis/  docs/  lib/  scripts/  src/  AUTHORS.md  CMakeLists.txt  .gitignore  LICENSE  README.md
 ```
 **All further blocks of bash instructions start from this directory for consistency.**
 
@@ -80,8 +76,10 @@ These instructions will get rescal-snow running on most linux environments; for 
 
 In a terminal, navigate into the main rescal-snow directory (shown above). Run:
 ```bash
-  ./configure
-  make
+mkdir build
+cd build
+cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release .. #Debug can be used instead of Release
+make -j 4                                    #Adjust to the number of cores you have for a speedy build
 ```
 
 ### Example 1: a snow cone <a name="test-cone"><a>
