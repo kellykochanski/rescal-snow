@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 ## This script recolors 'ALTI00xxx.log' files with matplotlib color schemes
 # It allows users to change rescal-snow visualizations when the default colors are not useful.
 # This particular script is configured to work with the example output in docs/example_images/snowfall
