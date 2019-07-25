@@ -4,6 +4,122 @@ import random
 import os
 import rescal_utilities
 import cellspace
+import pickle
+
+
+# experiment directory setup
+# expermient directory is a directory that contains all the files
+# it is dealt with as an object in python
+# RescalRun
+
+
+# experiment_name
+#   meta_data 
+#
+#
+
+
+
+class RescalDataRunMetaData:
+
+    def __init__(self):
+        self.parameters = None
+        self.intial_csps_created = False
+        self.control_run_files_created = False        
+        self.modded_csp_created = False
+        self.moded_run_files_created = False
+        self.main_experiment_started = False
+        self.data_consolidated = False
+        self.jobs_ids = []
+
+    
+# a class that represents a rescal data run
+# uses directory in the top level directory of a ReSCAL install
+class RescalDataRun:
+
+    def __init__(self, experiment_directory, rescal_root=None, overwrite=False):
+        # get the location of rescal
+        if rescal_root is None:
+            self.rescal_root = os.environ['RESCAL_ROOT']
+        else:
+            self.rescal_root = rescal_root
+
+
+        # deal with experiment_directory
+        if not os.path.isabs(experiment_directory):
+            self.experiment_directory = os.path.join(self.rescal_root, experiment_directory)
+        else:
+            # TODO, this could break everything if user gives bad path
+            self.experiment_directory = experiment_directory
+
+
+        self.meta_data_path = os.path.join(self.experiment_directory, '.meta_data')
+
+            
+        # see if experiment_directory exists and is a directory
+        # TODO deal with permissions
+        if os.path.isdir(self.experiment_directory):
+            # look for the meta_data file
+            if os.path.isfile(self.meta_data_path):
+                # if found, use it to initialize
+                self.initialize_from_existing_experiment_directory()
+                
+        # failure, won't everwrite file
+        elif os.path.isfile(self.experiment_name):
+            print('A file exists at {ed}'.format(self.experiment_directory))
+            print('Cannnot create experiment directory')
+
+        # nothing exists at self.experiment directory, so make and setup new directory
+        else:
+            self.initialize_experiment_directory()
+            
+
+
+    # TODO maybe do more than just the meta_data
+    def initialize_experiment_directory(self):
+        self.create_meta_data()
+        
+
+    # create a meta_data object and file
+    def create_meta_data(self):
+        self.meta_data = RescalDataRunMetaData()
+        pickle.dump(self.meta_data, self.meta_data_path)
+    
+            
+    def initialize_from_existing_experiement(self):
+        self.meta_data = pickle.load(self.meta_data_path)
+
+        
+        
+    # setup directories, this includes running rescal
+    # to randomly initialize
+    def setup(self):
+        pass
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+def flatten(x):
+    if x == []:
+        return []
+    elif isinstance(x, list):
+        return flatten(x[0]) + flatten(x[1:])
+    else:
+        return [x]
+        
+
+
 
 # common parameters for rescal
 # this includes parameters that will be in the .par file
@@ -155,9 +271,40 @@ def modify_outputs(top_dir, paths, mod_types, num_mods, exp_name='exp', ):
     return mod_paths
 
 
+
+# create runs scripts for the control run
+def make_control_runs(num_runs, paths1D, parameters, top_dir, run_header='run', run_name='run', seeds=None):
+    
+    # top dir to put the .csp files
+    if not os.path.isdir(top_dir):
+        os.mkdir(top_dir)
+
+    # create num_states random seeds
+    if seeds == None:
+        seed_numbers = random.sample(range(1,1000000), num_runs)
+        seeds = [['random seed', seed_numbers]]
+
+    for path in paths1D:    
+        path_file_part = os.path.basename(path)[:-4]
+        file_prefix = top_dir + '/' + path_file_part
+        # set each run up to use a premade .csp
+        csp_loc = {'premade_csp' : path}
+        parameters_new = {**parameters, **csp_loc}
+        all_paths.append(rescal_utilities.make_run_directories(parameters_new,
+                                                               seeds, 
+                                                               file_prefix,
+                                                               run_header,
+                                                               run_name))
+    return all_paths
+    
+    
+
+
+
+
 # takes the paths to the modded .csp files, creates a bunch of run folders for each with
 # differnt random seeds
-def make_modded_runs(num_runs, paths3D, parameters, top_dir, run_header='run', run_name='run'):
+def make_modded_runs(num_runs, paths3D, parameters, top_dir, run_header='run', run_name='run', seeds=None):
 
     # top dir to put the .csp files
     if not os.path.isdir(top_dir):
@@ -165,8 +312,9 @@ def make_modded_runs(num_runs, paths3D, parameters, top_dir, run_header='run', r
 
     
     # create num_states random seeds
-    seed_numbers = random.sample(range(1,1000000), num_runs)
-    seeds = [['random seed', seed_numbers]]
+    if seeds == None:
+        seed_numbers = random.sample(range(1,1000000), num_runs)
+        seeds = [['random seed', seed_numbers]]
 
     # 4D array of paths once filled
     all_paths = []
@@ -203,7 +351,7 @@ def make_modded_runs(num_runs, paths3D, parameters, top_dir, run_header='run', r
 def set_up_data_run(parameters_initial, parameters_after_mod,
                     num_rand_initials, mod_types, num_mods, num_runs,
                     top_dir_rand_initials, top_dir_mods, top_dir_experiment_runs,
-                    rand_initial_files=None):
+                    rand_initial_files=None, chunk_size=128):
 
     # start with some initial configuration
     # run it to some time and get the csp files from the end of the run
@@ -212,6 +360,10 @@ def set_up_data_run(parameters_initial, parameters_after_mod,
                                                    parameters_initial,
                                                    top_dir_rand_initials)
 
+    # create run files for the rand_initial_files
+    # this is the control group
+    make_control_runs()
+        
     # create a bunch of modified versions of each .csp
     modded_csps = modify_outputs(top_dir_mods, rand_initial_files, mod_types, num_mods)
 
@@ -220,145 +372,85 @@ def set_up_data_run(parameters_initial, parameters_after_mod,
                                  top_dir_experiment_runs)
 
     print(run_paths)
-    make_submit_file(run_paths)
-    
+    make_job_files(run_paths, chunk_size)
 
-    make_sbatch_file(run_paths)
-
-    
     return rand_initial_files, modded_csps, run_paths
     
 
 
-# given the output dirs, make sbatch
-# TODO, maybe add the rand_initial_files to do the control run
-def make_run_files(run_paths):
-    pass
 
+# does the data run
+def do_data_run():
+
+
+
+
+# makes pairs of .sbatch and submit files to split up jobs
+def make_job_files(run_paths, chunk_size=36, sbatch_file='test', submit_file='submit'):
+    # split up run_paths2d into a few chunks
+    # first flatten and remove 'run.run'
+
+    dirs = flatten(run_paths)
+    
+    # flatten run paths
+    #for run_paths1D in run_paths2D:
+    #for run_path in run_paths2D:
+    #    dirs.append(os.path.dirname(run_path))
+    # create the chunks
+    chunks = [dirs[i:i+chunk_size] for i in range(0,len(dirs),chunk_size)]
+
+    sbatch_files = []
+    submit_files = []
+    for i, chunk in enumerate(chunks):
+        current_sbatch_file = sbatch_file + str(i) + '.sbatch'
+        sbatch_files.append(current_sbatch_file)
+        current_submit_file = submit_file + str(i) + '.sh'
+        submit_files.append(current_submit_file)
+        make_sbatch_file(chunk, current_sbatch_file, current_submit_file, run_number=i)
+        make_submit_file(chunk, current_submit_file)
+    return sbatch_files, submit_files
+        
 
 # the sbatch file that does the big set of parallel runs
-def make_sbatch_file(run_paths2D, output_file='test.sbatch'):
+def make_sbatch_file(run_paths, output_file='test', submit_file='submit', run_number=0): 
+    
     with open(output_file, 'w') as f:
         # get the data needed
         email = 'defazio1@llnl.gov'
-        ntasks = len(run_paths2D) * len(run_paths2D[0])
-        time = '08:00:00'
+        ntasks = len(run_paths)
+        time = '05:00:00'
+        log_file = 'log' + str(run_number) + '.txt'
         
         f.write('#!/bin/bash\n')
+        f.write('#SBATCH --job-name r{rn}\n'.format(rn=run_number))
+        f.write('#SBATCH --output={lf}\n'.format(lf=log_file))
         f.write('#SBATCH --qos normal\n')
         f.write('#SBATCH --mail-user={e}\n'.format(e=email))
         f.write('#SBATCH --mail-type=ALL\n')      
         f.write('#SBATCH --time={t}\n'.format(t=time))
         f.write('#SBATCH --ntasks {nt}\n'.format(nt=ntasks))
+        f.write('srun --wait=0 --cpus-per-task=1 --ntasks={nt} {sf}'.format(nt=ntasks, sf=submit_file))
+    # set permissions for output_file
+    os.chmod(output_file, 0o764)
         
 
 # the submit.h file that sbatch calls
-def make_submit_file(run_paths2D, output_file='submit.sh'):
+def make_submit_file(dirs, output_file='submit.sh'):
     with open(output_file, 'w') as f:
         f.write('#!/bin/bash\n')
-        dirs = []
-        for run_paths1D in run_paths2D:
-            for run_path in run_paths1D:
-                dirs.append(os.path.dirname(run_path))
         f.write('run_dirs=(\n')
+        print(dirs)
         for d in dirs:
-            f.write('\"' + d + '\"\n')
+            f.write(d+'\n')
         f.write(')\n')
         f.write('my_run_dir=\"{run_dirs[${PMI_RANK}]}\"\n')
         f.write('cd ${my_run_dir}\n')
         f.write('chmod u+rwx *\n')
         f.write('./run.run\n')
-        
+    # set permissions for output file
+    os.chmod(output_file, 0o764)    
 
 
-
-
-
-# # TODO change function name
-# # fixed_and_var_params  the fixed and variable parameters for the first set of runs
-# # fixed_and_var_mods    the fixed and variable parameters for the second set of runs
-# def mod_res(params_1, params_2, top_dir_name, var_params_1=None, var_params_2=None):
-
-#     # will do a single run with seed set to 7 by default
-#     if var_params_1 == None:
-#         var_params_1 = [['random seed' [7]]]
-#     if var_params_2 == None:
-#         var_params_2 = [['random seed' [7]]]
-
-#     # TODO maybe call it make run scripts
-#     # create all the files and directories needed for the runs
-#     run_files = param_space_exploration_utilities.make_run_directories(params_1,
-#                                                                        var_params_1,
-#                                                                        top_dir_name,
-#                                                                        'run',
-#                                                                        'run')
-#     # run all the .run files, in parallel I think
-#     param_space_exploration_utilities.run_rescals(run_files)
-
-#     # get the paths to all the .csp file that were just creates
-#     paths = param_space_exploration_utilities.get_files_to_process(top_dir_name,
-#                                                                    cellspace.path_glob,
-#                                                                    cellspace.exclude_globs)
-
-#     return paths
-
-
-
-
-# def modify_csp_and_restart():
-
-    
-#     files = pseu.make_run_directories(parameters, var_params, 'exp_csp', 'run', 'run')
-#     pseu.run_rescals(files)
-#     paths = pseu.get_files_to_process('../../exp_csp', '/*.csp.gz')
-#     # paths should only contain one file
-#     #print(paths)
-#     c = cellspace.CellSpace(paths[0][1])
-#  #   c.draw_height_map()
-
-#     # edit the csp file
-
-
-#     #barry_face = np.read('barry_b_w.npy').astype(np.uint8) * 6
-    
-#     pic = cellspace.make_gaussian(8, 30,30,11.0)
-#     input_paths = c.multiple_random_pics(8, pic, 'hello')
-#     #input_paths = c.multiple_random_pics(6, barry_face, 'hello')
-    
-#     #### make multiple edit and write them all out
-#     #### make a list of the paths
-#     #### then do a sun with premade_csp as a varparam
-
-
-#     #c.draw_height_map()
-
-#     # start a new run where a modified .csp is used as the start point
-
-#     #print(input_paths)
-#     parameters['stop after'] = '3000_t0'
-
-    
-#     new_var_params = var_params + [['premade_csp',input_paths]]
-
-#     #print(new_var_params)
-    
-#     files = pseu.make_run_directories(parameters, new_var_params, 'exp_csp1', 'run', 'run')
-#     pseu.run_rescals(files)
-#     paths = pseu.get_files_to_process('../../exp_csp1', '/*.csp.gz')
-#     # paths should only contain one file
-#     #print(paths)
-#     # for p in paths:
-#     #     for q in p:
-#     #         c = cellspace.CellSpace(q)
-#     #         c.draw_height_map()
-    
-
-# def just_run_it():
-#     files = pseu.make_run_directories(parameters, var_params, 'exp_xxx1', 'run', 'run')
-#     pseu.run_rescals(files)
-#     paths = pseu.get_files_to_process('../../exp_xxx1', '/*.csp.gz')
-#     return paths
-    
 
 if __name__ == '__main__':
 
@@ -375,11 +467,17 @@ if __name__ == '__main__':
 
     rif_s = ['/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-175495/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-349/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-447778/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-475580/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-495303/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-525175/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-582451/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-909448/SNO00002_t0.csp.gz'] 
     
-    rif, mc, rp = set_up_data_run(parameters_1, parameters_2,
-                                  8, ['space_invader', 'sine'], 8, 8,
-                                  '../../tdi', '../../tdm', '../../tdr',
-                                  rand_initial_files=rif_s)
+    # rif, mc, rp = set_up_data_run(parameters_1, parameters_2,
+    #                               8, ['space_invader', 'sine'], 8, 8,
+    #                               '../../tdi', '../../tdm', '../../tdr',
+    #                               rand_initial_files=rif_s)
     
+#    f = open('paths_saved')
+#    li = f.read().splitlines()
+    
+    #print(li)
 
-
+ #   sb, su = make_job_files(li, 128)
+ #   print(sb)
+ #   print(su)
 
