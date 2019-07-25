@@ -13,8 +13,7 @@ import os
 
 dirname = '..'
 for filename in os.listdir(dirname):
-	if filename[:4] == 'ALTI':
-		if filename[-8:] == '0_t0.log':
+	if filename.startswith('ALTI') and filename.endswith('0_t0.log'):
 			data = np.loadtxt(os.path.join(dirname, filename))
 			vmx = 20
 			if vmx < data.max():
