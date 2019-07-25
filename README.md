@@ -52,7 +52,13 @@ If you have never used bash, we recommend you stop and work through a short tuto
 If you modify rescal-snow, you will need to modify and compile C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
 
 ### Dependencies
-Rescal-snow requires glib-2.0 and pthread, as well as a C compiler and the [lib](lib) directory, which contains compatible versions of zlib and libpng.
+Rescal-snow requires and assumes you have already installed:
+
+ * glib-2.0
+ * pthread
+ * C compiler
+ * libpng
+ * cmake
 
 Many of the auxiliary tools (see the [analysis](analysis) and [scripts/utilities](scripts/utilities) directories) are written in Python3. These were developed in an Anaconda environment and require os, sys, numpy, scipy, csv and pandas.
 
@@ -66,7 +72,7 @@ You may also download the repository manually from [https://github.com/kellykoch
 
 The downloaded repository should create a rescal-snow directory with the following contents (as of 02019-07-25):
 ```
-analysis/  docs/  lib/  scripts/  src/  AUTHORS.md  CMakeLists.txt  .gitignore  LICENSE  README.md
+analysis/  docs/  scripts/  src/  AUTHORS.md  CMakeLists.txt  .gitignore  LICENSE  README.md
 ```
 **All further blocks of bash instructions start from this directory for consistency.**
 
