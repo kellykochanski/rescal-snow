@@ -6,7 +6,11 @@ project (rescal-snow
   LANGUAGES C
 )
 
-find_package(PNG)
+# add_subdirectory(apps)
+# add_subdirectory(tests)
+
+add_subdirectory(lib/libpng-1.6.37)
+add_subdirectory(lib/zlib-1.2.11)
 
 set(COMMON_SOURCES
   src/cells.c
@@ -62,11 +66,10 @@ add_executable(csp2bin
   src/csp2bin.c
 )
 
-target_link_libraries(rescal    PRIVATE PNG::PNG pthread m)
-target_link_libraries(genesis   PRIVATE PNG::PNG m)
-target_link_libraries(regenesis PRIVATE m)
-target_link_libraries(bin2png   PRIVATE PNG::PNG m)
-target_link_libraries(csp2png   PRIVATE PNG::PNG m)
+target_link_libraries(rescal    PRIVATE png pthread)
+target_link_libraries(genesis   PRIVATE png)  
+target_link_libraries(bin2png   PRIVATE png)  
+target_link_libraries(csp2png   PRIVATE png)  
 
 target_include_directories(rescal    PRIVATE src)
 target_include_directories(genesis   PRIVATE src)
