@@ -53,7 +53,7 @@ endif()
 # COMMAND LINE OPTIONS
 option(PNG_SHARED "Build shared lib" ON)
 option(PNG_STATIC "Build static lib" ON)
-option(PNG_TESTS  "Build libpng tests" ON)
+option(PNG_TESTS  "Build libpng tests" OFF)
 
 # Many more configuration options could be added here
 option(PNG_FRAMEWORK "Build OS X framework" OFF)
