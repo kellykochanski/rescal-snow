@@ -9,7 +9,7 @@ project (rescal-snow
 # add_subdirectory(apps)
 # add_subdirectory(tests)
 
-add_subdirectory(lib/libpng-1.6.34)
+add_subdirectory(lib/libpng-1.6.37)
 add_subdirectory(lib/zlib-1.2.11)
 
 set(COMMON_SOURCES
@@ -68,11 +68,8 @@ add_executable(csp2bin
 
 target_link_libraries(rescal    PRIVATE png pthread)
 target_link_libraries(genesis   PRIVATE png)  
-target_link_libraries(regenesis PRIVATE png)    
 target_link_libraries(bin2png   PRIVATE png)  
 target_link_libraries(csp2png   PRIVATE png)  
-target_link_libraries(cspinfo   PRIVATE png)  
-target_link_libraries(csp2bin   PRIVATE png)  
 
 target_include_directories(rescal    PRIVATE src)
 target_include_directories(genesis   PRIVATE src)
