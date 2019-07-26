@@ -165,7 +165,6 @@ void log_cell_first(){
 
 void log_cell()
 {
-  int32_t nb;
   static int32_t start = 1;
   static int32_t cpt = 0;
   char current_output[256];

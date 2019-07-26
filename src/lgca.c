@@ -1629,7 +1629,7 @@ void dump_collisions()
 void dump_signature_mvt()
 {
   char current_output[128];
-  int32_t i;
+  size_t i;
   uint32_t sig, *aux;
 
   //calcul de la signature

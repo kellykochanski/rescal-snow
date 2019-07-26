@@ -1519,7 +1519,7 @@ void simul_dump() {
   static double time_threshold_dpng = 0.0;
   static double time_threshold_dcsp = 0.0;
   static int32_t cpt_dump = 0;
-  static char name[100];
+  static char name[512];
   static char str[100];
   static double t0 = 0, t1 = 0;
   static char start = 1;
@@ -1732,7 +1732,6 @@ void output_headers(){
   // Current headers are copied from previous output functions
   // TODO output_directory and output_filename will currently break in the face of typos
   
-  FILE *fp;
   void output_write(char *output_filename, char *output_content);
 
   // Check if output directory exists. If not, create it.

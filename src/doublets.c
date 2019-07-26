@@ -453,7 +453,7 @@ void init_db_inv()
 void init_db_pos()
 {
   static char first = 1;
-  uint32_t i,j,k, ix, td, tot;
+  int32_t i,j,k, ix, td, tot;
   Cell *t,*dr, *ba, *de;
   // allocations pour les tableaux de positions db_pos[][]
   tot = 0;
