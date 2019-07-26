@@ -6,6 +6,9 @@ project (rescal-snow
   LANGUAGES C
 )
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+find_package(Sanitizers)
+
 add_subdirectory(lib/libpng-1.6.37)
 add_subdirectory(lib/zlib-1.2.11)
 
@@ -72,8 +75,9 @@ function(setup_target target)
   if(MSVC)
     target_compile_options(${target} PRIVATE /W4 /WX)
   else()
-    target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic -Werror)
+    target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic -Werror -Wno-pointer-arith)
   endif()
+  add_sanitizers(${target})
 endfunction(setup_target)
 
 target_link_libraries(rescal    PRIVATE png pthread m)
