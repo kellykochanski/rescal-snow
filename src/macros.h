@@ -87,7 +87,7 @@ extern FILE *log_file;
   if (taille_mem >= 1000000) \
     LogPrintf("%sallocation %s : %.2f Mo\n", str, var, (float)taille_mem/1000000) \
   else \
-    LogPrintf("%sallocation %s : %ld\n", str, var, taille_mem)
+    LogPrintf("%sallocation %s : %lld\n", str, var, taille_mem)
 
 #define AllocMemoryPrint(var,adr,type,taille) \
 { \
@@ -108,7 +108,7 @@ extern FILE *log_file;
   else if (total_memory >= 1000000) \
     LogPrintf("total de la memoire allouee : %.2f Mo\n", (float)total_memory/1000000) \
   else \
-    LogPrintf("total de la memoire allouee : %ld\n", total_memory) \
+    LogPrintf("total de la memoire allouee : %lld\n", total_memory) \
 }
 
 #define FreeMemory(adr,type,taille) \

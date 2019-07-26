@@ -199,12 +199,12 @@ void init_collisions() {
   ResetMemory(CelMvt2, MvtField, CHLD);
 
   //allocation tableau NbMvt[]
-  AllocMemory(NbMvt, long, CLNS);
-  ResetMemory(NbMvt, long, CLNS);
+  AllocMemory(NbMvt, int64_t, CLNS);
+  ResetMemory(NbMvt, int64_t, CLNS);
 
 #ifdef MVT_REGUL
-  AllocMemory(NbMvt0, long, CLNS);
-  ResetMemory(NbMvt0, long, CLNS);
+  AllocMemory(NbMvt0, int64_t, CLNS);
+  ResetMemory(NbMvt0, int64_t, CLNS);
 #endif
   PrintTotalMemory();
 
@@ -258,7 +258,7 @@ void init_collisions() {
   }
 #endif
 
-  LogPrintf("nb_mvt_in = %ld\n", nb_mvt_in);
+  LogPrintf("nb_mvt_in = %lld\n", nb_mvt_in);
 
   // initialisation of Collisions[]
   for (i = 0; i < SIZE_MVT_FIELD; i++) {
@@ -1455,7 +1455,7 @@ void dump_mvt_in_out() {
   }
 
   if (step >= VSTEP_TIME){
-    sprintf(current_output, "MTV_IO","%04d: \t%09ld \t%09ld \t%f\n", cpt, nb_mvt_in, nb_mvt_out, (nb_mvt_in) ? ((float)nb_mvt_out/nb_mvt_in) : 0);
+    sprintf(current_output, "%04d: \t%09lld \t%09lld \t%f\n", cpt, nb_mvt_in, nb_mvt_out, (nb_mvt_in) ? ((float)nb_mvt_out/nb_mvt_in) : 0);
     output_write("MVT_IO", current_output);
     step = nb_mvt_in = nb_mvt_out = 0;	//reset
     cpt++;
@@ -1484,7 +1484,7 @@ void dump_densite(){
   // Calculate density
   densite = (float)(nb_mvt - nb_mvt_sol) / nb_cel_fluide;
 
-  sprintf(output, "%04d: \t%09ld \t%09ld \t%f \t%09ld\n", cpt++, (long)nb_mvt, nb_cel_fluide, densite, (long)nb_mvt_sol);
+  sprintf(output, "%04d: \t%09d \t%09lld \t%f \t%09ld\n", cpt++, nb_mvt, nb_cel_fluide, densite, (long)nb_mvt_sol);
   output_write("DENSITE", output);
 }
 

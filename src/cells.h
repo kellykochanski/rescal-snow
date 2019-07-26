@@ -23,7 +23,11 @@
 
 #include <stdint.h>
 
-#define CELL_DATA defined(CELL_COLOR)
+#if defined(CELL_COLOR)
+#define CELL_DATA 1
+#else
+#define CELL_DATA 0
+#endif
 
 #ifndef IN
 #define IN BORD
