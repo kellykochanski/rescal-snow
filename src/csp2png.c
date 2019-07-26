@@ -133,5 +133,6 @@ void unlock_display(int32_t log_flag) {
 }
 
 int32_t elapsed(double *sec) {
+  return 0;
 }
 
