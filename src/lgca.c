@@ -1456,7 +1456,7 @@ void dump_mvt_in_out() {
   }
 
   if (step >= VSTEP_TIME){
-    sprintf(current_output, "%04d: \t%09lld \t%09lld \t%f\n", cpt, nb_mvt_in, nb_mvt_out, (nb_mvt_in) ? ((float)nb_mvt_out/nb_mvt_in) : 0);
+    sprintf(current_output, "%04d: \t%09" PRId64" \t%09" PRId64 " \t%f\n", cpt, nb_mvt_in, nb_mvt_out, (nb_mvt_in) ? ((float)nb_mvt_out/nb_mvt_in) : 0);
     output_write("MVT_IO", current_output);
     step = nb_mvt_in = nb_mvt_out = 0;	//reset
     cpt++;
@@ -1485,7 +1485,7 @@ void dump_densite(){
   // Calculate density
   densite = (float)(nb_mvt - nb_mvt_sol) / nb_cel_fluide;
 
-  sprintf(output, "%04d: \t%09d \t%09lld \t%f \t%09ld\n", cpt++, nb_mvt, nb_cel_fluide, densite, (long)nb_mvt_sol);
+  sprintf(output, "%04d: \t%09d \t%09" PRId64 " \t%f \t%09ld\n", cpt++, nb_mvt, nb_cel_fluide, densite, (long)nb_mvt_sol);
   output_write("DENSITE", output);
 }
 

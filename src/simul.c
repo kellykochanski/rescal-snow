@@ -1649,10 +1649,10 @@ void dump_time()
   }
 
   if (delta_md_iter){
-    sprintf(current_output,"\n%04d: %04llu%09llu %03lld%09lld       %e    %e     ", cpt++, md_iter, iter, delta_md_iter, delta_iter, csp_time, csp_time - csp_time_0);
+    sprintf(current_output,"\n%04d: %04" PRIu64 "%09" PRId64" %03" PRId64 "%09" PRId64 "       %e    %e     ", cpt++, md_iter, iter, delta_md_iter, delta_iter, csp_time, csp_time - csp_time_0);
   }
   else {
-    sprintf(current_output,"\n%04d: %04llu%09lld    %09lld       %e    %e     ", cpt++, md_iter, iter, delta_iter, csp_time, csp_time - csp_time_0);
+    sprintf(current_output,"\n%04d: %04" PRIu64 "%09" PRId64"    %09" PRId64 "       %e    %e     ", cpt++, md_iter, iter, delta_iter, csp_time, csp_time - csp_time_0);
   }
   output_write("TIME", current_output);
 #ifdef LGCA
