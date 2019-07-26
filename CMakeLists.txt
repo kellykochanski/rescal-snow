@@ -6,9 +6,6 @@ project (rescal-snow
   LANGUAGES C
 )
 
-# add_subdirectory(apps)
-# add_subdirectory(tests)
-
 add_subdirectory(lib/libpng-1.6.37)
 add_subdirectory(lib/zlib-1.2.11)
 
@@ -70,16 +67,25 @@ add_executable(csp2bin
   src/csp2bin.c
 )
 
+function(setup_target target)
+  target_include_directories(${target} PRIVATE src)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /W4 /WX)
+  else()
+    target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic -Werror)
+  endif()
+endfunction(setup_target)
+
 target_link_libraries(rescal    PRIVATE png pthread m)
 target_link_libraries(genesis   PRIVATE png m)  
 target_link_libraries(regenesis PRIVATE m)  
 target_link_libraries(bin2png   PRIVATE png m)  
 target_link_libraries(csp2png   PRIVATE png m)  
 
-target_include_directories(rescal    PRIVATE src)
-target_include_directories(genesis   PRIVATE src)
-target_include_directories(regenesis PRIVATE src)
-target_include_directories(bin2png   PRIVATE src)
-target_include_directories(csp2png   PRIVATE src)
-target_include_directories(cspinfo   PRIVATE src)
-target_include_directories(csp2bin   PRIVATE src)
+setup_target(rescal)
+setup_target(genesis)
+setup_target(regenesis)
+setup_target(bin2png)
+setup_target(csp2png)
+setup_target(cspinfo)
+setup_target(csp2bin)

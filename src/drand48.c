@@ -184,4 +184,6 @@ main() {
 }
 #endif
 
-#endif //__CYGWIN__
+#else //__CYGWIN__
+typedef int make_iso_compilers_happy; //SUPPRESS: empty translation unit warning
+#endif
