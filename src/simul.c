@@ -900,7 +900,7 @@ void simul_ava_sync() {
     time_threshold = ava_delay_sync * ceil(csp_time / ava_delay_sync);
     LogPrintf("seuil temps avalanches = %f\n", time_threshold);
     LogPrintf("delai avalanches = %f\n", ava_delay_sync);
-    LogPrintf("nb min iterations avant avalanches = %lu\n", inter_iter_ava);
+    LogPrintf("nb min iterations avant avalanches = %llu\n", inter_iter_ava);
     LogPrintf("ava_h_lim = %d\n", ava_h_lim);
     LogPrintf("ava_nb_cel_max = %d\n", ava_nb_cel_max);
     start = 0;
@@ -1648,10 +1648,10 @@ void dump_time()
   }
 
   if (delta_md_iter){
-    sprintf(current_output,"\n%04d: %04lu%09lu %03lu%09lu       %e    %e     ", cpt++, md_iter, iter, delta_md_iter, delta_iter, csp_time, csp_time - csp_time_0);
+    sprintf(current_output,"\n%04d: %04llu%09llu %03lld%09lld       %e    %e     ", cpt++, md_iter, iter, delta_md_iter, delta_iter, csp_time, csp_time - csp_time_0);
   }
   else {
-    sprintf(current_output,"\n%04d: %04lu%09lu    %09lu       %e    %e     ", cpt++, md_iter, iter, delta_iter, csp_time, csp_time - csp_time_0);
+    sprintf(current_output,"\n%04d: %04llu%09lld    %09lld       %e    %e     ", cpt++, md_iter, iter, delta_iter, csp_time, csp_time - csp_time_0);
   }
   output_write("TIME", current_output);
 #ifdef LGCA
@@ -1718,7 +1718,7 @@ void output_write(char *output_filename, char *output_content){
 	  ErrPrintf("ERROR: cannot open file: %s \n", path);
 	  exit(-1);
   }
-  fprintf(fp, output_content);
+  fprintf(fp, "%s", output_content);
   fclose(fp);
 }
 

@@ -1342,7 +1342,7 @@ void loop_ava_propag(int32_t i, int32_t j) {
 
 void dump_surface(char* name, int32_t cpt, int32_t unit)
 {
-  int8_t filename[100];
+  char filename[100];
   int32_t i,j,n;
   char current_output[128];
   if (unit == UNIT_COMP)
@@ -1357,7 +1357,7 @@ void dump_surface(char* name, int32_t cpt, int32_t unit)
       for(i=0; i<LEO; i++, pt_al++){
         if (rot_map && OutOfSpace(1+i,LN+j)) continue;
         sprintf(current_output, "%d ", *pt_al);
-	output_write(filename, current_output);
+        output_write(filename, current_output);
         n++;
       }
       if (n>0) output_write(filename, "\n");
