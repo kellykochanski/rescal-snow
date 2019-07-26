@@ -25,6 +25,7 @@
  */
 
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -900,7 +901,7 @@ void simul_ava_sync() {
     time_threshold = ava_delay_sync * ceil(csp_time / ava_delay_sync);
     LogPrintf("seuil temps avalanches = %f\n", time_threshold);
     LogPrintf("delai avalanches = %f\n", ava_delay_sync);
-    LogPrintf("nb min iterations avant avalanches = %llu\n", inter_iter_ava);
+    LogPrintf("nb min iterations avant avalanches = %" PRIu64 "\n", inter_iter_ava);
     LogPrintf("ava_h_lim = %d\n", ava_h_lim);
     LogPrintf("ava_nb_cel_max = %d\n", ava_nb_cel_max);
     start = 0;

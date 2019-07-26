@@ -22,6 +22,7 @@
  */
 
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -258,7 +259,7 @@ void init_collisions() {
   }
 #endif
 
-  LogPrintf("nb_mvt_in = %lld\n", nb_mvt_in);
+  LogPrintf("nb_mvt_in = %" PRId64 "\n", nb_mvt_in);
 
   // initialisation of Collisions[]
   for (i = 0; i < SIZE_MVT_FIELD; i++) {
