@@ -137,7 +137,7 @@ eog scripts/*.png
 ```
 If `eog` is not available, use `open` (MacOS) or any image viewer.
 
-These files are numbered sequentially. The files are saved at regular intervals set by the `-dpng` flag in [scripts/snow_cone.run](scripts/snow_cone.run). For this run, we used `-dpng 10t0`, so file 0 is saved at simulation time t0=0, file 1 (SNO00001\_t0.png) is saved at
+These files are numbered sequentially. The files are saved at regular intervals set by the `-dpng` flag in [scripts/snow_cone.run](scripts/snow_cone.run). For this run, we used `-dpng 10t0`, so file 0 is saved at simulation time t0=0, file 1 (`SNO00001_t0.png`) is saved at
 simulation time t0=10, and so on.
 
 |Initial condition, SNO00000_t0.png         |  SNO00003_t0.png                          | SNO00009_t0.png                           |
@@ -224,7 +224,7 @@ diff snowfall.run snow_cone.run
 ```
 
  - The SNOWFALL template sets an initial condition to be a flat layer of cells of thickness 4, and creates a layer of injection cells to generate snowfall on the simulation ceiling.
- - Lambda\_I controls the rate of snow injection; its behavior depends on the type and location of the injection cells, and thus on the template.
+ - `Lambda_I` controls the rate of snow injection; its behavior depends on the type and location of the injection cells, and thus on the template.
 
 ### Visualizing the simulation output <a name="visualizing"></a>
 
@@ -332,7 +332,7 @@ The following phase diagram shows the 100th images produced by each of these run
 ![snowfall-wind phase diagram](docs/example_images/phase_space_exploration/phase_diagram1.png)
 
 The runs with the higher snowfall rate have a much deeper average snow depth than the runs with lower snowfall rate.
-The runs with high wind speed (low Tau\_min) have less even snow cover, with better-defined ripples and dunes.
+The runs with high wind speed (low `Tau_min`) have less even snow cover, with better-defined ripples and dunes.
 
 >*Parallel run errors?*
 >
