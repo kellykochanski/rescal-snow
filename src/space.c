@@ -424,10 +424,18 @@ void swap_cell_data(int32_t ix, int32_t ix2) {
 #endif
 
   if (flag1) {
-    memcpy((void *)(TE + ix) + CELL_TYPE_SIZE, (void *)(TE + ix2) + CELL_TYPE_SIZE, CELL_DATA_SIZE);  //TE[ix].celldata <- TE[ix2].celldata
+    const celltype_t te_ix_type = TE[ix].celltype; //Back up cell type; we are about to overwrite it.
+    TE[ix] = TE[ix2];             //Copy cell data and overwrite type
+    TE[ix].celltype = te_ix_type; //Restore cell type
+    //The above is a clearer way of doing the following:
+    // memcpy((void *)(TE + ix) + CELL_TYPE_SIZE, (void *)(TE + ix2) + CELL_TYPE_SIZE, CELL_DATA_SIZE);  //TE[ix].celldata <- TE[ix2].celldata
   }
   if (flag2) {
-    memcpy((void *)(TE + ix2) + CELL_TYPE_SIZE, (void *)(&aux) + CELL_TYPE_SIZE, CELL_DATA_SIZE);  //TE[ix2].celldata <- aux.celldata
+    const celltype_t te_ix2_type = TE[ix2].celltype; //Back up cell type; we are about to overwrite it.
+    TE[ix2] = aux;                   //Copy cell data and overwrite type
+    TE[ix2].celltype = te_ix2_type; //Restore cell type
+    //The above is a clearer way of doing the following:
+    // memcpy((void *)(TE + ix2) + CELL_TYPE_SIZE, (void *)(&aux) + CELL_TYPE_SIZE, CELL_DATA_SIZE);  //TE[ix2].celldata <- aux.celldata
   }
 }
 
@@ -438,7 +446,11 @@ void update_inout_data(int32_t ix, int32_t ix2) {
 
 //copier les donnees de la cellule ix dans la cellule ix2
 void copy_cell_data(int32_t ix, int32_t ix2) {
-  memcpy((void *)(TE + ix2) + CELL_TYPE_SIZE, (void *)(TE + ix) + CELL_TYPE_SIZE, CELL_DATA_SIZE); //TE[ix2].celldata <- aux.celldata
+  const celltype_t te_ix2_type = TE[ix2].celltype; //Back up cell type; we are about to overwrite it.
+  TE[ix2] = TE[ix];               //Copy cell data and overwrite type
+  TE[ix2].celltype = te_ix2_type; //Restore cell type
+  //The above is a clearer way of doing the following:
+  // memcpy((void *)(TE + ix2) + CELL_TYPE_SIZE, (void *)(TE + ix) + CELL_TYPE_SIZE, CELL_DATA_SIZE); //TE[ix2].celldata <- aux.celldata
 }
 
 #endif  //CELL_DATA

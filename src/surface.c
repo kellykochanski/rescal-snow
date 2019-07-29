@@ -772,7 +772,6 @@ void compute_coef_cgv() {
 void avalanches(uint8_t typ, int16_t h_lim, int16_t nb_cel_max, char alti_mode) {
   static char first = 1;
   Cell *aux, cel;
-  //CellData data;
   short *pt, *pt2;
   int i, j, k, jmin, jmax, ix, ix2;
   unsigned char alea, cpt, flag_ava;
