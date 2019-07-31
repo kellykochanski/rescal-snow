@@ -31,5 +31,5 @@ int32_t simul_csp();
 void simul_lgca();
 void dump_time();
 void output_write(char *output_filename, char *output_content); // write a line of output
-
+void output_path_noext(char *filename);
 
