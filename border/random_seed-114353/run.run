@@ -1,0 +1,41 @@
+#!/bin/bash 
+ 
+################## 
+ ## ReSCAL run script ## 
+################
+ 
+ ##Script written with Run_Script utility (KK)
+ ##Default options
+ 
+# ----Organizational tasks---- 
+# Remove files from previous runs 
+./clean 
+
+if [ ! -e genesis ]; then 
+  ln -s ../../scripts/genesis . 
+fi 
+if [ ! -e rescal ]; then 
+  ln -s ../../scripts/rescal . 
+fi 
+
+ln -s ../../scripts/rescal-ui.xml . 
+ 
+# ----Parameter file----
+PAR_FILE="run.par"
+
+echo PAR_FILE=$PAR_FILE
+
+# -----Physical properties----
+cp -r ../../scripts/real_data . 
+
+# ----Run options----
+export OMP_NUM_THREADS=1 
+GENESIS_LOG_FILE="GENESIS.log"
+RESCAL_LOG_FILE="RESCAL.log"
+
+# ----Genesis----
+./genesis -f $PAR_FILE -s 2000 > $GENESIS_LOG_FILE
+
+# ----Rescal----
+./rescal $PAR_FILE -nv -dcsp 200_t0 -stop 400_t0 -s 114353 -vel -vss -q -csp_borders
+ 

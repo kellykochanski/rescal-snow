@@ -51,6 +51,7 @@
 #include "lgca.h"
 #include "callbacks.h"
 #include "view.h"
+extern uint8_t csp_borders_flag = 0; // keep border cells when writing .csp files to disc
 extern uint8_t opt_info, opt_nv;
 extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
 extern int32_t LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
@@ -137,7 +138,8 @@ float lambda_A_stable = 0.0;
 int32_t ava_upwind = 1;
 uint8_t simul_dump_flag = 0;
 uint8_t csphpp_flag = 0;
-uint8_t alti_only_flag; // flag that causes heightmap (ALTI*) files to be written to a file, but not cellspace files (*.csp)
+uint8_t alti_only_flag = 0; // flag that causes heightmap (ALTI*) files to be written to a file, but not cellspace files (*.csp)
+uint8_t uncompressed_csp_flag = 0; // prevent .csp files from being compressed when writing them
 float dump_delay_png = 0.0;
 float dump_delay_csp = 0.0;
 float stop_delay_t0 = 0.0;

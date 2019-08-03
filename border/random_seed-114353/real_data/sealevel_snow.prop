@@ -1,0 +1,7 @@
+kappa=0.4
+z_0=0.24e-3
+z=12
+rhoair=1.293
+rhosand=900
+g=9.81
+d=1e-4

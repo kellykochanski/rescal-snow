@@ -289,19 +289,22 @@ class Run_Script():
         self.options['rescallocation']  = "../src"
 
         # automatically handle command line options here
-        self.__set_flag_option('usage info',            'h',    True)
-        self.__set_flag_option('show params',           'hm',   True)
-        self.__set_flag_option('no video',              'nv',   True)
-        self.__set_flag_option('info interval',         'info', True)
-        self.__set_flag_option('output interval',       'dcsp', '10t0')
-        self.__set_flag_option('png interval',          'dpng', '10t0')
-        self.__set_flag_option('stop after',            'stop', False)
-        self.__set_flag_option('frame rate',            'fr',   False)
-        self.__set_flag_option('random seed',           's',    False)
-        self.__set_flag_option('vel',                   'vel',  True)
-        self.__set_flag_option('vss',                   'vss',  True)
-        self.__set_flag_option('quit',                  'q',   False)
-        self.__set_flag_option('alti only',             'altionly', False)
+        self.__set_flag_option('usage info',             'h',    True)
+        self.__set_flag_option('show params',            'hm',   True)
+        self.__set_flag_option('no video',               'nv',   True)
+        self.__set_flag_option('info interval',          'info', True)
+        self.__set_flag_option('output interval',        'dcsp', '10t0')
+        self.__set_flag_option('png interval',           'dpng', '10t0')
+        self.__set_flag_option('stop after',             'stop', False)
+        self.__set_flag_option('frame rate',             'fr',   False)
+        self.__set_flag_option('random seed',            's',    False)
+        self.__set_flag_option('vel',                    'vel',  True)
+        self.__set_flag_option('vss',                    'vss',  True)
+        self.__set_flag_option('quit',                   'q',   False)
+        self.__set_flag_option('alti only',              'altionly', False)
+        self.__set_flag_option('cellspace borders',      'csp_borders', False)
+        self.__set_flag_option('uncompressed cellspace', 'uncompressed_csp', False)        
+        
 
         self.options['nice']            = False
         # locations for linking to physical properties files

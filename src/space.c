@@ -49,6 +49,8 @@ extern int32_t use_lgca;
 extern int32_t ava_norm;
 extern int32_t rot_mode;
 
+extern int32_t uncompressed_csp_flag;
+
 int32_t L = 0, H = 0, D = 0, HL = 0, HLD = 0; // dimensions of the cellular space
 int32_t L_bounds = 1, D_bounds = 1; //thickness of lateral boundaries
 int32_t LN, LS, LEO, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
@@ -126,7 +128,7 @@ void cree_terre() {
     LogPrintf("L_bounds = %d\n", L_bounds);
     LogPrintf("D_bounds = %d\n", D_bounds);
   }
-#endif
+#endif // CYCLAGE_HOR
 
   H += 2;
   L += 2 * L_bounds;
@@ -1287,7 +1289,10 @@ void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
   LogPrintf("write CSP: %s, csp_time = %f (t0)\n", filename, csp_time);
   write_csp(dump_type, filename);
 
-  compress(filename, 1);
+  // if uncompressed_csp_flag is 1, don't compress, 0 by default 
+  if (!uncompressed_csp_flag && dump_type == DUMP_CSP) {
+    compress(filename, 1);
+  }
 }
 
 

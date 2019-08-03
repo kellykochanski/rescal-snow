@@ -221,7 +221,7 @@ parameters_mod = {**parameters_par_mod, **parameters_run_mod, **parameters_meta_
 # sets up runs directories to make initial states
 # runs the simulations to get the initial states
 # returns the file paths to the .csp files created
-def random_initial_states(num_states, parameters, top_dir, run_header='run', run_name='run'):
+def random_initial_states(num_states, parameters, top_dir, run_header='run', run_name='run', run_files=None):
 
     # create num_states random seeds
     seed_numbers = random.sample(range(1,1000000), num_states)
@@ -380,7 +380,7 @@ def set_up_data_run(parameters_initial, parameters_after_mod,
 
 
 # does the data run
-def do_data_run():
+#def do_data_run():
 
 
 
@@ -466,6 +466,13 @@ if __name__ == '__main__':
 
 
     rif_s = ['/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-175495/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-349/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-447778/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-475580/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-495303/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-525175/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-582451/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-909448/SNO00002_t0.csp.gz'] 
+
+
+    p_mods_3 = {'cellspace borders' : True,}
+    parameters3 = {**parameters_1, **p_mods_3}
+
+    paths = random_initial_states(2, parameters3, '../../border')
+    print(paths)
     
     # rif, mc, rp = set_up_data_run(parameters_1, parameters_2,
     #                               8, ['space_invader', 'sine'], 8, 8,
