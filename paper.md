@@ -38,12 +38,10 @@ bibliography: docs/paper.bib
 
 *Paper*
 
-One of the most intriguing effects of wind on snow is the creation of mysterious and captivating shapes known as snow bedforms (Fig 1a-c). These features ornament Antarctica, Arctic sea ice, tundra, and many mountain tops.
+One of the most intriguing effects of wind on snow is the creation of mysterious and captivating shapes known as snow bedforms. These features ornament Antarctica, Arctic sea ice, tundra, and many mountain tops [@filhol:2015; @kochanski:2018; @kobayashi:1980].
 They change the reflectivity and average thermal conductivity of the snow, and may well change the patterns of snow accumulation and transport.
 They also present a range of interesting self-organized shapes that might interest geomorphologists and Earth surface process scientists.
 Despite these effects, however, they are poorly understood and not yet included in major snow models.
-
-![Example figure.](paperfigure.png)
 
 Several recent field studies have pointed to the missing theoretical components needed for a good understanding of snow bedforms.
 First, most snow bedforms (e.g ripples, barchan dunes, snow-steps and sastrugi) are between 0.1 and 2 m in length, with select bedforms (e.g. snow-waves, some whaleback dunes) extending from 5 to 30 m.
@@ -64,7 +62,7 @@ Fluid processes are modelled with a lattice gas cellular automaton, a method cho
 Finally, backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modelling self-organization.
 
 We have been able to use Rescal-snow to simulate the formation and movement of snow dunes and snow-waves under a range of wind, snowfall, and sintering conditions.
-We illustrate these results through the example simulations in our 'README' file, which also leads readers through an answer to a previously-unmodelled scientific question: how do bedforms affect the accumulation of snow?
+We illustrate these results through the example simulations in our `README` file, which also leads readers through an answer to a previously-unmodelled scientific question: how do bedforms affect the accumulation of snow?
 
 The present limitations of Rescal-snow mostly concern length scales, time scales, and the representation of turbulence.
 Thus far, we have not been able to model particularly sharp-edged snow features, such as snow-steps or sastrugi.
@@ -97,9 +95,6 @@ For a quick reference, the following citation commands can be used:
 - `[@author:2001]` -> "(Author et al., 2001)"
 - `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
 
-# Figures
-
-
 # Acknowledgements
 
 We thank Clement Narteau and Oliver Rozier (IPGP) for their advice and support in development beginning with ReSCAL 1.6,
@@ -113,6 +108,4 @@ This work was supported by a Department of Energy Computational Science Graduate
 *Add Barry support*
 
 *Add computational resources*
-
-# References
 
