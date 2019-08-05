@@ -27,6 +27,8 @@ Simulating snow self-organization with cellular automata
 
 When wind blows over snow, it self-organizes. This forms surface features, such as ripples and dunes, that alter the reflectivity and thermal conductivity of the snow.
 
+![](docs/example_images/field_examples.png)
+
 These features have just begun to be studied by the snow and climate science communities
 (see [1](https://doi.org/10.1002/2015JF003529), [2](https://doi.org/10.5194/tc-13-1267-2019), [3](https://doi.org/10.5194/tc-2019-45) for recent work). 
 
