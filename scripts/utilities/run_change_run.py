@@ -1,113 +1,9 @@
-
 import numpy as np
 import random
 import os
 import rescal_utilities
 import cellspace
 import pickle
-
-
-# experiment directory setup
-# expermient directory is a directory that contains all the files
-# it is dealt with as an object in python
-# RescalRun
-
-
-# experiment_name
-#   meta_data 
-#
-#
-
-
-
-class RescalDataRunMetaData:
-
-    def __init__(self):
-        self.parameters = None
-        self.intial_csps_created = False
-        self.control_run_files_created = False        
-        self.modded_csp_created = False
-        self.moded_run_files_created = False
-        self.main_experiment_started = False
-        self.data_consolidated = False
-        self.jobs_ids = []
-
-    
-# a class that represents a rescal data run
-# uses directory in the top level directory of a ReSCAL install
-class RescalDataRun:
-
-    def __init__(self, experiment_directory, rescal_root=None, overwrite=False):
-        # get the location of rescal
-        if rescal_root is None:
-            self.rescal_root = os.environ['RESCAL_ROOT']
-        else:
-            self.rescal_root = rescal_root
-
-
-        # deal with experiment_directory
-        if not os.path.isabs(experiment_directory):
-            self.experiment_directory = os.path.join(self.rescal_root, experiment_directory)
-        else:
-            # TODO, this could break everything if user gives bad path
-            self.experiment_directory = experiment_directory
-
-
-        self.meta_data_path = os.path.join(self.experiment_directory, '.meta_data')
-
-            
-        # see if experiment_directory exists and is a directory
-        # TODO deal with permissions
-        if os.path.isdir(self.experiment_directory):
-            # look for the meta_data file
-            if os.path.isfile(self.meta_data_path):
-                # if found, use it to initialize
-                self.initialize_from_existing_experiment_directory()
-                
-        # failure, won't everwrite file
-        elif os.path.isfile(self.experiment_name):
-            print('A file exists at {ed}'.format(self.experiment_directory))
-            print('Cannnot create experiment directory')
-
-        # nothing exists at self.experiment directory, so make and setup new directory
-        else:
-            self.initialize_experiment_directory()
-            
-
-
-    # TODO maybe do more than just the meta_data
-    def initialize_experiment_directory(self):
-        self.create_meta_data()
-        
-
-    # create a meta_data object and file
-    def create_meta_data(self):
-        self.meta_data = RescalDataRunMetaData()
-        pickle.dump(self.meta_data, self.meta_data_path)
-    
-            
-    def initialize_from_existing_experiement(self):
-        self.meta_data = pickle.load(self.meta_data_path)
-
-        
-        
-    # setup directories, this includes running rescal
-    # to randomly initialize
-    def setup(self):
-        pass
-
-    
-
-
-
-
-
-
-
-
-
-
-
 
 
 def flatten(x):
@@ -118,8 +14,6 @@ def flatten(x):
     else:
         return [x]
         
-
-
 
 # common parameters for rescal
 # this includes parameters that will be in the .par file
@@ -164,8 +58,8 @@ parameters_par_1 = {
 
 # command line arguments for rescal which will be in the .run file
 parameters_run_1 = {
-    'stop after' : '400_t0',
-    'output interval' : '200_t0',
+    'stop after' : '50_t0',
+    'output interval' : '50_t0',
     'png interval' : False,
     'quit' : True,
     'random seed' : 6,
@@ -180,7 +74,6 @@ parameters_run_1 = {
 # and premade .csp is used as the input to rescal
 parameters_meta_1 = {
     'rescallocation': '../../scripts', # this is where run script looks for rescal+genesis executables
-    #'premade_csp' : '/g/g13/defazio1/rescal-snow/scripts/SNO2500_t0_rng_4.csp'
 }
 
 # combine the 3 kinds of parameters into a single dict
@@ -198,23 +91,7 @@ var_params_1 = [['random seed', [7,8,9,10,11,12,13,14,15,16]],
               ['Tau_min', [100, 110, 120]],
 ]
 
-
-# parameters that wil change for the second set of runs
-# these are the modified parameters
-parameters_par_mod = {
-
-}
-
-parameters_run_mod = {
-
-}
-
-parameters_meta_mod = {
-
-}
-
-parameters_mod = {**parameters_par_mod, **parameters_run_mod, **parameters_meta_mod}
-
+#parameters_mod = {**parameters_par_mod, **parameters_run_mod, **parameters_meta_mod}
 
 
 # makes randoms initial states
@@ -235,9 +112,6 @@ def random_initial_states(num_states, parameters, top_dir, run_header='run', run
     paths = rescal_utilities.get_files_to_process(top_dir, cellspace.path_glob, cellspace.exclude_globs)
     paths_last = [x[-1] for x in paths]
 
-
-    print(paths_last)
-    
     return paths_last
 
 
@@ -300,8 +174,6 @@ def make_control_runs(num_runs, paths1D, parameters, top_dir, run_header='run', 
     
 
 
-
-
 # takes the paths to the modded .csp files, creates a bunch of run folders for each with
 # differnt random seeds
 def make_modded_runs(num_runs, paths3D, parameters, top_dir, run_header='run', run_name='run', seeds=None):
@@ -360,10 +232,16 @@ def set_up_data_run(parameters_initial, parameters_after_mod,
                                                    parameters_initial,
                                                    top_dir_rand_initials)
 
+
+    
     # create run files for the rand_initial_files
     # this is the control group
-    make_control_runs()
-        
+    #make_control_runs()
+
+
+    
+
+    
     # create a bunch of modified versions of each .csp
     modded_csps = modify_outputs(top_dir_mods, rand_initial_files, mod_types, num_mods)
 
@@ -376,12 +254,6 @@ def set_up_data_run(parameters_initial, parameters_after_mod,
 
     return rand_initial_files, modded_csps, run_paths
     
-
-
-
-# does the data run
-#def do_data_run():
-
 
 
 
@@ -441,9 +313,9 @@ def make_submit_file(dirs, output_file='submit.sh'):
         f.write('run_dirs=(\n')
         print(dirs)
         for d in dirs:
-            f.write(d+'\n')
+            f.write(os.path.dirname(d)+'\n')
         f.write(')\n')
-        f.write('my_run_dir=\"{run_dirs[${PMI_RANK}]}\"\n')
+        f.write('my_run_dir=\"${run_dirs[${PMI_RANK}]}\"\n')
         f.write('cd ${my_run_dir}\n')
         f.write('chmod u+rwx *\n')
         f.write('./run.run\n')
@@ -455,36 +327,38 @@ def make_submit_file(dirs, output_file='submit.sh'):
 if __name__ == '__main__':
 
     p_mods = {
-        'stop after' : '3600_t0',
+        'stop after' : '200_t0',
         'output interval' : '100_t0',
         'alti only' : True,
+        'rescallocation': '../../../scripts',
+        'real_data_location' : '../../../scripts/real_data'
     }
 
 
     
+
+    
     parameters_2 = {**parameters_1, **p_mods}
 
+    #p_mods_3 = {'cellspace borders' : True,}
+    #parameters3 = {**parameters_1, **p_mods_3}
 
-    rif_s = ['/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-175495/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-349/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-447778/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-475580/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-495303/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-525175/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-582451/SNO00002_t0.csp.gz', '/g/g13/defazio1/summer_2019/rescal-snow/tdi/random_seed-909448/SNO00002_t0.csp.gz'] 
+    #paths = random_initial_states(2, parameters_1, '../../kelly')
 
+    #print(paths)
 
-    p_mods_3 = {'cellspace borders' : True,}
-    parameters3 = {**parameters_1, **p_mods_3}
-
-    paths = random_initial_states(2, parameters3, '../../border')
-    print(paths)
     
-    # rif, mc, rp = set_up_data_run(parameters_1, parameters_2,
-    #                               8, ['space_invader', 'sine'], 8, 8,
-    #                               '../../tdi', '../../tdm', '../../tdr',
-    #                               rand_initial_files=rif_s)
     
-#    f = open('paths_saved')
-#    li = f.read().splitlines()
+    rif, mc, rp = set_up_data_run(parameters_1, parameters_2,
+                                  2, ['space_invader', 'sine'], 1, 2,
+                                  '../../tdi', '../../tdm', '../../tdr',) # rand_initial_files=rif_s)
     
-    #print(li)
+    # f = open('paths_saved')
+    # li = f.read().splitlines()
+    
+    # print(li)
 
- #   sb, su = make_job_files(li, 128)
- #   print(sb)
- #   print(su)
-
+    # sb, su = make_job_files(li, 128)
+    # print(sb)
+    # print(su)
+    

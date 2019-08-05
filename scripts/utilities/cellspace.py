@@ -223,18 +223,20 @@ class CellSpace:
         return data_type
 
 
-    def _read(self):
+    def _read(self, bs=None):
         '''read in the file contents and store the data in a ndarray.
         store the header both as python variables, but also in the original binary
         form from the input file.'''
+
+        if bs is None:
+            f = None
+            if self.input_file.endswith('.gz'):
+                f = gzip.open(self.input_file)
+            else:
+                f = open(self.input_file, 'rb')
+            bs = bytearray(f.read())
+            f.close()
         
-        f = None
-        if self.input_file.endswith('.gz'):
-            f = gzip.open(self.input_file)
-        else:
-            f = open(self.input_file, 'rb')
-        bs = bytearray(f.read())
-        f.close()
 
         self._read_header(bs)
 

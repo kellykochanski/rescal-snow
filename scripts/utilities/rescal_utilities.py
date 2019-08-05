@@ -303,7 +303,8 @@ class Run_Script():
         self.__set_flag_option('quit',                   'q',   False)
         self.__set_flag_option('alti only',              'altionly', False)
         self.__set_flag_option('cellspace borders',      'csp_borders', False)
-        self.__set_flag_option('uncompressed cellspace', 'uncompressed_csp', False)        
+        self.__set_flag_option('uncompressed cellspace', 'uncompressed_csp', False)
+        
         
 
         self.options['nice']            = False
