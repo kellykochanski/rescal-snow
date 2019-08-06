@@ -81,19 +81,6 @@ parameters_meta_1 = {
 parameters_1 = {**parameters_par_1, **parameters_run_1, **parameters_meta_1}
 
 
-# parameters that will differ between runs
-# a list of lists
-# each list has a key, which is some valid parameter name
-# and a list of values for that key to take
-# the total number of runs is the cardinality of the cartesian product
-# of all the values lists
-var_params_1 = [['random seed', [7,8,9,10,11,12,13,14,15,16]],
-              ['Tau_min', [100, 110, 120]],
-]
-
-#parameters_mod = {**parameters_par_mod, **parameters_run_mod, **parameters_meta_mod}
-
-
 # makes randoms initial states
 # sets up runs directories to make initial states
 # runs the simulations to get the initial states
@@ -231,16 +218,10 @@ def set_up_data_run(parameters_initial, parameters_after_mod,
         rand_initial_files = random_initial_states(num_rand_initials,
                                                    parameters_initial,
                                                    top_dir_rand_initials)
-
-
     
     # create run files for the rand_initial_files
     # this is the control group
     #make_control_runs()
-
-
-    
-
     
     # create a bunch of modified versions of each .csp
     modded_csps = modify_outputs(top_dir_mods, rand_initial_files, mod_types, num_mods)
@@ -290,7 +271,7 @@ def make_sbatch_file(run_paths, output_file='test', submit_file='submit', run_nu
         # get the data needed
         email = 'defazio1@llnl.gov'
         ntasks = len(run_paths)
-        time = '05:00:00'
+        time = '00:30:00'
         log_file = 'log' + str(run_number) + '.txt'
         
         f.write('#!/bin/bash\n')
@@ -317,15 +298,38 @@ def make_submit_file(dirs, output_file='submit.sh'):
         f.write(')\n')
         f.write('my_run_dir=\"${run_dirs[${PMI_RANK}]}\"\n')
         f.write('cd ${my_run_dir}\n')
-        f.write('chmod u+rwx *\n')
+        f.write('chm od u+rwx *\n')
         f.write('./run.run\n')
     # set permissions for output file
     os.chmod(output_file, 0o764)    
 
 
+# can iterate over run paths
+def consolidate_runs(run_path):
+    '''Given a directory for a single run,
+    finds the ALTI files and consolidates them into a .npz file.'''
+
+    # assumes that the output files are in run_path/out
+    dir_path = os.path.dirname(run_path)
+    output_dir = os.path.join(dir_path, 'out')
+
+    altis = glob.glob(output_dir + '/ALTI*')
+    
+    ndarry_altis = []
+    for alti in sorted(altis):
+        ndarry_altis.append(np.loadtxt(alti))
+    ndarray_altis = np.stack(ndarray_altis)
+    save_file = os.path.join(output_dir, 'height_maps.npz')
+    np.savez(save_file, height_maps=ndarray_altis)
+
+
+
+  
+    
 
 if __name__ == '__main__':
 
+    # modifications for the big runs
     p_mods = {
         'stop after' : '200_t0',
         'output interval' : '100_t0',
@@ -334,31 +338,16 @@ if __name__ == '__main__':
         'real_data_location' : '../../../scripts/real_data'
     }
 
-
-    
-
     
     parameters_2 = {**parameters_1, **p_mods}
 
-    #p_mods_3 = {'cellspace borders' : True,}
-    #parameters3 = {**parameters_1, **p_mods_3}
-
-    #paths = random_initial_states(2, parameters_1, '../../kelly')
-
-    #print(paths)
+    # will need to run the .sbatch file created
+    rand_initial_cells, modded_cells, run_paths = set_up_data_run(parameters_1, parameters_2,
+                                                                  2, ['space_invader', 'sine'], 1, 2,
+                                                                  '../../tdi', '../../tdm', '../../tdr',)
+        
+    
 
     
-    
-    rif, mc, rp = set_up_data_run(parameters_1, parameters_2,
-                                  2, ['space_invader', 'sine'], 1, 2,
-                                  '../../tdi', '../../tdm', '../../tdr',) # rand_initial_files=rif_s)
-    
-    # f = open('paths_saved')
-    # li = f.read().splitlines()
-    
-    # print(li)
 
-    # sb, su = make_job_files(li, 128)
-    # print(sb)
-    # print(su)
     

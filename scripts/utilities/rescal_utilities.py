@@ -200,6 +200,15 @@ class Parameters():
                 print("Parameter " + name + " has not been initialized and has no default value.")
                 print("Parameter " + name + " skipped. Check spelling or add a default with new_parameter().")
 
+    # TODO, deal with all parameters and verify none are real_data/*
+    def set_real_data_path(self, real_data_directory):
+        # sets path for 'Phys_prop_file' and 'Q_sat_file'
+        keys = ['Phys_prop_file','Qsat_file']
+        for key in keys:
+            self.parameters[key] = os.path.join(real_data_directory, os.path.basename(self.parameters[key])) 
+
+        
+                
     def get(self, name):
         return self.parameters[name]
 
@@ -355,6 +364,23 @@ class Run_Script():
                 f.write(" -" + str(self.__flag_options[option]) + " " + str(self.options[option]))
         f.write("\n \n")
 
+
+
+    def rescal_call_args(self):
+        # give a list of all the args for the actual call to rescal
+        args = []
+        if self.options['nice']:
+            nice_list.append('nice')
+        for option in self.__flag_options.keys():
+            if (self.options[option] == True):
+                # -flag
+                args.append("-" + self.__flag_options[option])
+            elif self.options[option]: # == any value except False or True
+                # -flag VALUE
+                args.append("-" + str(self.__flag_options[option]) + " " + str(self.options[option]))
+        return args
+        
+        
 
     def write(self, filename):
         with open(filename, "w") as f:

@@ -710,10 +710,8 @@ class CellSpace:
                 depth, _, length = self.cells.shape
                 max_length_scaling = length // image_length
                 max_depth_scaling = depth // image_depth
-                #length_scaling = random.randint(1, max_length_scaling)
-                #depth_scaling = random.randint(1, max_depth_scaling)
-                length_scaling = random.randint(max_length_scaling - 1, max_length_scaling)
-                depth_scaling = random.randint(max_depth_scaling - 1, max_depth_scaling)
+                length_scaling = random.randint(1, max_length_scaling)
+                depth_scaling = random.randint(1, max_depth_scaling)
                 
                 height_scaling = random.randint(2,h)
                 scaling_matrix = heightmap.make_scaler(depth_scaling, length_scaling)

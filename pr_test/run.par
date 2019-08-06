@@ -1,0 +1,108 @@
+## Parameter file for ReSCAL written from Parameters utility
+## Test from write_tests.py
+ 
+# Defines a set of transitions for grains in the cellular automaton e.g. DUN or SNO
+Model = SNO
+ 
+# Directory where output files go
+Output_directory = ./out
+ 
+# Genesis template?
+Csp_file = DUN.csp
+ 
+# Template containing initial shape for run
+Csp_template = SNOWFALL(4)
+ 
+# Parameters for size, depth etc of template shape
+Csp_params = []
+ 
+# Type of boundary conditions, e.g. OPEN, PERIODIC, REINJECTION
+Boundary = OPEN
+ 
+# Initial time
+Time = 0.0
+ 
+# Height of model domain (cells)
+H = 80
+ 
+# Length, longitudinal, of model domain (cells)
+L = 400
+ 
+# Depth, transverse to flow, of model domain (cells)
+D = 200
+ 
+# Automatic re-centering of model domain on dune
+Centering_delay = 0
+ 
+# File containing important physical properties e.g. gravity
+Phys_prop_file = /g/g13/defazio1/summer_2019/rescal-snow/scripts/real_data/sealevel_snow.prop
+ 
+# File containing relationship between saturated and threshold flux
+Qsat_file = /g/g13/defazio1/summer_2019/rescal-snow/scripts/real_data/PDF.data
+ 
+# Erosion rate (when threshold exceeded)
+Lambda_E = 1
+ 
+# Transition rate for mobile grains
+Lambda_T = 1.5
+ 
+# Deposition rate for mobile grains on surface
+Lambda_C = 0.5
+ 
+# Gravity - rate of fall of not-in-transport grains in air
+Lambda_G = 100000
+ 
+# Transition rate for diffusion
+Lambda_D = 0.01
+ 
+# Transition rate for sintering/cohesion
+Lambda_S = 0
+ 
+# Ratio of sintered:unsintered erosion thresholds
+Lambda_F = 1
+ 
+# Ratio of vertical:horizontal transport of mobile grains
+Coef_A = 0.1
+ 
+# Ratio of deposition against an obstacle : deposition
+Coef_B = 10
+ 
+# Ratio of deposition behind an obstacle : deposition
+Coef_C = 10
+ 
+# Probability of the transition links
+Prob_link_ET = 0.5
+ 
+# Probability of the transition links
+Prob_link_TT = 1.0
+ 
+# Higher mobility of grains
+High_mobility = 1
+ 
+# Injection rate
+Lambda_I = 0.002
+ 
+# ??
+Lambda_A = 1
+ 
+# Mode of avalanching
+Ava_mode = TRANS
+ 
+# Angle of repose, steeper slopes avalanche (degrees)
+Ava_angle = 38
+ 
+# Height limit in avalanches (cells)
+Ava_h_lim = 1
+ 
+# Delay between flow cycles
+Lgca_delay = 1
+ 
+# Speedup of the flow stabilization
+Lgca_speedup = 1000
+ 
+# Shear stress threshold for grain erosion, controls flow strength
+Tau_min = 100
+ 
+# Max shear stress, used in grain erosion/flow speed relation
+Tau_max = 1100
+ 

@@ -184,9 +184,9 @@ def compress_heights_and_comparisons(filename, height_maps, all_comparisons, ini
    height_maps, all_comparisons, initial_comparisons.'''
 
     np.savez_compressed(filename,
-                                            height_maps=height_maps,
-                                            all_comparisons=all_comparisons,
-                                            initial_comparions=initial_comparisons)
+                        height_maps=height_maps,
+                        all_comparisons=all_comparisons,
+                        initial_comparions=initial_comparisons)
 
 
 
