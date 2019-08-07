@@ -28,6 +28,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stdint.h>
+#include <sys/time.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -49,7 +50,8 @@ extern int32_t use_lgca;
 extern int32_t ava_norm;
 extern int32_t rot_mode;
 
-extern int32_t uncompressed_csp_flag;
+extern uint8_t uncompressed_csp_flag;
+extern int32_t id;
 
 int32_t L = 0, H = 0, D = 0, HL = 0, HLD = 0; // dimensions of the cellular space
 int32_t L_bounds = 1, D_bounds = 1; //thickness of lateral boundaries
@@ -76,6 +78,14 @@ float csp_angle = 0.0;        //angle resultant de toutes les rotations
 char *rot_map = NULL;        // periodic mapping of the rotating space
 Pos2 *rot_map_pos = NULL;        // periodic mapping of the rotating space
 Pos2 *rot_map_pos0 = NULL;        // old periodic mapping of the rotating space
+
+// for performance testing
+struct timeval time_start;
+struct timeval time_stop;
+long seconds_elapsed;
+long micro_seconds_elapsed;
+double elapsed_time;
+
 
 void init_terre() {
 }
@@ -1289,9 +1299,25 @@ void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
   LogPrintf("write CSP: %s, csp_time = %f (t0)\n", filename, csp_time);
   write_csp(dump_type, filename);
 
+  LogPrintf("!uncompressed_csp_flag: %d dump_type == DUMP_CSP: %d\n", !uncompressed_csp_flag, dump_type == DUMP_CSP);
+
+  
   // if uncompressed_csp_flag is 1, don't compress, 0 by default 
-  if (!uncompressed_csp_flag && dump_type == DUMP_CSP) {
+  if (!uncompressed_csp_flag && (dump_type == DUMP_CSP)) {
+
+
+    
+    gettimeofday(&time_start, NULL);
+    
     compress(filename, 1);
+    
+    gettimeofday(&time_stop, NULL);
+    seconds_elapsed = (long)(time_stop.tv_sec) - (long)(time_start.tv_sec);
+    micro_seconds_elapsed = (long)(time_stop.tv_usec) - (long)(time_start.tv_usec);
+    elapsed_time = ((double)(seconds_elapsed)) * 1000.0 + ((double)(micro_seconds_elapsed)) / 1000;
+    LogPrintf("%d COMPRESS_TERRE_TIME  %e\n", id, elapsed_time);
+
+
   }
 }
 
