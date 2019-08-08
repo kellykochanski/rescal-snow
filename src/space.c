@@ -50,8 +50,12 @@ extern int32_t use_lgca;
 extern int32_t ava_norm;
 extern int32_t rot_mode;
 
+
 extern uint8_t uncompressed_csp_flag;
 extern int32_t id;
+
+
+extern int32_t data_pipe; // from format.c, determines if data is piped or saved, if piped no need to compress
 
 int32_t L = 0, H = 0, D = 0, HL = 0, HLD = 0; // dimensions of the cellular space
 int32_t L_bounds = 1, D_bounds = 1; //thickness of lateral boundaries
@@ -1302,8 +1306,8 @@ void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
   LogPrintf("!uncompressed_csp_flag: %d dump_type == DUMP_CSP: %d\n", !uncompressed_csp_flag, dump_type == DUMP_CSP);
 
   
-  // if uncompressed_csp_flag is 1, don't compress, 0 by default 
-  if (!uncompressed_csp_flag && (dump_type == DUMP_CSP)) {
+  // if uncompressed_csp_flag is 1, don't compress, 0 by default, if piping there is no file to compress 
+  if (!uncompressed_csp_flag && (dump_type == DUMP_CSP) && data_pipe == -1) {
 
 
     

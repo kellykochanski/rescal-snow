@@ -20,14 +20,14 @@ class DataRun:
 
     def __init__(self, parameters, experiment_directory,
                  experiment_parent_directory='data_runs', rescal_root=None,
-                 keep_height_maps=True, keep_ffts=True)
+                 keep_height_maps=True, keep_ffts=True):
         '''Collect and process the parameters for running ReSCAL and 
         processing its output. Set up the data structures to store ReSCAL outout.
         Determine where the executables and configuration files are or should be.
         For this initialization to work, the environment variable RESCAL_SNOW_ROOT 
         should exist, and its value should be the path to the top directory of an 
         installed ReSCAL. A 'data_runs' directory, or some other name specified by 
-        experiment_parent should already exist at RESCAL_SNOW_ROOT.
+        experiment_parent_directory should already exist at RESCAL_SNOW_ROOT.
         
         arguments:
 
@@ -40,11 +40,10 @@ class DataRun:
 
         keyword arguments:
 
-            experiment_parent -- the parent_directory of experiment_directory.
+            experiment_parent_directory -- the parent directory of experiment_directory.
             the purpose of using this directory is to keep
             experiment directories from accumulating in the
-            RESCAL_SNOW_ROOT directory. It's best if the directory already exists,
-            otherwise multiple processes may try to make it simultaneuosly.
+            RESCAL_SNOW_ROOT directory. The directory must already exist.
             (default 'data_runs')
 
             rescal_root -- the path to a ReSCAL install that will be used 
@@ -69,8 +68,8 @@ class DataRun:
                 self.rescal_root = os.path.expanduser(os.environ['RESCAL_SNOW_ROOT'])
             else:
                 sys.stderr.write('Rescal root not found. Set environment variable RESCAL_SNOW_ROOT',
-                       'to path to top directory of ReSCAL install or specify another path
-                       for \'rescal_root\'.\n')
+                                 'to path to top directory of ReSCAL install or specify another path',
+                                 'for \'rescal_root\'.\n')
                 sys.exit(0)
         else:
             self.rescal_root = os.path.expanduser(rescal_root)
@@ -81,20 +80,22 @@ class DataRun:
             self.experiment_parent_directory = os.path.join(self.rescal_root,
                                                             experiment_parent_directory)
         else:
-            self.experiment_directory = os.fspath(experiment_directory)
+            self.experiment_parent_directory = os.fspath(experiment_parent_directory)
 
         # deal with experiment_directory
         if not os.path.isabs(experiment_directory):
-            self.experiment_directory = os.path.join(self.experiment_parent, experiment_directory)
+            self.experiment_directory = os.path.join(self.experiment_parent_directory,
+                                                     experiment_directory)
         else:
             self.experiment_directory = os.fspath(experiment_directory)
             
         # set up paths to other files/directories of interest
+        self.rescal_src_directory = os.path.join(self.rescal_root, 'src')
         self.scripts_directory = os.path.join(self.rescal_root, 'scripts')
         self.real_data_directory = os.path.join(self.scripts_directory, 'real_data')
         self.rescal_executable = os.path.join(self.scripts_directory, 'rescal')
         self.genesis_executable = os.path.join(self.scripts_directory, 'genesis')
-        self.ui_xml = os.path.join(self.scripts_directory, 'rescal_ui.xml')
+        self.ui_xml = os.path.join(self.rescal_src_directory, 'rescal-ui.xml')
         self.par = os.path.join(self.experiment_directory, 'run.par')
         self.meta_data = os.path.join(self.experiment_directory, 'meta_data')
         
@@ -118,7 +119,9 @@ class DataRun:
         '''Verify that the files and directories that should already exist 
         actually do exist.'''
 
-        dirs =  [self.rescal_root, self.scripts_directory, self.real_data_directory]
+        dirs =  [self.rescal_root, self.scripts_directory,
+                 self.real_data_directory, self.experiment_parent_directory,
+                 self.rescal_src_directory]
         files = [self.rescal_executable, self.genesis_executable, self.ui_xml]
         for d in dirs:
             if not os.path.isdir(d):
@@ -151,10 +154,6 @@ class DataRun:
 
         # some files and directories should alreay exist
         self.check_paths()
-        
-        # make the experiment parent directory
-        if not os.path.exists(self.experiment_parent__directory):
-            os.mkdir(self.experiment_parent_directory)
         
         # make the experiment directory
         if not os.path.exists(self.experiment_directory):
@@ -279,10 +278,10 @@ class DataRun:
             self.receive_process_data()
 
         # write the data to file
-        if self.save_height_maps:
+        if self.keep_height_maps:
             height_maps = np.array(self.height_maps)
             np.savez_compressed(self.height_maps_path, height_maps=height_maps)
-        if self.save_ffts:
+        if self.keep_ffts:
             ffts = np.array(self.ffts) 
             np.savez_compressed(self.ffts_path, ffts=ffts)
 

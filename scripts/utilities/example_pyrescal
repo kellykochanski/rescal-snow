@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import pyrescal
+import datarun
 import os
 
 parameters_par_1 = {
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     parameters_1['random seed'] = int(pmi_rank) + 1234
     output_dir = 'exp' + str(pmi_rank)
     
-    pr = pyrescal.PyRescal(parameters_1, output_dir)
-    pr.create_experiment_directory()
-    #pr.run_simulation()
-    pr.run_without_piping()
+    dr = datarun.DataRun(parameters_1, output_dir)
+    dr.setup()
+    dr.run_simulation()
+    #dr.run_without_piping()
