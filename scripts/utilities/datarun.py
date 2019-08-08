@@ -1,53 +1,139 @@
-import numpy as np
-import random
+__author__ = '''Gian-Carlo DeFazio'''
+
+__doc__ = r'''A python interface to ReSCAL. A DataRun object takes in the 
+parameters and meta-parameters required to run ReSCAL. The DataRun can receive and process
+the output of ReSCAL while rescal is running.'''
+
 import os
-import rescal_utilities
+import sys
+import subprocess
+import struct
+import numpy as np
+
 import cellspace
-import pickle
+import rescal_utilities
+
+
+class DataRun:
+    '''Collect and process the parameters for running ReSCAL and 
+    processing its output. Set up the data structures to store ReSCAL output.'''
+
+    def __init__(self, parameters, experiment_directory,
+                 experiment_parent_directory='data_runs', rescal_root=None,
+                 keep_height_maps=True, keep_ffts=True)
+        '''Collect and process the parameters for running ReSCAL and 
+        processing its output. Set up the data structures to store ReSCAL outout.
+        Determine where the executables and configuration files are or should be.
+        For this initialization to work, the environment variable RESCAL_SNOW_ROOT 
+        should exist, and its value should be the path to the top directory of an 
+        installed ReSCAL. A 'data_runs' directory, or some other name specified by 
+        experiment_parent should already exist at RESCAL_SNOW_ROOT.
+        
+        arguments:
+
+            parameters -- a dictionary containing the parameters for rescal 
+            and meta-parameters for running ReSCAL.
+
+            experiment_directory -- the directory that will hold 
+            output data, and may have input files depending
+            on the configuration.
+
+        keyword arguments:
+
+            experiment_parent -- the parent_directory of experiment_directory.
+            the purpose of using this directory is to keep
+            experiment directories from accumulating in the
+            RESCAL_SNOW_ROOT directory. It's best if the directory already exists,
+            otherwise multiple processes may try to make it simultaneuosly.
+            (default 'data_runs')
+
+            rescal_root -- the path to a ReSCAL install that will be used 
+            for the data run. If the value is None and the enviroment variable
+            RESCAL_SNOW_ROOT exist, then the value of RESCAL_SNOW_ROOT will be 
+            used. Otherwise, a user specified path will be used. If the value is 
+            None and RESCAL_SNOW_ROOT is not defined, initialization will fail.
+            (default None)
+
+            keep_height_maps -- will keep and write out the height map data
+            created by processing the cellspace outputs from ReSCAL.
+            (default True)
+
+            keep_ffts -- will keep and write out the fft blur data created by 
+            processing cell space outputs from ReSCAL.
+            (default True)'''
+
+        # set self.rescal_root using the environment or rescal_root argument
+        # should be the parent directory of the ReSCAL src and scripts directories
+        if rescal_root is None:
+            if 'RESCAL_SNOW_ROOT' in os.environ:
+                self.rescal_root = os.path.expanduser(os.environ['RESCAL_SNOW_ROOT'])
+            else:
+                sys.stderr.write('Rescal root not found. Set environment variable RESCAL_SNOW_ROOT',
+                       'to path to top directory of ReSCAL install or specify another path
+                       for \'rescal_root\'.\n')
+                sys.exit(0)
+        else:
+            self.rescal_root = os.path.expanduser(rescal_root)
+        
+        
+        # this directory should alreay exist, but it will be created if it doesn't
+        if not os.path.isabs(experiment_parent_directory):
+            self.experiment_parent_directory = os.path.join(self.rescal_root,
+                                                            experiment_parent_directory)
+        else:
+            self.experiment_directory = os.fspath(experiment_directory)
+
+        # deal with experiment_directory
+        if not os.path.isabs(experiment_directory):
+            self.experiment_directory = os.path.join(self.experiment_parent, experiment_directory)
+        else:
+            self.experiment_directory = os.fspath(experiment_directory)
+            
+        # set up paths to other files/directories of interest
+        self.scripts_directory = os.path.join(self.rescal_root, 'scripts')
+        self.real_data_directory = os.path.join(self.scripts_directory, 'real_data')
+        self.rescal_executable = os.path.join(self.scripts_directory, 'rescal')
+        self.genesis_executable = os.path.join(self.scripts_directory, 'genesis')
+        self.ui_xml = os.path.join(self.scripts_directory, 'rescal_ui.xml')
+        self.par = os.path.join(self.experiment_directory, 'run.par')
+        self.meta_data = os.path.join(self.experiment_directory, 'meta_data')
+        
+        # parameters needs to contain directory paths for .par file generation to work
+        paths_to_add = {'rescallocation' : self.scripts_directory,
+                        'real_data_location' : self.real_data_directory}
+
+        self.parameters = {**parameters, **paths_to_add}
+        
+        # for dealing with the data from ReSCAL
+        self.keep_height_maps = keep_height_maps
+        self.keep_ffts = keep_ffts
+        self.height_maps = []
+        self.ffts = []
+        self.height_maps_path = os.path.join(self.experiment_directory, 'height_maps.npz')
+        self.ffts_path = os.path.join(self.experiment_directory, 'ffts.npz')
 
 
 
+    def check_paths(self):
+        '''Verify that the files and directories that should already exist 
+        actually do exist.'''
 
-
-def flatten(x):
-    if x == []:
-        return []
-    elif isinstance(x, list):
-        return flatten(x[0]) + flatten(x[1:])
-    else:
-        return [x]
+        dirs =  [self.rescal_root, self.scripts_directory, self.real_data_directory]
+        files = [self.rescal_executable, self.genesis_executable, self.ui_xml]
+        for d in dirs:
+            if not os.path.isdir(d):
+                sys.stderr.write('ERROR: directory ' + d + ' not found.\n')
+                sys.exit(0)
+        for f in files:
+            if not os.path.isfile(f):
+                sys.stderr.write('ERROR: file ' + f + ' not found.\n')
+                sys.exit(0)
+                
         
 
-
-
-    
-pickled_experiment = 'pickled_experiment'
-
-
-
-# hold the meta data for the data run
-class MetaData:
-    def __init__(self):
-        self.intial_csps_created = False
-        self.control_run_files_created = False        
-        self.modded_csp_created = False
-        self.moded_run_files_created = False
-        self.main_experiment_started = False
-        self.data_consolidated = False
-        self.jobs = []
-
-        # experiment data
-        self.have_experiment_data = False
-        self.parameters_initial = None
-        self.parameters_after_mod = None
-        self.num_rand_initial = None
-        self.mod_types = None
-        self.num_mods = None
-        self.num_runs = None
-        self.chunk_size = None
-
-
     def __str__(self):
+        '''A very generic __str__ that just gets everythiing that's not a built-in
+        or a method.'''
         # get the attributes that matter
         # from stack-exchange
         # https://stackoverflow.com/questions/11637293/iterate-over-object-attributes-in-python
@@ -56,204 +142,220 @@ class MetaData:
         for attr in attrs:
             s.append(attr + ': ' + str(self.__dict__[attr]))
         return '\n'.join(s)
-            
-
-
-        
     
-# holds the eperiment data for the data run
-class ExperimentData:
-
-    def __init__(self, parameters_initial=None, parameters_after_mod=None,
-                 num_rand_initial=None, mod_types=None, num_mods=None,
-                 num_runs=None, chunk_size=None):
-
-        self.parameters_initial = parameters_initial
-        self.parameters_after_mod = parameters_after_mod
-        self.num_rand_initial = num_rand_initial 
-        self.mod_types = mod_types
-        self.num_mods = num_mods
-        self.num_runs = num_runs
-        self.chunk_size = chunk_size
-
-                       
-    # write pickled version of self to file
-    def write(self, filename):
-        with open(filename, 'wb+') as f:
-            pickle.dump(self, f)
-
     
+    def setup(self):
+        '''Create the experiment directory and the .par file. Create the .csp input 
+        using genesis if neccesary. Deal with the file path to real_data.
+        Get the args for the call to rescal.'''
+
+        # some files and directories should alreay exist
+        self.check_paths()
         
+        # make the experiment parent directory
+        if not os.path.exists(self.experiment_parent__directory):
+            os.mkdir(self.experiment_parent_directory)
         
-# a class that represents a rescal data run
-# uses directory in the top level directory of a ReSCAL install
-class DataRun:
-
-    def __init__(self, experiment_directory, rescal_root=None, experiment_data=None, overwrite=False):
-        # get the location of rescal
-        if rescal_root is None:
-            self.rescal_root = os.path.expanduser(os.environ['RESCAL_SNOW_ROOT'])
-        else:
-            self.rescal_root = os.path.expanduser(rescal_root)
-
-
-        # deal with experiment_directory
-        if not os.path.isabs(experiment_directory):
-            self.experiment_directory = os.path.join(self.rescal_root, experiment_directory)
-        else:
-            # TODO, this could break everything if user gives bad path
-            self.experiment_directory = os.fspath(experiment_directory)
-
-        self.meta_data_path = os.path.join(self.experiment_directory, '.meta_data')
-            
-        # see if experiment_directory exists and is a directory
-        # TODO deal with permissions
-        if os.path.isdir(self.experiment_directory):
-            # look for the meta_data file
-            if os.path.isfile(self.meta_data_path):
-                # if found, use it to initialize
-                with open(self.meta_data_path, 'rb') as f: 
-                    self.meta_data = pickle.load(f)
-        # failure, won't everwrite file
-        elif os.path.isfile(self.experiment_directory):
-            print('A file exists at {ed}'.format(self.experiment_directory))
-            print('Cannnot create experiment directory')
-
-        # nothing exists at self.experiment_directory, so make and setup new directory
-        else:
-            # create the directory
+        # make the experiment directory
+        if not os.path.exists(self.experiment_directory):
             os.mkdir(self.experiment_directory)
-            with open(self.meta_data_path, 'wb+') as f:
-                self.meta_data = MetaData()
-                pickle.dump(self.meta_data, f)
 
-        self.setup_experiment(experiment_data)
+        # deal with .csp files
+        # if 'premade_csp' overwrite 'Csp_file'
+        if 'premade_csp' in self.parameters.keys():
+            # put the .csp name into the .par file as Csp_file
+            design.set_parameters({'Csp_file' : self.parameters['premade_csp']})
+        else:
+            # if 'Csp_file' just a file name, put it into self.experiment_directory
+            if 'Csp_file' in self.parameters.keys():
+                # if it's an absolute path, leave it alone, otherwise
+                # take the file name and put it into the experiment directory
+                if not os.path.isabs(self.parameters['Csp_file']):
+                    self.parameters['Csp_file'] = os.path.join(self.experiment_directory,
+                                                               os.path.basename(self.parameters['Csp_file']))
+            else:
+                # give 'Csp_file' a generic name
+                self.parameters['Csp_file'] = os.path.join(self.experiment_directory, 'Cells.csp')
+
+        # set output directory
+        # TODO allow users to specify their own output directory
+        self.parameters['Output_directory'] = os.path.join(self.experiment_directory, 'out')
+                
+        # create a run with the given parameters
+        design = rescal_utilities.Design_a_run()
+        design.set_parameters(self.parameters)
+
+        # find file paths that are in the real data folder and fix them
+        # using self.real_data_directory 
+        design.parameters.set_real_data_path(self.real_data_directory)
+            
+        # write the par file
+        design.parameters.write(self.par)
+
+        # run genesis if neccesary
+        if 'premade_csp' not in self.parameters.keys():
+            # run genesis and put the output where specified by 'Csp_file' parameter
+            p = subprocess.Popen([self.genesis_executable, '-f',  self.par, '-s', str(2000)],
+                                 stdout=subprocess.DEVNULL)
+            p.wait()
+
+        
+        # now get the cmd line args for rescal
+        cmd_args = design.run_script.rescal_call_args()
+
+        # put rescal and the par file in, after nice if nice exists
+        if cmd_args[0].strip() == 'nice':
+            cmd_args = cmd_args[0] + [self.rescal_executable, self.par] + cmd_args[1:]
+        else:
+            cmd_args = [self.rescal_executable, self.par] + cmd_args
+        self.rescal_args = cmd_args
+
+        
+
             
         
-    # write meta_data out to file
-    def write_meta_data(self):
-        with open(self.meta_data_path, 'wb') as f:
-            pickle.dump(self.meta_data, f)
+            
+    def receive_process_data(self):
+        '''Get the data size, which will be in a 4 byte integer.
+        Get the data itself. Create a cellspace.CellSpace to
+        process the data and keep the height_maps and ffts 
+        based on flags.'''
         
+        data_size_bytes = os.read(self.r, 4)
+        if not data_size_bytes:
+            return
+        data_size = struct.unpack('i', data_size_bytes)[0]
 
-    # copies the experiment data into the meta data
-    # from a ExperimentData object
-    def copy_experiment_data(self, experiment_data):
-        self.meta_data.parameters_initial = experiment_data.parameters_initial
-        self.meta_data.parameters_after_mod = experiment_data.parameters_after_mod
-        self.meta_data.num_rand_initial = experiment_data.num_rand_initial 
-        self.meta_data.mod_types = experiment_data.mod_types
-        self.meta_data.num_mods = experiment_data.num_mods
-        self.meta_data.num_runs = experiment_data.num_runs
-        self.meta_data.chunk_size = experiment_data.chunk_size
-        self.meta_data.have_experiment_data = True
-        # and save it
+        self.data = os.read(self.r, data_size)
+        
+        c = cellspace.CellSpace(self.data)
+        # get the actual heightmap and ffts arrays out
+        if self.keep_height_maps:
+            self.height_maps.append(c.height_map.height_map)
+        if self.keep_ffts:
+            self.ffts.append(c.height_map.fft_blur)
+
+
+        
+    def write_meta_data(self):
+        '''Write the rescal parameters and execuation call to a file
+        in the experiment directory.'''
+        with open(self.meta_data, 'w+') as f:
+            f.write('parameters = ' + str(self.parameters) + '\n')
+            f.write('exec = ' + str(self.rescal_args) + '\n')
+
+    
+    
+
+    def run_simulation(self):
+        '''Run ReSCAL and get the cellspace data
+        that would otherwise be written to a file. Process and save the data
+        to files and write out the meta-data.'''
+
+        # setup pipe to rescal
+        r,w = os.pipe()
+
+        self.r = r
+        
+        # allow rescal to inherit the write side of the pipe
+        os.set_inheritable(w, True)
+
+        # add the pipe to self.rescal args
+        self.rescal_args = self.rescal_args + ['-data_pipe',  str(w)]
+
+        # start a rescal process that can send data back
+        rescal = subprocess.Popen(self.rescal_args,
+                                  pass_fds=([w]),
+                                  cwd=self.experiment_directory,
+                                  stdout=subprocess.DEVNULL)
+
+        # close the write pipe on this side
+        os.close(w)
+
+        # check if rescal is still running
+        while rescal.poll() is None:
+
+            # now get the data back and process it
+            self.receive_process_data()
+
+        # write the data to file
+        if self.save_height_maps:
+            height_maps = np.array(self.height_maps)
+            np.savez_compressed(self.height_maps_path, height_maps=height_maps)
+        if self.save_ffts:
+            ffts = np.array(self.ffts) 
+            np.savez_compressed(self.ffts_path, ffts=ffts)
+
+        # write out the meta_data
         self.write_meta_data()
 
+        
+
+    def run_without_piping(self):
+        '''Do a rescal run that saves data to files like normal.'''
+        rescal = subprocess.Popen(self.rescal_args,
+                                  cwd=self.experiment_directory,
+                                  stdout=subprocess.DEVNULL)
+        rescal.wait()
+        
+       
+
+
+if __name__ == '__main__':
+
+    parameters_par_1 = {
+        'Model':  'SNO',
+        'Output_directory': 'out',
+        'Csp_file': 'DUN.csp',  # could just put the premade .csp in here
+        'Csp_template': 'SNOWFALL(4)',
+        'parfile': 'run.par',
+        'Boundary':  'OPEN',
+        'Time': 0.0,
+        'H': 80,
+        'L': 400,
+        'D': 200,
+        'Centering_delay': 0,
+        'Phys_prop_file': 'real_data/sealevel_snow.prop', # need to use rescal home
+        'Qsat_file': 'real_data/PDF.data', # need to use rescal home
+        'Lambda_A': 1,
+        'Lambda_E': 1,
+        'Lambda_T': 1.5,
+        'Lambda_C': 0.5,
+        'Lambda_G': 100000,
+        'Lambda_D': 0.01,
+        'Lambda_S': 0,
+        'Lambda_F': 1,
+        'Lambda_I': 0.002,
+        'Coef_A': 0.1,
+        'Coef_B': 10,
+        'Coef_C': 10,
+        'Prob_link_ET': 0.5,
+        'Prob_link_TT': 1.0,
+        'High_mobility': 1,
+        'Ava_mode': 'TRANS',
+        'Ava_angle': 38,
+        'Ava_h_lim': 1,
+        'Lgca_delay': 1,
+        'Lgca_speedup': 1000,
+        'Tau_min': 100,
+        'Tau_max': 1100,
+    }
+
+    # command line arguments for rescal which will be in the .run file
+    parameters_run_1 = {
+        'stop after' : '200_t0',
+        'output interval' : '50_t0',
+        'png interval' : False,
+        'quit' : True,
+        'random seed' : 6,
+        'usage info' : False,
+        'show params' : False,
+        'info interval' : False,
+    }
+
+    parameters_1 = {**parameters_par_1, **parameters_run_1}
             
-    # get experiment parameters from a file path or
-    # passed as an ExperimentData object
-    def setup_experiment(self, experiment_data):
-
-        if experiment_data is None and self.meta_data.have_experiment_data == False:
-            print('WARNING: DataRun has no experiment data.')
-        elif experiment_data is not None and self.meta_data.have_experiment_data == True:
-            print('WARNING: DataRun experiment_data alreay exists.')
-            print('cannot overwrite experiment data at instantiation time')
-            print('use replace_experiment_data method')
-        elif experiment_data is not None and self.meta_data.have_experiment_data == False:
-            # determine if experiment_data is file name of ExperimentData
-            if isinstance(experiment_data, ExperimentData):
-                self.copy_experiment_data(experiment_data)
-            elif isinstance(experiment_data, str):    
-                # try to read in pickled ExperimentData
-                with open(experiment_data, 'rb') as f: 
-                    self.copy_experiment_data(pickle.load(f))
-            else:
-                print('WARNING: experiment_data must be of type str of ExperiementData')
-                print('DataRun has no experiment_data.')
-            #experiment_data is None and self.meta_data.have_experiment_data == True:
-        else:
-            # nothing to do, typical case when reloading from file
-            pass
-
-        
-    # TODO maybe do more than just the meta_data
-    def initialize_experiment_directory(self):
-        self.create_meta_data()
-        
-
-    # create a meta_data object and file
-    def create_meta_data(self):
-        with open(self.meta_data_path, 'wb') as f:
-            self.meta_data = MetaData()
-            pickle.dump(self.meta_data, f)
-    
-            
-    def initialize_from_existing_experiement(self):
-        self.meta_data = pickle.load(self.meta_data_path)
-
-        
-        
-    # setup directories, this includes running rescal
-    # to randomly initialize
-    def setup(self):
-        pass
-
-
-    # makes randoms initial states
-    # sets up runs directories to make initial states
-    # runs the simulations to get the initial states
-    # saves the file paths to the .csp files created
-    def random_initial_states(self):
-
-        random_intials_paths = os.path.join(self.experiment_directory, 'random_initials_paths'))
-        
-        if self.meta_data.initial_csps_created = True:
-            # read in paths from file
-            with open(random_intials_paths, 'r') as f:
-                self.random_initial_paths = f.read.splitlines()
-        
-        else:
-            # will create directory called random initial to
-            # do the intial random runs
-            top_dir = os.path.join(self.experiment_directory, '.random_initials')
-
-            # create num_states random seeds
-            seed_numbers = random.sample(range(1,1000000), self.meta_data.num_states)
-            seeds = [['random seed', seed_numbers]]
-
-            run_files = rescal_utilities.make_run_directories(parameters, seeds, top_dir, run_header, run_name)
-
-            rescal_utilities.run_rescals(run_files)
-
-            paths = rescal_utilities.get_files_to_process(top_dir, cellspace.path_glob, cellspace.exclude_globs)
-            paths_last = [x[-1] for x in paths]
-
-            # save the paths
-            with open(random_intials_paths, 'w+') as f:
-                f.write('\n'.join(paths_last))
-
-            self.random_initial_paths = paths_last
-
-            self.meta_data.initial_csps_created = True
-
-
-
-
-
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-    
+    p = PyRescal(parameters_1, 'pr_test')
+    p.create_experiment_directory()
+    #p.run_without_piping()
+    p.run_simulation()

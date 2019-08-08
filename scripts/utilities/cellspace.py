@@ -169,15 +169,7 @@ class CellSpace:
         usage example:
             c = CellSpace('path_to_file.csp')
         '''
-
-        self.input_file = filename
-        self.keep_original = keep_original
-        # remove .gz by default
-        if self.input_file.endswith('.gz'):
-            self.output_file = filename
-        else:
-            self.output_file = filename[:-3]
-
+            
         # set within self._read
         self.header_size = None
         self.model = None
@@ -191,8 +183,20 @@ class CellSpace:
         # keep_original == True
         self.cells_original = None
         self.header_binary = None
+        self.keep_original = keep_original
 
-        self._read()
+        # determine if data is in a file or is alreay bytes
+        if isinstance(filename, bytes):
+            self._read(bs=filename)
+        else:            
+            self.input_file = filename
+            
+            # remove .gz by default
+            if self.input_file.endswith('.gz'):
+                self.output_file = filename
+            else:
+                self.output_file = filename[:-3]
+            self._read()
 
         # potentially used later
         self.temp_mod_cells = None

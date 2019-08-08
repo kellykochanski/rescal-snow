@@ -377,7 +377,8 @@ class Run_Script():
                 args.append("-" + self.__flag_options[option])
             elif self.options[option]: # == any value except False or True
                 # -flag VALUE
-                args.append("-" + str(self.__flag_options[option]) + " " + str(self.options[option]))
+                args.append("-" + str(self.__flag_options[option]))
+                args.append(str(self.options[option]))
         return args
         
         
