@@ -54,8 +54,15 @@ extern float dump_delay_png;
 extern float dump_delay_csp;
 extern uint8_t csphpp_flag;
 extern uint8_t alti_only_flag;
+extern uint8_t uncompressed_csp_flag;
+extern uint8_t csp_borders_flag;
+extern int32_t data_pipe; //
+extern int32_t id; // from simul.c, used to tell processed apart when multiple writing to same log file 
+
 extern float stop_delay_t0;
 extern double stop_time;
+
+
 extern int32_t mode_pat;
 
 int32_t prog = PROG_RESCAL;
@@ -258,6 +265,15 @@ void general_options(int32_t argc, char *argv[]) {
       frame_delay = (frame_rate < 100) ? 1000 / frame_rate : 10;
     } else if (!strcmp(argv[i], "-altionly")) { // added to allow ALTI but not .csp file writes
       alti_only_flag = 1;
+    } else if (!strcmp(argv[i], "-uncompressed_csp")) {
+      uncompressed_csp_flag = 1;
+    } else if (!strcmp(argv[i], "-csp_borders")) {
+      csp_borders_flag = 1;
+    } else if (!strcmp(argv[i], "-data_pipe")) {
+      data_pipe = atoi(argv[++i]);
+      csp_borders_flag = 1;
+    } else if (!strcmp(argv[i], "-id")) {
+      id = atoi(argv[++i]);         
     } else if (!strcmp(argv[i], "-info")) {
       opt_info = 1;
     } else if (!strcmp(argv[i], "-dcsp") || !strcmp(argv[i], "-dcsphpp")) {
@@ -343,6 +359,10 @@ void show_general_options() {
 //   printf("  -dbin <n> \t generation of a binary file every <n> minutes\n");
 //   printf("  -dpng <n> \t generation of a PNG image every <n> seconds\n");
   printf("  -altionly \t\t prevent CSP files from being written. ALTI files will still be written. Must still set -dcsp or -dcsphpp\n");
+  printf("  -uncompressed_csp \t\t Any .csp files written will not be compressed.\n");
+  printf("  -csp_borders \t\t .csp files will be written with border type cells still attached.\n");
+  printf("  -data_pipe <n>\t\t sets up a pipe to pass data back to calling process.\n");
+  printf("  -id <n> \t\t give rescal run a unique id.\n");
   printf("  -dpng <f>t0\t generation of PNG images with delay in t0 unit (float value)\n");
 // #ifndef USE_LIBPNG
 //   printf("  -djpeg <n> \t generation of a Jpeg image every <n> seconds\n");

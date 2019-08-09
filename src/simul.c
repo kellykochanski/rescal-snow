@@ -32,6 +32,10 @@
 #include <math.h>
 #include <stdint.h>
 
+// performance timing
+#include <sys/time.h>
+
+
 // For output
 #include <string.h>
 #include <sys/types.h>
@@ -51,6 +55,8 @@
 #include "lgca.h"
 #include "callbacks.h"
 #include "view.h"
+extern int32_t data_pipe; // from format.c, determines if piping will happen, cencels ALTI file writing
+extern uint8_t csp_borders_flag; // keep border cells when writing .csp files to disc
 extern uint8_t opt_info, opt_nv;
 extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
 extern int32_t LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
@@ -137,7 +143,9 @@ float lambda_A_stable = 0.0;
 int32_t ava_upwind = 1;
 uint8_t simul_dump_flag = 0;
 uint8_t csphpp_flag = 0;
-uint8_t alti_only_flag; // flag that causes heightmap (ALTI*) files to be written to a file, but not cellspace files (*.csp)
+uint8_t alti_only_flag = 0; // flag that causes heightmap (ALTI*) files to be written to a file, but not cellspace files (*.csp)
+uint8_t uncompressed_csp_flag = 0; // prevent .csp files from being compressed when writing them
+int32_t id = 0; // unique identifier for the run
 float dump_delay_png = 0.0;
 float dump_delay_csp = 0.0;
 float stop_delay_t0 = 0.0;
@@ -182,6 +190,15 @@ void simul_lien_trans(int32_t, int32_t, int32_t);
 #ifdef LGCA
 void flow_stabilization(int32_t);
 #endif
+
+// timers for performance testing
+struct timeval time_start;
+struct timeval time_stop;
+long seconds_elapsed;
+long micro_seconds_elapsed;
+double elapsed_time;
+extern int32_t id;
+
 void simul_stop();
 void simul_dump();
 void params_simul() {
@@ -1570,10 +1587,33 @@ void simul_dump() {
       if (dump_delay_csp && (time_threshold == time_threshold_dcsp)) {
         // edited to allow dumping of ALTI files but not .csp files using the altionly flag
         if (!alti_only_flag) {
+
+
+          gettimeofday(&time_start, NULL);
+          
           dump_terre(DUMP_CSP, cpt_dump, UNIT_T0);
+          
+          gettimeofday(&time_stop, NULL);
+          seconds_elapsed = (long)(time_stop.tv_sec) - (long)(time_start.tv_sec);
+          micro_seconds_elapsed = (long)(time_stop.tv_usec) - (long)(time_start.tv_usec);
+          elapsed_time = ((double)(seconds_elapsed)) * 1000.0 + ((double)(micro_seconds_elapsed)) / 1000;
+          LogPrintf("%d DUMP_TERRE_TIME  %e\n", id, elapsed_time);
+
+          
         }
 #ifdef ALTI
-        dump_surface("ALTI", cpt_dump, UNIT_T0);
+        if (data_pipe == -1) {
+          gettimeofday(&time_start, NULL);
+          
+          dump_surface("ALTI", cpt_dump, UNIT_T0);
+
+          gettimeofday(&time_stop, NULL);
+          seconds_elapsed = (long)(time_stop.tv_sec) - (long)(time_start.tv_sec);
+          micro_seconds_elapsed = (long)(time_stop.tv_usec) - (long)(time_start.tv_usec);
+          elapsed_time = ((double)(seconds_elapsed)) * 1000.0 + ((double)(micro_seconds_elapsed)) / 1000;
+          LogPrintf("%d DUMP_SURFACE_TIME  %e\n", id, elapsed_time);
+          
+        }
 #endif
 #ifdef LGCA
         if (use_lgca && csphpp_flag) {
@@ -1738,7 +1778,7 @@ void output_headers(){
   // Uses #include <sys/types.h>, <sys/stat.h>, <unistd.h>
   struct stat st = {0};
   if (stat(output_directory, &st) == -1) mkdir(output_directory, 0777);
-  LogPrintf("\n Trying to write output to directory : %s", output_directory);
+  LogPrintf("\n Trying to write output to directory : %s\n", output_directory);
 
   // Cell states (adds additional output in dump_cell)
   output_write("CELL",     "\n# CELL STATES\n");
