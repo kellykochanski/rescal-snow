@@ -71,7 +71,7 @@ As a cellular automaton, the output of Rescal-snow is disretized in time, which 
 during sintering.
 Both of these limits can be adjusteded; here we present a configuration with a practical balance between precision and computational expense.
 Finally, the natural length and time scales of Rescal-snow are set by the configuration of the cellular automata.
-Although these can be related to real length and time scales, it requires careful calibration: this is described fully in @Narteau:2009.
+Although these can be related to real length and time scales, it requires careful calibration: this is described fully in @narteau:2009.
 
 By releasing Rescal-snow through the Journal of Open Source Science, we aim to demonstrate good practices that will encourage robust, reproducible science.
 For example, we expect that our work may be the first introduction many of our readers have to some subset of bash, C, python, and high-performance scientific computing.
@@ -97,9 +97,9 @@ For a quick reference, the following citation commands can be used:
 
 # Acknowledgements
 
-We thank Clement Narteau and Oliver Rozier (IPGP) for their advice and support in development beginning with ReSCAL 1.6,
-Robert Anderson and Gregory Tucker (CU) for their advice on the scientific direction of this software,
-and Tapasya Patki, Divya Mohan, Jeff Booher-Kaeding and Aaron Robeson (LLNL) for contributions to the quality and performance of rescal-snow.
+We thank Clement Narteau and Oliver Rozier (IPGP) for advice and support in development beginning with ReSCAL 1.6,
+Robert Anderson and Gregory Tucker (CU) for advice on the scientific direction of this software,
+and Tapasya Patki, Divya Mohan, Jeff Booher-Kaeding and Aaron Robeson (LLNL) for minor contributions to Rescal-snow.
 
 This work was supported by a Department of Energy Computational Science Graduate Fellowship (DE-FG02-97ER25308), by support from the Data Science Summer Institute at Lawrence Livermore National Laboratory, and by an UROP award from the University of Colorado.
 
