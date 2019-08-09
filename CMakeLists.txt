@@ -71,6 +71,7 @@ add_executable(csp2bin
 )
 
 function(setup_target target)
+  set_property(TARGET ${target} PROPERTY C_STANDARD 99)
   target_include_directories(${target} PRIVATE src)
   if(MSVC)
     target_compile_options(${target} PRIVATE /W4 /WX)
