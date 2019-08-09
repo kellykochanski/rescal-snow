@@ -147,8 +147,6 @@ This section lists the best way to bring your project - and its successes, chall
 
 We encourage you to interact with the project through github (see below). This will allow easy integration of your changes and prevent rescal-snow from fragmenting excessively.
 
-We check our email more often than our github, and will respond faster if git issues are accompanied by emails.
-
 ### Citation
 
 Do you want to incentivize developers to build and maintain the software you need?
