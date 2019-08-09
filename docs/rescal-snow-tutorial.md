@@ -3,12 +3,10 @@ Simulating snow self-organization with cellular automata
 
 ![](docs/example_images/snowfall_example.gif)
 
-1. [Introduction](#introduction)
+1. [Tutorial aims and features](#introduction)
 2. [Getting started](#starting)
     1. [Prerequisites](#Prerequisites)
-    2. [Dependencies](#Dependencies)
-    3. [Installation](#Installation)
-    4. [Example 1: a snow cone](#test-cone)
+    2. [Example 1: a snow cone](#test-cone)
 2. [Controlling the simulations](#modifying)
     1. [Example 2: sintering snow](#test-sinter)
     2. [Example 3: dune growth by snowfall](#test-snowfall)
@@ -23,7 +21,7 @@ Simulating snow self-organization with cellular automata
 6. [Contributors](#authors)
 7. [License](#License)
 
-### Tutorial aim and features
+## 1. Tutorial aim and features <a name="introduction"></a>
 
 This tutorial walks through a series of examples that demonstrate how to use Rescal-snow to simulate:
 
@@ -34,12 +32,27 @@ This tutorial walks through a series of examples that demonstrate how to use Res
  - Time-dependent cohesion (snow sintering)
  - Parallel runs for phase space exploration
 
+## 2. Getting started
+
+Before starting this tutorial, download and install Rescal-snow according to the instructions in `README.md`.
+
 ### Prerequisites
 
 We assume you have reasonable familiarity with bash and terminal commands.
 If you have never used bash, we recommend you stop and work through a short tutorial.
 (Our favorite is ['The Unix Shell' from Software Carpentry](http://swcarpentry.github.io/shell-novice/).)
 If you modify rescal-snow, you will need to modify and compile C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
+
+**All blocks of bash instructions will start from the main rescal-snow directory:**
+
+```bash
+ls
+>> AUTHORS.md   	lib	   	scripts		src
+>> LICENSE.md   	NOTICE	 	docs
+>> README.md	  	analysis    	paper.md
+```
+(You may see additional files not listed here.)
+
 
 ### Example 1: a snow cone <a name="test-cone"><a>
 
@@ -56,7 +69,7 @@ This command will take a few minutes to run, and produces terminal output like:
 > *Nothing happening?*
 >
 > This is mostly a good sign - if something is wrong, rescal-snow almost always crashes in the first few seconds. The simulations, however, are computationally expensive, and may take an unreasonably long time to run on slower machines. 
-> If this is the case for you, we've put some tips for improving performance in [docs/performance_and_parallelization.md](docs/performance_and_parallelization.md).
+> If this is the case for you, we've put some tips for improving performance in [docs/performance_and_parallelization.md](performance_and_parallelization.md).
 > Fortunately, the substantive output from rescal-snow is saved at regular intervals. You can view intermediate output while the simulation is still running, and you can stop the simulation (usually `Ctrl-C`) without losing that output. 
 
 The easiest way to examine the output is to look at rescal-snow's natively generated png files:
@@ -66,12 +79,12 @@ eog scripts/*.png
 ```
 If `eog` is not available, use `open` (MacOS) or any image viewer.
 
-These files are numbered sequentially. The files are saved at regular intervals set by the `-dpng` flag in [scripts/snow_cone.run](scripts/snow_cone.run). For this run, we used `-dpng 10t0`, so file 0 is saved at simulation time t0=0, file 1 (SNO00001\_t0.png) is saved at
+These files are numbered sequentially. The files are saved at regular intervals set by the `-dpng` flag in [scripts/snow_cone.run](../scripts/snow_cone.run). For this run, we used `-dpng 10t0`, so file 0 is saved at simulation time t0=0, file 1 (SNO00001\_t0.png) is saved at
 simulation time t0=10, and so on.
 
 |Initial condition, SNO00000_t0.png 	|  SNO00003_t0.png   | SNO00009_t0.png  |
 |------------------------|--------------------|------------------|
-| ![](docs/example_images/snow_cone/00.png) | ![](docs/example_images/snow_cone/03.png) | ![](docs/example_images/snow_cone/09.png) |
+| ![](example_images/snow_cone/00.png) | ![](example_images/snow_cone/03.png) | ![](example_images/snow_cone/09.png) |
 
 Each of the three images above shows a shaded top-down view of a dune (top left), cross-sections through the dune, along the dashed lines (middle left, top right), and a cross-section showing the pressure intensity in the fluid (bottom left).
 
@@ -96,7 +109,7 @@ cd scripts
 
 This produces the following series of png images, with sintered grains shown in light purple and non-sintered grains shown in tan:
 
-![](docs/example_images/sintering/sintering.gif)
+![](example_images/sintering/sintering.gif)
 
 This image shows a triangular wave of snow. It quickly leans over to the right. Like the first dune, it begins to blow away in the wind. Some grains at the bottom of the dune, however, sinter (turning light purple in the top left panel of the image). These grains persist for
 much longer than the non-sintered grains, but eventually they too blow away.
@@ -125,7 +138,7 @@ diff scripts/sintering.par scripts/snow_cone.par
  - Lambda\_S controls the rate of sintering: we increased it from 0 to 0.01/t0.
  - Lambda\_F controls the relative erodibility of the sintered grains: we set it to 0.05/t0, or 5% of the erodibility of the non-sintered grains
 
-**All rescal-snow parameters are all given brief descriptions in the .par file, and in [docs/rescal-snow-inputs.md](docs/rescal-snow-inputs.md).**
+**All rescal-snow parameters are all given brief descriptions in the .par file, and in [docs/rescal-snow-inputs.md](rescal-snow-inputs.md).**
 
 ### Example 3: dune growth by snowfall <a name="test-snowfall"></a>
 
@@ -172,9 +185,9 @@ This produces the following images:
 
 | Default image, SNO00050_t0.png | ALTI00050_recolored.png | ALTI00100_recolored.png | ALTI00150_recolored.png |
 |-----------|----------------|------------|---------------|
-| ![](docs/example_images/snowfall/SNO00050_t0.png) | ![](docs/example_images/snowfall/ALTI00050_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00100_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00150_t0_recolored.png) |
+| ![](example_images/snowfall/SNO00050_t0.png) | ![](example_images/snowfall/ALTI00050_t0_recolored.png) | ![](example_images/snowfall/ALTI00100_t0_recolored.png) | ![](example_images/snowfall/ALTI00150_t0_recolored.png) |
 
-The full evolution of this simulation is shown in the gif at the top of [README.md](README.md).
+The full evolution of this simulation is shown in the gif at the top of [README.md](../README.md).
 
 > Additional scripts for analysing and visualizing the runs are available in the scripts/utilities and analysis directories.
 
@@ -199,10 +212,10 @@ See [csdms.colorado.edu/wiki/HPC](https://csdms.colorado.edu/wiki/HPC) for detai
 In this example, we're going to run 10 instances of rescal. Begin by downloading and installing rescal-snow on your computing cluster, and running one of the above examples to test the installation.
 
 > *Why are we running 10 instances of rescal-snow, not one instance on 10 cores?*
-> Rescal-snow doesn't parallelize well: see [docs/performance_and_parallelization.md](docs/performance_and_parallelization.md)
+> Rescal-snow doesn't parallelize well: see [docs/performance_and_parallelization.md](performance_and_parallelization.md)
 
 *Writing large numbers of input files*
-[scripts/utilities/rescal_utilities.py](scripts/utilities/rescal_utilities.py) contains tools for writing .run and .par scripts automatically. This is much easier, and more bug-free, than writing 10 parameter files by hand.
+[scripts/utilities/rescal_utilities.py](../scripts/utilities/rescal_utilities.py) contains tools for writing .run and .par scripts automatically. This is much easier, and more bug-free, than writing 10 parameter files by hand.
 
 To set up the runs:
 
@@ -259,7 +272,7 @@ ls test_parallel_runs/tauMin0_lambdaI0.01/out
 
 The following phase diagram shows the 100th images produced by each of these runs (t0 = 1000; snowfall rate = lambda\_I; wind strength = Tau\_min). 
 
-![snowfall-wind phase diagram](docs/example_images/phase_space_exploration/phase_diagram1.png)
+![snowfall-wind phase diagram](example_images/phase_space_exploration/phase_diagram1.png)
 
 The runs with the higher snowfall rate have a much deeper average snow depth than the runs with lower snowfall rate.
 The runs with high wind speed (low Tau\_min) have less even snow cover, with better-defined ripples and dunes.
@@ -271,76 +284,3 @@ The runs with high wind speed (low Tau\_min) have less even snow cover, with bet
 > - script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun param_space_exploration_example.py and confirm that it produced the output above; check that you're running msub/sbatch from scripts; check relative directory references in msub/sbatch script and submit.sh
 > - runs time out before producing useful output -> increase walltime; large simulations on slow machines may ultimately take a few hours
 
-## Community guidelines <a name="community"></a>
-
-We are excited to hear about your scientific work with ReSCAL.
-This section lists the best way to bring your project - and its successes, challenges, bugs, and developments - to our attention.
-
-We encourage you to interact with the project through github (see below). This will allow easy integration of your changes and prevent rescal-snow from fragmenting excessively.
-
-We check our email more often than our github, and will respond faster if git issues are accompanied by emails.
-
-### Citation
-
-Do you want to incentivize developers to build and maintain the software you need?
-Cite us!
-
-We are working on getting a doi for this repository through the Journal of Open Source Software (JOSS). 
-
-This software inherits much of its functionality from the Real-Space Cellular Automaton Laboratory, ReSCAL. Please credit those developers by citing:
- - ['A real-space cellular automaton laboratory', O Rozier and C Narteau, Earth Surface Processes and Landforms 39(1) 98-109, 2013, doi=10.1002/esp.3479](https://onlinelibrary.wiley.com/doi/abs/10.1002/esp.3479)
-
-### Support
-
-If you have challenges or questions, look at the material under 'further information' or reach out to us.
-
-Primary contact:
-Kelly Kochanski
-kelly.kochanski@gmail.com
-www.github.com/kellykochanski
-
-Issues may be reported using github's issue tracking function on this repository, [www.github.com/kellykochanski/rescal-snow](www.github.com/kellykochanski/rescal-snow).
-
-### Contributing
-
-We have built a model of the basic growth and function of snow dunes, but expect that many users may want more detailed features.
-
-If you wish to contribute a new feature, we recommend you fork our repository, commit your changes to a new feature or development branch, and create a pull request. An example contribution workflow, with git instructions, is outlined by the [LAVA software community project contribution
-guide](https://docs.lavasoftware.org/lava/contribution.html)
-
-Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
-
-## References and further reading <a name="references"></a>
-
-The [docs](docs) folder contains additional information on 
-[alternate installations](docs/how_to_install.md), 
-[performance and parallelization issues](docs/performance_and_parallelization.md), 
-[model inputs and configuration](docs/rescal-snow-inputs.md),
-[model calibration and validation](docs/calibration_and_validation.md),
-and [development history](docs/NEWS.md)
-
-For more background on snow dunes, sintering, and self-organization, see:
- - ['Snow bedforms: A review, new data, and a formation model', Filhol and Sturm, 2015](https://doi.org/10.1002/2015JF003529)
- - ['The evolution of snow bedforms in the Colorado Front Range', Kochanski, Anderson and Tucker, 2019](https://doi.org/10.5194/tc-13-1267-2019)
- - ['Statistical classification of self-organized snow surfaces', Kochanski, Anderson and Tucker, 2018](https://doi.org/10.1029/2018GL077616)
- - ['Studies on interaction between wind and dry snow surface', Kobayashi, 1980](https://eprints.lib.hokudai.ac.jp/dspace/bitstream/2115/20242/1/A29_p1-64.pdf)
-
-For models of snow dunes based on ReSCAL, see:
- - ['Understanding snow bedform formation by adding sintering to a cellular automata model', Sharma, Braud and Lehning, preprint](https://doi.org/10.5194/tc-2019-45)
-
-For more information about the initial ReSCAL development and the backend function of the cellular automaton and lattice gas model, see:
- - ['Setting the length and timescales of a cellular automaton dune model', Narteau et al., 2009](https://doi.org/10.1029/2008JF001127)
- - ['A real-space cellular automaton laboratory', Rozier and Narteau, 2014](dx.doi.org/10.1002/esp.3479)
- - ['Transport capacity and saturation mechanism in a real-space cellular automaton dune model', Gao et al., 2014](dx.doi.org/10.5194/adgeo-37-47-2014)
-To learn the underlying principles of the lattice gas cellular automaton (LGCA)  model (recommended before modifying the LGCA, the boundary conditions, or the aspect ratio of the simulation) see:
- - ['Lattice-gas automata for the Navier-Stokes equation', Frisch, Hasslacher and Pomeau, 1986'](https://doi.org/10.1103/PhysRevLett.56.1505)
-
-## Contributors <a name="authors"></a>
-See [AUTHORS.md](AUTHORS.md).
-
-## License
-GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md).
-
-SPDX-License-Identifier: GPL-3.0-or-later
-
-Release: LLNL-CODE-785837. See [NOTICE](NOTICE) for details.
