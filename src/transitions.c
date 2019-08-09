@@ -703,7 +703,7 @@ void dump_transitions()
   output_write("TRANSITIONS", current_output);
   for(i=0; i<nb_liens; i++)
     sprintf(current_output,"LT(%2d): %d[%d] -> %d, %.9f\n", i, t_lien[i].trans1, t_lien[i].cel, t_lien[i].trans2, t_lien[i].intensite);
-    output_write("TRANSITIONS", current_output);
+  output_write("TRANSITIONS", current_output);
 #endif
 }
 
