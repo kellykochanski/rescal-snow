@@ -27,6 +27,8 @@ Simulating snow self-organization with cellular automata
 
 When wind blows over snow, it self-organizes. This forms surface features, such as ripples and dunes, that alter the reflectivity and thermal conductivity of the snow.
 
+![](docs/example_images/field_examples.png)
+
 These features have just begun to be studied by the snow and climate science communities
 (see [1](https://doi.org/10.1002/2015JF003529), [2](https://doi.org/10.5194/tc-13-1267-2019), [3](https://doi.org/10.5194/tc-2019-45) for recent work). 
 
@@ -67,10 +69,10 @@ You may also download the repository manually from [https://github.com/kellykoch
 The downloaded repository should create a rescal-snow directory with the following contents (as of 18 June 2019):
 ```bash
 ls
-AUTHORS		Makefile.am	TODO		configure	missing
-COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
-ChangeLog	NEWS		compile		depcomp		src
-INSTALL		README		config.h.in	install-sh
+>> AUTHORS		Makefile.am	TODO		configure	missing
+>> COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
+>> ChangeLog		NEWS		compile		depcomp		src
+>> INSTALL		README		config.h.in	install-sh
 ```
 **All further blocks of bash instructions start from this directory for consistency.**
 
@@ -78,16 +80,7 @@ INSTALL		README		config.h.in	install-sh
 
 These instructions will get rescal-snow running on most linux environments; for additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
 
-All of the instructions in this README are run from a terminal in the main rescal-snow directory. It should look like this:
-```bash
-ls
-AUTHORS		Makefile.am	TODO		configure	missing
-COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
-ChangeLog	NEWS		compile		depcomp		src
-INSTALL		README		config.h.in	install-sh
-```
-
-In a terminal, navigate into the main rescal-snow directory (the one containing this readme, as well as 'scripts', 'src', etc'). Run:
+In a terminal, navigate into the main rescal-snow directory (shown above). Run:
 ```bash
   ./configure
   make
@@ -104,8 +97,6 @@ This command will take a few minutes to run, and produces terminal output like:
 ```bash
 >> PAR_FILE=snow_cone.par
 >> OMP_NUM_THREADS=1
->> Wed Jun 12 15:06:20 PDT 2019
->> Wed Jun 12 15:11:53 PDF 2019
 ```
 > *Nothing happening?*
 >
@@ -159,14 +150,14 @@ much longer than the non-sintered grains, but eventually they too blow away.
 
 The only change between `snowfall.run` and the previous script, `snow_cone.run` (excepting a few changes to the comments) is the parameter file:
 ```bash
-diff scripts/snowfall.run scripts/snow_cone.run
+diff scripts/sintering.run scripts/snow_cone.run
 >> < PAR_FILE="sintering.par"
 >> > PAR_FILE="snow_cone.par"
 ```
 
 If we look at the differences between parameter files, we see:
 ```bash
-diff scripts/snowfall.par scripts/snow_cone.par
+diff scripts/sintering.par scripts/snow_cone.par
 >> < Csp_template = WAVE(15)
 >> > Csp_template = CONE(20,40,50)
 >> < Lambda_S = 0.01
@@ -362,6 +353,8 @@ We have built a model of the basic growth and function of snow dunes, but expect
 If you wish to contribute a new feature, we recommend you fork our repository, commit your changes to a new feature or development branch, and create a pull request. An example contribution workflow, with git instructions, is outlined by the [LAVA software community project contribution
 guide](https://docs.lavasoftware.org/lava/contribution.html)
 
+Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
+
 ## References and further reading <a name="references"></a>
 
 The [docs](docs) folder contains additional information on 
@@ -391,5 +384,8 @@ To learn the underlying principles of the lattice gas cellular automaton (LGCA) 
 See [AUTHORS.md](AUTHORS.md).
 
 ## License
-GNU GPL 3.0 or any later version. See [docs/LICENSE](docs/LICENSE).
+GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md).
 
+SPDX-License-Identifier: GPL-3.0-or-later
+
+Release: LLNL-CODE-785837. See [NOTICE](NOTICE) for details.
