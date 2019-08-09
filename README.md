@@ -353,6 +353,8 @@ We have built a model of the basic growth and function of snow dunes, but expect
 If you wish to contribute a new feature, we recommend you fork our repository, commit your changes to a new feature or development branch, and create a pull request. An example contribution workflow, with git instructions, is outlined by the [LAVA software community project contribution
 guide](https://docs.lavasoftware.org/lava/contribution.html)
 
+Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
+
 ## References and further reading <a name="references"></a>
 
 The [docs](docs) folder contains additional information on 
@@ -384,3 +386,6 @@ See [AUTHORS.md](AUTHORS.md).
 ## License
 GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md).
 
+SPDX-License-Identifier: GPL-3.0-or-later
+
+Release: LLNL-CODE-785837. See [NOTICE](NOTICE) for details.
