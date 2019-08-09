@@ -36,15 +36,7 @@ and a factor of 'v' in the vertical direction'''
     return [[1 for j in range(v)] for i in range(h)]
 
 
-
 invaders = np.kron(invader, make_scaler(6,6)) * 6
-
-
-# for finding height_map files
-# used with param_space_exploration_utilities.get_files_to_process
-path_glob = 'out/ALTI*'
-exclude_globs = []
-
 
 
 def fft2d_analyze(data):
@@ -52,8 +44,6 @@ def fft2d_analyze(data):
     performs fft2d analysis on the data taken from input file
     and returns single quadrant fft result.
     data -> data to perform fft on'''
-
-
     #Data points for x and y axis
     dpx, dpy = data.shape
 
@@ -89,7 +79,6 @@ def fft2d_crop_blur(image):
     '''gets fft2d (which drops all but top left quadrant)
     grabs a small piece on the top left
     apply gaussian blur'''
-
     # get just the magnitudes
     f_image = image.astype(np.float32)
     fft2d = np.absolute(fft2d_analyze(f_image))
@@ -105,7 +94,6 @@ def fft2d_crop_blur(image):
 
 def fft2d_center_blur(image):
     '''make pics with fft stuff in the middle'''
-    
     # get just the magnitudes
     fft2d = np.absolute(fft2d_analyze_map_pic(image))
     x,y = fft2d.shape
@@ -202,9 +190,7 @@ class HeightMap:
 
 
     def save_as_pdf(self, filename, in_3d=False):
-        '''make a figure'''
-        
-
+        '''make a pdf and write to file'''
         plt.xticks([])
         plt.yticks([])
         
@@ -215,12 +201,9 @@ class HeightMap:
         # save with transparent background and a small bounding box
         plt.savefig(filename, transparent=True, bbox_inches='tight')
 
-
-
     
     def draw(self):
         '''draw a simple color_map of height_map'''
-        
         plt.imshow(self.height_map)
         plt.colorbar()
         plt.show()
@@ -228,9 +211,7 @@ class HeightMap:
     
     def make_fft_blur(self):
         '''makes a blurred 2D fft of the height_map'''
-        
         return fft2d_crop_blur(self.height_map.astype(np.float32))
-
 
     
     def draw_fft_blur(self, in_3d=False):
@@ -260,8 +241,6 @@ class HeightMap:
             plt.show()
         else:
             plot_3d(self.fft_center)
-
-
 
     
     def make_summary_data(self):

@@ -86,10 +86,6 @@ def _draw_cross_section(window, axes):
     axes.invert_yaxis()
     return
 
-# for finding cellspace files
-path_glob = '*.csp*'
-exclude_globs = ['DUN.csp']
-
 
 # TODO: I think my depth, height, and length are oriented differently than ReSCAL :-(
 class CellSpace:
@@ -677,7 +673,6 @@ class CellSpace:
     mods = ['sine', 'noise', 'guassian hill', 'space_invader', 'clip']
 
 
-    
     # applies a random modification of the given type
     def random_mods(self, file_prefix, mod_type='gaussian', num_mods=1, temp_mod=False):
 
@@ -700,6 +695,8 @@ class CellSpace:
                 self.temp_mod_cells = self.cells.copy()
 
             if mod_type == 'sine':
+                # superimpose a sine wave in the wind direction with random
+                # amplitude and frequency
                 # calculate frequency and amplitude values
                 amp = random.randint(2,h)
                 f = random.randint(1, 20)
@@ -709,6 +706,8 @@ class CellSpace:
                 
                 pass
             elif mod_type == 'space_invader':
+                # superimpose a space invader onto the cell space surface
+                # random size and location
                 # create the image
                 image_depth, image_length = heightmap.invader.shape
                 depth, _, length = self.cells.shape
@@ -879,8 +878,7 @@ def _process_args():
     return parser.parse_args()
 
 
-def _main():
-    
+def _main():    
     args = _process_args()
     c = CellSpace(args.input_file)
     if args.height_map:
