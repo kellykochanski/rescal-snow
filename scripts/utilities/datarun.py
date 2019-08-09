@@ -12,6 +12,25 @@ import numpy as np
 
 import cellspace
 import rescal_utilities
+import h5py
+import json
+
+
+def find_rescal_root(filename=None):
+    '''Tries to find RESCAL_SNOW_ROOT in the environment
+    and make it into an absolute path.'''
+    if rescal_root is None:
+        if 'RESCAL_SNOW_ROOT' in os.environ:
+            return os.path.expanduser(os.environ['RESCAL_SNOW_ROOT'])
+        else:
+            sys.stderr.write('Rescal root not found. Set environment variable RESCAL_SNOW_ROOT',
+                             'to path to top directory of ReSCAL install or specify another path',
+                             'for \'rescal_root\'.\n')
+            sys.exit(0)
+    else:
+        return os.path.expanduser(rescal_root)
+
+
 
 
 class DataRun:
@@ -63,17 +82,7 @@ class DataRun:
 
         # set self.rescal_root using the environment or rescal_root argument
         # should be the parent directory of the ReSCAL src and scripts directories
-        if rescal_root is None:
-            if 'RESCAL_SNOW_ROOT' in os.environ:
-                self.rescal_root = os.path.expanduser(os.environ['RESCAL_SNOW_ROOT'])
-            else:
-                sys.stderr.write('Rescal root not found. Set environment variable RESCAL_SNOW_ROOT',
-                                 'to path to top directory of ReSCAL install or specify another path',
-                                 'for \'rescal_root\'.\n')
-                sys.exit(0)
-        else:
-            self.rescal_root = os.path.expanduser(rescal_root)
-        
+        self.rescal_root = find_rescal_root(rescal_root)
         
         # this directory should alreay exist, but it will be created if it doesn't
         if not os.path.isabs(experiment_parent_directory):
@@ -299,6 +308,108 @@ class DataRun:
         
        
 
+class MultiRun:
+    '''Manages multiple Dataruns, can run using a job manager or without.'''
+
+    def __init__(self, top_dir, parameters=None, variable_parameters=None, rescal_root=None):
+        '''Set up the top_dir which is a directory that contains all the data.
+        If the directory already exists, read in the meta-data of the existing setup.'''
+
+        # get a rescal_root
+        self.rescal_root = find_rescal_root(rescal_root)
+
+        # get path for top_dir
+        top_dir = os.path.expanduser(top_dir)
+        if os.path.isabs(top_dir):
+            self.top_dir = top_dir
+        else:
+            self.top_dir = os.path.join(self.rescal_root, top_dir)
+
+        # deal with the state file
+        self.state_file = os.path.join(self.top_dir, self.top_dir)
+
+        # see if self.top_dir is an existing directory
+        if os.path.isdir(self.top_dir):
+            # see if it has a state_file
+            if os.path.isfile(self.state_file):
+                
+
+            
+        # self.top_dir does not exist so make it
+        elif not os.path.exists(self.top_dir):
+            pass
+        
+        # if it doesn't exist create it
+
+        # if it does exist, try to find the state.json
+        else:
+            pass
+
+        
+        self.parameters = parameters
+        self.variable_parameters = variable_parameters
+
+
+        
+
+    def do_runs(self):
+        pass
+
+    def consolidate_data(self):
+        pass
+    
+
+    def dump_state(self):
+        '''Dump out all the member of the instance into json
+        into file called dict.'''
+
+        # make json string of the __dict__ of this object
+        json_dump = json.dumps(self.__dict__, sort_keys=True, indent=4)
+
+        # if filename is absolute, use it
+        if os.path.isabs(self.state_file):
+            full_file_path = self.state_file
+        else:
+            # put file in top_dir
+            full_file_path = os.path.join(self.top_dir, self.state_file)
+        
+        # and write it to a file
+        with open(full_file_path, 'w+') as f:
+            f.write(json_dump)
+
+
+    def fetch_state(self, filename='state.json'):
+        '''Reads in a file that contains the state of a 
+        MultiRun.'''
+
+        # check if path is absolute
+        if os.path.isabs(self.state_file):
+           full_file_path = self.state_file
+        else:
+            full_file_path = os.path.join(self.top_dir, filename)
+
+        # check if the file exits
+        if not os.path.isfile(full_file_path):
+            sys.stderr.write('ERROR: cannot restore MultiRun state using file {f}'.format(f=full_file_path))
+            sys.exit(0)
+
+        with open(full_file_path, 'r') as f:
+            stored_state = f.read()
+            stored_state = json.loads(stored_state)
+            self.__dict__ = {**self.__dict__, **stored_state}
+            
+            
+        
+        
+            
+
+
+
+    
+class Dumbo:
+    '''I am doc.'''
+    def __init__(self):
+        self.hello = 4
 
 if __name__ == '__main__':
 
@@ -354,7 +465,14 @@ if __name__ == '__main__':
 
     parameters_1 = {**parameters_par_1, **parameters_run_1}
             
-    p = PyRescal(parameters_1, 'pr_test')
-    p.create_experiment_directory()
-    #p.run_without_piping()
-    p.run_simulation()
+    d = DataRun(parameters_1, 'pr_test')
+    #d.create_experiment_directory()
+    #d.run_without_piping()
+    #d.run_simulation()
+
+    j = Dumbo()
+    
+    
+
+    
+    
