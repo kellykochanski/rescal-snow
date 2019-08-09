@@ -210,7 +210,10 @@ int32_t main(int32_t argc, char *argv[]) {
   int32_t nRetVal;
   pthread_t pth;
   nRetVal = pthread_create(&pth, 0, rescal_thread, 0);
-  assert(nRetVal==0);
+  if(nRetVal!=0){
+    ErrPrintf("ERROR: Could not create rescal_thread!");
+    exit(-1);
+  }
   pthread_join(pth, 0);
 
 #ifdef LOG_FILE
