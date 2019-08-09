@@ -364,7 +364,7 @@ int32_t get_cell_up(int32_t ix) {
 }
 
 int32_t get_cell_dir(int32_t ix, char dir) {
-  int32_t ix2;
+  int32_t ix2=0;
   if (dir == EST) {
     ix2 = get_cell_east(ix);
   } else if (dir == OUEST) {
