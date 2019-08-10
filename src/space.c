@@ -1293,7 +1293,7 @@ Vec3 compute_mass_center(int32_t type) {
 }
 
 void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
-  char filename[1024];
+  char filename[512];
   char str[100];
   char *ext;
 
@@ -1304,8 +1304,6 @@ void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
   } else {
     sprintf(filename, "%s%04d%s.%s", MOD_NAME, cpt, str, ext);
   }
-
-  output_path_noext(filename);
 
   LogPrintf("write CSP: %s, csp_time = %f (t0)\n", filename, csp_time);
   write_csp(dump_type, filename);
