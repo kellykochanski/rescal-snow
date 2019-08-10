@@ -1,0 +1,7 @@
+build/
+*.png
+*.csp.gz
+*.log
+scripts/genesis
+scripts/rescal
+scripts/DUN.csp

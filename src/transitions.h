@@ -98,6 +98,7 @@ void do_trans_db(int32_t tr, int32_t ix, int32_t dir);
 void do_trans_cel(int32_t tr, int32_t ix);
 void dump_transitions();
 void dump_trans_info();
+void dump_trans_info_header();
 
 //for the compatibility with the old syntax
 #define lien_trans trans_link

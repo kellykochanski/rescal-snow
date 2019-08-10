@@ -134,6 +134,7 @@ void modif_alti_cel(int32_t ix, uint8_t typ) {
   }
 }
 void calcule_alti(uint8_t typ, char alti_mode) {
+  (void)typ; //SUPPRESS unused warning
   Cell *aux;
   short *pt;
   int i, j, k;
@@ -171,10 +172,9 @@ void calcule_alti(uint8_t typ, char alti_mode) {
 int32_t calcule_alti_max(uint8_t typ) {
   Cell *aux;
   int16_t max = 0;
-  int16_t *pt;
   int32_t i, j, k;
   for (j = 0; j < LNS; j++)
-    for (i = 0; i < LEO; i++, pt++) {
+    for (i = 0; i < LEO; i++) {
       k = 1;
       aux = TE + (1 + i) + k * L + (LN + j) * HL;
       while ((k < H - 1) && (aux->celltype != typ)) {
@@ -570,6 +570,7 @@ int32_t check_ava(int32_t ix, void *data) {
 // (on suppose que le lien de transitions se fera en est-ouest)
 // TODO? : on pourrait aussi verifier la difference de hauteur en est-ouest avant de calculer la normale ...
 int32_t check_slope(int32_t ix, void *data) {
+  (void)data; //SUPPRESS unused warning
   static char start = 1;
   int32_t x, y, z, i, j, ij, chk_ok = 0;
   float nx;
@@ -717,6 +718,7 @@ float prob_cgv(float gv, float gvmin, float gvmax) {
 }
 // callback de controle en fonction du gradient de la vitesse selon la normale a la surface
 int32_t check_grad_vel(int32_t ix, void *data) {
+  (void)data; //SUPPRESS unused warning
   int32_t x, y, z, chk_ok;
   float gv, alea, prob;
   //calcul de la position (x,y,z)
@@ -770,14 +772,12 @@ void compute_coef_cgv() {
 void avalanches(uint8_t typ, int16_t h_lim, int16_t nb_cel_max, char alti_mode) {
   static char first = 1;
   Cell *aux, cel;
-  //CellData data;
   short *pt, *pt2;
   int i, j, k, jmin, jmax, ix, ix2;
   unsigned char alea, cpt, flag_ava;
   int step[8], step_alti[8];
   short i_cel, h_lim_diag;
   int nb_ava, nb_ava_iter;
-  FILE *fp;
   char output[128]; // things to be written to AVA log
 
   h_lim_diag = h_lim;
@@ -932,7 +932,6 @@ void avalanches_norm(uint8_t typ, int16_t nb_cel_max, char alti_mode) {
   int32_t step, step_alti;
   int16_t i_cel;
   int32_t nb_ava, nb_ava_iter, nb_ava_drop;
-  FILE *fp;
   Vec3 *pt_n3d;
   float angle;
   char output[256];
@@ -1342,7 +1341,7 @@ void loop_ava_propag(int32_t i, int32_t j) {
 
 void dump_surface(char* name, int32_t cpt, int32_t unit)
 {
-  int8_t filename[100];
+  char filename[100];
   int32_t i,j,n;
   char current_output[128];
   if (unit == UNIT_COMP)
@@ -1357,7 +1356,7 @@ void dump_surface(char* name, int32_t cpt, int32_t unit)
       for(i=0; i<LEO; i++, pt_al++){
         if (rot_map && OutOfSpace(1+i,LN+j)) continue;
         sprintf(current_output, "%d ", *pt_al);
-	output_write(filename, current_output);
+        output_write(filename, current_output);
         n++;
       }
       if (n>0) output_write(filename, "\n");
