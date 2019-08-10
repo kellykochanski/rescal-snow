@@ -398,10 +398,6 @@ void write_csp(char dump_type, char *filename) {
   Cell *buf, *aux;
   int32_t data_size;
   int32_t write_status;
-  int32_t errsav;
-  
-  // determines if 
-  int32_t do_big_dump = 0;
   
   if (data_pipe != -1) {
     LogPrintf("writing CSP data : %s\n", filename);
@@ -428,7 +424,6 @@ void write_csp(char dump_type, char *filename) {
 
     // send the message size
     write_status = write(data_pipe, &data_size, sizeof(int32_t));
-    errsav = errno;
     if (write_status == -1) {
       ErrPrintf("Failed to send message size on file descriptor %d.\n", data_pipe);
       exit(-4);
@@ -436,7 +431,6 @@ void write_csp(char dump_type, char *filename) {
 
     // send the message size
     write_status = write(data_pipe, header, hd_size);
-    errsav = errno;
     if (write_status == -1) {
       ErrPrintf("Failed to send header on file descriptor %d.\n", data_pipe);
       exit(-4);
@@ -444,7 +438,6 @@ void write_csp(char dump_type, char *filename) {
 
     // send the message size
     write_status = write(data_pipe, TE, data_size - hd_size);
-    errsav = errno;
     if (write_status == -1) {
       ErrPrintf("Failed to send message data on file descriptor %d.\n", data_pipe);
       exit(-4);

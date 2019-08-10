@@ -2,6 +2,11 @@ __doc__ = 'the cellspace module'
 __author__ = 'Gian-Carlo DeFazio'
 __date__ = 'July 31 2019'
 
+import matplotlib
+import os
+# Matplotlib will fail if no display is available (e.g. many high-performance computing environments)
+if bool(os.environ.get('DISPLAY', None)) == False:
+	matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as  colors
@@ -12,7 +17,6 @@ import struct
 import numpy as np
 import random
 import gzip
-import os
 import sys
 import argparse
 import scipy.ndimage

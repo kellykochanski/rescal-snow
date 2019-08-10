@@ -61,7 +61,10 @@ if __name__ == '__main__':
     # will do a bunch of rescal runs with different random seeds
 
     # find the pmi_rank
-    pmi_rank = os.environ['PMI_RANK']
+    if bool(os.environ.get('PMI_RANK', None)): 
+    	pmi_rank = os.environ['PMI_RANK']
+    else:
+        pmi_rank = 0
     parameters_1['random seed'] = int(pmi_rank) + 1234
     output_dir = 'exp' + str(pmi_rank)
     
