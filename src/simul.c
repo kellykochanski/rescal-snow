@@ -170,7 +170,7 @@ char *phys_prop_filename = NULL;
 float time_scale = 1.0; //t_0
 #endif
 
-char output_directory[1024] = "../out"; // directory for log and output files -KK
+char *output_directory = "../out"; // directory for log and output files -KK
 void output_headers(); // write headers for output files into output_directory
 void output_write(char *output_filename, char *output_content); // write a line of output
 void output_path(char *filename); // append directory name and .log to filename
@@ -1519,7 +1519,7 @@ void simul_dump() {
   static double time_threshold_dpng = 0.0;
   static double time_threshold_dcsp = 0.0;
   static int32_t cpt_dump = 0;
-  static char name[1024];
+  static char name[512];
   static char str[100];
   static double t0 = 0, t1 = 0;
   static char start = 1;
@@ -1563,7 +1563,6 @@ void simul_dump() {
       if (dump_delay_png && (time_threshold == time_threshold_dpng)) {
         //dump PNG file
         sprintf(name, "%s%05d_t0%s.png", MOD_NAME, cpt_dump, str);
-        output_path_noext(name);
         dump_image(name, "png");
         while (time_threshold_dpng <= csp_time) {
           time_threshold_dpng += dump_delay_png;
