@@ -26,6 +26,9 @@
 #include <memory.h>
 #include <assert.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <errno.h>
+
 
 #include "defs.h"
 #include "macros.h"
@@ -35,9 +38,12 @@
 #define READ_INT(_CH) (int)(*(int*)(_CH))
 #define READ_DOUBLE(_CH) (double)(*(double*)(_CH))
 
+
 extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
 extern Cell  *TE;            // la 'terre'
 extern double csp_time;
+
+ 
 
 char header[2048];  //metadata header
 int32_t csp_cell_size = 0; //size of cells in a CSP file
@@ -50,6 +56,9 @@ int32_t csp_y_bounds = 0; //north-south thickness of the boundary walls
 int32_t csp_z_bounds = 0; //vertical thickness of the boundary walls
 uint8_t decomp_flag = 0;
 uint8_t check_model = 1;
+uint8_t csp_borders_flag = 0; // determines if borders written with .csp files
+int32_t data_pipe = -1; // file descriptor to send data back to calling process
+
 
 uint8_t little_endian() {
   int32_t n = 1;
@@ -106,7 +115,15 @@ int32_t read_csp_header(char *filename) {
   int32_t chunk, cksize, mdsize, offset, n;
   FILE *fp;
 
-  decompress(filename);
+
+  // should check if decompression is neccesary
+  // if no .gz, skip decompression
+
+  if (strstr(filename, ".gz")) {
+    decompress(filename);
+  }
+  
+  
 
   if (!strstr(filename, ".csp")) {
     ErrPrintf("ERROR: %s not a CSP file\n", filename);
@@ -343,6 +360,29 @@ int32_t generate_csp_header() {
   memcpy(header + offset, &csp_time, sizeof(double));
   offset += mdsize;
 
+  /// chunk: sizes with border
+  /// the dimensions with border cells added
+  /// follows by flag value that is 1 if written with borders
+  /// and 0 if written without
+  int32_t csp_borders_flag_32 = (int32_t)csp_borders_flag;
+  mdsize = 4 * sizeof(int);
+  cksize = 8 + mdsize;
+  memcpy(header + offset, &cksize, 4);
+  offset += 4;
+  memcpy(header + offset, "BORD", 4);
+  offset += 4;
+  memcpy(header + offset, &H, sizeof(int));
+  offset += sizeof(int);
+  memcpy(header + offset, &L, sizeof(int));
+  offset += sizeof(int);
+  memcpy(header + offset, &D, sizeof(int));
+  offset += sizeof(int);
+  memcpy(header + offset, &csp_borders_flag_32, sizeof(int));
+  offset += sizeof(int);
+
+
+
+
   /// size of header
   memcpy(header + hdsz_offset, &offset, sizeof(int));
 
@@ -356,8 +396,19 @@ void write_csp(char dump_type, char *filename) {
   int32_t i, j;
   Cell *pt = TE;
   Cell *buf, *aux;
-
-  LogPrintf("writing CSP data : %s\n", filename);
+  int32_t data_size;
+  int32_t write_status;
+  int32_t errsav;
+  
+  // determines if 
+  int32_t do_big_dump = 0;
+  
+  if (data_pipe != -1) {
+    LogPrintf("writing CSP data : %s\n", filename);
+  }
+  else {
+    LogPrintf("piping CSP data to file descriptor %d\n", data_pipe);
+  }
 
   if (dump_type == DUMP_CSP) {
     // header with metadata
@@ -368,30 +419,78 @@ void write_csp(char dump_type, char *filename) {
     start = 0;
   }
 
-  fp = fopen(filename, "w");
-  if (!fp) {
-    ErrPrintf("Erreur ouverture fichier CSP : %s\n", filename);
-    exit(-4);
-  }
 
-  if (dump_type == DUMP_CSP) {
-    fwrite(header, 1, hd_size, fp);
-  }
+  // if data_pipe seems to have a valid value, send data
+  // through it
+  if (data_pipe != -1) {
+    // calculate some data sizes
+    data_size = H * L * D * sizeof(Cell) + hd_size;
 
-  AllocMemory(buf, Cell, HL);
-  ResetMemory(buf, Cell, HL);
-
-  for (j = 0; j < D; j++) {
-    aux = buf;
-    for (i = 0; i < HL; i++, pt++) {
-      if (pt->celltype != BORD) {
-        *aux++ = *pt;
-      }
+    // send the message size
+    write_status = write(data_pipe, &data_size, sizeof(int32_t));
+    errsav = errno;
+    if (write_status == -1) {
+      ErrPrintf("Failed to send message size on file descriptor %d.\n", data_pipe);
+      exit(-4);
     }
-    if (aux > buf) {
-      fwrite(buf, sizeof(Cell), csp_H * csp_L, fp);
+
+    // send the message size
+    write_status = write(data_pipe, header, hd_size);
+    errsav = errno;
+    if (write_status == -1) {
+      ErrPrintf("Failed to send header on file descriptor %d.\n", data_pipe);
+      exit(-4);
+    }
+
+    // send the message size
+    write_status = write(data_pipe, TE, data_size - hd_size);
+    errsav = errno;
+    if (write_status == -1) {
+      ErrPrintf("Failed to send message data on file descriptor %d.\n", data_pipe);
+      exit(-4);
     }
   }
-  fclose(fp);
-  FreeMemory(buf, Cell, HL);
+  // no pipe, so write to file the normal way
+  else {
+    fp = fopen(filename, "w");
+    if (!fp) {
+      ErrPrintf("Erreur ouverture fichier CSP : %s\n", filename);
+      exit(-4);
+    }
+
+    if (dump_type == DUMP_CSP) {
+      fwrite(header, 1, hd_size, fp);
+    }
+
+
+    // write all of TE
+    if (csp_borders_flag) {
+      fwrite(TE, sizeof(Cell), H * L * D, fp);
+      fclose(fp);
+    }
+
+    // write TE without border type cells
+    else {
+
+        AllocMemory(buf, Cell, HL);
+        ResetMemory(buf, Cell, HL);
+
+        for (j = 0; j < D; j++) {
+          aux = buf;
+          for (i = 0; i < HL; i++, pt++) {
+            if (pt->celltype != BORD) {
+              *aux++ = *pt;
+            }
+          }
+          if (aux > buf) {
+            fwrite(buf, sizeof(Cell), csp_H * csp_L, fp);
+          }
+        }
+        fclose(fp);
+        FreeMemory(buf, Cell, HL);
+    }
+  }
+
+
+  
 }

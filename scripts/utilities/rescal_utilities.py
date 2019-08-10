@@ -7,6 +7,9 @@
 
 import os
 import re
+import itertools
+import subprocess
+import glob
 
 class Design_a_run():
     # Design a ReSCAL run
@@ -197,6 +200,15 @@ class Parameters():
                 print("Parameter " + name + " has not been initialized and has no default value.")
                 print("Parameter " + name + " skipped. Check spelling or add a default with new_parameter().")
 
+    # TODO, deal with all parameters and verify none are real_data/*
+    def set_real_data_path(self, real_data_directory):
+        # sets path for 'Phys_prop_file' and 'Q_sat_file'
+        keys = ['Phys_prop_file','Qsat_file']
+        for key in keys:
+            self.parameters[key] = os.path.join(real_data_directory, os.path.basename(self.parameters[key])) 
+
+        
+                
     def get(self, name):
         return self.parameters[name]
 
@@ -286,19 +298,23 @@ class Run_Script():
         self.options['rescallocation']  = "../src"
 
         # automatically handle command line options here
-        self.__set_flag_option('usage info',            'h',    True)
-        self.__set_flag_option('show params',           'hm',   True)
-        self.__set_flag_option('no video',              'nv',   True)
-        self.__set_flag_option('info interval',         'info', True)
-        self.__set_flag_option('output interval',       'dcsp', '10t0')
-        self.__set_flag_option('png interval',          'dpng', '10t0')
-        self.__set_flag_option('stop after',            'stop', False)
-        self.__set_flag_option('frame rate',            'fr',   False)
-        self.__set_flag_option('random seed',           's',    False)
-        self.__set_flag_option('vel',                   'vel',  True)
-        self.__set_flag_option('vss',                   'vss',  True)
-        self.__set_flag_option('quit',                  'q',   False)
-        self.__set_flag_option('alti only',             'altionly', False)
+        self.__set_flag_option('usage info',             'h',    True)
+        self.__set_flag_option('show params',            'hm',   True)
+        self.__set_flag_option('no video',               'nv',   True)
+        self.__set_flag_option('info interval',          'info', True)
+        self.__set_flag_option('output interval',        'dcsp', '10t0')
+        self.__set_flag_option('png interval',           'dpng', '10t0')
+        self.__set_flag_option('stop after',             'stop', False)
+        self.__set_flag_option('frame rate',             'fr',   False)
+        self.__set_flag_option('random seed',            's',    False)
+        self.__set_flag_option('vel',                    'vel',  True)
+        self.__set_flag_option('vss',                    'vss',  True)
+        self.__set_flag_option('quit',                   'q',   False)
+        self.__set_flag_option('alti only',              'altionly', False)
+        self.__set_flag_option('cellspace borders',      'csp_borders', False)
+        self.__set_flag_option('uncompressed cellspace', 'uncompressed_csp', False)
+        
+        
 
         self.options['nice']            = False
         # locations for linking to physical properties files
@@ -348,6 +364,24 @@ class Run_Script():
                 f.write(" -" + str(self.__flag_options[option]) + " " + str(self.options[option]))
         f.write("\n \n")
 
+
+
+    def rescal_call_args(self):
+        # give a list of all the args for the actual call to rescal
+        args = []
+        if self.options['nice']:
+            nice_list.append('nice')
+        for option in self.__flag_options.keys():
+            if (self.options[option] == True):
+                # -flag
+                args.append("-" + self.__flag_options[option])
+            elif self.options[option]: # == any value except False or True
+                # -flag VALUE
+                args.append("-" + str(self.__flag_options[option]))
+                args.append(str(self.options[option]))
+        return args
+        
+        
 
     def write(self, filename):
         with open(filename, "w") as f:
@@ -405,6 +439,110 @@ class Run_Script():
 
 
 
+
+
+
+##--------------------------------------------------------------------------------------
+##--------------------------------------------------------------------------------------
+##--------------------------------------------------------------------------------------
+
+
+
+# TODO allow iteratables to be used
+# not just lists
+# TODO allow passing of arguments in dicts, but with no guaranteed ordering
+def all_parameter_combos(named_parameter_lists):
+    '''Takes a parameter list of lists of lists such as:
+       [['Coef_A', [0.1, 0.2, 0.3]], ['random seed', [1,2,3]]])
+       so that each sublist has the variable name and set of parameters to vary over.
+       Creates a generator that returns a dictionary with each possible parameter
+       combination and a string that can be used to identify the varying parameters.
+       If variable names have spaces they are replaced with underscores.'''
+
+    # separate parameter names from values lists, cast all values to strings
+    names = [x[0] for x in named_parameter_lists]
+    parameter_lists_original = [x[1] for x in named_parameter_lists]
+
+    # cast all values to strings
+    parameter_lists = [[str(i) for i in x] for x in parameter_lists_original]
+
+    # create a generator that makes all combination of parameters lists (the cartesian product)
+    # also creates a string for the file name
+    for parameter_combination in itertools.product(*parameter_lists):
+        # create a dict of the names and some value combination
+        params_dict_to_add = dict(zip(names, parameter_combination))
+        # creats a directory name based on the names and values
+        # if any of the values are file paths, only the base name of the file is used
+        directory_name_suffix = [name.replace(' ', '_') + '-' + \
+                                 os.path.basename(str(params_dict_to_add[name])) for name in names]
+        yield params_dict_to_add, '--'.join(directory_name_suffix)
+
+
+
+#### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
+def make_run_directories(fixed_params, variable_params, experiment_name, run_header, run_name):
+    '''Create a set of directories that contain all needed files for separate rescal runs.
+       The directories exist in a top level directory of experiment_name.
+       Each directory is names based on its varying parameters.
+       The paths to the run scripts are returned for easy execution on the
+       power-lab machines.'''
+
+    #breakpoint()
+    # make the top level directory, but don't overwrite a directory that
+    # already exists
+    experiment_directory_name = experiment_name
+    if not os.path.isdir(experiment_name):
+        os.mkdir(experiment_name)
+    # TODO deal with case that directory already exists
+    else:
+        return
+    
+    # save the paths to the run scipts for running them later
+    run_scripts = []
+
+    # create full parameter set for each run
+    # as well as the directory suffix for each run sub directory
+    for current_variable_params in all_parameter_combos(variable_params):
+        params_to_add, directory_suffix = current_variable_params
+        parameters = {**fixed_params, **params_to_add}
+        this_run = Design_a_run()
+        #this_run.set_header(run_header)
+        this_run.set_name(run_name)
+        # create a directory for each run inside the experiment directory
+        run_directory = os.path.join(experiment_directory_name, directory_suffix)
+        if not os.path.isdir(run_directory):
+            os.mkdir(run_directory)
+
+        this_run.set_directory(run_directory)
+        this_run.set_parameters(parameters)
+        this_run.write()
+
+        # store all the run scripts for future use
+        run_scripts.append(os.path.join(run_directory, run_name + '.run'))
+
+    return run_scripts
+
+
+#### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
+def run_rescals(run_scripts):
+    '''Takes path to a set of run_scripts that should be in the proper locations
+       to run rescal and runs each of them. Runs should be asynchronous.'''
+
+    # if any spaces in path names, turns ' ' into '\ ' so the shell can understand them
+    modded_scripts = []
+    for run_script in run_scripts:
+        modded_scripts.append(run_script.replace(' ', '\\ '))
+
+    processes = []
+    # move to the directory of each run_script and run it
+    for modded_script in modded_scripts:
+        processes.append(subprocess.Popen('cd ' + os.path.dirname(modded_script) + \
+                                          ' && ' +  modded_script, shell=True))
+    for p in processes:
+        p.wait()
+
+
+            
 # given a .par file, returns a dictionary of parameters
 # TODO, could be more flexible, but works for the auto-generated ones
 def par_to_dict(filename):
@@ -476,3 +614,20 @@ def get_files_to_process(top_dir, path_glob, exclude_globs):
         paths_truncated.append(p[:min_files_in_dir])
     return paths_truncated
 
+
+# makes randoms initial states
+# sets up runs directories to make initial states
+# runs the simulations to get the initial states
+# returns the file paths to the .csp files created
+def random_initial_states(num_states, parameters, top_dir, run_header='run', run_name='run'):
+
+
+    # create num_states random seeds
+    seed_numbers = random.sample(range(1,1000000), num_states)
+    seeds = [['random seed', seed_numbers]]
+    
+    run_files = make_run_directories(parameters, seeds, top_dir, run_header, run_name)
+
+    run_rescals(run_files)
+
+    paths = get_files_to_process(top_dir, )
