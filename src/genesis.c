@@ -232,8 +232,9 @@ void genesis() {
 /********************************* DUN model *********************************/
 /*****************************************************************************/
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
-  float di, dk;
-  float Ldx, Ldy;
+  float di, dj, dk;
+  float Ldx, Ldy, Ldz;
+  float pente = 2.0;
   float h, w, rc, n, hg, p;
   int32_t xmin, xmax, ymin, ymax;
   float x, y, z;

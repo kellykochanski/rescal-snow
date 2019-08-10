@@ -25,7 +25,6 @@
  */
 
 
-#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -208,7 +207,7 @@ void elimine_doublet(int32_t type, int32_t index, int32_t dir)
         int32_t x,y,z;
         Calcule_xyz(index,x,y,z);
         ErrPrintf("x=%d   y=%d   z=%d\n",x,y,z);
-        ErrPrintf("iter=%" PRIu64 "\n", iter);
+        ErrPrintf("iter=%ld\n", iter);
         exit(-1);
       }
       // on bouche le 'trou' avec le dernier doublet du tableau
@@ -453,7 +452,7 @@ void init_db_inv()
 void init_db_pos()
 {
   static char first = 1;
-  int32_t i,j,k, ix, td, tot;
+  uint32_t i,j,k, ix, td, tot;
   Cell *t,*dr, *ba, *de;
   // allocations pour les tableaux de positions db_pos[][]
   tot = 0;

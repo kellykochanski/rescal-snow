@@ -23,11 +23,7 @@
 
 #include <stdint.h>
 
-#if defined(TRACE_SRC) || defined(TRACE_AIRE) || defined(TRACE_PAR) || defined(TRACE_PAR_COL) || defined(TRACE_TRANS) || defined(TRACE3D_CEL) || defined(TRACE_FLUX)
-#define MODE_TRACE 1
-#else
-#define MODE_TRACE 0
-#endif
+#define MODE_TRACE defined(TRACE_SRC) || defined(TRACE_AIRE) || defined(TRACE_PAR) || defined(TRACE_PAR_COL) || defined(TRACE_TRANS) || defined(TRACE3D_CEL) || defined(TRACE_FLUX)
 
 void trace_init();
 int32_t trace_init_loop();

@@ -91,7 +91,6 @@ int32_t elapsed(double *sec) {
 }
 
 void *rescal_thread(void *data) {
-  (void)data; //SUPPRESS: unused warning
   sleep(1);
   rescal();
   end_of_rescal = 1;
@@ -215,7 +214,6 @@ void* do_stop(void* arg) {
 }
 
 void* do_quit(void* arg) {
-  (void)arg; //SUPPRESS: unused warning
   sleep(1);
   if (opt_quit && end_of_rescal) {
     LogPrintf("quit\n");

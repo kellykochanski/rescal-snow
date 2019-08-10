@@ -16,10 +16,10 @@
 
 
 if [ ! -e genesis ]; then
-  ln -s ../build/genesis .
+  ln -s ../src/genesis .
 fi
 if [ ! -e rescal ]; then
-  ln -s ../build/rescal .
+  ln -s ../src/rescal .
 fi
 
 ## parameters file (input)
