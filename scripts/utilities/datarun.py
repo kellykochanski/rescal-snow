@@ -2,7 +2,10 @@ __author__ = '''Gian-Carlo DeFazio'''
 
 __doc__ = r'''A python interface to ReSCAL. A DataRun object takes in the 
 parameters and meta-parameters required to run ReSCAL. The DataRun can receive and process
-the output of ReSCAL while rescal is running.'''
+the output of ReSCAL while ReSCAL is running.
+To run ReSCAL using a DataRun instance, the environment variable RESCAL_SNOW_ROOT
+should be defined and be the path of a ReSCAL installation. Also, a directory
+for the output should be created. The default is RESCAL_SNOW_ROOT/data_runs.'''
 
 import os
 import sys
@@ -21,8 +24,8 @@ def find_rescal_root(filename=None):
         if 'RESCAL_SNOW_ROOT' in os.environ:
             return os.path.expanduser(os.environ['RESCAL_SNOW_ROOT'])
         else:
-            sys.stderr.write('Rescal root not found. Set environment variable RESCAL_SNOW_ROOT',
-                             'to path to top directory of ReSCAL install or specify another path',
+            sys.stderr.write('Rescal root not found. Set environment variable RESCAL_SNOW_ROOT ' \
+                             'to be the path to the top directory of a ReSCAL install or specify another path ' \
                              'for \'rescal_root\'.\n')
             sys.exit(0)
     else:
@@ -32,8 +35,8 @@ def find_rescal_root(filename=None):
 
 
 class DataRun:
-    '''Collect and process the parameters for running ReSCAL and 
-    processing its output. Set up the data structures to store ReSCAL output.'''
+    '''Run ReSCAL with the option to receive and process the output 
+    while ReSCAL is running. Save the processed output to a file.'''
 
     def __init__(self, parameters, experiment_directory,
                  experiment_parent_directory='data_runs', rescal_root=None,
@@ -82,7 +85,8 @@ class DataRun:
         # should be the parent directory of the ReSCAL src and scripts directories
         self.rescal_root = find_rescal_root(rescal_root)
         
-        # this directory should alreay exist, but it will be created if it doesn't
+        # find the experiment_parent directory, this needs to already exist
+        # attempting to create will cause race conditions if doing multiple simultaneous runs
         if not os.path.isabs(experiment_parent_directory):
             self.experiment_parent_directory = os.path.join(self.rescal_root,
                                                             experiment_parent_directory)
@@ -99,15 +103,16 @@ class DataRun:
         # set up paths to other files/directories of interest
         self.rescal_src_directory = os.path.join(self.rescal_root, 'src')
         self.scripts_directory = os.path.join(self.rescal_root, 'scripts')
+        self.build_directory = os.path.join(self.rescal_root, 'build')
         self.real_data_directory = os.path.join(self.scripts_directory, 'real_data')
-        self.rescal_executable = os.path.join(self.scripts_directory, 'rescal')
-        self.genesis_executable = os.path.join(self.scripts_directory, 'genesis')
+        self.rescal_executable = os.path.join(self.build_directory, 'rescal')
+        self.genesis_executable = os.path.join(self.build_directory, 'genesis')
         self.ui_xml = os.path.join(self.rescal_src_directory, 'rescal-ui.xml')
         self.par = os.path.join(self.experiment_directory, 'run.par')
         self.meta_data = os.path.join(self.experiment_directory, 'meta_data')
         
         # parameters needs to contain directory paths for .par file generation to work
-        paths_to_add = {'rescallocation' : self.scripts_directory,
+        paths_to_add = {'rescallocation' : self.build_directory,
                         'real_data_location' : self.real_data_directory}
 
         self.parameters = {**parameters, **paths_to_add}
@@ -296,65 +301,4 @@ class DataRun:
                                   cwd=self.experiment_directory,
                                   stdout=subprocess.DEVNULL)
         rescal.wait()
-        
-       
 
-if __name__ == '__main__':
-
-    parameters_par_1 = {
-        'Model':  'SNO',
-        'Output_directory': 'out',
-        'Csp_file': 'DUN.csp',  # could just put the premade .csp in here
-        'Csp_template': 'SNOWFALL(4)',
-        'parfile': 'run.par',
-        'Boundary':  'OPEN',
-        'Time': 0.0,
-        'H': 80,
-        'L': 400,
-        'D': 200,
-        'Centering_delay': 0,
-        'Phys_prop_file': 'real_data/sealevel_snow.prop', # need to use rescal home
-        'Qsat_file': 'real_data/PDF.data', # need to use rescal home
-        'Lambda_A': 1,
-        'Lambda_E': 1,
-        'Lambda_T': 1.5,
-        'Lambda_C': 0.5,
-        'Lambda_G': 100000,
-        'Lambda_D': 0.01,
-        'Lambda_S': 0,
-        'Lambda_F': 1,
-        'Lambda_I': 0.002,
-        'Coef_A': 0.1,
-        'Coef_B': 10,
-        'Coef_C': 10,
-        'Prob_link_ET': 0.5,
-        'Prob_link_TT': 1.0,
-        'High_mobility': 1,
-        'Ava_mode': 'TRANS',
-        'Ava_angle': 38,
-        'Ava_h_lim': 1,
-        'Lgca_delay': 1,
-        'Lgca_speedup': 1000,
-        'Tau_min': 100,
-        'Tau_max': 1100,
-    }
-
-    # command line arguments for rescal which will be in the .run file
-    parameters_run_1 = {
-        'stop after' : '200_t0',
-        'output interval' : '50_t0',
-        'png interval' : False,
-        'quit' : True,
-        'random seed' : 6,
-        'usage info' : False,
-        'show params' : False,
-        'info interval' : False,
-    }
-
-    parameters_1 = {**parameters_par_1, **parameters_run_1}
-            
-    d = DataRun(parameters_1, 'pr_test')
-    #d.create_experiment_directory()
-    #d.run_without_piping()
-    #d.run_simulation()
-    

@@ -9,6 +9,11 @@ import argparse
 import scipy.ndimage
 
 import matplotlib
+import os
+# Matplotlib will fail if no display is available (e.g. many high-performance computing environments)
+if bool(os.environ.get('DISPLAY', None)) == False:
+	matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
@@ -32,9 +37,7 @@ def make_scaler(h,v):
     '''make a lists of lists that can be used in np.kron
 to scale up images by a factor of 'h' in the horizontal direction
 and a factor of 'v' in the vertical direction'''
-
     return [[1 for j in range(v)] for i in range(h)]
-
 
 
 invaders = np.kron(invader, make_scaler(6,6)) * 6
@@ -44,7 +47,6 @@ invaders = np.kron(invader, make_scaler(6,6)) * 6
 # used with param_space_exploration_utilities.get_files_to_process
 path_glob = 'out/ALTI*'
 exclude_globs = []
-
 
 
 def fft2d_analyze(data):

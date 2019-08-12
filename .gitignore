@@ -5,3 +5,5 @@ build/
 scripts/genesis
 scripts/rescal
 scripts/DUN.csp
+*.pyc
+__pychache__/
