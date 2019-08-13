@@ -56,7 +56,7 @@ uint8_t decomp_flag = 0;
 uint8_t check_model = 1;
 uint8_t csp_borders_flag = 0; // determines if borders written with .csp files
 int32_t data_pipe = -1; // file descriptor to send data back to calling process
-
+uint8_t perf_print_flag = 0; // determines whether or not some performance data is printed to stdout  
 
 uint8_t little_endian() {
   int32_t n = 1;

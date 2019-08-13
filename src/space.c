@@ -53,7 +53,7 @@ extern int32_t rot_mode;
 
 extern uint8_t uncompressed_csp_flag;
 extern int32_t id;
-
+extern uint8_t perf_print_flag; // defined in format.c, set in entry.c
 
 extern int32_t data_pipe; // from format.c, determines if data is piped or saved, if piped no need to compress
 
@@ -85,10 +85,27 @@ Pos2 *rot_map_pos0 = NULL;        // old periodic mapping of the rotating space
 
 // for performance testing
 struct timeval time_start;
-struct timeval time_stop;
-long seconds_elapsed;
-long micro_seconds_elapsed;
-double elapsed_time;
+
+// start and stop have been used to record a time using gettimeofday
+// find the difference (stop - start) in seconds
+double calculate_sec(struct timeval start, struct timeval stop) {
+    long s_elapsed = (long)(stop.tv_sec) - (long)(start.tv_sec);
+    long us_elapsed = (long)(stop.tv_usec) - (long)(start.tv_usec);
+    return ((double)s_elapsed) + ((double)us_elapsed) / 1000000.0;
+}
+
+// log the difference between current time and start
+// print out message with id and time to stdout
+// do nothing if output is not set to visible
+void log_time_delta(struct timeval start, char* message, int id, int visible) {
+  if (!visible) {
+    return;
+  }
+  struct timeval stop;
+  gettimeofday(&stop, NULL);
+  double delta_time = calculate_sec(start, stop);
+  LogPrintf("%d %s %e\n", id, message, delta_time);
+}
 
 
 void init_terre() {
@@ -1324,25 +1341,11 @@ void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
   LogPrintf("write CSP: %s, csp_time = %f (t0)\n", filename, csp_time);
   write_csp(dump_type, filename);
 
-  LogPrintf("!uncompressed_csp_flag: %d dump_type == DUMP_CSP: %d\n", !uncompressed_csp_flag, dump_type == DUMP_CSP);
-
-  
   // if uncompressed_csp_flag is 1, don't compress, 0 by default, if piping there is no file to compress 
   if (!uncompressed_csp_flag && (dump_type == DUMP_CSP) && data_pipe == -1) {
-
-
-    
     gettimeofday(&time_start, NULL);
-    
     compress(filename, 1);
-    
-    gettimeofday(&time_stop, NULL);
-    seconds_elapsed = (long)(time_stop.tv_sec) - (long)(time_start.tv_sec);
-    micro_seconds_elapsed = (long)(time_stop.tv_usec) - (long)(time_start.tv_usec);
-    elapsed_time = ((double)(seconds_elapsed)) * 1000.0 + ((double)(micro_seconds_elapsed)) / 1000;
-    LogPrintf("%d COMPRESS_TERRE_TIME  %e\n", id, elapsed_time);
-
-
+    log_time_delta(time_start, "COMPRESS_TERRE_TIME", id, perf_print_flag);          
   }
 }
 

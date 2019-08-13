@@ -99,6 +99,15 @@ class DataRun:
                                                      experiment_directory)
         else:
             self.experiment_directory = os.fspath(experiment_directory)
+
+        # deal with output directory which should be made by ReSCAL            
+        ouput_directory = 'out'
+        if 'Output_directory' in parameters.keys():
+            output_directory = parameters['Output_directory']
+        if not os.path.isabs(output_directory):
+            self.output_directory = os.path.join(self.experiment_directory, output_directory)
+        else:
+            self.output_directory = os.fspath(output_directory)
             
         # set up paths to other files/directories of interest
         self.rescal_src_directory = os.path.join(self.rescal_root, 'src')
@@ -111,6 +120,7 @@ class DataRun:
         self.par = os.path.join(self.experiment_directory, 'run.par')
         self.meta_data = os.path.join(self.experiment_directory, 'meta_data')
         
+        
         # parameters needs to contain directory paths for .par file generation to work
         paths_to_add = {'rescallocation' : self.build_directory,
                         'real_data_location' : self.real_data_directory}
@@ -122,8 +132,8 @@ class DataRun:
         self.keep_ffts = keep_ffts
         self.height_maps = []
         self.ffts = []
-        self.height_maps_path = os.path.join(self.experiment_directory, 'height_maps.npz')
-        self.ffts_path = os.path.join(self.experiment_directory, 'ffts.npz')
+        self.height_maps_path = os.path.join(self.output_directory, 'height_maps.npz')
+        self.ffts_path = os.path.join(self.output_directory, 'ffts.npz')
 
 
 
@@ -289,7 +299,10 @@ class DataRun:
             # now get the data back and process it
             self.receive_process_data()
 
-        # write the data to file
+        # ensure that an output_directory exists, just in case ReSCAL didn't make it
+        if not os.path.isdir(self.output_directory):
+            os.mkdir(self.ouput_directory)
+        # write the data
         if self.keep_height_maps:
             height_maps = np.array(self.height_maps)
             np.savez_compressed(self.height_maps_path, height_maps=height_maps)

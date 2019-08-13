@@ -313,7 +313,7 @@ class Run_Script():
         self.__set_flag_option('alti only',              'altionly', False)
         self.__set_flag_option('cellspace borders',      'csp_borders', False)
         self.__set_flag_option('uncompressed cellspace', 'uncompressed_csp', False)
-        
+        self.__set_flag_option('print performance',      'perf_print',  False)
         
 
         self.options['nice']            = False
@@ -620,8 +620,6 @@ def get_files_to_process(top_dir, path_glob, exclude_globs):
 # runs the simulations to get the initial states
 # returns the file paths to the .csp files created
 def random_initial_states(num_states, parameters, top_dir, run_header='run', run_name='run'):
-
-
     # create num_states random seeds
     seed_numbers = random.sample(range(1,1000000), num_states)
     seeds = [['random seed', seed_numbers]]

@@ -56,6 +56,7 @@
 #include "lgca.h"
 #include "callbacks.h"
 #include "view.h"
+extern uint8_t perf_print_flag; // defined in format.c, set in entry.c
 extern int32_t data_pipe; // from format.c, determines if piping will happen, cencels ALTI file writing
 extern uint8_t csp_borders_flag; // keep border cells when writing .csp files to disc
 extern uint8_t opt_info, opt_nv;
@@ -194,10 +195,6 @@ void flow_stabilization(int32_t);
 
 // timers for performance testing
 struct timeval time_start;
-struct timeval time_stop;
-long seconds_elapsed;
-long micro_seconds_elapsed;
-double elapsed_time;
 extern int32_t id;
 
 void simul_stop();
@@ -1588,32 +1585,15 @@ void simul_dump() {
       if (dump_delay_csp && (time_threshold == time_threshold_dcsp)) {
         // edited to allow dumping of ALTI files but not .csp files using the altionly flag
         if (!alti_only_flag) {
-
-
           gettimeofday(&time_start, NULL);
-          
           dump_terre(DUMP_CSP, cpt_dump, UNIT_T0);
-          
-          gettimeofday(&time_stop, NULL);
-          seconds_elapsed = (long)(time_stop.tv_sec) - (long)(time_start.tv_sec);
-          micro_seconds_elapsed = (long)(time_stop.tv_usec) - (long)(time_start.tv_usec);
-          elapsed_time = ((double)(seconds_elapsed)) * 1000.0 + ((double)(micro_seconds_elapsed)) / 1000;
-          LogPrintf("%d DUMP_TERRE_TIME  %e\n", id, elapsed_time);
-
-          
+          log_time_delta(time_start, "DUMP_TERRE_TIME", id, perf_print_flag);
         }
 #ifdef ALTI
         if (data_pipe == -1) {
           gettimeofday(&time_start, NULL);
-          
           dump_surface("ALTI", cpt_dump, UNIT_T0);
-
-          gettimeofday(&time_stop, NULL);
-          seconds_elapsed = (long)(time_stop.tv_sec) - (long)(time_start.tv_sec);
-          micro_seconds_elapsed = (long)(time_stop.tv_usec) - (long)(time_start.tv_usec);
-          elapsed_time = ((double)(seconds_elapsed)) * 1000.0 + ((double)(micro_seconds_elapsed)) / 1000;
-          LogPrintf("%d DUMP_SURFACE_TIME  %e\n", id, elapsed_time);
-          
+          log_time_delta(time_start, "DUMP_SURFACE_TIME", id, perf_print_flag);          
         }
 #endif
 #ifdef LGCA

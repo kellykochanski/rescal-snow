@@ -59,6 +59,7 @@ extern uint8_t uncompressed_csp_flag;
 extern uint8_t csp_borders_flag;
 extern int32_t data_pipe; //
 extern int32_t id; // from simul.c, used to tell processed apart when multiple writing to same log file 
+extern uint8_t perf_print_flag; // defined in format.c
 
 extern float stop_delay_t0;
 extern double stop_time;
@@ -278,7 +279,9 @@ void general_options(int32_t argc, char *argv[]) {
       data_pipe = atoi(argv[++i]);
       csp_borders_flag = 1;
     } else if (!strcmp(argv[i], "-id")) {
-      id = atoi(argv[++i]);         
+      id = atoi(argv[++i]);
+    } else if (!strcmp(argv[i], "-perf_print")) {
+      perf_print_flag = 1;  
     } else if (!strcmp(argv[i], "-info")) {
       opt_info = 1;
     } else if (!strcmp(argv[i], "-dcsp") || !strcmp(argv[i], "-dcsphpp")) {
@@ -368,6 +371,7 @@ void show_general_options() {
   printf("  -csp_borders \t\t .csp files will be written with border type cells still attached.\n");
   printf("  -data_pipe <n>\t\t sets up a pipe to pass data back to calling process.\n");
   printf("  -id <n> \t\t give rescal run a unique id.\n");
+  printf("  -perf_print \t\t print out times for .csp and ALTI processing to stdout.\n");
   printf("  -dpng <f>t0\t generation of PNG images with delay in t0 unit (float value)\n");
 // #ifndef USE_LIBPNG
 //   printf("  -djpeg <n> \t generation of a Jpeg image every <n> seconds\n");
