@@ -525,8 +525,10 @@ def make_run_directories(fixed_params, variable_params, experiment_name, run_hea
 
 #### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
 def run_rescals(run_scripts):
-    '''Takes path to a set of run_scripts that should be in the proper locations
-       to run rescal and runs each of them. Runs should be asynchronous.'''
+    '''Takes a list of paths to .run scripts that should already be in directories set up
+    to run ReSCAL. An instance of ReSCAL is started using each run script and then
+    the ReSCAL all run at the same time and asynchronously. This function waits for all the
+    child processes to complete.'''
 
     # if any spaces in path names, turns ' ' into '\ ' so the shell can understand them
     modded_scripts = []

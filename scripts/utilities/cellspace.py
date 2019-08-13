@@ -10,9 +10,6 @@ if bool(os.environ.get('DISPLAY', None)) == False:
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as  colors
-
-import pydoc
-
 import struct
 import numpy as np
 import random
@@ -21,9 +18,41 @@ import sys
 import argparse
 import scipy.ndimage
 import random
+import math
 
 import heightmap
 
+
+def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True):
+    '''Create a sinusoid on a 2D plane that has dimensions dims. 
+    Does an inverse Fourier transform and discretizes. 
+    The wave is resized so that its height ranges from 0 to height. 
+    The frequency is relative to the space. If the frequency is x, wave will 
+    complete x cycles across the space. If wind_direction is True, then the wave
+    heights will vary in the horizontal direction, otherwise they will vary in the
+    vertical direction.'''
+    # create a 2D array of the same size as the dims
+    grid = np.zeros(dims, dtype=np.complex)
+
+    # convert phase to a complex number
+    complex_val = math.cos(phase) + (math.sin(phase) * 1.0j)
+    
+    # add the frequency to the grid
+    if wind_direction:
+        grid[0,frequency] = complex_val
+    else:
+        grid[frequency,0] = complex_val
+        
+    # make the sinusoid
+    height_map = np.fft.ifft2(grid).real
+
+    # scale to amplitude
+    if height_map.max() != 0.0:
+        height_map = height_map *  height / (2 * height_map.max())
+        
+    # now get rid of the negatives and round    
+    height_map = height_map - np.min(height_map)
+    return np.round_(height_map).astype(np.uint8)
 
 
 def make_gaussian(h, d_padding, l_padding, sigma):
@@ -651,9 +680,9 @@ class CellSpace:
     # adds a height_map to the sand with heigh_map positioned by top_left
     def add_height_map(self, top_left, height_map, temp_mod=False):
 
+        # find the portion of the image on which to change height
         x_min, y_min = top_left
         x_len, y_len, = height_map.shape
-        #image_window = self.cells[x_min:x_min + x, y_min:y_min + y]
 
         sm = self.surface_map
         for x in range(x_len):
@@ -665,16 +694,14 @@ class CellSpace:
                     else:
                         self.cells[x_min+x,i,y_min+y] = cell_types['grain']
 
-    # add a sin wave to the cellspace
-    def add_sine(self, amp=5, f=10, temp_mod=False):
-        '''Superimposes a sine wave onto the surface of the cell space.'''
-
-        # create a grid of values 
-        a = np.mgrid[f*-1.0:f*1.0:f*2.0/self.length, f*-1.0:f*1.0:f*2.0/self.depth]
-        s = np.sin(a[0]) + 1.0
-        s = (s.T * amp)
-        s = (np.round(s)).astype(np.uint8)
-        self.add_height_map((0,0),s, temp_mod=temp_mod)
+                        
+    
+    def add_sinusoid(self, amplitude=5, frequency=10, phase=0, wind_direction=True, temp_mod=False):
+        '''Superimposes a sinusoidal wave onto the surface of the cell space.'''
+        # create a 2D heightmap that will be superimposed onto the surface
+        d, _, l = self.cells.shape
+        sinusoid_height_map = make_sinusoid(amplitude, frequency, (d,l), phase=phase)
+        self.add_height_map((0,0), sinusoid_height_map, temp_mod=temp_mod)
 
 
     # types of mods available
@@ -696,6 +723,7 @@ class CellSpace:
             # TODO deal with not enough space to modify
             return None
 
+        d, _, l = self.shape
         paths = []
         # do the modification
         for i in range(num_mods):
@@ -704,10 +732,12 @@ class CellSpace:
                 self.temp_mod_cells = self.cells.copy()
 
             if mod_type == 'sine':
-                # calculate frequency and amplitude values
+                # calculate parameters to add_sinusoid
                 amp = random.randint(2,h)
-                f = random.randint(1, 20)
-                self.add_sine(amp, f, temp_mod)
+                f = random.randint(1, min(d,l)//10)
+                wind_direction = random.choice([True, False])
+                phase = random.uniform(0, 2*math.pi)
+                self.add_sinusoid(amp, f, phase=phase, wind_direction=wind_direction, temp_mod=temp_mod)
             elif mod_type == 'gaussian':
                 # create a gaussian
                 
@@ -871,23 +901,3 @@ class CellSpace:
         plt.show()
         return
 
-# make a main() that takes command line args
-def _process_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--height_map', action='store_true',
-                        help='draw height map of input file')
-    parser.add_argument('-f', '--input_file', required=True,
-                        help='input file path')
-    parser.add_argument('--fft_blur', action='store_true',
-                        help='draw colormap of part of low frequency values of 2Dfft magnitudes')
-    return parser.parse_args()
-
-
-def _main():
-    
-    args = _process_args()
-    c = CellSpace(args.input_file)
-    if args.height_map:
-        c.draw_height_map()
-    if args.fft_blur:
-        c.draw_fft_blur()
