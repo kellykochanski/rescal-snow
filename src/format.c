@@ -27,8 +27,6 @@
 #include <assert.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <errno.h>
-
 
 #include "defs.h"
 #include "macros.h"
@@ -297,7 +295,7 @@ int32_t generate_csp_header() {
   offset += 8;
 
   /// chunk: size of header
-  mdsize = sizeof(int);
+  mdsize = sizeof(int32_t);
   cksize = 8 + mdsize;
   memcpy(header + offset, &cksize, 4);
   offset += 4;
@@ -326,22 +324,22 @@ int32_t generate_csp_header() {
     csp_L = L;
     csp_D = D;
   }
-  mdsize = 3 * sizeof(int);
+  mdsize = 3 * sizeof(int32_t);
   cksize = 8 + mdsize;
   memcpy(header + offset, &cksize, 4);
   offset += 4;
   memcpy(header + offset, "SIZE", 4);
   offset += 4;
-  memcpy(header + offset, &csp_H, sizeof(int));
-  offset += sizeof(int);
-  memcpy(header + offset, &csp_L, sizeof(int));
-  offset += sizeof(int);
-  memcpy(header + offset, &csp_D, sizeof(int));
-  offset += sizeof(int);
+  memcpy(header + offset, &csp_H, sizeof(int32_t));
+  offset += sizeof(int32_t);
+  memcpy(header + offset, &csp_L, sizeof(int32_t));
+  offset += sizeof(int32_t);
+  memcpy(header + offset, &csp_D, sizeof(int32_t));
+  offset += sizeof(int32_t);
 
   /// chunk: cells metadata
   md4 = sizeof(Cell);
-  mdsize = sizeof(int);
+  mdsize = sizeof(int32_t);
   cksize = 8 + mdsize;
   memcpy(header + offset, &cksize, 4);
   offset += 4;
@@ -365,26 +363,23 @@ int32_t generate_csp_header() {
   /// follows by flag value that is 1 if written with borders
   /// and 0 if written without
   int32_t csp_borders_flag_32 = (int32_t)csp_borders_flag;
-  mdsize = 4 * sizeof(int);
+  mdsize = 4 * sizeof(int32_t);
   cksize = 8 + mdsize;
   memcpy(header + offset, &cksize, 4);
   offset += 4;
   memcpy(header + offset, "BORD", 4);
   offset += 4;
-  memcpy(header + offset, &H, sizeof(int));
-  offset += sizeof(int);
-  memcpy(header + offset, &L, sizeof(int));
-  offset += sizeof(int);
-  memcpy(header + offset, &D, sizeof(int));
-  offset += sizeof(int);
-  memcpy(header + offset, &csp_borders_flag_32, sizeof(int));
-  offset += sizeof(int);
-
-
-
+  memcpy(header + offset, &H, sizeof(int32_t));
+  offset += sizeof(int32_t);
+  memcpy(header + offset, &L, sizeof(int32_t));
+  offset += sizeof(int32_t);
+  memcpy(header + offset, &D, sizeof(int32_t));
+  offset += sizeof(int32_t);
+  memcpy(header + offset, &csp_borders_flag_32, sizeof(int32_t));
+  offset += sizeof(int32_t);
 
   /// size of header
-  memcpy(header + hdsz_offset, &offset, sizeof(int));
+  memcpy(header + hdsz_offset, &offset, sizeof(int32_t));
 
   return offset;
 }
@@ -393,7 +388,6 @@ void write_csp(char dump_type, char *filename) {
   static int32_t hd_size = 0;
   static char start = 1;
   FILE *fp;
-  int32_t i, j;
   Cell *pt = TE;
   Cell *buf, *aux;
   int32_t data_size;
@@ -468,9 +462,9 @@ void write_csp(char dump_type, char *filename) {
         AllocMemory(buf, Cell, HL);
         ResetMemory(buf, Cell, HL);
 
-        for (j = 0; j < D; j++) {
+        for (int32_t j = 0; j < D; j++) {
           aux = buf;
-          for (i = 0; i < HL; i++, pt++) {
+          for (int32_t i = 0; i < HL; i++, pt++) {
             if (pt->celltype != BORD) {
               *aux++ = *pt;
             }

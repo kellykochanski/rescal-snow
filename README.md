@@ -15,6 +15,7 @@ Simulating snow self-organization with cellular automata
     3. [Visualizing the output](#visualizing)
 3. [Setting up parallel runs](#parallel)
     1. [Example 4: parameter space exploration](#test-parallel)
+    2. [Run ReSCAL within python](#python)
 4. [Community guidelines](#community)
     1. [Citation](#Citation)
     2. [Support](#Support)
@@ -341,7 +342,9 @@ The runs with high wind speed (low `Tau_min`) have less even snow cover, with be
 > - script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun `param_space_exploration_example.py` and confirm that it produced the output above; check that you're running `msub/sbatch` from scripts; check relative directory references in msub/sbatch script and submit.sh
 > - runs time out before producing useful output -> increase walltime; large simulations on slow machines may ultimately take a few hours
 
+### Run ReSCAL within python <a name="python"</a>
 
+There is an option to run ReSCAL in such a way that the `.csp` files are piped to a python process that processes them while ReSCAL is running. This can be useful for reducing the amount of disc space used and may have a siginificant speed increase for some configurations. There is an example of how to do this at [docs/rescal-in-python].
 
 ## Community guidelines <a name="community"></a>
 
@@ -373,7 +376,6 @@ Issues which cannot be handled via Github can be addressed to
     Kelly Kochanski
     kelly.kochanski@gmail.com
     www.github.com/kellykochanski
-
 
 ### Contributing
 

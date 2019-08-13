@@ -1,4 +1,14 @@
 #!/bin/bash
+
+# example of using sbatch to run multiple instances of example_pyrescal 
+
+# ensure that RESCAL_SNOW_ROOT/data_runs/ exists
+# make it if it doesn't
+if [ ! -d "$RESCAL_SNOW_ROOT/data_runs/" ]; then
+    mkdir "$RESCAL_SNOW_ROOT/data_runs/"
+fi
+
+
 #SBATCH --job-name r0
 #SBATCH --output=log.txt
 #SBATCH --qos normal

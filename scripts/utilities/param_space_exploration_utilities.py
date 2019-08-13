@@ -39,8 +39,11 @@ def explore_parameter_space(output_root, executable_location, parameter_ranges, 
     # Write parameter files for each set of parameters
     now = datetime.datetime.now()
     for run in range(n_runs):
-        run_output_dir          = output_root + "/" + \
-                        str(now.year) + str(now.month) + str(now.day) + "_" + str(run)
+        run_output_file = '{year}{month}{day}_{run}'.format(year=str(now.year),
+                                                            month=str(now.month),
+                                                            day=str(now.day),
+                                                            run=str(run))
+        run_output_dir = os.path.join(output_root, run_ouput_file)
 
         # Avoid overwriting previous results or using a messy directory
         while os.path.isdir(run_output_dir):
@@ -195,11 +198,11 @@ def get_files_to_process(top_dir, path_glob, exclude_globs):
     paths = []
     for output_dir in output_dirs:
         # get all possible matches
-        local_paths = glob.glob(output_dir + '/' + path_glob)
+        local_paths = glob.glob(os.path.join(output_dir, path_glob))
         # find the ones to exclude
         exclude_paths = []
         for exclude_glob in exclude_globs:
-            exclude_paths += glob.glob(output_dir + '/' + exclude_glob)
+            exclude_paths += glob.glob(os.path.join(output_dir, exclude_glob))
 
         # now remove the bad paths from the good ones
         local_paths = sorted(list(set(local_paths) - set(exclude_paths)))
@@ -222,25 +225,5 @@ def get_files_to_process(top_dir, path_glob, exclude_globs):
     for p in paths:
         paths_truncated.append(p[:min_files_in_dir])
     return paths_truncated
-
-
-
-# runs a simulation to a given time,
-# then runs a set of modified simulations from that time onwards
-# mods can be to any physics hyperparameter(s)
-# the random seed
-# of the cell space itself
-# each modified version directory has mods 'dcoumented'
-# in its runscript
-# params: a dict of all the inputs to rescal
-# this includes parameters that go into the .par file and the .run file
-# there are also meta parameters that affect how the .run file is made
-# such as how .csp files are used
-
-# params first set
-def run_modify_run(params, params_first_set, params_second_set):
-    pass
-
-
 
 

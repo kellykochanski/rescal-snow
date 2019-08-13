@@ -214,7 +214,6 @@ class CellSpace:
         self.make_ceiling_map()
 
 
-
     def _get_cell_data_type(self):
         '''get correct data type depending on cell size'''
         data_type = None
@@ -421,7 +420,7 @@ class CellSpace:
         if compressed:
             # if no .gz at end of file, add it
             if not filename.endswith('.gz'):
-                filename = filname + '.gz'
+                filename = filename + '.gz'
             with gzip.open(filename) as f:
                f.write(self.header_binary)
                cells.tofile(f)
@@ -668,12 +667,13 @@ class CellSpace:
 
     # add a sin wave to the cellspace
     def add_sine(self, amp=5, f=10, temp_mod=False):
-        # mgrid of (l,d) values
+        '''Superimposes a sine wave onto the surface of the cell space.'''
+
+        # create a grid of values 
         a = np.mgrid[f*-1.0:f*1.0:f*2.0/self.length, f*-1.0:f*1.0:f*2.0/self.depth]
         s = np.sin(a[0]) + 1.0
         s = (s.T * amp)
         s = (np.round(s)).astype(np.uint8)
-        #hm(s)
         self.add_height_map((0,0),s, temp_mod=temp_mod)
 
 

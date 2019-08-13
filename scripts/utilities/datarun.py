@@ -27,7 +27,7 @@ def find_rescal_root(filename=None):
             sys.stderr.write('Rescal root not found. Set environment variable RESCAL_SNOW_ROOT ' \
                              'to be the path to the top directory of a ReSCAL install or specify another path ' \
                              'for \'rescal_root\'.\n')
-            sys.exit(0)
+            sys.exit(-1)
     else:
         return os.path.expanduser(filename)
 
@@ -138,11 +138,11 @@ class DataRun:
         for d in dirs:
             if not os.path.isdir(d):
                 sys.stderr.write('ERROR: directory ' + d + ' not found.\n')
-                sys.exit(0)
+                sys.exit(-1)
         for f in files:
             if not os.path.isfile(f):
                 sys.stderr.write('ERROR: file ' + f + ' not found.\n')
-                sys.exit(0)
+                sys.exit(-1)
                 
         
 
@@ -206,9 +206,9 @@ class DataRun:
         # run genesis if neccesary
         if 'premade_csp' not in self.parameters.keys():
             # run genesis and put the output where specified by 'Csp_file' parameter
-            p = subprocess.Popen([self.genesis_executable, '-f',  self.par, '-s', str(2000)],
+            p = subprocess.check_call([self.genesis_executable, '-f',  self.par, '-s', str(2000)],
                                  stdout=subprocess.DEVNULL)
-            p.wait()
+        
 
         
         # now get the cmd line args for rescal
@@ -227,7 +227,10 @@ class DataRun:
         Get the data itself. Create a cellspace.CellSpace to
         process the data and keep the height_maps and ffts 
         based on flags.'''
-        
+
+        # either block because there's nothing to read,
+        # read the next .csp,
+        # or see EOF and return
         data_size_bytes = os.read(self.r, 4)
         if not data_size_bytes:
             return
@@ -254,20 +257,24 @@ class DataRun:
     def run_simulation(self):
         '''Run ReSCAL and get the cellspace data
         that would otherwise be written to a file. Process and save the data
-        to files and write out the meta-data.'''
+        to files and write out the meta-data. A new file descriptor is used,
+        as opposed to just redirecting the stdot of ReSCAL, because the stdout
+        of ReSCAL is full of text output that this function doesn't deal with.'''
 
         # setup pipe to rescal
         r,w = os.pipe()
 
+        # save the read side of the pipe
         self.r = r
         
         # allow rescal to inherit the write side of the pipe
         os.set_inheritable(w, True)
 
-        # add the pipe to self.rescal args
+        # add the pipe to self.rescal args so rescal knows it's open
         self.rescal_args = self.rescal_args + ['-data_pipe',  str(w)]
 
         # start a rescal process that can send data back
+        # data is send back one .csp at a time through the pipe
         rescal = subprocess.Popen(self.rescal_args,
                                   pass_fds=([w]),
                                   cwd=self.experiment_directory,

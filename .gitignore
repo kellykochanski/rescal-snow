@@ -5,5 +5,9 @@ build/
 scripts/genesis
 scripts/rescal
 scripts/DUN.csp
+
 *.pyc
 __pychache__/
+
+# default location for output from datarun.py
+data_runs/
