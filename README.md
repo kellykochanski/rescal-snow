@@ -344,7 +344,7 @@ The runs with high wind speed (low `Tau_min`) have less even snow cover, with be
 
 ### Run ReSCAL within python <a name="python"></a>
 
-There is an option to run ReSCAL in such a way that the `.csp` files are piped to a python process that processes them while ReSCAL is running. This can be useful for reducing the amount of disc space used and may have a siginificant speed increase for some configurations. There is an example of how to do this at [docs/rescal-in-python.md].
+There is an option to run ReSCAL in such a way that the `.csp` files are piped to a python process that processes them while ReSCAL is running. This can be useful for reducing the amount of disc space used and may have a siginificant speed increase for some configurations. There is an example of how to do this at [docs/rescal-in-python.md](docs/rescal-in-python.md).
 
 ## Community guidelines <a name="community"></a>
 
