@@ -8,7 +8,7 @@ Author: Gian-Carlo DeFazio, defaziogiancarlo@gmail.com
 
 ReSCAL has utilities for the creation and modification of its cellspace files,
 which usually have a file suffix of `.csp` or `.csp.gz`.
-The CellSpace class, in [scripts/utilities/cellspace.py](#../scripts/utilities/cellspace.py) creates 
+The CellSpace class, in [scripts/utilities/cellspace.py](../scripts/utilities/cellspace.py) creates 
 a python object using a .csp file. Having a python version of the cell spaces makes makes it easier to 
 work with cellspaces when running ReSCAL in python as demostrated here [rescal-in-python.md].
 
