@@ -3,7 +3,7 @@
 # Set up this run in the correct directory
 #Configured for LL CPU not RC
 
-output_root="../test_gaussian_parallel"
+output_root="../test_parallel_runs"
 echo "Looking for jobs to run under ${output_root}"
 
 output_dirs=(${output_root}/*)
