@@ -101,7 +101,9 @@ ls $RESCAL_SNOW_ROOT/data_runs
 Look at one of the directories
 ```bash
 ls $RESCAL_SNOW_ROOT/data_runs/exp0
->> DUN.csp  ffts.npz  height_maps.npz  meta_data  out  run.par
+>> DUN.csp  meta_data  out  run.par
+ls $RESCAL_SNOW_ROOT/data_runs/exp0/out
+>> CELL.log  CGV_COEF.log	DENSITE.log  TRANSITIONS.log  VEL.log  ffts.npz  height_maps.npz
 ```
 
 The `.npz` files contain the processed outputs.
@@ -114,12 +116,14 @@ python3
 >>> f = np.load('ffts.npz')['ffts']
 >>> h.shape
 (5, 200, 400)
->>> f.shape()
+>>> f.shape
 (5, 16, 33)
 ```
 In this case, there are 5 timesteps (0_t0, 100_t0, 200_t0, 300_t0, 400_t0) and the dimensions of the 3D space
 were (200, 80, 400) so the heightmaps are (200,400). The ffts are smaller because by default they only show the portion that has been found to have the 
 dominant frequencies.
 
-The default processing will make heigt map and fft files.
+The default processing will make height map and fft files.
+
+The arrays may be viewed with standard processing; see the `visualization` tutorial, or use the tool of your choice (e.g. matplotlib.pyplot.imshow()).
 
