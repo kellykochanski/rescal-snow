@@ -78,9 +78,13 @@ In a terminal, navigate into the main rescal-snow directory (shown above). Run:
   make
 ```
 
-## 3. Features and examples <a name="examples"></a>
+## 3. Use and features <a name="examples"></a>
 
-### Example 1: a snow cone <a name="test-cone"></a>
+To start running, configuring and analyzing Rescal-snow simulations, go through the tutorial: [docs/rescal-snow-tutorial.md](docs/rescal-snow-tutorial.md).
+
+The tutorial fully describes the examples below. The [docs](docs) folder also contains descriptions of additional configuration and analysis options; check these if you're looking for functionality not found in the tutorial.
+
+### Sand and snow dunes <a name="test-cone"></a>
 The following examples are described fully in [docs/rescal-snow-tutorial.md](docs/rescal-snow-tutorial.md).
 
 The default configuration for Rescal-snow simulates snow (or sand) dune formation. This simulates processes including air flow; grain entrainment, saltation, suspension and deposition; and granular avalanches.
@@ -93,20 +97,18 @@ In these conditions, a pile of sand/snow (left) evolves into a dart-shaped barch
 
 Each of the three images above shows a shaded top-down view of a dune (top left), cross-sections through the dune, along the dashed lines (middle left, top right), and a cross-section showing the pressure intensity in the fluid (bottom left).
 
-### Example 2: sintering snow <a name="test-sinter"></a>
+### Sintering snow <a name="test-sinter"></a>
 
 Snow cohesion increases over time: this is called sintering.
 Rescal-snow is able to simulate the transition of loose (beige) grains into sintered (light purple) grains within waves and dunes.
 
 ![](docs/example_images/sintering/sintering.gif)
 
-### Example 3: dune growth by snowfall <a name="test-snowfall"></a>
+### Dune growth by snowfall <a name="test-snowfall"></a>
 
 Rescal-snow simulates snow by adding loose grains to the top of the simulation. The gif at the top of this page shows a height-map of a field of dunes and waves growing during snowfall.
 
-We have therefore added utilities to help you set up batches of many runs of rescal-snow.
-
-### Example 4: parameter space exploration <a name="test-parallel"></a>
+### Parallel instances and parameter space exploration <a name="test-parallel"></a>
 We believe that building robust, trustworthy models is much simpler when it's easy to make many model runs.
 
 Rescal-snow contains a series of tools for running many simulation instances in parallel, and managing the associated flows of input and output data.
@@ -182,8 +184,6 @@ Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must
 See [AUTHORS.md](AUTHORS.md).
 
 ## 7. License
-GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md).
-
-SPDX-License-Identifier: GPL-3.0-or-later
+GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md). SPDX-License-Identifier: GPL-3.0-or-later
 
 Release: LLNL-CODE-785837. See [NOTICE](NOTICE) for details.
