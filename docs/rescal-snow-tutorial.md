@@ -13,13 +13,6 @@ Simulating snow self-organization with cellular automata
     3. [Visualizing the output](#visualizing)
 3. [Setting up parallel runs](#parallel)
     1. [Example 4: parameter space exploration](#test-parallel)
-4. [Community guidelines](#community)
-    1. [Citation](#Citation)
-    2. [Support](#Support)
-    3. [Contributing](#contributing)
-5. [References and further reading](#references)
-6. [Contributors](#authors)
-7. [License](#License)
 
 ## 1. Tutorial aim and features <a name="introduction"></a>
 
@@ -32,7 +25,7 @@ This tutorial walks through a series of examples that demonstrate how to use Res
  - Time-dependent cohesion (snow sintering)
  - Parallel runs for phase space exploration
 
-## 2. Getting started
+## 2. Getting started <a name="starting"</a>
 
 Before starting this tutorial, download and install Rescal-snow according to the instructions in `README.md`.
 
@@ -41,7 +34,10 @@ Before starting this tutorial, download and install Rescal-snow according to the
 We assume you have reasonable familiarity with bash and terminal commands.
 If you have never used bash, we recommend you stop and work through a short tutorial.
 (Our favorite is ['The Unix Shell' from Software Carpentry](http://swcarpentry.github.io/shell-novice/).)
-If you modify rescal-snow, you will need to modify and compile C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
+
+If you wish to modify rescal-snow, you will need to work with C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
+
+If you wish to modify our configuration, set-up, and visualization tools, you will need to work with Python (numpy, scipy, pandas and matplotlib).
 
 **All blocks of bash instructions will start from the main rescal-snow directory:**
 
