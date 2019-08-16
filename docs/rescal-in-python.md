@@ -1,11 +1,11 @@
 
-# Running ReSCAL in python
+# Running Rescal-snow in python
 
-Run ReSCAL within python to process output data concurrently
+Run Rescal-snow within python to process output data concurrently
 
 Author: Gian-Carlo DeFazio, defaziogiancarlo@gmail.com
 
-## Running ReSCAL in python
+## Running Rescal-snow in python
 
 The parallel run options described in `README.md` may generate a large number of files.
 The .csp files, which are snapshots of the entire 3D cell space, can take up large amounts
@@ -24,19 +24,19 @@ You can check if it is already defined:
 echo $RESCAL_SNOW_ROOT
 ```
 
-You should see the path to the top directory of you ReSCAL installation.
+You should see the path to the top directory of you Rescal-snow installation.
 If RESCAL_SNOW_ROOT is not defined:
 ```bash
 export RESCAL_SNOW_ROOT='<path to your rescal install>'
 ```
 
-To set RESCAL_SNOW_ROOT permanently, put
+To set RESCAL_SNOW_ROOT permanently (not recommended if you are doing development with multiple Rescal-snow instances), put
 ```bash
 export RESCAL_SNOW_ROOT='<path to your rescal install>'
 ```
 in your `~/.bashrc` file.
 
-From now on RESCAL_SNOW_ROOT refers to the top directory of ReSCAL (or $RESCAL_SNOW_ROOT for bash commands)
+From now on RESCAL_SNOW_ROOT refers to the top directory of Rescal-snow (or $RESCAL_SNOW_ROOT for bash commands)
 
 You will also need a directory to store the data files.
 The default is `data_runs` which will be in RESCAL_SNOW_ROOT.
@@ -58,7 +58,7 @@ cd scripts/utilities
 
 run an individual example
 ```bash
-./example_pyrescal
+./example_pyrescal.py
 ```
 
 or run several in parallel using sbatch
@@ -106,11 +106,9 @@ ls $RESCAL_SNOW_ROOT/data_runs/exp0
 
 The `.npz` files contain the processed outputs.
 You can read them in using the numpy module in python
-```bash 
+```python
 cd $RESCAL_SNOW_ROOT/data_runs/exp0
 python3
-```
-```python
 >>> import numpy as np
 >>> h = np.load('height_maps.npz')['height_maps']
 >>> f = np.load('ffts.npz')['ffts']
