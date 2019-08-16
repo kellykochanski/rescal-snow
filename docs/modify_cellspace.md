@@ -15,7 +15,7 @@ work with cellspaces when running ReSCAL in python as demostrated here [rescal-i
 The CellSpace class cannot make a cell space, it needs to either read in a cell space from a `.csp` or `.csp.gz`
 file, or it can be given a python bytearray. 
 
-First, lets make a .csp file using genesis.
+First, let's make a `.csp` file using genesis.
 We'll use one of the example parameter files `snow_cone.par`.
 
 ```bash
@@ -23,7 +23,7 @@ cd build
 ./genesis -f ../scripts/snow_cone.par > /dev/null
 ```
 
-By default genesis will name the new file `Dun.csp`.
+`snow_cone.par` will instruct `genesis` to write the new cell space to `DUN.csp`.
 You should see this file in the build directory.
 
 ```bash
@@ -32,7 +32,7 @@ ls
 >> CMakeFiles      Makefile  cmake_install.cmake  csp2png  genesis  regenesis
 ```
 
-Move this file to scripts/utilities and go to that directory
+Move this file to `scripts/utilities` and go to that directory
 ```bash
 mv DUN.csp ../scripts/utilities
 cd ../scripts/utilities
@@ -58,7 +58,7 @@ head -n 15 ../snow_cone.par
 >>
 ```
 
-This shows that we should get a .csp file with height=50, length=200, and depth=80
+This shows that we should get a file named `DUN.csp` with height=50, length=200, and depth=80
 
 Now start an interactive python session.
 
@@ -74,7 +74,7 @@ First we read in the `DUN.csp` file using the `CellSpace` constructor.
 <__main__.CellSpace object at 0x2aaaac964b00>
 ```
 
-The CellSpace instance `c` now contains the contents of the .csp file.
+The CellSpace instance `c` now contains the contents of `DUN.csp`.
 We can check the dimensions to see if they were read in correctly.
 ```python
 >>> c.height
@@ -149,4 +149,8 @@ Let's look at the files we just made.
 
 Notice that `DUN.csp` and `invaded.csp` files are the same size.
 This is expected because we only changed cell values, we didn't change 
-the number of cells or any values in the file header.
+the number of cells or any values in the file header. Also the compressed version
+has a `.gz` added automatically.
+
+If you were to do a `write` without specifying a `filename`,
+the input file would be used, so in this case `DUN.csp` would be overwritten.
