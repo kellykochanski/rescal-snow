@@ -63,6 +63,13 @@ void  srand48();
 
 float* load_surface(char *, int, int);
 
+//available CSP template types
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
+enum CSP_TEMPLATES {INPUT_ELEVATION, CSP_CUSTOM, CSP_LAYER, CSP_SNOWFALL,  CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_SNOWCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
+#else
+enum CSP_TEMPLATES {CSP_CUSTOM};
+#endif
+
 void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
   va_list vl;
   int32_t i;
@@ -80,7 +87,8 @@ void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
       t_templates[nb_templates].file = (char*) va_arg(vl, const char*);
     } else { 
       t_templates[nb_templates].args[i] = (float) va_arg(vl, double);
-      t_templates[nb_templates].args[i]);
+      //LogPrintf("t_templates[%d].args[%d] = %f\n", nb_templates, i, t_templates[nb_templates].args[i]);      
+    }
   }
   va_end(vl);
   nb_templates++;
@@ -102,13 +110,6 @@ void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
 //    Note: default values of arguments MUST be floats (in case of an integer, just add a zero fractional part).
 // 3) in genesis() function, write the implementation for the new CSP template.
 //
-
-//available CSP template types
-#if defined(MODEL_DUN) || defined(MODEL_SNO)
-enum CSP_TEMPLATES {INPUT_ELEVATION, CSP_CUSTOM, CSP_LAYER, CSP_SNOWFALL,  CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_SNOWCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
-#else
-enum CSP_TEMPLATES {CSP_CUSTOM};
-#endif
 
 //initialization of available templates
 void init_template_list() {
@@ -252,7 +253,7 @@ void genesis() {
 
   int32_t j_value;
   int32_t j_found;
-  int32_t injection_val;
+  int32_t injection_val = 0;
 
 //// normal mode ////
 

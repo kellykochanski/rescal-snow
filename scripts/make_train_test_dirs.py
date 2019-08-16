@@ -3,7 +3,7 @@ import shutil
 import random
 import numpy as np
 
-path_name = '/p/lscratchh/kochansk/summer2019/rescal-snow/test_gaussian_parallel/'
+path_name = '../test_gaussian_parallel/'
 file_names = os.listdir(path_name)
 
 

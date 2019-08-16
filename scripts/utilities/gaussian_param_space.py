@@ -15,7 +15,7 @@ import numpy as np
 #  so that all 30 simulations can be run in parallel.
 
 
-executable_location = ".." # location of the compiled rescal executable
+executable_location = "../../build" # location of the compiled rescal executable
 experiment_name = "test_gaussian_parallel" # header directory which all generated input goes into
 experiment_directory = os.path.join("../../", experiment_name)
 if not os.path.isdir(experiment_directory):
@@ -95,7 +95,7 @@ while (True):
 	# copy executables for this run into this run directory
 	shutil.copyfile(executable_location + "/rescal", this_directory+'/rescal')
 	shutil.copyfile(executable_location + "/genesis", this_directory+'/genesis')
-	shutil.copyfile(executable_location + "/gaussian.py", this_directory+'/gaussian.py')
+	shutil.copyfile(".." + "/gaussian.py", this_directory+'/gaussian.py')
 	if not os.path.isdir(this_directory+'/real_data'):
 		os.mkdir(this_directory+'/real_data')
 	shutil.copyfile('../real_data/sealevel_snow.prop', this_directory+'/real_data/sealevel_snow.prop')
