@@ -1,6 +1,6 @@
-__doc__ = 'the cellspace module'
+__doc__ = '''Utilities to read, write, modify, and visualize rescal cell spaces.'''
 __author__ = 'Gian-Carlo DeFazio'
-__date__ = 'July 31 2019'
+__date__ = 'August 16 2019'
 
 import matplotlib
 import os
@@ -450,9 +450,10 @@ class CellSpace:
             # if no .gz at end of file, add it
             if not filename.endswith('.gz'):
                 filename = filename + '.gz'
-            with gzip.open(filename) as f:
-               f.write(self.header_binary)
-               cells.tofile(f)
+            with gzip.open(filename, 'wb+') as f:
+                # get the bytes of the header and cells
+                all_bytes = self.header_binary + cells.tobytes()
+                f.write(all_bytes)
         else:
             with open(filename, 'wb') as f:
                f.write(self.header_binary)
@@ -690,6 +691,7 @@ class CellSpace:
                 h = sm[x_min + x, y_min + y]
                 for i in range(h-height_map[x,y]+1, h+1):
                     if temp_mod:
+                        self.temp_mod_cells = self.cells.copy()
                         self.temp_mod_cells[x_min+x,i,y_min+y] = cell_types['grain']
                     else:
                         self.cells[x_min+x,i,y_min+y] = cell_types['grain']

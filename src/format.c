@@ -394,10 +394,10 @@ void write_csp(char dump_type, char *filename) {
   int32_t write_status;
   
   if (data_pipe != -1) {
-    LogPrintf("writing CSP data : %s\n", filename);
+    LogPrintf("piping CSP data to file descriptor %d\n", data_pipe);
   }
   else {
-    LogPrintf("piping CSP data to file descriptor %d\n", data_pipe);
+    LogPrintf("writing CSP data : %s\n", filename);    
   }
 
   if (dump_type == DUMP_CSP) {
@@ -410,8 +410,7 @@ void write_csp(char dump_type, char *filename) {
   }
 
 
-  // if data_pipe seems to have a valid value, send data
-  // through it
+  // if data_pipe seems to have a valid value, send data through it
   if (data_pipe != -1) {
     // calculate some data sizes
     data_size = H * L * D * sizeof(Cell) + hd_size;

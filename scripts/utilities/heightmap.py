@@ -1,19 +1,16 @@
-__doc__ = 'the doc'
+__doc__ = '''Utilities to read and visualize rescal height maps.'''
 __author__ = 'Gian-Carlo DeFazio'
-__date__ = '31 July 2019'
-
-
+__date__ = '16 August 2019'
 
 import numpy as np
 import argparse
 import scipy.ndimage
-
 import matplotlib
 import os
 # Matplotlib will fail if no display is available (e.g. many high-performance computing environments)
 if bool(os.environ.get('DISPLAY', None)) == False:
 	matplotlib.use('Agg')
-
+    
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
@@ -264,7 +261,6 @@ class HeightMap:
             plot_3d(self.fft_center)
 
 
-
     
     def make_summary_data(self):
         '''get some basic metrics'''
@@ -283,30 +279,3 @@ class HeightMap:
 
         return [[HeightMap(path) for path in local_paths] for local_paths in paths]
 
-
-def _process_args():
-    '''deal with commandline arguments'''
-    
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--height_map', action='store_true',
-                        help='draw height map of input file')
-    parser.add_argument('-f', '--input_file', required=True,
-                        help='input file path')
-    parser.add_argument('--fft_blur', action='store_true',
-                        help='draw colormap of part of low frequency values of 2Dfft magnitudes')
-    parser.add_argument('-s', '--summary', action='store_true',
-                        help='draw colormap and fft blur and summary data')
-    return parser.parse_args()
-
-
-def main():
-    '''for running as shell command'''
-    
-    args = _process_args()
-    h = HeightMap(args.input_file)
-    if args.height_map:
-        h.draw()
-    if args.fft_blur:
-        h.draw_fft_blur()
-    if args.summary:
-        h.display_summary()
