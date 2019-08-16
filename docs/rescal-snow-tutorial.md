@@ -21,11 +21,11 @@ This tutorial walks through a series of examples that demonstrate how to use Res
  - Snow/sand grain erosion and deposition by wind
  - Snow dune formation
  - Snowfall
- - Simple visualization of simulation output
+ - Visualization of simulation output
  - Time-dependent cohesion (snow sintering)
  - Parallel runs for phase space exploration
 
-## 2. Getting started <a name="starting"</a>
+## 2. Getting started <a name="starting"></a>
 
 Before starting this tutorial, download and install Rescal-snow according to the instructions in `README.md`.
 
