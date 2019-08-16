@@ -1,7 +1,7 @@
 # rescal-snow <a name="introduction"></a>
 Simulating snow self-organization with cellular automata
 
-![](docs/example_images/snowfall_example.gif)
+![](example_images/snowfall_example.gif)
 
 1. [Tutorial aims and features](#introduction)
 2. [Getting started](#starting)
