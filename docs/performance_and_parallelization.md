@@ -65,7 +65,7 @@ In order of ease and likely effectiveness:
  ## Scaling experiments
  
  Below are select scaling experiments. These are run with the configuration from the [snowfall example](../scripts/snowfall.run).
- 'Wall time' is the time taken to reach t0=400.
+ 'Wall time' is the time taken to reach t0=400. Each result is the average of 3 runs on a Intel Xeon E5-2695 v4 (full specs at [https://hpc.llnl.gov/hardware/platforms/Quartz](https://hpc.llnl.gov/hardware/platforms/Quartz)).
 
  
  ### Effects of domain size on run time
