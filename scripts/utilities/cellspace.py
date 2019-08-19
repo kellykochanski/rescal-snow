@@ -23,7 +23,151 @@ import math
 import heightmap
 
 
-def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True):
+
+_cell_colors_list = ['khaki',         # grain
+                    'turquoise',     # mobile_grain
+                    'red',       # vegetated_grain
+                    'white',        # air
+                    'forestgreen',  # vegetation
+                    'lightcyan',   # boundary
+                    'dimgray',      # neutral
+                    'darkorange',   # input_of_sand
+                    'orchid',       # output_of_sand
+                    'red',          # tunnel
+                    'lightcoral',   # EAUT
+                    'lemonchiffon', # colored_grain
+]
+
+
+cell_types = {'grain' : 0,
+              'mobile_grain' : 1,
+              'vegetated_grain' : 2,
+              'air' : 3,
+              'vegetation' : 4,
+              'boundary' : 5,
+              'neutral' : 6,
+              'input_of_sand' : 7,
+              'ouput_of_sand' : 8,
+              'tunnel' : 9,
+              'EAUT' : 10, # not sure, used only graphically
+              'colored_grain' : 11 # used graphically
+}
+
+
+def in_bounds(base, overlay, position):
+    '''Evaluates if overlay can be placed onto base at 
+    position. position is the coordinates of base on which the top left 
+    corner of overlay is placed.'''
+    # verify that the dimensions match
+    if base.ndim != len(position):
+        return False
+    if overlay.ndim > base.ndim:
+        return False
+
+    # verify that position is in bounds for base
+    if not all([-b <= p and p < b for b,p in zip(base.shape, position)]):
+        return False
+    
+    # change any negative values in position to
+    # positive base on base.shape
+    position_positive = [p if (p>=0) else b+p for b,p in zip(base.shape, position)]
+
+    # now get the portions of dimensions that are applicable based
+    # on overlay.ndim, get only the overlay.ndim last dimensions
+    base_dims = base.shape[-overlay.ndim:]
+    position_positive = position_positive[-overlay.ndim:]
+
+    # verify that position_positive + overlay_dims
+    # will not exceed base dims
+    all_dims = zip(base_dims, overlay.shape, position_positive)
+    return all([o + p <= b for b,o,p in all_dims])
+
+
+def non_border(a):
+    '''Get a slice of a that excludes border cells.'''
+    # the stuff we care about has states 0,1,2,3
+    valid = np.nonzero(a < 4)[0]
+    return a[valid[0]: valid[-1]+1]
+
+
+# replaced with find_air_or_mobile
+def surface_position(a):
+    '''find index of first solid sand starting from the top.'''
+    sand_indices = np.nonzero(a == 0)[0]
+    if sand_indices.size > 0:
+        return sand_indices[0]
+    else:
+        return 0
+
+
+
+def find_air_or_mobile(column):
+    air_indices = np.nonzero(column == 3)[0]
+    mobile_sand_indices = np.nonzero(column == 1)[0]
+
+    if air_indices.size > 0 and mobile_sand_indices.size > 0:
+        return max(air_indices[-1], mobile_sand_indices[-1])
+    elif air_indices.size > 0:
+        return air_indices[-1]
+    elif mobile_sand_indices.size > 0:
+        mobile_sand_indices[-1]
+    else:
+        return 0
+
+
+def shift_fill(a, shift, fill=0):
+    '''Shift an array to the right by shift and fill in with fill value.
+    If shift value is negative, the shift will be to the left.'''
+    # nothing to do
+    if shift == 0:
+        pass
+    # no point in shifting, entire array will
+    # be overwritten by fill value
+    elif abs(shift) >= len(a):
+        a[:] = fill
+    elif shift > 0:
+        a[shift:] = a[:-shift]
+        a[:shift] = fill
+    else:
+        a[:shift] = a[-shift:]
+        a[shift:] = fill
+    
+
+def change_surface_level(column, delta):
+    '''Given a column in the 3D cellspace, modify the sand height by delta.
+    Clip at the boundaries of the space. Try to keep mobile sand by moving it with
+    the surface.'''
+
+    # if nothing to do, do nothing
+    if delta == 0:
+        return
+
+    # negate delta because the height and indices are reversed
+    # the surface of sand with higher height has a lower index
+    delta = -delta
+
+    # ignore the boundary cell at the top and bottom
+    column_in_bounds = non_border(column)
+    
+    # get surface height
+    surface = find_air_or_mobile(column_in_bounds) + 1
+    
+    # now calculate how far to actually move the sand
+    # the actual delta may be clipped by top or bottom
+    # also set the fill values
+    # then shift the columns
+    if delta < 0:
+        clipped_delta = max(delta, -surface)
+        fill_value = cell_types['grain']
+        shift_fill(column_in_bounds, clipped_delta, fill_value)
+    else:
+        clipped_delta = min(delta, len(column_in_bounds) - surface)
+        fill_value = cell_types['air']
+        shift_fill(column_in_bounds, clipped_delta, fill_value)
+
+
+# various height maps
+def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True, no_negative=False):
     '''Create a sinusoid on a 2D plane that has dimensions dims. 
     Does an inverse Fourier transform and discretizes. 
     The wave is resized so that its height ranges from 0 to height. 
@@ -50,9 +194,10 @@ def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True):
     if height_map.max() != 0.0:
         height_map = height_map *  height / (2 * height_map.max())
         
-    # now get rid of the negatives and round    
-    height_map = height_map - np.min(height_map)
-    return np.round_(height_map).astype(np.uint8)
+    # now get rid of the negatives and round
+    if no_negative:
+        height_map = height_map - np.min(height_map)
+    return np.round_(height_map).astype(np.int32)
 
 
 def make_gaussian(h, d_padding, l_padding, sigma):
@@ -68,37 +213,12 @@ def make_gaussian(h, d_padding, l_padding, sigma):
     dd[l//2, d//2] = 1
     g = scipy.ndimage.gaussian_filter(dd, sigma)
     g = g * (h / g[l//2,d//2]) + 0.01
-    return (np.round_(g)).astype(np.uint8)
+    return np.round_(g).astype(np.int32)
 
 
-_cell_colors_list = ['khaki',         # grain
-                    'turquoise',     # mobile_grain
-                    'red',       # vegetated_grain
-                    'white',        # air
-                    'forestgreen',  # vegetation
-                    'lightcyan',   # boundary
-                    'dimgray',      # neutral
-                    'darkorange',   # input_of_sand
-                    'orchid',       # output_of_sand
-                    'red',          # tunnel
-                    'lightcoral',   # EAUT
-                    'lemonchiffon', # colored_grain
-                    ]
+def flat_ground(height):
 
 
-cell_types = {'grain' : 0,
-              'mobile_grain' : 1,
-              'vegetated_grain' : 2,
-              'air' : 3,
-              'vegetation' : 4,
-              'boundary' : 5,
-              'neutral' : 6,
-              'input_of_sand' : 7,
-              'ouput_of_sand' : 8,
-              'tunnel' : 9,
-              'EAUT' : 10, # not sure, used only graphically
-              'colored_grain' : 11 # used graphically
-}
 
 
 mods = ['sine', 'noise', 'guassian hill', 'space_invader', 'clip']
@@ -241,6 +361,7 @@ class CellSpace:
         # also makes surface_map
         self.make_height_map()
         self.make_ceiling_map()
+        self.dims_2d = self.dims_2d()
 
 
     def _get_cell_data_type(self):
@@ -461,6 +582,12 @@ class CellSpace:
 
 
 
+    def dims_2d(self):
+        '''Get the dimensions of a height map for cell.'''
+        d, _, l = self.cells.shape
+        return d,l
+
+               
 
     # checks if a point is in the cell space
     def _in_cell_space(self, point):
@@ -676,33 +803,39 @@ class CellSpace:
                 paths[i] = os.path.abspath(paths[i])
         return paths
 
-
-    # TODO vectorize this
-    # adds a height_map to the sand with heigh_map positioned by top_left
-    def add_height_map(self, top_left, height_map, temp_mod=False):
-
-        # find the portion of the image on which to change height
-        x_min, y_min = top_left
-        x_len, y_len, = height_map.shape
-
-        sm = self.surface_map
-        for x in range(x_len):
-            for y in range(y_len):
-                h = sm[x_min + x, y_min + y]
-                for i in range(h-height_map[x,y]+1, h+1):
-                    if temp_mod:
-                        self.temp_mod_cells = self.cells.copy()
-                        self.temp_mod_cells[x_min+x,i,y_min+y] = cell_types['grain']
-                    else:
-                        self.cells[x_min+x,i,y_min+y] = cell_types['grain']
-
                         
-    
+
+    def add_height_map(self, top_left, height_map, temp_mod=False):
+        # verify that the height_map can be placed at top_left
+        if not in_bounds(self.cells[:,0,:], height_map, top_left):
+            # TODO raise an exception, bad input
+            return
+        # now grab the applicable portion of self.cells
+        d_top_left, l_top_left = top_left
+        d_height_map, l_height_map = height_map.shape
+        cells_to_mod = self.cells[d_top_left : d_top_left + d_height_map,
+                                  :,
+                                  l_top_left : l_top_left + l_height_map]
+
+        # now iterate over the applicable cells, and add the heightmap
+        for i in range(d_height_map):
+            for j in range(l_height_map):
+                change_surface_level(cells_to_mod[i,:,j], height_map[i,j])
+                
+
+
+    def add_height(self, height):
+        '''Raise the entire surface level by height.
+        If height is negative surface level will lower.'''
+        # create heightmap of height
+        h = np.full(self.dims_2d, height)
+        self.add_height_map((0,0), h)
+                
+                        
     def add_sinusoid(self, amplitude=5, frequency=10, phase=0, wind_direction=True, temp_mod=False):
         '''Superimposes a sinusoidal wave onto the surface of the cell space.'''
         # create a 2D heightmap that will be superimposed onto the surface
-        d, _, l = self.cells.shape
-        sinusoid_height_map = make_sinusoid(amplitude, frequency, (d,l), phase=phase)
+        sinusoid_height_map = make_sinusoid(amplitude, frequency, self.dims_2d, phase=phase)
         self.add_height_map((0,0), sinusoid_height_map, temp_mod=temp_mod)
 
 
