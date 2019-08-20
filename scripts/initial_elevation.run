@@ -47,6 +47,10 @@ RESCAL_LOG_FILE="RESCAL.log"
 export OMP_NUM_THREADS=1
 echo OMP_NUM_THREADS=$OMP_NUM_THREADS
 
+# ---- Generate Initial Elevation Array ----
+# (echo "import numpy as np" ; echo "np.savetxt('initial_elevation.tab',  np.random.randint(50 // 2, size=(200, 80)).T, fmt='%d')") | python
+(echo "import numpy as np" ; echo "np.savetxt('initial_elevation.tab',  np.full((200, 80), 50 // 4).T, fmt='%d')") | python
+
 # ----Genesis----
 ./genesis -f $PAR_FILE -s 2000 > $GENESIS_LOG_FILE
 

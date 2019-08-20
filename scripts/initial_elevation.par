@@ -14,7 +14,7 @@ Lgca_delay = 1.0
 Boundary = OPEN
  
 # Depth, transverse to flow, of model domain (cells)
-D = 150
+D = 80
  
 # Genesis template?
 Csp_file = DUN.csp
@@ -50,10 +50,10 @@ Csp_params = []
 Phys_prop_file = real_data/sealevel_snow.prop
  
 # Height of model domain (cells)
-H = 100
+H = 50
  
 # Length, longitudinal, of model domain (cells)
-L = 600
+L = 200
  
 # Higher mobility of grains
 High_mobility = 1.0
