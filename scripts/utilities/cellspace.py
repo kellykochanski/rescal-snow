@@ -1,4 +1,4 @@
-__doc__ = '''Utilities to read, write, modify, and visualize rescal cell spaces.'''
+__doc__ = '''Utilities to read, write, modify, and visualize snow-rescal cell spaces.'''
 __author__ = 'Gian-Carlo DeFazio'
 __date__ = 'August 16 2019'
 
@@ -24,18 +24,18 @@ import heightmap
 
 
 
-_cell_colors_list = ['khaki',         # grain
+_cell_colors_list = ['khaki',        # grain
                     'turquoise',     # mobile_grain
-                    'red',       # vegetated_grain
-                    'white',        # air
-                    'forestgreen',  # vegetation
-                    'lightcyan',   # boundary
-                    'dimgray',      # neutral
-                    'darkorange',   # input_of_sand
-                    'orchid',       # output_of_sand
-                    'red',          # tunnel
-                    'lightcoral',   # EAUT
-                    'lemonchiffon', # colored_grain
+                    'red',           # vegetated_grain
+                    'white',         # air
+                    'forestgreen',   # vegetation
+                    'lightcyan',     # boundary
+                    'dimgray',       # neutral
+                    'darkorange',    # input_of_sand
+                    'orchid',        # output_of_sand
+                    'red',           # tunnel
+                    'lightcoral',    # EAUT
+                    'lemonchiffon',  # colored_grain
 ]
 
 
@@ -98,7 +98,6 @@ def surface_position(a):
         return sand_indices[0]
     else:
         return 0
-
 
 
 def find_air_or_mobile(column):
@@ -200,6 +199,7 @@ def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True, no_nega
     return np.round_(height_map).astype(np.int32)
 
 
+# TODO make this better
 def make_gaussian(h, d_padding, l_padding, sigma):
     '''creates a heightmap for a guassian
     scales the max height to h
@@ -215,13 +215,6 @@ def make_gaussian(h, d_padding, l_padding, sigma):
     g = g * (h / g[l//2,d//2]) + 0.01
     return np.round_(g).astype(np.int32)
 
-
-def flat_ground(height):
-
-
-
-
-mods = ['sine', 'noise', 'guassian hill', 'space_invader', 'clip']
 
 def _ints_to_colors(color_list):
     '''takes a list of colors and creates a colormap
@@ -239,15 +232,10 @@ def _draw_cross_section(window, axes):
     axes.invert_yaxis()
     return
 
-# for finding cellspace files
-path_glob = '*.csp*'
-exclude_globs = ['DUN.csp']
 
-
-# TODO: I think my depth, height, and length are oriented differently than ReSCAL :-(
 class CellSpace:
-    '''A ReSCAL cell space representation. This class deals with the .csp files
-    made by ReSCAL and genesis. The .csp files contain a header followed by the 3D space
+    '''A snow-rescal cell space representation. This class deals with the .csp files
+    made by rescal and genesis. The .csp files contain a header followed by the 3D space
     of cells as a 1D array.
 
     The parts of the header that are used are organized as follows:
@@ -298,7 +286,6 @@ class CellSpace:
         [12-15]   i  the length L <<some_number>>
         [16-19]   i  the depth  D <<some_number>>
         [20-23]   i  flag to say if thses values should be used. 1 if yes, 0 if no.'''
-
     
     b0_19 = 'B3s2scci4si'
     model_chunk = 'i4s3sB'
@@ -307,43 +294,43 @@ class CellSpace:
     borders_chunk = 'i4siiii'
 
     
-    def __init__(self, filename, keep_original=True):
+    def __init__(self, filename):
         '''read in a .csp or .csp.gz file and create a CellSpace instance
-        to represent the file contents.
+        to represent the file contents. filename can also be a bytearray object
+        that contains the contents of a .csp file.
 
         arguments:
             filename -- the path to the input file
 
-        keyword arguments:
-            keep_orignal -- if True, retain the original cell data from the
-                            input file. If False discard the orginal cell data.
-                            (default True)
+        the following attributes will be created:
+
+        header_size: the number of bytes in the header of filename
+        model: the snow-rescal model
+        height: the height of the cell space 
+        length the length of the cell space
+        depth: the depth of the cell space
+        cell_size: the number of bytes per cell
+
+        cell_data_type: the data type used for each cell self.cells
+        cells_original: the orginal cell values
+        cell: a copy of cell_original that can be modified
+        header_binary: the verbatim binary header of filename
+
+        output_file: the default output file name to write to
+        height_map: a heightmap.HeightMap instance with the height data
+        dims_2d: the dimensions of the corresponding height map 
+
 
         usage example:
             c = CellSpace('path_to_file.csp')
         '''
             
-        # set within self._read
-        self.header_size = None
-        self.model = None
-        self.height = None
-        self.length = None
-        self.depth = None
-        self.cell_size = None
-        self.cell_data_type = None
-
-        # gets original data from .csp file if
-        # keep_original == True
-        self.cells_original = None
-        self.header_binary = None
-        self.keep_original = keep_original
-
-        # determine if data is in a file or is alreay bytes
+        # determine if data is in a file or is already bytes
         if isinstance(filename, bytes):
             self._read(bs=filename)
+            self.output_file = None
         else:            
             self.input_file = filename
-            
             # remove .gz by default
             if self.input_file.endswith('.gz'):
                 self.output_file = filename
@@ -351,16 +338,8 @@ class CellSpace:
                 self.output_file = filename[:-3]
             self._read()
 
-        # potentially used later
-        self.temp_mod_cells = None
-
-        # made during analysis
-        self.height_map = None
-        self.surface_map = None
-
         # also makes surface_map
         self.make_height_map()
-        self.make_ceiling_map()
         self.dims_2d = self.dims_2d()
 
 
@@ -380,6 +359,13 @@ class CellSpace:
         return data_type
 
 
+
+    def dims_2d(self):
+        '''Get the dimensions of a height map for cell.'''
+        d, _, l = self.cells.shape
+        return d,l
+    
+
     def _read(self, bs=None):
         '''read in the file contents and store the data in a ndarray.
         store the header both as python variables, but also in the original binary
@@ -394,7 +380,6 @@ class CellSpace:
             bs = bytearray(f.read())
             f.close()
         
-
         self._read_header(bs)
 
         # get correct data type depending on cell size
@@ -415,13 +400,11 @@ class CellSpace:
             cells = cells[pad_depth:-pad_depth,pad_height:-pad_height,pad_length:-pad_length]
         else:
             cells = np.reshape(cells, (self.depth,self.height,self.length))
-        # may choose to discard original cells to save space
-        if self.keep_original:
-            self.cells_original = cells
+        self.cells_original = cells
         self.cells = cells.astype(np.uint8)
         # make copy of the header for easy writing to file
         self.header_binary = bs[:self.header_size]
-        return
+
 
 
     # TODO deal with 'TIME'
@@ -442,7 +425,7 @@ class CellSpace:
         header_20_to_end = bs[20:header_size]
 
         # find the other pertinent data
-        # iterate through all remaining chunks and extract the importaing data
+        # iterate through all remaining chunks and extract the important data
         chunk_start = 20
         # should be at least 8 more bytes for the size and type
         while chunk_start + 8 <= header_size:
@@ -488,7 +471,6 @@ class CellSpace:
                     # extract and store height, length, and depth
                     _, _, h_b, l_b, d_b, u_b = struct.unpack(CellSpace.borders_chunk, bs[bytes_slice])
                     self.height_borders, self.length_borders, self.depth_borders, self.use_borders = h_b, l_b, d_b, u_b
-                
             else:
                 print('unrecognized chunk type {n}'.format(n=chunk_type.decode('utf-8')))
 
@@ -496,24 +478,24 @@ class CellSpace:
         return
 
 
-    def _overwrite_lsbs(self, temp_mod=False):
+    def _overwrite_lsbs(self):
         '''creates cells that are identical to those read in (self.cells_original) except
-        for the lsb which is rewritten with the values in self.cells
-        can use a temporary modification to write out'''
-
+        for the lsb which is rewritten with the values in self.cells.'''
         # expand bytes to type read in from the input file
-        bytes_expanded = None
-        if temp_mod:
-            bytes_expanded = self.temp_mod_cells.astype(self.cells_original.dtype)
-        else:
-            bytes_expanded = self.cells.astype(self.cells_original.dtype)
+        bytes_expanded = self.cells.astype(self.cells_original.dtype)
         mask = np.array([0xffffffffffffff00]).astype(self.cells_original.dtype)
         return (self.cells_original & mask) | bytes_expanded
 
 
+
+    def restore_original_cells(self):
+        '''restore self.cells to its orginal value.'''
+        self.cells = self.cells_original.astype(np.uint8)
+    
+
     # writes a .csp file
     # if no filename is given, the input file name is used
-    def write(self, filename=None, temp_mod=False, compressed=False):
+    def write(self, filename=None, compressed=False):
         ''' write the CellSpace to a file in the .csp format
 
         keyword arguments:
@@ -525,11 +507,6 @@ class CellSpace:
                           change self.output_file after initialization.
                           (default None)
 
-            temp_mod --   if True, temp_mod_cells are written. if False cells are written. 
-                          temp_mod_cells are a copy of the orginal cells that may be modified
-                          while the original cell remain unchanged. 
-                          (default False)
-        
             compressed -- if True, a gzipped file is written and '.gz.' is added to 
                           the filename if not already present. If False, the output is
                           uncompressed and the filename is unchanged, even if it ends
@@ -548,46 +525,24 @@ class CellSpace:
             compressed=True will write to a file that has the same
             name as the input but with '.gz' added. 'input.csp' is not overwritten
             and 'input.csp.gz' is written or overwritten.
-                c.write(compressed=True)
-
-            temp_mod=True will use the temp_mod_cells, which will exist if some
-            modification has been made which also set temp_mod=True.
-                c.write(temp_mod=True)'''
+                c.write(compressed=True)'''
 
         if filename is None:
             filename = self.output_file
         
-        cells = None
-        # get original bytes with lsbs overwritten
-        if self.keep_original:
-            cells = self._overwrite_lsbs(temp_mod)
-        else:
-            if temp_mod:
-                cells = self.temp_mod_cells.astype(self.cell_data_type)
-            else:
-                cells = self.cells.astype(self.cell_data_type)
-            
         if compressed:
             # if no .gz at end of file, add it
             if not filename.endswith('.gz'):
                 filename = filename + '.gz'
             with gzip.open(filename, 'wb+') as f:
                 # get the bytes of the header and cells
-                all_bytes = self.header_binary + cells.tobytes()
+                all_bytes = self.header_binary + self._overwrite_lsbs().tobytes()
                 f.write(all_bytes)
         else:
             with open(filename, 'wb') as f:
                f.write(self.header_binary)
                cells.tofile(f)
 
-
-
-    def dims_2d(self):
-        '''Get the dimensions of a height map for cell.'''
-        d, _, l = self.cells.shape
-        return d,l
-
-               
 
     # checks if a point is in the cell space
     def _in_cell_space(self, point):
@@ -601,7 +556,7 @@ class CellSpace:
 
 
     # point can be either length 3 or 1 or a scalar
-    # get a slice through the etire cell space at the given point and orientation
+    # get a slice through the entire cell space at the given point and orientation
     def _cut_1(self, point, orientation):
         # deal with possible input types
         D,H,L = 0,0,0
@@ -746,20 +701,6 @@ class CellSpace:
         self.add_sand(depth, length)
 
 
-    # prototype to add grains to surface
-    def add_square(self, depth, length, k, temp_mod=False):
-        sm = self.surface_map
-        for d in range(depth-5, depth+6):
-            for l in range(length-5, length+6):
-                h = sm[d, l]
-                # was range(h-k, h+1):
-                for i in range(h-k, h+1):
-                    if temp_mod:
-                        self.temp_mod_cells[d,i,l] = cell_types['grain']
-                    else:
-                        self.cells[d,i,l] = cell_types['grain']
-
-
     # perform multiple random edits and write out the edited versions
     # return the paths to the new files
     def multiple_random_edits(self, num_edits, file_prefix):
@@ -805,7 +746,7 @@ class CellSpace:
 
                         
 
-    def add_height_map(self, top_left, height_map, temp_mod=False):
+    def add_height_map(self, top_left, height_map):
         # verify that the height_map can be placed at top_left
         if not in_bounds(self.cells[:,0,:], height_map, top_left):
             # TODO raise an exception, bad input
@@ -823,7 +764,6 @@ class CellSpace:
                 change_surface_level(cells_to_mod[i,:,j], height_map[i,j])
                 
 
-
     def add_height(self, height):
         '''Raise the entire surface level by height.
         If height is negative surface level will lower.'''
@@ -832,20 +772,15 @@ class CellSpace:
         self.add_height_map((0,0), h)
                 
                         
-    def add_sinusoid(self, amplitude=5, frequency=10, phase=0, wind_direction=True, temp_mod=False):
+    def add_sinusoid(self, amplitude=5, frequency=10, phase=0, wind_direction=True):
         '''Superimposes a sinusoidal wave onto the surface of the cell space.'''
         # create a 2D heightmap that will be superimposed onto the surface
         sinusoid_height_map = make_sinusoid(amplitude, frequency, self.dims_2d, phase=phase)
-        self.add_height_map((0,0), sinusoid_height_map, temp_mod=temp_mod)
+        self.add_height_map((0,0), sinusoid_height_map)
 
 
-    # types of mods available
-    mods = ['sine', 'noise', 'guassian hill', 'space_invader', 'clip']
-
-
-    
     # applies a random modification of the given type
-    def random_mods(self, file_prefix, mod_type='gaussian', num_mods=1, temp_mod=False):
+    def random_mods(self, file_prefix, mod_type='gaussian', num_mods=1:
 
         # get heightest sand to avoid going out of the space
         
@@ -863,16 +798,13 @@ class CellSpace:
         # do the modification
         for i in range(num_mods):
 
-            if temp_mod:
-                self.temp_mod_cells = self.cells.copy()
-
             if mod_type == 'sine':
                 # calculate parameters to add_sinusoid
                 amp = random.randint(2,h)
                 f = random.randint(1, min(d,l)//10)
                 wind_direction = random.choice([True, False])
                 phase = random.uniform(0, 2*math.pi)
-                self.add_sinusoid(amp, f, phase=phase, wind_direction=wind_direction, temp_mod=temp_mod)
+                self.add_sinusoid(amp, f, phase=phase, wind_direction=wind_direction)
             elif mod_type == 'gaussian':
                 # create a gaussian
                 
@@ -896,7 +828,7 @@ class CellSpace:
                 top_left_depth = random.randint(0, depth - scaled_image_depth)
                 top_left_length = random.randint(0, length - scaled_image_length)
                 top_left = (top_left_depth, top_left_length)
-                self.add_height_map(top_left, scaled_image, temp_mod)
+                self.add_height_map(top_left, scaled_image)
             else:
                 pass
 
@@ -904,7 +836,7 @@ class CellSpace:
 
             # now write out the modification fo file
             file_out = file_prefix + '--' + mod_type + '--' + str(i) + '.csp'
-            self.write(filename=file_out, temp_mod=temp_mod)
+            self.write(filename=file_out)
             paths.append(file_out)
 
 

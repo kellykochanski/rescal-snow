@@ -16,6 +16,58 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 
 
+# various height maps
+def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True, no_negative=False):
+    '''Create a sinusoid on a 2D plane that has dimensions dims. 
+    Does an inverse Fourier transform and discretizes. 
+    The wave is resized so that its height ranges from 0 to height. 
+    The frequency is relative to the space. If the frequency is x, wave will 
+    complete x cycles across the space. If wind_direction is True, then the wave
+    heights will vary in the horizontal direction, otherwise they will vary in the
+    vertical direction.'''
+    # create a 2D array of the same size as the dims
+    grid = np.zeros(dims, dtype=np.complex)
+
+    # convert phase to a complex number
+    complex_val = math.cos(phase) + (math.sin(phase) * 1.0j)
+    
+    # add the frequency to the grid
+    if wind_direction:
+        grid[0,frequency] = complex_val
+    else:
+        grid[frequency,0] = complex_val
+        
+    # make the sinusoid
+    height_map = np.fft.ifft2(grid).real
+
+    # scale to amplitude
+    if height_map.max() != 0.0:
+        height_map = height_map *  height / (2 * height_map.max())
+        
+    # now get rid of the negatives and round
+    if no_negative:
+        height_map = height_map - np.min(height_map)
+    return np.round_(height_map).astype(np.int32)
+
+
+def make_gaussian(h, d_padding, l_padding, sigma):
+    '''creates a heightmap for a guassian
+    scales the max height to h
+    set all values to integers'''
+    
+    # does it the cheap way, makes a dirac delta
+    # meaning a 1 in the middle and 0 otherwise
+    # then filters it
+    dd = np.zeros([2 * l_padding + 1, 2 * d_padding + 1])
+    l, d = dd.shape
+    dd[l//2, d//2] = 1
+    g = scipy.ndimage.gaussian_filter(dd, sigma)
+    g = g * (h / g[l//2,d//2]) + 0.01
+    return np.round_(g).astype(np.int32)
+
+
+
+
 # little example of making a height map and scaling it
 # space invader height map
 invader = np.array([[0,0,1,0,0,0,0,0,1,0,0],
