@@ -7,7 +7,6 @@ import os
 # Matplotlib will fail if no display is available (e.g. many high-performance computing environments)
 if bool(os.environ.get('DISPLAY', None)) == False:
 	matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
 import matplotlib.colors as  colors
 import struct
@@ -18,39 +17,39 @@ import sys
 import argparse
 import scipy.ndimage
 import random
-import math
 
 import heightmap
 
 
-
-_cell_colors_list = ['khaki',        # grain
-                    'turquoise',     # mobile_grain
-                    'red',           # vegetated_grain
-                    'white',         # air
-                    'forestgreen',   # vegetation
-                    'lightcyan',     # boundary
-                    'dimgray',       # neutral
-                    'darkorange',    # input_of_sand
-                    'orchid',        # output_of_sand
-                    'red',           # tunnel
-                    'lightcoral',    # EAUT
-                    'lemonchiffon',  # colored_grain
+_cell_colors_list = [
+    'khaki',        # grain
+    'turquoise',     # mobile_grain
+    'red',           # vegetated_grain
+    'white',         # air
+    'forestgreen',   # vegetation
+    'lightcyan',     # boundary
+    'dimgray',       # neutral
+    'darkorange',    # input_of_sand
+    'orchid',        # output_of_sand
+    'red',           # tunnel
+    'lightcoral',    # EAUT
+    'lemonchiffon',  # colored_grain
 ]
 
 
-cell_types = {'grain' : 0,
-              'mobile_grain' : 1,
-              'vegetated_grain' : 2,
-              'air' : 3,
-              'vegetation' : 4,
-              'boundary' : 5,
-              'neutral' : 6,
-              'input_of_sand' : 7,
-              'ouput_of_sand' : 8,
-              'tunnel' : 9,
-              'EAUT' : 10, # not sure, used only graphically
-              'colored_grain' : 11 # used graphically
+cell_types = {
+    'grain' : 0,
+    'mobile_grain' : 1,
+    'vegetated_grain' : 2,
+    'air' : 3,
+    'vegetation' : 4,
+    'boundary' : 5,
+    'neutral' : 6,
+    'input_of_sand' : 7,
+    'ouput_of_sand' : 8,
+    'tunnel' : 9,
+    'EAUT' : 10, # not sure, used only graphically
+    'colored_grain' : 11 # used graphically
 }
 
 
@@ -142,7 +141,6 @@ def change_surface_level(column, delta):
         return
 
     # negate delta because the height and indices are reversed
-    # the surface of sand with higher height has a lower index
     delta = -delta
 
     # ignore the boundary cell at the top and bottom
@@ -165,57 +163,6 @@ def change_surface_level(column, delta):
         shift_fill(column_in_bounds, clipped_delta, fill_value)
 
 
-# various height maps
-def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True, no_negative=False):
-    '''Create a sinusoid on a 2D plane that has dimensions dims. 
-    Does an inverse Fourier transform and discretizes. 
-    The wave is resized so that its height ranges from 0 to height. 
-    The frequency is relative to the space. If the frequency is x, wave will 
-    complete x cycles across the space. If wind_direction is True, then the wave
-    heights will vary in the horizontal direction, otherwise they will vary in the
-    vertical direction.'''
-    # create a 2D array of the same size as the dims
-    grid = np.zeros(dims, dtype=np.complex)
-
-    # convert phase to a complex number
-    complex_val = math.cos(phase) + (math.sin(phase) * 1.0j)
-    
-    # add the frequency to the grid
-    if wind_direction:
-        grid[0,frequency] = complex_val
-    else:
-        grid[frequency,0] = complex_val
-        
-    # make the sinusoid
-    height_map = np.fft.ifft2(grid).real
-
-    # scale to amplitude
-    if height_map.max() != 0.0:
-        height_map = height_map *  height / (2 * height_map.max())
-        
-    # now get rid of the negatives and round
-    if no_negative:
-        height_map = height_map - np.min(height_map)
-    return np.round_(height_map).astype(np.int32)
-
-
-# TODO make this better
-def make_gaussian(h, d_padding, l_padding, sigma):
-    '''creates a heightmap for a guassian
-    scales the max height to h
-    set all values to integers'''
-    
-    # does it the cheap way, makes a dirac delta
-    # meaning a 1 in the middle and 0 otherwise
-    # then filters it
-    dd = np.zeros([2 * l_padding + 1, 2 * d_padding + 1])
-    l, d = dd.shape
-    dd[l//2, d//2] = 1
-    g = scipy.ndimage.gaussian_filter(dd, sigma)
-    g = g * (h / g[l//2,d//2]) + 0.01
-    return np.round_(g).astype(np.int32)
-
-
 def _ints_to_colors(color_list):
     '''takes a list of colors and creates a colormap
     that maps the index of the color to the color when drawing'''
@@ -236,62 +183,7 @@ def _draw_cross_section(window, axes):
 class CellSpace:
     '''A snow-rescal cell space representation. This class deals with the .csp files
     made by rescal and genesis. The .csp files contain a header followed by the 3D space
-    of cells as a 1D array.
-
-    The parts of the header that are used are organized as follows:
-   
-    the first 20 bytes:
-        [0..3]   B3s  the magic number which is \\212 or 0o212
-                      in the source and 'CSP' <<138 'CSP'>>
-        [4..5]   2s   not sure what this is, but it's <<'@1'>>
-        [6]      c    can be <<'_'>> for little endian and <<'b'>> for big endian
-        [7]      c    a newline <<'\\n'>>
-        [8..11]  i    a chunk size, this doesn't appear to be used,
-                       but it's 8 + sizeof(int) = 12  <<12>>
-        12..15]  4s   a string that indicates the header size is next <<'HDSZ'>>
-        [16..19] i    the header size,
-                      which includes these first 20 bytes <<some_number>>
-
-    after the first 20 bytes, the format is in chunks
-    each chunk starts with a number (int) that says its size in bytes
-    this size includes the 4 bytes for the chunk size number
-    byte values are relative to the start of the chunk
-    the chunks that are used are the model, size, and cell size chunks
-
-    Model chunk:  contains the model type, which I think is a 3 byte string
-        [0-3]   i  the size the chunk  <<some_number>> (probably 12)
-        [4-7]   4s the chunk type identifier <<'MODL'>>
-        [8-10]  3s the model name, for example <<'SNO'>>
-        [11]    B  I think this is pad <<'\\0'>>
-
-    Size chunk:  contains the dimensions of the simulations space 
-    height (H), length (L), and depth (D) as 3 ints
-        [0-3]     i  the size the chunk  <<some_number>> (probably 20)
-        [4-7]     4s the chunk type identifier <<'SIZE'>>
-        [8-11]    i  the height H <<some_number>>
-        [12-15]   i  the length L <<some_number>>
-        [16-19]   i  the depth  D <<some_number>>
-
-    Cell Size chunk: contains the number of bytes for each cell
-    which seems to default to 8
-        [0-3]     i  the size the chunk  <<some_number>> (probably 12)
-        [4-7]     4s the chunk type identifier <<'CELL'>>
-        [8-11]    i  the number of bytes per cell <<some_number>> (probably 8)
-
-    Sizes with borders chunk: contains the dimension with border cells
-    and a flag to indicate if there are the dimensions to be used
-        [0-3]     i i  the size the chunk  <<some_number>> (probably 24)
-        [4-7]     4s the chunk type identifier <<'BORD'>>
-        [8-11]    i  the height H <<some_number>>
-        [12-15]   i  the length L <<some_number>>
-        [16-19]   i  the depth  D <<some_number>>
-        [20-23]   i  flag to say if thses values should be used. 1 if yes, 0 if no.'''
-    
-    b0_19 = 'B3s2scci4si'
-    model_chunk = 'i4s3sB'
-    size_chunk = 'i4siii'
-    cell_size_chunk = 'i4si'
-    borders_chunk = 'i4siiii'
+    of cells as a 1D array.'''
 
     
     def __init__(self, filename):
@@ -318,12 +210,7 @@ class CellSpace:
 
         output_file: the default output file name to write to
         height_map: a heightmap.HeightMap instance with the height data
-        dims_2d: the dimensions of the corresponding height map 
-
-
-        usage example:
-            c = CellSpace('path_to_file.csp')
-        '''
+        dims_2d: the dimensions of the corresponding height map'''
             
         # determine if data is in a file or is already bytes
         if isinstance(filename, bytes):
@@ -337,8 +224,8 @@ class CellSpace:
             else:
                 self.output_file = filename[:-3]
             self._read()
-
-        # also makes surface_map
+            
+        # make_height_map also makes surface_map
         self.make_height_map()
         self.dims_2d = self.dims_2d()
 
@@ -357,7 +244,6 @@ class CellSpace:
         else:
             print('not sure of cell data type')
         return data_type
-
 
 
     def dims_2d(self):
@@ -413,10 +299,66 @@ class CellSpace:
     # self.model, self.depth, self.length, self.height
     # self.cell_size
     def _read_header(self, bs):
-        '''read the .csp header and store the pertinent values'''
+        '''Read the .csp header and store the pertinent values
 
+        The parts of the header that are used are organized as follows:
+
+        the first 20 bytes:
+            [0..3]   B3s  the magic number which is \\212 or 0o212
+                          in the source and 'CSP' <<138 'CSP'>>
+            [4..5]   2s   not sure what this is, but it's <<'@1'>>
+            [6]      c    can be <<'_'>> for little endian and <<'b'>> for big endian
+            [7]      c    a newline <<'\\n'>>
+            [8..11]  i    a chunk size, this doesn't appear to be used,
+                           but it's 8 + sizeof(int) = 12  <<12>>
+            12..15]  4s   a string that indicates the header size is next <<'HDSZ'>>
+            [16..19] i    the header size,
+                          which includes these first 20 bytes <<some_number>>
+
+        after the first 20 bytes, the format is in chunks
+        each chunk starts with a number (int) that says its size in bytes
+        this size includes the 4 bytes for the chunk size number
+        byte values are relative to the start of the chunk
+        the chunks that are used are the model, size, and cell size chunks
+
+        Model chunk:  contains the model type, which I think is a 3 byte string
+            [0-3]   i  the size the chunk  <<some_number>> (probably 12)
+            [4-7]   4s the chunk type identifier <<'MODL'>>
+            [8-10]  3s the model name, for example <<'SNO'>>
+            [11]    B  I think this is pad <<'\\0'>>
+
+        Size chunk:  contains the dimensions of the simulations space 
+        height (H), length (L), and depth (D) as 3 ints
+            [0-3]     i  the size the chunk  <<some_number>> (probably 20)
+            [4-7]     4s the chunk type identifier <<'SIZE'>>
+            [8-11]    i  the height H <<some_number>>
+            [12-15]   i  the length L <<some_number>>
+            [16-19]   i  the depth  D <<some_number>>
+
+        Cell Size chunk: contains the number of bytes for each cell
+        which seems to default to 8
+            [0-3]     i  the size the chunk  <<some_number>> (probably 12)
+            [4-7]     4s the chunk type identifier <<'CELL'>>
+            [8-11]    i  the number of bytes per cell <<some_number>> (probably 8)
+
+        Sizes with borders chunk: contains the dimension with border cells
+        and a flag to indicate if there are the dimensions to be used
+            [0-3]     i i  the size the chunk  <<some_number>> (probably 24)
+            [4-7]     4s the chunk type identifier <<'BORD'>>
+            [8-11]    i  the height H <<some_number>>
+            [12-15]   i  the length L <<some_number>>
+            [16-19]   i  the depth  D <<some_number>>
+            [20-23]   i  flag to say if thses values should be used. 1 if yes, 0 if no.'''
+
+        b0_19 = 'B3s2scci4si'
+        model_chunk = 'i4s3sB'
+        size_chunk = 'i4siii'
+        cell_size_chunk = 'i4si'
+        borders_chunk = 'i4siiii'
+
+        
         # unpack first 20 bytes
-        header_20 = struct.unpack(CellSpace.b0_19, bs[:20])
+        header_20 = struct.unpack(b0_19, bs[:20])
         # get the size of the header
         header_size = header_20[-1]
         self.header_size = header_size
@@ -443,7 +385,7 @@ class CellSpace:
                     print('bad chunk size for Model')
                 else:
                     # extract and store model name
-                    _, _, model, _ = struct.unpack(CellSpace.model_chunk,bs[bytes_slice])
+                    _, _, model, _ = struct.unpack(model_chunk,bs[bytes_slice])
                     self.model = model.decode('utf-8')
 
             elif chunk_type == b'SIZE':
@@ -451,14 +393,14 @@ class CellSpace:
                     print('bad chunk size for SIZE')
                 else:
                     # extract and store height, length, and depth
-                    _, _, h, l, d = struct.unpack(CellSpace.size_chunk, bs[bytes_slice])
+                    _, _, h, l, d = struct.unpack(size_chunk, bs[bytes_slice])
                     self.height, self.length, self.depth = h, l, d
 
             elif chunk_type == b'CELL':
                 if chunk_size < 12:
                     print('bad chunk size for CELL')
                 else:
-                    _, _, cell_size = struct.unpack(CellSpace.cell_size_chunk, bs[bytes_slice])
+                    _, _, cell_size = struct.unpack(cell_size_chunk, bs[bytes_slice])
                     self.cell_size = cell_size
 
             elif chunk_type == b'TIME':
@@ -469,7 +411,7 @@ class CellSpace:
                     print('bad chunk size for BORD')
                 else:
                     # extract and store height, length, and depth
-                    _, _, h_b, l_b, d_b, u_b = struct.unpack(CellSpace.borders_chunk, bs[bytes_slice])
+                    _, _, h_b, l_b, d_b, u_b = struct.unpack(borders_chunk, bs[bytes_slice])
                     self.height_borders, self.length_borders, self.depth_borders, self.use_borders = h_b, l_b, d_b, u_b
             else:
                 print('unrecognized chunk type {n}'.format(n=chunk_type.decode('utf-8')))
@@ -554,55 +496,6 @@ class CellSpace:
         return True
 
 
-
-    # point can be either length 3 or 1 or a scalar
-    # get a slice through the entire cell space at the given point and orientation
-    def _cut_1(self, point, orientation):
-        # deal with possible input types
-        D,H,L = 0,0,0
-        if type(point) == int:
-            D,H,L = point, point, point
-        elif len(point) == 1:
-            D,H,L = point[0], point[0], point[0]
-        elif len(point) == 3:
-            D,H,L = point
-
-        # verify slice is in range
-        bounds_check_point = (0,0,0)
-        if orientation == 'd':
-            bounds_check_point = (D,0,0)
-        elif orientation == 'h':
-            bounds_check_point = (0,H,0)
-        elif orientation == 'l':
-            bounds_check_point = (0,0,L)
-
-        # TODO handle the error or point out of bounds
-        if not self._in_cell_space(bounds_check_point):
-            return None
-
-        if orientation == 'd':
-            return self.cells[D,:,:].copy()
-        elif orientation == 'h':
-            return self.cells[:,H,:].copy()
-        elif orientation == 'l':
-            return self.cells[:, :,L].copy()
-        # TODO handle error or invalid orientation
-        else:
-            return None
-
-
-    # show cut from all 3 directions for a given point
-    def _cut_3(self, point, reorient=False):
-        d_cut = self._cut_1(point, 'd')
-        h_cut = self._cut_1(point, 'h')
-        l_cut = self._cut_1(point, 'l')
-
-        if reorient:
-            l_cut = np.transpose(l_cut)
-
-        return d_cut, h_cut, l_cut
-
-
     # takes in csp column and makes a height map
     # find the first location of an air cell
     def _find_air(self, column):
@@ -626,43 +519,6 @@ class CellSpace:
         else:
             return 0
 
-    # get the position of the bottom of the ceiling
-    def _find_ceiling_one_column(self, column):
-
-        # get the indices of each type
-        boundary = cell_types['boundary'] 
-        neutral = cell_types['neutral']
-        input_of_sand =  cell_types['input_of_sand']
-        boundary_indices = np.nonzero(column == boundary)[0]
-        neutral_indices = np.nonzero(column == neutral)[0]
-        input_of_sand_indices = np.nonzero(column == input_of_sand)[0]
-
-        # iterate through the types of indices
-        indices_lists = [boundary_indices, neutral_indices, input_of_sand_indices]
-        min_position = 0
-        for indices in indices_lists:
-            if indices.size == 0:
-                continue
-            elif indices.size == 1:
-                min_position = max(min_position, indices[0])
-            # find the longes contiguous streak of ceiling cell types starting from 0
-            # the highest index value is the bottom of the ceiling for this column
-            else:
-                for i in range(1,len(indices)):
-                    if indices[i] == 1 + indices[i-1]:
-                        min_position = max(min_position, indices[i])
-                    else:
-                        break
-        return min_position
-                
-                # look for break in contiguous values
-                
-    # create a heightmap of the celing and get the lowest point                
-    def make_ceiling_map(self):
-        self.ceiling_map = np.apply_along_axis(self._find_ceiling_one_column, 1, self.cells)  
-        
-        
-
         
     # creates a surface map
     # like an inverted and offset heightmap, gives the positions
@@ -677,7 +533,6 @@ class CellSpace:
     def make_height_map(self):
         self.make_surface_map()
         height_map = self.cells.shape[1] - 1 - self.surface_map
-        # this is how good I am at OOP
         self.height_map = heightmap.HeightMap(height_map)
 
 
@@ -746,13 +601,13 @@ class CellSpace:
 
                         
 
-    def add_height_map(self, top_left, height_map):
+    def add_height_map(self, height_map, top_left_corner=(0,0)):
         # verify that the height_map can be placed at top_left
-        if not in_bounds(self.cells[:,0,:], height_map, top_left):
+        if not in_bounds(self.cells[:,0,:], height_map, top_left_corner):
             # TODO raise an exception, bad input
             return
         # now grab the applicable portion of self.cells
-        d_top_left, l_top_left = top_left
+        d_top_left, l_top_left = top_left_corner
         d_height_map, l_height_map = height_map.shape
         cells_to_mod = self.cells[d_top_left : d_top_left + d_height_map,
                                   :,
@@ -769,18 +624,18 @@ class CellSpace:
         If height is negative surface level will lower.'''
         # create heightmap of height
         h = np.full(self.dims_2d, height)
-        self.add_height_map((0,0), h)
+        self.add_height_map(h)
                 
                         
     def add_sinusoid(self, amplitude=5, frequency=10, phase=0, wind_direction=True):
         '''Superimposes a sinusoidal wave onto the surface of the cell space.'''
         # create a 2D heightmap that will be superimposed onto the surface
-        sinusoid_height_map = make_sinusoid(amplitude, frequency, self.dims_2d, phase=phase)
-        self.add_height_map((0,0), sinusoid_height_map)
+        sinusoid_height_map = heightmap.make_sinusoid(amplitude, frequency, self.dims_2d, phase=phase)
+        self.add_height_map(sinusoid_height_map)
 
 
     # applies a random modification of the given type
-    def random_mods(self, file_prefix, mod_type='gaussian', num_mods=1:
+    def random_mods(self, file_prefix, mod_type='gaussian', num_mods=1):
 
         # get heightest sand to avoid going out of the space
         
@@ -871,6 +726,60 @@ class CellSpace:
         self.make_height_map()
         self.height_map.draw_fft_blur()
 
+
+
+    # point can be either length 3 or 1 or a scalar
+    # get a slice through the entire cell space at the given point and orientation
+    def _cut_1(self, point, orientation):
+        # deal with possible input types
+        D,H,L = 0,0,0
+        if type(point) == int:
+            D,H,L = point, point, point
+        elif len(point) == 1:
+            D,H,L = point[0], point[0], point[0]
+        elif len(point) == 3:
+            D,H,L = point
+
+        # verify slice is in range
+        bounds_check_point = (0,0,0)
+        if orientation == 'd':
+            bounds_check_point = (D,0,0)
+        elif orientation == 'h':
+            bounds_check_point = (0,H,0)
+        elif orientation == 'l':
+            bounds_check_point = (0,0,L)
+
+        # TODO handle the error or point out of bounds
+        if not self._in_cell_space(bounds_check_point):
+            return None
+
+        if orientation == 'd':
+            return self.cells[D,:,:].copy()
+        elif orientation == 'h':
+            return self.cells[:,H,:].copy()
+        elif orientation == 'l':
+            return self.cells[:, :,L].copy()
+        # TODO handle error or invalid orientation
+        else:
+            return None
+
+
+    # show cut from all 3 directions for a given point
+    def _cut_3(self, point, reorient=False):
+        d_cut = self._cut_1(point, 'd')
+        h_cut = self._cut_1(point, 'h')
+        l_cut = self._cut_1(point, 'l')
+
+        if reorient:
+            l_cut = np.transpose(l_cut)
+
+        return d_cut, h_cut, l_cut
+
+
+
+
+
+                    
 
     # put image on axes
     @staticmethod
@@ -968,3 +877,6 @@ class CellSpace:
         plt.show()
         return
 
+
+if __name__ == '__main__':
+    c = CellSpace('DUN.csp')

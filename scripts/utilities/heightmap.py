@@ -2,6 +2,7 @@ __doc__ = '''Utilities to read and visualize rescal height maps.'''
 __author__ = 'Gian-Carlo DeFazio'
 __date__ = '16 August 2019'
 
+import math
 import numpy as np
 import argparse
 import scipy.ndimage
@@ -14,6 +15,25 @@ if bool(os.environ.get('DISPLAY', None)) == False:
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
+
+
+# TODO make this better
+def gaussian_hill(amplitude, sigma, height_padding, width_padding):
+    '''Creates a guassian heightmap. The center of the guassian
+    will have a value of amplitude. sigma can be either a scaler 
+    or a 2-tuple. The padding determines the size of the array returned.
+    The size is (2*height_padding+1, 2*width_padding+1)'''
+    
+    # does it the cheap way:
+    # makes an impulse, meaning a 1 in the middle and 0 otherwise,
+    # then filters it
+    impulse = np.zeros([2 * height_padding + 1, 2 * width_padding + 1])
+    height, width = impule.shape
+    impule[height//2, width//2] = 1
+    gaussian = scipy.ndimage.gaussian_filter(impulse, sigma)
+    # scale so center has a height of amplitude
+    gaussian = gaussian * (amplitude / gaussian[height//2,width//2])
+    return np.round_(guassian).astype(np.int32)
 
 
 # various height maps
@@ -50,52 +70,26 @@ def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True, no_nega
     return np.round_(height_map).astype(np.int32)
 
 
-def make_gaussian(h, d_padding, l_padding, sigma):
-    '''creates a heightmap for a guassian
-    scales the max height to h
-    set all values to integers'''
-    
-    # does it the cheap way, makes a dirac delta
-    # meaning a 1 in the middle and 0 otherwise
-    # then filters it
-    dd = np.zeros([2 * l_padding + 1, 2 * d_padding + 1])
-    l, d = dd.shape
-    dd[l//2, d//2] = 1
-    g = scipy.ndimage.gaussian_filter(dd, sigma)
-    g = g * (h / g[l//2,d//2]) + 0.01
-    return np.round_(g).astype(np.int32)
-
-
-
 
 # little example of making a height map and scaling it
 # space invader height map
-invader = np.array([[0,0,1,0,0,0,0,0,1,0,0],
-                    [0,0,0,1,0,0,0,1,0,0,0],
-                    [0,0,1,1,1,1,1,1,1,0,0],
-                    [0,1,1,0,1,1,1,0,1,1,0],
-                    [1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,1,1,1,1,1,1,1,0,1],
-                    [1,0,1,0,0,0,0,0,1,0,1],
-                    [0,0,0,1,1,0,1,1,0,0,0]], dtype=np.uint8)
-
-# make a lists of lists that can be used in np.kron
-# to scale up images by a factor of 'h' in the horizontal direction
-# and a factor of 'v' in the vertical direction
-def make_scaler(h,v):
-    '''make a lists of lists that can be used in np.kron
-to scale up images by a factor of 'h' in the horizontal direction
-and a factor of 'v' in the vertical direction'''
-    return [[1 for j in range(v)] for i in range(h)]
+invader_template = np.array([[0,0,1,0,0,0,0,0,1,0,0],
+                             [0,0,0,1,0,0,0,1,0,0,0],
+                             [0,0,1,1,1,1,1,1,1,0,0],
+                             [0,1,1,0,1,1,1,0,1,1,0],
+                             [1,1,1,1,1,1,1,1,1,1,1],
+                             [1,0,1,1,1,1,1,1,1,0,1],
+                             [1,0,1,0,0,0,0,0,1,0,1],
+                             [0,0,0,1,1,0,1,1,0,0,0]], dtype=np.int32)
 
 
-invaders = np.kron(invader, make_scaler(6,6)) * 6
 
+def scale(height_map, amplitude=1, vertical=1, horizontal=1):
+    '''Scales a height map. The heigh map dimensions are scaled in the 
+    horizontal and vertical directions. The values are then scaled by a factor
+    of amplitude.'''
+    return np.kron(height_map, np.full((vertical, horizontal), amplitude))
 
-# for finding height_map files
-# used with param_space_exploration_utilities.get_files_to_process
-path_glob = 'out/ALTI*'
-exclude_globs = []
 
 
 def fft2d_analyze(data):
@@ -133,7 +127,6 @@ def fft2d_analyze_map_pic(data):
     #Get fft2d and resize to single quadrant
     # PY3 Note: need indeces to be integers
     return np.fft.fftshift(np.fft.fft2(fft_data)/(dpx*dpy))
-
 
 
 def fft2d_crop_blur(image):
@@ -175,9 +168,18 @@ def make_surface(height_map):
     ax.set_xticks([])
     ax.set_yticks([])
     ax.view_init(45, 20)
-    surf = ax.plot_surface(xss, yss, np.transpose(height_map), cmap=cm.plasma,
+    return ax.plot_surface(xss, yss, np.transpose(height_map), cmap=cm.plasma,
                            linewidth=0, antialiased=False)
-    return surf
+
+
+def draw(height_map):
+    '''draw a simple color_map of height_map.
+    height_map is a 2d numpy.ndarray, not a HeightMap.'''        
+    plt.imshow(height_map)
+    plt.colorbar()
+    plt.show()
+
+
 
 # from the matplotlib tutorials
 def plot_3d(height_map):
@@ -254,8 +256,6 @@ class HeightMap:
 
     def save_as_pdf(self, filename, in_3d=False):
         '''make a figure'''
-        
-
         plt.xticks([])
         plt.yticks([])
         
@@ -267,26 +267,20 @@ class HeightMap:
         plt.savefig(filename, transparent=True, bbox_inches='tight')
 
 
-
-    
     def draw(self):
-        '''draw a simple color_map of height_map'''
-        
+        '''draw a simple color_map of height_map'''        
         plt.imshow(self.height_map)
         plt.colorbar()
         plt.show()
 
     
     def make_fft_blur(self):
-        '''makes a blurred 2D fft of the height_map'''
-        
+        '''makes a blurred 2D fft of the height_map'''        
         return fft2d_crop_blur(self.height_map.astype(np.float32))
-
 
     
     def draw_fft_blur(self, in_3d=False):
         '''draw simple color map of fft_blur'''
-        
         if not in_3d:
             plt.imshow(self.fft_blur)
             plt.colorbar()
@@ -294,6 +288,7 @@ class HeightMap:
         else:
             plot_3d(self.fft_blur)
 
+            
     def save_fft_blur(self, filename, in_3d=False):
         if not in_3d:
             plt.imshow(self.fft_blur)
@@ -302,7 +297,6 @@ class HeightMap:
         plt.savefig(filename, transparent=True, bbox_inches='tight')
 
 
-    
     def draw_fft_center(self, in_3d=False):
         '''draw simple color map of fft_blur'''
         if not in_3d:
@@ -311,7 +305,6 @@ class HeightMap:
             plt.show()
         else:
             plot_3d(self.fft_center)
-
 
     
     def make_summary_data(self):
@@ -324,10 +317,4 @@ class HeightMap:
         self.fft_blur = fft2d_crop_blur(self.height_map.astype(np.float32))
         self.fft_center = fft2d_center_blur(self.height_map.astype(np.float32))
 
-
-    def load_from_paths(paths):
-        '''given a 2D list of file paths
-        returns 2D list of HeightMap objects'''
-
-        return [[HeightMap(path) for path in local_paths] for local_paths in paths]
 

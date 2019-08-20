@@ -6,16 +6,17 @@ Author: Gian-Carlo DeFazio, defaziogiancarlo@gmail.com
 
 ## Make a Rescal-snow cellspace into to python object
 
-ReSCAL has utilities for the creation and modification of its cellspace files,
+Rescal-snow already has utilities for the creation and modification of its cellspace files,
 which usually have a file suffix of `.csp` or `.csp.gz`.
-The CellSpace class, in [scripts/utilities/cellspace.py](../scripts/utilities/cellspace.py) creates 
-a python object using a .csp file. Having a python version of the cell spaces makes makes it easier to 
-work with cellspaces when running ReSCAL in python as demostrated here [rescal-in-python.md](./rescal-in-python.md).
+The `CellSpace` class, in [scripts/utilities/cellspace.py](../scripts/utilities/cellspace.py) creates 
+a python object using a `.csp` file. Having a python version of the cell spaces makes makes it easier to 
+work with cellspaces when running Rescal-snow in python as demostrated here [rescal-in-python.md](./rescal-in-python.md).
+The `heightmap` module is also used and can be found here [scripts/utilities/heightmap.py](../scripts/utilities/heightmap.py)
 
-The CellSpace class cannot make a cell space, it needs to either read in a cell space from a `.csp` or `.csp.gz`
+The `CellSpace` class cannot make a cell space, it needs to either read in a cell space from a `.csp` or `.csp.gz`
 file, or it can be given a python bytearray. 
 
-First, let's make a `.csp` file using genesis.
+First, let's make a `.csp` file using `genesis`.
 We'll use one of the example parameter files `snow_cone.par`.
 
 ```bash
@@ -38,7 +39,7 @@ mv DUN.csp ../scripts/utilities
 cd ../scripts/utilities
 ```
 
-Before we load in the `DUN.csp`, let's look at the dimensions specified by `snow_cone.par`.
+Before we load in the `DUN.csp`, let's look at `snow_cone.par`.
 ```bash
 head -n 15 ../snow_cone.par
 >> ## PARAMETER FILE
@@ -57,7 +58,6 @@ head -n 15 ../snow_cone.par
 >> D = 80
 >>
 ```
-
 This shows that we should get a file named `DUN.csp` with height=50, length=200, and depth=80
 
 Now start an interactive python session.
@@ -100,32 +100,90 @@ you can view the height map.
 A window should pop up with this image
 ![](example_images/cellspace/snow_cone_height_map.png)
 
-You can also look at the surface map, which looks a lot like a negative of the height map.
-Surface maps are used internally for making height maps and editing the cells.
-
+Let's increase the height of the entire surface by 10.
 ```python
->>> c.draw_surface_map()
+c.add_height(10)
+c.draw_height_map()
+```
+A window should pop up with this image
+![](example_images/cellspace/snow_cone_height_increased.png)
+
+This looks about the same as the last one, but notice the scale on the right
+now ranges from 11 to 29, instead of 1 to 19 like before.
+
+Let's add a sine wave
+```python
+c.add_sinusoid()
+c.draw_height_map()
 ```
 
 A window should pop up with this image
-![](example_images/cellspace/snow_cone_surface_map.png)
+![](example_images/cellspace/snow_cone_sine.png)
 
-We can now edit the cells. There are several ways to edit, but the most flexible way is to use the 
-`add_height_map` method.
 
-There is an example height map `heightmap.invaders`.
-To add the heght map to `c.cells`
+You can make you own custom edits. The mostflexible way is to use the 
+`add_height_map` method. This method takes a height map and superimposes it onto the
+sand or snow surface. In fact, `add_sinusoid` and `add_height` methods just make a sinusoidal
+or flat height map and then add it using `add_height_map`.
+
+There is an example height map `heightmap.invader_template`.
+
+We can view it by creating a `HeightMap` object.
+```python
+h = heightmap.HeightMap(heightmap.invader_template)
+h.draw()
+```
+
+A window should pop up with this image
+![](example_images/cellspace/inavder_template.png)
+
+The `cellspace` module uses the `heightmap` module to process
+and draw the 2D height maps made from the 3D cell space.  
+
+`heightmap.invader_template` is just a `numpy.ndarray`.
+If you dont' need to make a `Heightmap` object you can view it using
+```python
+>>> heightmap.draw(heightmap.invader_template)
+```
+
+This heighmap is pretty small. We can scale it up
+```python
+big_invader = height_map.scale(heightmap.invader_template, 7, 6, 6)
+heightmap.draw(big_invader)
+```
+
+
+To add the height map to `c.cells`
 
 ```python
->>> c.add_height_map((20, 40), heightmap.invaders)
+>>> c.add_height_map(big_invader, top_left_corner=(20,40))
 >>> c.draw_height_map()
 ```
 
 A window should pop up with this image
 ![](example_images/cellspace/snow_cone_height_map_invaded.png)
 
-Notice that you can still see the cone under the space invader. This is because the heightmap is
-placed on top of the surface of the sand.
+We now have 3 modifications to the original cell space.
+To undo these modifications
+```python
+c.restore_original_cells()
+c.draw_height_map()
+```
+
+What if we want to save the changes we've made?
+Let's make a change and save it.
+We'll add a gaussian hill to compare with the cone.
+```python
+gaussian_hill = heightmap.gaussian_hill(25, (2,3), 30, 30)
+heightmap.draw(gaussian_hill)
+```
+
+Now lets add this to `c`.
+```python
+c.add_height_map(guassian_hill, top_left_corner=(15, 60))
+c.draw_height_map()
+```
+
 
 You can now write this modification to a file. To do so, just use the `write` method.
 ```python
@@ -139,12 +197,13 @@ c.write(filename='invaded.csp', compressed=True)
 
 Let's look at the files we just made.
 ```python
->>> import os
->>> os.system('ls -lh *.csp*')
+quit()
+```
+```bash
+ls -lh *.csp*
 -rw------- 1 <user> <group> 6.2M <time> DUN.csp
 -rw------- 1 <user> <group> 6.2M <time> invaded.csp
 -rw------- 1 <user> <group>  12K <time> invaded.csp.gz
-0
 ```
 
 Notice that `DUN.csp` and `invaded.csp` files are the same size.
@@ -154,3 +213,5 @@ has a `.gz` added automatically.
 
 If you were to do a `write` without specifying a `filename`,
 the input file would be used, so in this case `DUN.csp` would be overwritten.
+However, if you were to use `write` with `compressed` specified, a new file
+called `DUN.csp.gz` would be written and `Dun.csp` would not be overwritten.
