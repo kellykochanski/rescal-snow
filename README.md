@@ -44,6 +44,8 @@ We hope that this model will be useful to researchers in snow science, geomorpho
 
 Rescal-snow can model the growth of ripples from a flat bed of snow; the accumulation of dunes during snowfall events; and the solidification of dunes and snow-waves by sintering.
 
+
+
 ## Getting started <a name="starting"></a>
 
 ### Prerequisites
@@ -53,37 +55,52 @@ If you have never used bash, we recommend you stop and work through a short tuto
 (Our favorite is ['The Unix Shell' from Software Carpentry](http://swcarpentry.github.io/shell-novice/).)
 If you modify rescal-snow, you will need to modify and compile C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
 
-### Dependencies
-Rescal-snow requires glib-2.0 and pthread, as well as a C compiler and the [lib](lib) directory, which contains compatible versions of zlib and libpng.
 
-Many of the auxiliary tools (see the [analysis](analysis) and [scripts/utilities](scripts/utilities) directories) are written in Python3. These were developed in an Anaconda environment and require os, sys, numpy, scipy, csv and pandas.
+
+### Dependencies
+
+ * C compiler (GCC and CLANG are known to work)
+ * cmake>=3.1 (used for compiling)
+ * make (used for compiling)
+ * Optional packages used for analysis (see the [analysis](analysis) and [scripts/utilities](scripts/utilities) directories):
+   * Python3 (used for analysis)
+   * numpy (used by Python3 for analysis)
+   * pandas (used by Python3 for analysis)
+   * scipy (used by Python3 for analysis)
+
+On a Debian-based/Ubuntu Linux machine, the dependencies can be acquired using: 
+
+```bash
+sudo apt install gcc cmake make python3 python3-numpy python3-pandas python3-scipy
+```
+
+On most machines, the Python packages can also be acquired using:
+
+```bash
+pip3 install numpy pandas scipy
+```
+
 
 ### Download
 Download rescal-snow by cloning this repository with git:
+
 ```bash
 git clone https://github.com/kellykochanski/rescal-snow.git
 cd rescal-snow
 ```
-You may also download the repository manually from [https://github.com/kellykochanski/rescal-snow](https://github.com/kellykochanski/rescal-snow).
 
-The downloaded repository should create a rescal-snow directory with the following contents (as of 18 June 2019):
-```bash
-ls
->> AUTHORS		Makefile.am	TODO		configure	missing
->> COPYING		Makefile.in	aclocal.m4	configure.ac	scripts
->> ChangeLog		NEWS		compile		depcomp		src
->> INSTALL		README		config.h.in	install-sh
-```
-**All further blocks of bash instructions start from this directory for consistency.**
+You may also download the repository manually from [Github](https://github.com/kellykochanski/rescal-snow).
 
 ### Installation
 
-These instructions will get rescal-snow running on most linux environments; for additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
+These instructions will get rescal-snow running on most Linux environments. For additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
 
 In a terminal, navigate into the main rescal-snow directory (shown above). Run:
 ```bash
-  ./configure
-  make
+mkdir build
+cd build
+cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release .. #Debug can be used instead of Release
+make -j 4                                    #Adjust to the number of cores you have for a speedy build
 ```
 
 ### Example 1: a snow cone <a name="test-cone"><a>
@@ -111,21 +128,21 @@ eog scripts/*.png
 ```
 If `eog` is not available, use `open` (MacOS) or any image viewer.
 
-These files are numbered sequentially. The files are saved at regular intervals set by the `-dpng` flag in [scripts/snow_cone.run](scripts/snow_cone.run). For this run, we used `-dpng 10t0`, so file 0 is saved at simulation time t0=0, file 1 (SNO00001\_t0.png) is saved at
+These files are numbered sequentially. The files are saved at regular intervals set by the `-dpng` flag in [scripts/snow_cone.run](scripts/snow_cone.run). For this run, we used `-dpng 10t0`, so file 0 is saved at simulation time t0=0, file 1 (`SNO00001_t0.png`) is saved at
 simulation time t0=10, and so on.
 
-|Initial condition, SNO00000_t0.png 	|  SNO00003_t0.png   | SNO00009_t0.png  |
-|------------------------|--------------------|------------------|
+|Initial condition, SNO00000_t0.png         |  SNO00003_t0.png                          | SNO00009_t0.png                           |
+|-------------------------------------------|-------------------------------------------|-------------------------------------------|
 | ![](docs/example_images/snow_cone/00.png) | ![](docs/example_images/snow_cone/03.png) | ![](docs/example_images/snow_cone/09.png) |
 
 Each of the three images above shows a shaded top-down view of a dune (top left), cross-sections through the dune, along the dashed lines (middle left, top right), and a cross-section showing the pressure intensity in the fluid (bottom left).
 
-The initial condition (t0=0) is a small cone of sand. As the simulation runs, the cone quickly self-organizes into an elongate dune, and moves downwind.
+The initial condition (`t0=0`) is a small cone of sand. As the simulation runs, the cone quickly self-organizes into an elongate dune, and moves downwind.
 As time progresses, the dune gradually loses grains. These are not replaced, and the dune dwindles away: this dune is not stable in these (high-wind, no resupply) conditions.
 
 ## Controlling the simulation <a name="modifying"></a>
 
-In the next two examples, we walk through the .run and .par scripts that control the behavior of the simulation, and present example simulations that show you how to modify two important snow parameters: sintering and snowfall.
+In the next two examples, we walk through the `.run` and `.par` scripts that control the behavior of the simulation, and present example simulations that show you how to modify two important snow parameters: sintering and snowfall.
 
 ### Example 2: sintering snow <a name="test-sinter"></a>
 
@@ -166,9 +183,9 @@ diff scripts/sintering.par scripts/snow_cone.par
 >> > Lambda_F = 0
 ```
 *What do these changes do?*
- - Csp\_templeate selects one of several initial conditions defined in [src/genesis.c](src/genesis.c): the initial condition is now a 15 cell high triangular wave instead of a 20 cell high cone
- - Lambda\_S controls the rate of sintering: we increased it from 0 to 0.01/t0.
- - Lambda\_F controls the relative erodibility of the sintered grains: we set it to 0.05/t0, or 5% of the erodibility of the non-sintered grains
+ - `Csp_template` selects one of several initial conditions defined in [src/genesis.c](src/genesis.c): the initial condition is now a 15 cell high triangular wave instead of a 20 cell high cone
+ - `Lambda_S` controls the rate of sintering: we increased it from 0 to 0.01/t0.
+ - `Lambda_F` controls the relative erodibility of the sintered grains: we set it to 0.05/t0, or 5% of the erodibility of the non-sintered grains
 
 **All rescal-snow parameters are all given brief descriptions in the .par file, and in [docs/rescal-snow-inputs.md](docs/rescal-snow-inputs.md).**
 
@@ -198,14 +215,13 @@ diff snowfall.run snow_cone.run
 ```
 
  - The SNOWFALL template sets an initial condition to be a flat layer of cells of thickness 4, and creates a layer of injection cells to generate snowfall on the simulation ceiling.
- - Lambda\_I controls the rate of snow injection; its behavior depends on the type and location of the injection cells, and thus on the template.
+ - `Lambda_I` controls the rate of snow injection; its behavior depends on the type and location of the injection cells, and thus on the template.
 
 ### Visualizing the simulation output <a name="visualizing"></a>
 
-The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface (left-most picture in image below; airborne
-grains are red).
+The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface (left-most picture in image below; airborne grains are red).
 
-To see the output clearly, we will make custom images with matplotlib (Python). We will make topographic maps showing the dunes' elevation. This data is output in scripts/out/ALTIxxxxx.log files.
+To see the output clearly, we will make custom images with matplotlib (Python). We will make topographic maps showing the dunes' elevation. This data is output in `scripts/out/ALTIxxxxx.log` files.
 
 We have included a script to recolor three example output frames from the snowfall simulation:
 
@@ -216,10 +232,10 @@ python recolor.py
 This produces the following images:
 
 | Default image, SNO00050_t0.png | ALTI00050_recolored.png | ALTI00100_recolored.png | ALTI00150_recolored.png |
-|-----------|----------------|------------|---------------|
+|--------------------------------|-------------------------|-------------------------|-------------------------|
 | ![](docs/example_images/snowfall/SNO00050_t0.png) | ![](docs/example_images/snowfall/ALTI00050_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00100_t0_recolored.png) | ![](docs/example_images/snowfall/ALTI00150_t0_recolored.png) |
 
-The full evolution of this simulation is shown in the gif at the top of [README.md](README.md).
+The full evolution of this simulation over a longer time period is shown in the gif at the top of [README.md](README.md).
 
 > Additional scripts for analysing and visualizing the runs are available in the scripts/utilities and analysis directories.
 
@@ -268,16 +284,16 @@ Each subdirectory contains the executables and input needed for a rescal-snow ru
 ls test_parallel_runs/tauMin0_lambdaI0.001
 >> genesis  real_data  rescal  run.par  run.run
 ```
-Running `./run.run` in this test_parallel_runs/tauMin0_lambdaI0.001 directory would begin a rescal-snow run (you may wish to test this now).
+Running `./run.run` in this `test_parallel_runs/tauMin0_lambdaI0.001` directory would begin a rescal-snow run (you may wish to test this now).
 
-The directory names list the run parameters. For example, test_paralle_runs/tauMin0\_lambdaI0.001 uses a snowfall rate of 0.001/t0, and has the highest possible wind strength (tauMin=0).
+The directory names list the run parameters. For example, `test_parallel_runs/tauMin0_lambdaI0.001` uses a snowfall rate of 0.001/t0, and has the highest possible wind strength (tauMin=0).
 The other nine subdirectories contain material for runs with different snowfall rates and wind strengths.
 
 We can submit all of these runs simultaneously using scripts/test_parallel_runs.msub (for Moab systems) or scripts/test_parallel_runs.sbatch (for slurm).
 These scripts contain #MSUB or #SBATCH commands describing the user's email, the queue, the resources in terms of nodes or processors, etc.
 You will need to modify these commands to match the structure of your computing cluster, or an example job script that works with your account on your computing cluster.
 
-Once you have a working msub/sbatch script, run:
+Once you have a working `msub/sbatch` script, run:
 
 ```bash
 cd scripts
@@ -285,7 +301,7 @@ msub test_parallel_runs.msub
 ```
 on a Moab system, or `cd scripts; sbatch test_parallel_runs.sbatch` on slurm.
 
-Each subdirectory should now produce its own 'out' directory accompanied by log files, png output, and cellspace (.csp) files. After four output intervals pass, it looks like this:
+Each subdirectory should now produce its own `out` directory accompanied by log files, png output, and cellspace (`.csp`) files. After four output intervals pass, it looks like this:
 
 ```bash
 ls test_parallel_runs/tauMin0_lambdaI0.01
@@ -302,28 +318,29 @@ ls test_parallel_runs/tauMin0_lambdaI0.01/out
 >> ALTI00004_t0.log  DOUBLETS.log             TIME.log
 ```
 
-The following phase diagram shows the 100th images produced by each of these runs (t0 = 1000; snowfall rate = lambda\_I; wind strength = Tau\_min). 
+The following phase diagram shows the 100th images produced by each of these runs (`t0 = 1000; snowfall rate = lambda_I; wind strength = Tau_min`). 
 
 ![snowfall-wind phase diagram](docs/example_images/phase_space_exploration/phase_diagram1.png)
 
 The runs with the higher snowfall rate have a much deeper average snow depth than the runs with lower snowfall rate.
-The runs with high wind speed (low Tau\_min) have less even snow cover, with better-defined ripples and dunes.
+The runs with high wind speed (low `Tau_min`) have less even snow cover, with better-defined ripples and dunes.
 
 >*Parallel run errors?*
 >
 > - msub/sbatch commands not allowed by your computing cluster -> seek support from someone familiar with the cluster
 > - permissions errors -> run `chmod u+rwx \*` in test_parallel_runs; contact administrator if this is disallowed
-> - script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun param_space_exploration_example.py and confirm that it produced the output above; check that you're running msub/sbatch from scripts; check relative directory references in msub/sbatch script and submit.sh
+> - script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun `param_space_exploration_example.py` and confirm that it produced the output above; check that you're running `msub/sbatch` from scripts; check relative directory references in msub/sbatch script and submit.sh
 > - runs time out before producing useful output -> increase walltime; large simulations on slow machines may ultimately take a few hours
+
+
 
 ## Community guidelines <a name="community"></a>
 
 We are excited to hear about your scientific work with ReSCAL.
 This section lists the best way to bring your project - and its successes, challenges, bugs, and developments - to our attention.
 
-We encourage you to interact with the project through github (see below). This will allow easy integration of your changes and prevent rescal-snow from fragmenting excessively.
+We encourage you to interact with the project through Github (see below). This will allow easy integration of your changes and prevent rescal-snow from fragmenting excessively.
 
-We check our email more often than our github, and will respond faster if git issues are accompanied by emails.
 
 ### Citation
 
@@ -335,16 +352,19 @@ We are working on getting a doi for this repository through the Journal of Open 
 This software inherits much of its functionality from the Real-Space Cellular Automaton Laboratory, ReSCAL. Please credit those developers by citing:
  - ['A real-space cellular automaton laboratory', O Rozier and C Narteau, Earth Surface Processes and Landforms 39(1) 98-109, 2013, doi=10.1002/esp.3479](https://onlinelibrary.wiley.com/doi/abs/10.1002/esp.3479)
 
+
 ### Support
 
 If you have challenges or questions, look at the material under 'further information' or reach out to us.
 
-Primary contact:
-Kelly Kochanski
-kelly.kochanski@gmail.com
-www.github.com/kellykochanski
+Issues should be reported using Github's issue tracking function on this repository, [here](https://github.com/kellykochanski/rescal-snow/issues).
 
-Issues may be reported using github's issue tracking function on this repository, [www.github.com/kellykochanski/rescal-snow](www.github.com/kellykochanski/rescal-snow).
+Issues which cannot be handled via Github can be addressed to
+
+    Kelly Kochanski
+    kelly.kochanski@gmail.com
+    www.github.com/kellykochanski
+
 
 ### Contributing
 
@@ -358,11 +378,12 @@ Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must
 ## References and further reading <a name="references"></a>
 
 The [docs](docs) folder contains additional information on 
-[alternate installations](docs/how_to_install.md), 
-[performance and parallelization issues](docs/performance_and_parallelization.md), 
-[model inputs and configuration](docs/rescal-snow-inputs.md),
-[model calibration and validation](docs/calibration_and_validation.md),
-and [development history](docs/NEWS.md)
+
+ - [Alternate installations](docs/how_to_install.md), 
+ - [Performance and parallelization issues](docs/performance_and_parallelization.md), 
+ - [Model inputs and configuration](docs/rescal-snow-inputs.md),
+ - [Model calibration and validation](docs/calibration_and_validation.md),
+ - [Development history](docs/NEWS.md)
 
 For more background on snow dunes, sintering, and self-organization, see:
  - ['Snow bedforms: A review, new data, and a formation model', Filhol and Sturm, 2015](https://doi.org/10.1002/2015JF003529)

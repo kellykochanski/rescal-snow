@@ -190,7 +190,7 @@ int32_t read_csp_header(char *filename) {
     } else if (chunk == READ_INT("CELL")) {
       csp_cell_size = READ_INT(header + offset);
       LogPrintf("chunk CELL: %d\n", csp_cell_size);
-      if (csp_cell_size > sizeof(Cell)) {
+      if (csp_cell_size > (int)sizeof(Cell)) {
         WarnPrintf("WARNING: too much data within cells (%d bytes), it will be truncated\n", csp_cell_size);
       }
     } else if (chunk == READ_INT("TIME")) {
@@ -237,7 +237,7 @@ void read_csp(char *filename) {
     }
   }
 
-  szcell = csp_cell_size ? Min(csp_cell_size, sizeof(Cell)) : sizeof(Cell);
+  szcell = csp_cell_size ? Min(csp_cell_size, (int)sizeof(Cell)) : (int)sizeof(Cell);
   LogPrintf("szcell = %d\n", szcell);
   LogPrintf("csp_cell_size = %d\n", csp_cell_size);
 

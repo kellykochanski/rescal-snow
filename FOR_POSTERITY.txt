@@ -1,0 +1,27 @@
+How to generate data of gaussian hills: 
+
+1. Create parallel directories
+	[rescal-snow] cd scripts/utilities
+	[utilities] nano gaussian_param_space.py
+		- change the name of the output folder: experiment_name = "test_gaussian_parallel" 
+		- change the number of parallel directories: num_trials = 360
+		- other initial conditions can be changed here as well
+	[utilities] python2 gaussian_param_space.py
+
+2. Change the submit file
+	[rescal-snow] cd scripts
+	[scripts] nano submit.sh 
+		- change the name of the output folder: output_root="../test_gaussian_parallel"
+
+3. Change & Submit the msub file
+	[rescal-snow] cd scripts
+        [scripts] nano run_parallel_rescal.msub
+		- change the number of nodes and tasks: srun --nodes=10 --cpus-per-task=1 --ntasks=360 --wait=0 submit.sh
+	[scripts] msub run_parallel_rescal.msub
+
+4. Split into Train & Test sets
+	[rescal-snow] cd scripts
+	[scripts] nano make_train_test_dirs.py
+		- change the name of the output folder: path_name = '../test_gaussian_parallel/'
+
+~ Divya Mohan & Jenna Horrall

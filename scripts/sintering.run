@@ -1,3 +1,19 @@
+
+#Rescal-snow: a cellular automaton model of self-organized snow
+#Copyright (C) 2019 Kelly Kochanski
+
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or 
+#(at your option) any later version.
+#This program is distributed in the hope that it will be useful, 
+#but WITHOUT ANY WARRANTY; without even the implied warranty of 
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
 #!/bin/bash
 
 ###################################
@@ -16,10 +32,10 @@
 
 
 if [ ! -e genesis ]; then
-  ln -s ../src/genesis .
+  ln -s ../build/genesis .
 fi
 if [ ! -e rescal ]; then
-  ln -s ../src/rescal .
+  ln -s ../build/rescal .
 fi
 
 ## parameters file (input)
@@ -44,5 +60,5 @@ RESCAL_LOG_FILE="RESCAL.log"
 #nice ./rescal $PAR_FILE -cv0 -lc -ls 45 -vel >> $RESCAL_LOG_FILE
 
 ## generation of png images, CSP files and info logs, then stop after 300 simulated time steps
-./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -nv -dcsp 10t0 -stop 300t0 >> $RESCAL_LOG_FILE
+nice ./rescal $PAR_FILE -cv0 -lc -h 20 -ls 45 -vel -vss -info -dpng 10t0 -nv -dcsp 10t0 -stop 300t0 >> $RESCAL_LOG_FILE
 

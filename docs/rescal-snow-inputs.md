@@ -19,8 +19,8 @@ All three input files are sensitive to changes in whitespace. Sorry.
 ### The run script
 The run script (run.run, snow_cone.run, etc) is a bash script. You can modify it to change the run in the following ways:
  - `./clean` : asks user if they want to remove previous output; use -f flag to skip request (useful for remote/queued/parallel runs)
- - `ln -s ../src/genesis .` : tells the run where to find the genesis executable; must be modified if you change the directory structure
- - `ln -s ../src/rescal .` : tells the run where to find the rescal executable; must be modified if you change the directory structure
+ - `ln -s ../build/genesis .` : tells the run where to find the genesis executable; must be modified if you change the directory structure
+ - `ln -s ../build/rescal .` : tells the run where to find the rescal executable; must be modified if you change the directory structure
  - `PAR_FILE` gives the location of the parameter file (see section below). *Expect to change this whenever you change model physics*
  - `export OMP_NUM_THREADS=1` : sets environment variable OMP_NUM_THREADS, we recommend using 1
  - `GENESIS_LOG_FILE` and `RESCAL_LOG_FILE` : set locations of two log files

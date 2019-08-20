@@ -63,6 +63,13 @@ void  srand48();
 
 float* load_surface(char *, int, int);
 
+//available CSP template types
+#if defined(MODEL_DUN) || defined(MODEL_SNO)
+enum CSP_TEMPLATES {INPUT_ELEVATION, CSP_CUSTOM, CSP_LAYER, CSP_SNOWFALL,  CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_SNOWCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
+#else
+enum CSP_TEMPLATES {CSP_CUSTOM};
+#endif
+
 void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
   va_list vl;
   int32_t i;
@@ -71,12 +78,17 @@ void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
   t_templates[nb_templates].name = name;
   t_templates[nb_templates].desc = desc;
   t_templates[nb_templates].nb_args = nb_args;
+  t_templates[nb_templates].file = NULL;
 
   AllocMemory(t_templates[nb_templates].args, float, nb_args);
   va_start(vl, nb_args);
   for (i = 0; i < nb_args; i++) {
-    t_templates[nb_templates].args[i] = (float) va_arg(vl, double);
-    //LogPrintf("t_templates[%d].args[%d] = %f\n", nb_templates, i, t_templates[nb_templates].args[i]);
+    if (t_templates[nb_templates].type == INPUT_ELEVATION && i == 0) {
+      t_templates[nb_templates].file = (char*) va_arg(vl, const char*);
+    } else { 
+      t_templates[nb_templates].args[i] = (float) va_arg(vl, double);
+      //LogPrintf("t_templates[%d].args[%d] = %f\n", nb_templates, i, t_templates[nb_templates].args[i]);      
+    }
   }
   va_end(vl);
   nb_templates++;
@@ -99,17 +111,11 @@ void init_template(int32_t type, char *name, char *desc, int32_t nb_args, ...) {
 // 3) in genesis() function, write the implementation for the new CSP template.
 //
 
-//available CSP template types
-#if defined(MODEL_DUN) || defined(MODEL_SNO)
-enum CSP_TEMPLATES {CSP_CUSTOM, CSP_LAYER, CSP_SNOWFALL,  CSP_LAYER_COL, CSP_BLOCK, CSP_CYLINDER, CSP_CONE, CSP_RCONE, CSP_SNOWCONE, CSP_CONE2, CSP_CONE3, CSP_CONE5, CSP_RCONE5, CSP_RWALL, CSP_WAVES_2D, CSP_WAVY_NS_LAYER, CSP_WAVE, CSP_TRIANGLES, CSP_SRC_DISK, CSP_SRC_DISK_CEIL, CSP_SMILEY, CSP_FORSTEP};
-#else
-enum CSP_TEMPLATES {CSP_CUSTOM};
-#endif
-
 //initialization of available templates
 void init_template_list() {
   init_template(CSP_CUSTOM, "CUSTOM", "CUSTOM:\t\t\tno template", 0);
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
+  init_template(INPUT_ELEVATION, "INPUT_ELEVATION", "INPUT_ELEVATION(filename with elevation values, 0 or 1 if using injection layer)", 2, "ALTI00000_t0.data", 0);
   init_template(CSP_LAYER, "LAYER", "LAYER(h=1.0):\t\t\tsand layer of height <h>", 1, 1.0);
   init_template(CSP_SNOWFALL, "SNOWFALL", "SNOWFALL(h=1.0):\t\t\tsand layer of height <h> with IN cells along ceiling", 1, 1.0);
   init_template(CSP_SNOWCONE, "SNOWCONE", "SNOWCONE(h=30, w=100, x=L/2, y=D/2, d=h/5):\tcone of height <h> and width <w> centered on (x,y) with a layer depth <d>", 5, 30.0, 100.0, 0.0, 0.0, 0.0);
@@ -160,7 +166,14 @@ int32_t parse_template() {
   i = 0;
   while (ptr && (i < csp_template.nb_args)) {
     //LogPrintf("csp_template.args[%d] = %s\n", i, ptr);
-    csp_template.args[i++] = read_float(ptr, &err);
+    if (csp_template.type != INPUT_ELEVATION || i > 0) {
+      csp_template.args[i++] = read_float(ptr, &err);
+    } else { 
+      csp_template.file = ptr;
+      LogPrintf("File name from input_elevation: %s\n", csp_template.file);
+      i++;
+    }
+
     if (err) {
       ErrPrintf("ERROR: bad argument \"%s\" for template %s\n", ptr, csp_template.name);
       exit(-1);
@@ -232,12 +245,15 @@ void genesis() {
 /********************************* DUN model *********************************/
 /*****************************************************************************/
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
-  float di, dj, dk;
-  float Ldx, Ldy, Ldz;
-  float pente = 2.0;
+  float di, dk;
+  float Ldx, Ldy;
   float h, w, rc, n, hg, p;
   int32_t xmin, xmax, ymin, ymax;
   float x, y, z;
+
+  int32_t j_value;
+  int32_t j_found;
+  int32_t injection_val = 0;
 
 //// normal mode ////
 
@@ -249,6 +265,26 @@ void genesis() {
   int32_t lcone = lc * 0.6; //lc*0.6; //lc/2; //lc*0.6; //lc*2/3;  //((int32_t) L / 2)*0.8; //largeur du cone
   int32_t hcone = ((int32_t) H / 3); //Hd2;//2*((int32_t) H / 3); //H-10; //hauteur du cone
   float periode = 10.0; //periode des ondulations
+
+  FILE* file;		
+  int32_t array_index = 0;		
+  int32_t input_array[L*D];		
+
+//// read integers from file and store in array ////		
+
+  if (csp_template.type == INPUT_ELEVATION) {
+    injection_val = csp_template.args[1];
+    file = fopen(csp_template.file, "r");
+    j_found = fscanf(file, "%d", &j_value);
+
+    //store elevation values in input_array
+    while (j_found == 1) {
+      input_array[array_index] = j_value;
+      j_found = fscanf(file, " %d", &j_value);
+      array_index += 1;
+    }
+    fclose(file);
+  }
 
   // initialization of the cellular space
   for (k = 0; k < D; k++) { // profondeur
@@ -265,7 +301,23 @@ void genesis() {
         aux->celltype = EAUC; //default state
 
         /*** GR cells ***/
-        if (csp_template.type == CSP_LAYER) {
+
+        // *** INPUT_ELEVATION CASE: no template (values read in from data file) *** //
+        if (csp_template.type == INPUT_ELEVATION) {
+            if (input_array[array_index] >= (H / 2)) {
+              ErrPrintf("%d height in data file exceeds height (H) specified in param file. ", input_array[array_index]);
+              exit(-2);
+            } 
+            //INPUT_ELEVATION CASE: elevation values read in from text file
+            //format: INPUT_ELEVATION(text file name, 0 or 1 injection layer)
+            if (injection_val == 1 && j == 1) {
+              aux->celltype = IN;
+            }
+            array_index = i + L*k;
+            if ((H - j) < input_array[array_index]) {
+              aux->celltype = GR;
+            }
+	} else if (csp_template.type == CSP_LAYER) {
           //CSP_LAYER: sand layer
           //format: LAYER(h)
           hh = (int)csp_template.args[0];

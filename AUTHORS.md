@@ -17,6 +17,7 @@ The original software, ReSCAL, was written (2004-2014) in the Laboratoire de Dyn
 Rescal-snow would not exist without this development, in code or in concept.
 However, these authors are not responsible for changes in rescal-snow after 2016; see docs/NEWS.md for details. For their continued and parallel work with ReSCAL, see http://www.ipgp.fr/~rozier/rescal/rescal.html .
 
+
 **ReSCAL development and maintenance at IPGP**
 
 Olivier Rozier <rozier@ipgp.fr>

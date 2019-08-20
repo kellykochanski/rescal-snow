@@ -15,26 +15,26 @@ class Design_a_run():
 		self.name 	= 'run'
 		self.directory 	= '.' 
 		self.parameters = Parameters()
-                self.run_script = Run_Script()
-                self.parameters.set_header("Test from write_tests.py")
+		self.run_script = Run_Script()
+		self.parameters.set_header("Test from write_tests.py")
          
-        def set_parameters(self, param_dict):
-                # Sets all parameters, given as {name : value} pairs
-                # Allows user to mix things that go in parameter file
-                # with things that go in the run script, etc
-                # TODO make it possible to do compiler flags too?
+	def set_parameters(self, param_dict):
+        	# Sets all parameters, given as {name : value} pairs
+        	# Allows user to mix things that go in parameter file
+        	# with things that go in the run script, etc
+        	# TODO make it possible to do compiler flags too?
                  
-                for name in param_dict.keys():
-                        if self.__is_a_parameter(name): 
-                                self.parameters.set({name : param_dict[name]})
-                        elif self.__is_a_run_script_option(name):
-                                self.run_script.set({name : param_dict[name]})
-                        else:   
-                                print "Warning : skipped nonexistent parameter " + name
+		for name in param_dict.keys():
+			if self.__is_a_parameter(name): 
+				self.parameters.set({name : param_dict[name]})
+			elif self.__is_a_run_script_option(name):
+				self.run_script.set({name : param_dict[name]})
+			else:   
+				print "Warning : skipped nonexistent parameter " + name
          
-        def list_all(self):
-                # Lists all available options/parameters
-                return self.run_script.list_all(), self.parameters.list_all()
+	def list_all(self):
+		# Lists all available options/parameters
+		return self.run_script.list_all(), self.parameters.list_all()
          
 	def get(self, param):
 		if param in self.parameters.list_all():
@@ -45,8 +45,8 @@ class Design_a_run():
 			print "Error: requested nonexistent parameter " + param
 			return False
 
-        def set_header(self, description):
-                self.parameters.set_header("Test from write_tests.py: " + description)
+	def set_header(self, description):
+        	self.parameters.set_header("Test from write_tests.py: " + description)
          
 	def set_name(self, name):
 		 self.name = name
@@ -54,17 +54,17 @@ class Design_a_run():
 	def set_directory(self, directory):
 		self.directory = directory
          
-        def __is_a_parameter(self, name):
-                # Checks whether the parameters dictionary contains 'name'
-                return ((name == 'Environment') or (name in self.parameters.list_all()))
+	def __is_a_parameter(self, name):
+        	# Checks whether the parameters dictionary contains 'name'
+        	return ((name == 'Environment') or (name in self.parameters.list_all()))
          
-        def __is_a_run_script_option(self, name):
-                # Checks whether 'name' is an option in the run script
-                 return (name in self.run_script.list_all())
+	def __is_a_run_script_option(self, name):
+        	# Checks whether 'name' is an option in the run script
+        	return (name in self.run_script.list_all())
          
-        def write(self):
-                self.run_script.write(self.directory + "/" + self.name + ".run")
-                self.parameters.write(self.directory + "/" + self.name + ".par")
+	def write(self, input_elevation_type=None, args=None):
+        	self.run_script.write(self.directory + "/" + self.name + ".run", input_elevation_type, args)
+        	self.parameters.write(self.directory + "/" + self.name + ".par")
 
 ##--------------------------------------------------------------------------------------
 ##--------------------------------------------------------------------------------------
@@ -337,10 +337,10 @@ class Run_Script():
 			elif self.options[option]: # == any value except False or True
 				# -flag VALUE
 				f.write(" -" + self.__flag_options[option] + " " + self.options[option])
-		f.write("\n \n")
+		f.write("> $RESCAL_LOG_FILE\n \n")
 
 
-	def write(self, filename):
+	def write(self, filename, input_elevation_type=None, args=None):
 		with open(filename, "w") as f:
 			f.write("#!/bin/bash \n \n")
 			f.write("################## \n ## ReSCAL run script ## \n################")
@@ -358,7 +358,7 @@ class Run_Script():
 			#Linking - not optional
 			f.write("if [ ! -e genesis ]; then \n  ln -s " + self.options['rescallocation'] +  "/genesis . \nfi \n")
 			f.write("if [ ! -e rescal ]; then \n  ln -s "  + self.options['rescallocation'] + "/rescal . \nfi \n\n")
-			f.write("ln -s " + self.options['rescallocation'] + "/rescal-ui.xml . \n \n")
+			#f.write("ln -s " + self.options['rescallocation'] + "/rescal-ui.xml . \n \n")
 
 			#Parameter file
 			f.write("# ----Parameter file----\n")
@@ -374,6 +374,11 @@ class Run_Script():
 			f.write("GENESIS_LOG_FILE=\"" + self.options['genesislog'] + "\"\n")
 			f.write("RESCAL_LOG_FILE=\""  + self.options['rescallog']  + "\"\n\n")
 
+			# Run optional input_elevation scripts
+			if input_elevation_type == "gaussian": 
+				f.write("# ----Gaussian----\n")
+				f.write("python gaussian.py " + " ".join([str(i) for i in args]) + "\n\n")
+
 			# Run genesis
 			f.write("# ----Genesis----\n")
 			f.write("./genesis -f $PAR_FILE -s 2000 > $GENESIS_LOG_FILE\n\n")
@@ -382,4 +387,5 @@ class Run_Script():
 			self.__write_run_rescal(f)
 
 			# Automatic analysis
+
 

@@ -141,7 +141,7 @@ void log_cell_first(){
   for(i=0; i<MAX_CELL; i++){
     if (etats[i]){
 #ifdef PHASES
-     int8_t *str_phase = (Phase[i]==SOLID)?"<SOLID>":"<FLUID>";
+     char *str_phase = (Phase[i]==SOLID)?"<SOLID>":"<FLUID>";
 #else
      int8_t *str_phase = NULL;
 #endif
@@ -150,7 +150,7 @@ void log_cell_first(){
     }
   }
   output_write("CELL", "\n     ");
-  int8_t str[30];
+  char str[30];
   for(i=0; i<MAX_CELL; i++){
     if (etats[i]){
       str[0] = 0;
@@ -165,7 +165,6 @@ void log_cell_first(){
 
 void log_cell()
 {
-  int32_t nb;
   static int32_t start = 1;
   static int32_t cpt = 0;
   char current_output[256];

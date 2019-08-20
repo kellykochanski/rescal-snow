@@ -79,11 +79,13 @@ void init_terre() {
 }
 
 void lock_csp(int32_t log_flag) {
+  (void)log_flag;
 #ifdef CSP_MUTEX
 #endif
 }
 
 void unlock_csp(int32_t log_flag) {
+  (void)log_flag; //SUPPRESS: unused warning
 #ifdef CSP_MUTEX
 #endif
 }
@@ -362,7 +364,7 @@ int32_t get_cell_up(int32_t ix) {
 }
 
 int32_t get_cell_dir(int32_t ix, char dir) {
-  int32_t ix2;
+  int32_t ix2=0;
   if (dir == EST) {
     ix2 = get_cell_east(ix);
   } else if (dir == OUEST) {
@@ -375,6 +377,8 @@ int32_t get_cell_dir(int32_t ix, char dir) {
     ix2 = get_cell_down(ix);
   } else if (dir == HAUT) {
     ix2 = get_cell_up(ix);
+  } else {
+    assert(0); //Panic    
   }
   return ix2;
 }
@@ -420,25 +424,40 @@ void swap_cell_data(int32_t ix, int32_t ix2) {
 #endif
 
   if (flag1) {
-    memcpy((void *)(TE + ix) + CELL_TYPE_SIZE, (void *)(TE + ix2) + CELL_TYPE_SIZE, CELL_DATA_SIZE);  //TE[ix].celldata <- TE[ix2].celldata
+    const celltype_t te_ix_type = TE[ix].celltype; //Back up cell type; we are about to overwrite it.
+    TE[ix] = TE[ix2];             //Copy cell data and overwrite type
+    TE[ix].celltype = te_ix_type; //Restore cell type
+    //The above is a clearer way of doing the following:
+    // memcpy((void *)(TE + ix) + CELL_TYPE_SIZE, (void *)(TE + ix2) + CELL_TYPE_SIZE, CELL_DATA_SIZE);  //TE[ix].celldata <- TE[ix2].celldata
   }
   if (flag2) {
-    memcpy((void *)(TE + ix2) + CELL_TYPE_SIZE, (void *)(&aux) + CELL_TYPE_SIZE, CELL_DATA_SIZE);  //TE[ix2].celldata <- aux.celldata
+    const celltype_t te_ix2_type = TE[ix2].celltype; //Back up cell type; we are about to overwrite it.
+    TE[ix2] = aux;                   //Copy cell data and overwrite type
+    TE[ix2].celltype = te_ix2_type; //Restore cell type
+    //The above is a clearer way of doing the following:
+    // memcpy((void *)(TE + ix2) + CELL_TYPE_SIZE, (void *)(&aux) + CELL_TYPE_SIZE, CELL_DATA_SIZE);  //TE[ix2].celldata <- aux.celldata
   }
 }
 
 void update_inout_data(int32_t ix, int32_t ix2) {
+  (void)ix;  //SUPPRESS: unused warning
+  (void)ix2; //SUPPRESS: unused warning
 }
 
 //copier les donnees de la cellule ix dans la cellule ix2
 void copy_cell_data(int32_t ix, int32_t ix2) {
-  memcpy((void *)(TE + ix2) + CELL_TYPE_SIZE, (void *)(TE + ix) + CELL_TYPE_SIZE, CELL_DATA_SIZE); //TE[ix2].celldata <- aux.celldata
+  const celltype_t te_ix2_type = TE[ix2].celltype; //Back up cell type; we are about to overwrite it.
+  TE[ix2] = TE[ix];               //Copy cell data and overwrite type
+  TE[ix2].celltype = te_ix2_type; //Restore cell type
+  //The above is a clearer way of doing the following:
+  // memcpy((void *)(TE + ix2) + CELL_TYPE_SIZE, (void *)(TE + ix) + CELL_TYPE_SIZE, CELL_DATA_SIZE); //TE[ix2].celldata <- aux.celldata
 }
 
 #endif  //CELL_DATA
 
 // callback de controle en fonction de l'altitude
 int32_t check_alti(int32_t ix, void *data) {
+  (void)data; //SUPPRESS: unused warning
   static int32_t start = 1;
   if (start) {
     LogPrintf("controle du flux entrant en fonction de l'altitude\n");
@@ -447,6 +466,7 @@ int32_t check_alti(int32_t ix, void *data) {
   //calcul de la position (x,y,z)
   int32_t x, y, z;
   Calcule_xyz(ix, x, y, z);
+  (void)x; //SUPPRESS: unused warning
 
   //calcul probabiliste suivant y
   float alea = drand48();
@@ -473,6 +493,7 @@ int32_t check_no_cell_dir(int32_t ix, void *data) {
 #if defined(MODEL_DUN) || defined(MODEL_SNO)
 // callback de controle en fonction de la cellule a l'ouest
 int32_t check_grain_seul(int32_t index, void *data) {
+  (void)data; //SUPPRESS: unused check
   return TE[index - 1].celltype == EAUC;
 }
 #endif
@@ -863,7 +884,7 @@ void rotation(float angle, char mode, char flags) {
                 /// use the precomputed periodic mapping of the rotating space before rotation
                 cp = rot_map_pos0 + (i0 + k0 * L);
                 csp_tmp[i + j * L + k * HL] = TE[cp->x + j * L + cp->y * HL];
-                if ((csp_tmp[i + j * L + k * HL].celltype == BORD) /*&& (j==2)*/) {
+                if (csp_tmp[i + j * L + k * HL].celltype == BORD /*&& (j==2)*/) {
                   ErrPrintf("ERROR: full rotation - no cell, i=%d, k=%d, i0=%d, k0=%d, x0=%d, y0=%d\n", i, k, i0, k0, rot_map_pos[i0 + k0 * L].x, rot_map_pos0[i0 + k0 * L].y);
                   ErrPrintf("ERROR: final cell %d\n", csp_tmp[i + j * L + k * HL].celltype);
                   exit(-1);
@@ -1272,7 +1293,7 @@ Vec3 compute_mass_center(int32_t type) {
 }
 
 void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
-  char filename[100];
+  char filename[512];
   char str[100];
   char *ext;
 
@@ -1293,7 +1314,7 @@ void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
 
 #ifdef DUMP_SIGNATURE
 void dump_signature(int32_t ii){
-  int32_t i;
+  size_t i;
   uint32_t sig, *aux;
   char output[128];
 

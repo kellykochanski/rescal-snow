@@ -1021,7 +1021,7 @@ void dump_image(char *filename, char *format) {
 void dump_image_inter(int32_t inter, char *format) {
   static int32_t cpt_inter = 0;
   static int32_t cpt_snap = 0;
-  static char nom[100];
+  static char nom[1024];
   static char str[100];
   static char flag_sec = 0;
   int32_t nmin;

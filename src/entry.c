@@ -28,6 +28,7 @@
 #endif
 
 #define _MAIN_
+#include <assert.h>
 #include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,6 +54,7 @@ extern int32_t graine;            // graine pour la generation des nombres aleat
 extern float dump_delay_png;
 extern float dump_delay_csp;
 extern uint8_t csphpp_flag;
+extern uint8_t alti_only_flag;
 extern float stop_delay_t0;
 extern double stop_time;
 extern int32_t mode_pat;
@@ -208,6 +210,10 @@ int32_t main(int32_t argc, char *argv[]) {
   int32_t nRetVal;
   pthread_t pth;
   nRetVal = pthread_create(&pth, 0, rescal_thread, 0);
+  if(nRetVal!=0){
+    ErrPrintf("ERROR: Could not create rescal_thread!");
+    exit(-1);
+  }
   pthread_join(pth, 0);
 
 #ifdef LOG_FILE
@@ -255,6 +261,8 @@ void general_options(int32_t argc, char *argv[]) {
     } else if (!strcmp(argv[i], "-fr")) {
       int32_t frame_rate = atoi(argv[++i]);
       frame_delay = (frame_rate < 100) ? 1000 / frame_rate : 10;
+    } else if (!strcmp(argv[i], "-altionly")) { // added to allow ALTI but not .csp file writes
+      alti_only_flag = 1;
     } else if (!strcmp(argv[i], "-info")) {
       opt_info = 1;
     } else if (!strcmp(argv[i], "-dcsp") || !strcmp(argv[i], "-dcsphpp")) {
@@ -339,6 +347,7 @@ void show_general_options() {
   printf("  -dcsphpp <f>t0 \t generation of CSP and HPP files with delay in t0 unit (float value)\n");
 //   printf("  -dbin <n> \t generation of a binary file every <n> minutes\n");
 //   printf("  -dpng <n> \t generation of a PNG image every <n> seconds\n");
+  printf("  -altionly \t\t prevent CSP files from being written. ALTI files will still be written. Must still set -dcsp or -dcsphpp\n");
   printf("  -dpng <f>t0\t generation of PNG images with delay in t0 unit (float value)\n");
 // #ifndef USE_LIBPNG
 //   printf("  -djpeg <n> \t generation of a Jpeg image every <n> seconds\n");

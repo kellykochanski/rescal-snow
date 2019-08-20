@@ -1,8 +1,8 @@
 #!/bin/bash
 #MSUB -q pbatch
-#MSUB -M yourname@yourserver.com
-#MSUB -l nodes=1
-#MSUB -l walltime=00:05:00
+#MSUB -M mohan4@llnl.gov
+#MSUB -l nodes=10
+#MSUB -l walltime=00:30:00
 
 # This is an example script for submitting runs to a computing cluster
 # Current options:
@@ -21,4 +21,4 @@
 
 echo "run_parallel_rescal.msub : starting to run ReSCAL in parallel"
 
-srun --nodes=1 --cpus-per-task=1 --ntasks=10 --wait=0 submit.sh
+srun --nodes=10 --cpus-per-task=1 --ntasks=360 --wait=0 submit.sh

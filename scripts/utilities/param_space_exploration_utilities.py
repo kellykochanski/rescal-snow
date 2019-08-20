@@ -1,17 +1,34 @@
+"""
+Rescal-snow: a cellular automaton model of self-organized snow
+Copyright (C) 2019 Kelly Kochanski
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or 
+(at your option) any later version.
+This program is distributed in the hope that it will be useful, 
+but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+"""
 # KK July 03 2018
 
-# This is a shell script designed to start organizing ReSCAL to perform a parameter space exploration;
-#  it could be adapted to perform any set of runs with variable parameters
+This is a shell script designed to start organizing ReSCAL to perform a parameter space exploration;
+it could be adapted to perform any set of runs with variable parameters
 
-# The "explore_parameter_space" function creates an array of subdirectories, each containing:
-#   - a run script (bash), generally called run.run
-#   - a parameter file (txt), generally caled run.par
-# Note that the multi-directory structure is useful for several reasons:
-#   1. The output for each run stays in its own subdirectory, attached to the appropriate input files
-#   2. If multiple processors are available, they may simultaneously run separate instances of rescal-snow, one per directory,
-#       without any communication, race conditions, or other problems
+The "explore_parameter_space" function creates an array of subdirectories, each containing:
+   - a run script (bash), generally called run.run
+   - a parameter file (txt), generally caled run.par
+ Note that the multi-directory structure is useful for several reasons:
+   1. The output for each run stays in its own subdirectory, attached to the appropriate input files
+   2. If multiple processors are available, they may simultaneously run separate instances of rescal-snow, one per directory,
+       without any communication, race conditions, or other problems
 
-# Set up a bunch of runs to go in parallel
+"""
 
 import rescal_utilities
 import numpy as np
