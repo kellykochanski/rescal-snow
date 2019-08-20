@@ -27,6 +27,8 @@ Simulating snow self-organization with cellular automata
 
 When wind blows over snow, it self-organizes. This forms surface features, such as ripples and dunes, that alter the reflectivity and thermal conductivity of the snow.
 
+![](docs/example_images/field_examples.png)
+
 These features have just begun to be studied by the snow and climate science communities
 (see [1](https://doi.org/10.1002/2015JF003529), [2](https://doi.org/10.5194/tc-13-1267-2019), [3](https://doi.org/10.5194/tc-2019-45) for recent work). 
 
@@ -89,8 +91,6 @@ cd rescal-snow
 
 You may also download the repository manually from [Github](https://github.com/kellykochanski/rescal-snow).
 
-
-
 ### Installation
 
 These instructions will get rescal-snow running on most Linux environments. For additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
@@ -111,19 +111,10 @@ cd scripts
 ./snow_cone.run
 ```
 This command will take a few minutes to run, and produces terminal output like:
-<<<<<<< HEAD
 ```bash
 >> PAR_FILE=snow_cone.par
 >> OMP_NUM_THREADS=1
 ```
-=======
-
-    >> PAR_FILE=snow_cone.par
-    >> OMP_NUM_THREADS=1
-    >> Wed Jun 12 15:06:20 PDT 2019
-    >> Wed Jun 12 15:11:53 PDF 2019
-
->>>>>>> Cleaning of README.md
 > *Nothing happening?*
 >
 > This is mostly a good sign - if something is wrong, rescal-snow almost always crashes in the first few seconds. The simulations, however, are computationally expensive, and may take an unreasonably long time to run on slower machines. 
@@ -382,6 +373,8 @@ We have built a model of the basic growth and function of snow dunes, but expect
 If you wish to contribute a new feature, we recommend you fork our repository, commit your changes to a new feature or development branch, and create a pull request. An example contribution workflow, with git instructions, is outlined by the [LAVA software community project contribution
 guide](https://docs.lavasoftware.org/lava/contribution.html)
 
+Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
+
 ## References and further reading <a name="references"></a>
 
 The [docs](docs) folder contains additional information on 
@@ -410,3 +403,10 @@ To learn the underlying principles of the lattice gas cellular automaton (LGCA) 
 
 ## Contributors <a name="authors"></a>
 See [AUTHORS.md](AUTHORS.md).
+
+## License
+GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md).
+
+SPDX-License-Identifier: GPL-3.0-or-later
+
+Release: LLNL-CODE-785837. See [NOTICE](NOTICE) for details.

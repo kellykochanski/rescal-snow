@@ -12,7 +12,6 @@ It was developed from version 1.6 of the Real-Space Cellular Automaton Laborator
  - Aaron Robeson (added xcorr utility)
  - Divya Mohan (misc debugging)
 
-
 ## IPGP contributors (2004-2016)
 The original software, ReSCAL, was written (2004-2014) in the Laboratoire de Dynamique des Fluides Geologiques, Institut de Physique du Globe de Paris.
 Rescal-snow would not exist without this development, in code or in concept.
