@@ -483,7 +483,7 @@ class CellSpace:
         else:
             with open(filename, 'wb') as f:
                f.write(self.header_binary)
-               cells.tofile(f)
+               self._overwrite_lsbs().tofile(f)
 
 
     # checks if a point is in the cell space

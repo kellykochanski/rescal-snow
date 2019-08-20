@@ -102,26 +102,26 @@ A window should pop up with this image
 
 Let's increase the height of the entire surface by 10.
 ```python
-c.add_height(10)
-c.draw_height_map()
+>>> c.add_height(10)
+>>> c.draw_height_map()
 ```
 A window should pop up with this image
-![](example_images/cellspace/snow_cone_height_increased.png)
+![](example_images/cellspace/snow_cone_raised_10.png)
 
 This looks about the same as the last one, but notice the scale on the right
-now ranges from 11 to 29, instead of 1 to 19 like before.
+now ranges from 11 to 29, instead of 1 to 19.
 
 Let's add a sine wave
 ```python
-c.add_sinusoid()
-c.draw_height_map()
+>>> c.add_sinusoid()
+>>> c.draw_height_map()
 ```
 
 A window should pop up with this image
 ![](example_images/cellspace/snow_cone_sine.png)
 
 
-You can make you own custom edits. The mostflexible way is to use the 
+You can make your own custom edits. The most flexible way is to use the 
 `add_height_map` method. This method takes a height map and superimposes it onto the
 sand or snow surface. In fact, `add_sinusoid` and `add_height` methods just make a sinusoidal
 or flat height map and then add it using `add_height_map`.
@@ -130,12 +130,12 @@ There is an example height map `heightmap.invader_template`.
 
 We can view it by creating a `HeightMap` object.
 ```python
-h = heightmap.HeightMap(heightmap.invader_template)
-h.draw()
+>>> h = heightmap.HeightMap(heightmap.invader_template)
+>>> h.draw()
 ```
 
 A window should pop up with this image
-![](example_images/cellspace/inavder_template.png)
+![](example_images/cellspace/invader_template.png)
 
 The `cellspace` module uses the `heightmap` module to process
 and draw the 2D height maps made from the 3D cell space.  
@@ -148,10 +148,13 @@ If you dont' need to make a `Heightmap` object you can view it using
 
 This heighmap is pretty small. We can scale it up
 ```python
-big_invader = height_map.scale(heightmap.invader_template, 7, 6, 6)
-heightmap.draw(big_invader)
+>>> big_invader = heightmap.scale(heightmap.invader_template, 7, 6, 6)
+>>> heightmap.draw(big_invader)
 ```
 
+A window should pop up with this image ![](example_images/cellspace/big_invader.png)
+Notice that the horizontal and vertical axes are scaled by a factor of 6 and
+the color bar ranges from 0 to 7 instead of 0 to 1.
 
 To add the height map to `c.cells`
 
@@ -161,52 +164,52 @@ To add the height map to `c.cells`
 ```
 
 A window should pop up with this image
-![](example_images/cellspace/snow_cone_height_map_invaded.png)
+![](example_images/cellspace/invader_waves.png)
 
 We now have 3 modifications to the original cell space.
 To undo these modifications
 ```python
-c.restore_original_cells()
-c.draw_height_map()
+>>> c.restore_original_cells()
+>>> c.draw_height_map()
 ```
 
 What if we want to save the changes we've made?
 Let's make a change and save it.
 We'll add a gaussian hill to compare with the cone.
 ```python
-gaussian_hill = heightmap.gaussian_hill(25, (2,3), 30, 30)
-heightmap.draw(gaussian_hill)
+>>> gaussian_hill = heightmap.gaussian_hill(19, (5,9), 20, 30)
+>>> heightmap.draw(gaussian_hill)
 ```
 
 Now lets add this to `c`.
 ```python
-c.add_height_map(guassian_hill, top_left_corner=(15, 60))
-c.draw_height_map()
+>>> c.add_height_map(gaussian_hill, top_left_corner=(25, 90))
+>>> c.draw_height_map()
 ```
-
+A window should pop up with this image ![](example_images/cellspace/big_invader.png)
 
 You can now write this modification to a file. To do so, just use the `write` method.
 ```python
-c.write(filename='invaded.csp')
+>>> c.write(filename='snow_cone_gaussian.csp')
 ```
 
 In fact you can write a compressed version.
 ```python
-c.write(filename='invaded.csp', compressed=True)
+>>> c.write(filename='snow_cone_gaussian.csp', compressed=True)
 ```
 
 Let's look at the files we just made.
 ```python
-quit()
+>>> quit()
 ```
 ```bash
 ls -lh *.csp*
 -rw------- 1 <user> <group> 6.2M <time> DUN.csp
--rw------- 1 <user> <group> 6.2M <time> invaded.csp
--rw------- 1 <user> <group>  12K <time> invaded.csp.gz
+-rw------- 1 <user> <group> 6.2M <time> snow_cone_gaussian.csp
+-rw------- 1 <user> <group>  12K <time> snow_cone_gaussian.csp.gz
 ```
 
-Notice that `DUN.csp` and `invaded.csp` files are the same size.
+Notice that `DUN.csp` and `snow_cone_gaussian.csp` files are the same size.
 This is expected because we only changed cell values, we didn't change 
 the number of cells or any values in the file header. Also the compressed version
 has a `.gz` added automatically.
@@ -215,3 +218,4 @@ If you were to do a `write` without specifying a `filename`,
 the input file would be used, so in this case `DUN.csp` would be overwritten.
 However, if you were to use `write` with `compressed` specified, a new file
 called `DUN.csp.gz` would be written and `Dun.csp` would not be overwritten.
+

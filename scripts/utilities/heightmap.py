@@ -28,12 +28,12 @@ def gaussian_hill(amplitude, sigma, height_padding, width_padding):
     # makes an impulse, meaning a 1 in the middle and 0 otherwise,
     # then filters it
     impulse = np.zeros([2 * height_padding + 1, 2 * width_padding + 1])
-    height, width = impule.shape
-    impule[height//2, width//2] = 1
+    height, width = impulse.shape
+    impulse[height//2, width//2] = 1
     gaussian = scipy.ndimage.gaussian_filter(impulse, sigma)
     # scale so center has a height of amplitude
     gaussian = gaussian * (amplitude / gaussian[height//2,width//2])
-    return np.round_(guassian).astype(np.int32)
+    return np.round_(gaussian).astype(np.int32)
 
 
 # various height maps
@@ -138,7 +138,8 @@ def fft2d_crop_blur(image):
     f_image = image.astype(np.float32)
     fft2d = np.absolute(fft2d_analyze(f_image))
     x,y = fft2d.shape
-    fft2d = fft2d[:x//6, :y//6]
+    # need to avoid setting array dimensions to zero here
+    fft2d = fft2d[:max(x//6,1), :max(y//6,1)]
     fft2d = scipy.ndimage.gaussian_filter(fft2d, sigma=1)
     fft2d[0][0] = 0.0
     return fft2d
@@ -314,7 +315,7 @@ class HeightMap:
         self.min_height = hm.min()
         self.max_height = hm.max()
         self.var_height = hm.var()
-        self.fft_blur = fft2d_crop_blur(self.height_map.astype(np.float32))
-        self.fft_center = fft2d_center_blur(self.height_map.astype(np.float32))
+        self.fft_blur = fft2d_crop_blur(hm)
+        self.fft_center = fft2d_center_blur(hm)
 
 
