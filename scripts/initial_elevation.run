@@ -25,12 +25,12 @@
 # Remove files from previous runs 
 ./clean 
 
-if [ ! -e genesis ]; then 
-  ln -s ./genesis . 
-fi 
-if [ ! -e rescal ]; then 
-  ln -s ./rescal . 
-fi 
+if [ ! -e genesis ]; then
+  ln -s ../build/genesis .
+fi
+if [ ! -e rescal ]; then
+  ln -s ../build/rescal .
+fi
 
 # ----Parameter file----
 PAR_FILE="initial_elevation.par"

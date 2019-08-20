@@ -35,7 +35,7 @@ Centering_delay = 0
 Ava_mode = TRANS
  
 # Template containing initial shape for run
-Csp_template = INPUT_ELEVATION(initial_elevation.data, 1)
+Csp_template = INPUT_ELEVATION(initial_elevation.tab, 1)
  
 # Speedup of the flow stabilization
 Lgca_speedup = 1000.0
