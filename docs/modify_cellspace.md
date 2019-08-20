@@ -6,7 +6,7 @@ Author: Gian-Carlo DeFazio, defaziogiancarlo@gmail.com
 
 ## Make a Rescal-snow cellspace into to python object
 
-Rescal-snow already has utilities for the creation and modification of its cellspace files,
+Rescal-snow already has utilities for the creation and modification of its cell space files,
 which usually have a file suffix of `.csp` or `.csp.gz`.
 The `CellSpace` class, in [scripts/utilities/cellspace.py](../scripts/utilities/cellspace.py) creates 
 a python object using a `.csp` file. Having a python version of the cell spaces makes makes it easier to 
@@ -153,6 +153,7 @@ This heighmap is pretty small. We can scale it up
 ```
 
 A window should pop up with this image ![](example_images/cellspace/big_invader.png)
+
 Notice that the horizontal and vertical axes are scaled by a factor of 6 and
 the color bar ranges from 0 to 7 instead of 0 to 1.
 
