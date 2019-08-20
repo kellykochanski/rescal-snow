@@ -186,7 +186,7 @@ Now lets add this to `c`.
 >>> c.add_height_map(gaussian_hill, top_left_corner=(25, 90))
 >>> c.draw_height_map()
 ```
-A window should pop up with this image ![](example_images/cellspace/big_invader.png)
+A window should pop up with this image ![](example_images/cellspace/snow_cone_and_gaussian.png)
 
 You can now write this modification to a file. To do so, just use the `write` method.
 ```python
