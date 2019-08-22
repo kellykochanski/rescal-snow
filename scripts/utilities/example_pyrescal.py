@@ -71,6 +71,12 @@ if __name__ == '__main__':
     	pmi_rank = os.environ['PMI_RANK']
     else:
         pmi_rank = 0
+        # safe to make sure data_runs directory exists
+        rescal_root = os.environ['RESCAL_SNOW_ROOT']
+        data_runs_dir = os.path.join(rescal_root, 'data_runs')
+        if not os.path.isdir(data_runs_dir):
+            os.mkdir(data_runs_dir)
+        
     parameters_1['random seed'] = int(pmi_rank) + 1234
     output_dir = 'exp' + str(pmi_rank)
     
