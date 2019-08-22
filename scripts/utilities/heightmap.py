@@ -1,12 +1,12 @@
-__doc__ = '''Utilities to read and visualize rescal height maps.'''
+__doc__ = '''Utilities to read and visualize rescal-snow height maps.'''
 __author__ = 'Gian-Carlo DeFazio'
 __date__ = '16 August 2019'
 
 import math
 import numpy as np
-import argparse
 import scipy.ndimage
 import matplotlib
+import sys
 import os
 # Matplotlib will fail if no display is available (e.g. many high-performance computing environments)
 if bool(os.environ.get('DISPLAY', None)) == False:
@@ -17,7 +17,18 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 
 
-# TODO make this better
+
+# space invader height map
+invader_template = np.array([[0,0,1,0,0,0,0,0,1,0,0],
+                             [0,0,0,1,0,0,0,1,0,0,0],
+                             [0,0,1,1,1,1,1,1,1,0,0],
+                             [0,1,1,0,1,1,1,0,1,1,0],
+                             [1,1,1,1,1,1,1,1,1,1,1],
+                             [1,0,1,1,1,1,1,1,1,0,1],
+                             [1,0,1,0,0,0,0,0,1,0,1],
+                             [0,0,0,1,1,0,1,1,0,0,0]], dtype=np.int32)
+
+
 def gaussian_hill(amplitude, sigma, height_padding, width_padding):
     '''Creates a guassian heightmap. The center of the guassian
     will have a value of amplitude. sigma can be either a scaler 
@@ -36,7 +47,6 @@ def gaussian_hill(amplitude, sigma, height_padding, width_padding):
     return np.round_(gaussian).astype(np.int32)
 
 
-# various height maps
 def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True, no_negative=False):
     '''Create a sinusoid on a 2D plane that has dimensions dims. 
     Does an inverse Fourier transform and discretizes. 
@@ -70,20 +80,6 @@ def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True, no_nega
     return np.round_(height_map).astype(np.int32)
 
 
-
-# little example of making a height map and scaling it
-# space invader height map
-invader_template = np.array([[0,0,1,0,0,0,0,0,1,0,0],
-                             [0,0,0,1,0,0,0,1,0,0,0],
-                             [0,0,1,1,1,1,1,1,1,0,0],
-                             [0,1,1,0,1,1,1,0,1,1,0],
-                             [1,1,1,1,1,1,1,1,1,1,1],
-                             [1,0,1,1,1,1,1,1,1,0,1],
-                             [1,0,1,0,0,0,0,0,1,0,1],
-                             [0,0,0,1,1,0,1,1,0,0,0]], dtype=np.int32)
-
-
-
 def scale(height_map, amplitude=1, vertical=1, horizontal=1):
     '''Scales a height map. The heigh map dimensions are scaled in the 
     horizontal and vertical directions. The values are then scaled by a factor
@@ -91,13 +87,11 @@ def scale(height_map, amplitude=1, vertical=1, horizontal=1):
     return np.kron(height_map, np.full((vertical, horizontal), amplitude))
 
 
-
 def fft2d_analyze(data):
     '''This function should be imported from analysis
     performs fft2d analysis on the data taken from input file
     and returns single quadrant fft result.
     data -> data to perform fft on'''
-
 
     #Data points for x and y axis
     dpx, dpy = data.shape
@@ -112,6 +106,7 @@ def fft2d_analyze(data):
     #Get fft2d and resize to single quadrant
     # PY3 Note: need indeces to be integers
     return np.fft.fft2(fft_data)[0:int(dpx/2),0:int(dpy/2)]*2/(dpx*dpy)
+
 
 def fft2d_analyze_map_pic(data):
     #Data points for x and y axis
@@ -145,9 +140,6 @@ def fft2d_crop_blur(image):
     return fft2d
 
 
-#vec_fft2d_crop_blur =  np.vectorize(fft2d_crop_blur, signature='(a,b)->(c,d)')
-
-
 def fft2d_center_blur(image):
     '''make pics with fft stuff in the middle'''
     
@@ -156,6 +148,7 @@ def fft2d_center_blur(image):
     x,y = fft2d.shape
     fft2d = fft2d[x//3:2*(x//3), y//3:2*(y//3)]
     return scipy.ndimage.gaussian_filter(fft2d, sigma=1)
+
 
 def make_surface(height_map):
     # get indices
@@ -179,7 +172,6 @@ def draw(height_map):
     plt.imshow(height_map)
     plt.colorbar()
     plt.show()
-
 
 
 # from the matplotlib tutorials
@@ -237,17 +229,13 @@ class HeightMap:
         ''' write out the height_map
         default should be in the same form as ReSCAL
         can also write to .npy'''
-
         
         if filename is None:
-            filename = self.output_file
-
-        # meaning self.output_file is None
-        # and this instance wasn't made constructed using a file
-        if filename is None:
-            # TODO maybe do some default filename
-            # or an error
-            return
+            if self.output_file is None:
+                sys.stderr.write('ERROR: No filename given and no default file name. Cannot write HeightMap to file.\n')
+                return
+            else:
+                filename = self.output_file
         else:
             if not npy:
                 np.savetxt(filename, self.height_map, fmt='%s')
@@ -291,6 +279,7 @@ class HeightMap:
 
             
     def save_fft_blur(self, filename, in_3d=False):
+        '''save fftblur to file'''
         if not in_3d:
             plt.imshow(self.fft_blur)
         else:
@@ -309,7 +298,7 @@ class HeightMap:
 
     
     def make_summary_data(self):
-        '''get some basic metrics'''
+        '''get some basic analysis metrics'''
         hm = self.height_map.astype(np.float32)
         self.average_height = hm.mean()
         self.min_height = hm.min()

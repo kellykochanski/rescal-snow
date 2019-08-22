@@ -1,20 +1,18 @@
-__doc__ = '''Utilities to read, write, modify, and visualize snow-rescal cell spaces.'''
+__doc__ = '''Utilities to read, write, modify, and visualize rescal-snow cell spaces.'''
 __author__ = 'Gian-Carlo DeFazio'
 __date__ = 'August 16 2019'
 
 import matplotlib
+import sys
 import os
 # Matplotlib will fail if no display is available (e.g. many high-performance computing environments)
 if bool(os.environ.get('DISPLAY', None)) == False:
 	matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.colors as  colors
 import struct
 import numpy as np
 import random
 import gzip
-import sys
-import argparse
 import scipy.ndimage
 import random
 
@@ -46,7 +44,7 @@ cell_types = {
     'boundary' : 5,
     'neutral' : 6,
     'input_of_sand' : 7,
-    'ouput_of_sand' : 8,
+    'output_of_sand' : 8,
     'tunnel' : 9,
     'EAUT' : 10, # not sure, used only graphically
     'colored_grain' : 11 # used graphically
@@ -163,21 +161,6 @@ def change_surface_level(column, delta):
         shift_fill(column_in_bounds, clipped_delta, fill_value)
 
 
-def _ints_to_colors(color_list):
-    '''takes a list of colors and creates a colormap
-    that maps the index of the color to the color when drawing'''
-    length = len(color_list)
-    c_rgba = []
-    for c in color_list:
-        c_rgba.append(colors.to_rgba_array(c))
-    c_rgba = np.reshape(c_rgba, (c_rgba.shape[0], c_rgba.shape[2]))
-    return colors.ListedColormap(c_rgba, N=12)
-
-def _draw_cross_section(window, axes):
-    n = colors.Normalize(vmin=0, vmax=11)
-    axes.pcolormesh(window, cmap=rescal_color_map, norm=n)
-    axes.invert_yaxis()
-    return
 
 
 class CellSpace:
@@ -295,9 +278,6 @@ class CellSpace:
 
     # TODO deal with 'TIME'
     # TODO should all the chunk size checks be 12? I think not.
-    # sets values of self.header_size
-    # self.model, self.depth, self.length, self.height
-    # self.cell_size
     def _read_header(self, bs):
         '''Read the .csp header and store the pertinent values
 
@@ -470,8 +450,12 @@ class CellSpace:
                 c.write(compressed=True)'''
 
         if filename is None:
-            filename = self.output_file
-        
+            if self.output_file is None:
+                sys.stderr.write('ERROR: No filename given and no default file name. Cannot write CellSpace to file.\n')
+                return
+            else:
+                filename = self.output_file
+
         if compressed:
             # if no .gz at end of file, add it
             if not filename.endswith('.gz'):
@@ -556,51 +540,6 @@ class CellSpace:
         self.add_sand(depth, length)
 
 
-    # perform multiple random edits and write out the edited versions
-    # return the paths to the new files
-    def multiple_random_edits(self, num_edits, file_prefix):
-        # pick a random spot that won't be out of bounds
-        d, _, l = self.cells.shape
-        paths = []
-        for i in range(num_edits):
-            depth = random.randint(5,d-5)
-            length = random.randint(5,l-5)
-            self.temp_mod_cells = self.cells.copy()
-            self.add_square(depth, length,  8, temp_mod=True)
-            filename = file_prefix + str(i) + '.csp'
-            self.write(filename=filename, temp_mod=True)
-            paths.append(filename)
-
-            # make path names absolute
-            for i in range(len(paths)):
-                paths[i] = os.path.abspath(paths[i])
-        return paths
-
-
-    def multiple_random_pics(self, num_edits, base_image, file_prefix):
-        d, _, l = self.cells.shape
-        paths = []
-        #scale_factor = random.randint(4,8)
-        #scaled_image = np.kron(base_image, make_scaler(scale_factor, scale_factor)) * 6
-        scaled_image = base_image
-        s_d, s_l = scaled_image.shape
-
-        for i in range(num_edits):
-            depth = random.randint(1, d - s_d - 1)
-            length = random.randint(1, l - s_l - 1)
-            self.temp_mod_cells = self.cells.copy()
-            self.add_height_map((depth, length), scaled_image, temp_mod=True)
-            filename = file_prefix + str(i) + '.csp'
-            self.write(filename=filename, temp_mod=True)
-            paths.append(filename)
-
-            # make path names absolute
-            for i in range(len(paths)):
-                paths[i] = os.path.abspath(paths[i])
-        return paths
-
-                        
-
     def add_height_map(self, height_map, top_left_corner=(0,0)):
         # verify that the height_map can be placed at top_left
         if not in_bounds(self.cells[:,0,:], height_map, top_left_corner):
@@ -633,73 +572,6 @@ class CellSpace:
         sinusoid_height_map = heightmap.make_sinusoid(amplitude, frequency, self.dims_2d, phase=phase)
         self.add_height_map(sinusoid_height_map)
 
-
-    # applies a random modification of the given type
-    def random_mods(self, file_prefix, mod_type='gaussian', num_mods=1):
-
-        # get heightest sand to avoid going out of the space
-        
-        sand_top = np.min(self.surface_map)
-        ceiling_bottom = np.max(self.ceiling_map)
-        
-        # max alteration height
-        h = sand_top - ceiling_bottom - 1
-        if h < 2:
-            # TODO deal with not enough space to modify
-            return None
-
-        d, _, l = self.shape
-        paths = []
-        # do the modification
-        for i in range(num_mods):
-
-            if mod_type == 'sine':
-                # calculate parameters to add_sinusoid
-                amp = random.randint(2,h)
-                f = random.randint(1, min(d,l)//10)
-                wind_direction = random.choice([True, False])
-                phase = random.uniform(0, 2*math.pi)
-                self.add_sinusoid(amp, f, phase=phase, wind_direction=wind_direction)
-            elif mod_type == 'gaussian':
-                # create a gaussian
-                
-                pass
-            elif mod_type == 'space_invader':
-                # create the image
-                image_depth, image_length = heightmap.invader.shape
-                depth, _, length = self.cells.shape
-                max_length_scaling = length // image_length
-                max_depth_scaling = depth // image_depth
-                length_scaling = random.randint(1, max_length_scaling)
-                depth_scaling = random.randint(1, max_depth_scaling)
-                
-                height_scaling = random.randint(2,h)
-                scaling_matrix = heightmap.make_scaler(depth_scaling, length_scaling)
-                scaled_image = np.kron(heightmap.invader, scaling_matrix) * height_scaling
-
-                # now place the image
-                scaled_image_depth, scaled_image_length = scaled_image.shape
-                #breakpoint()
-                top_left_depth = random.randint(0, depth - scaled_image_depth)
-                top_left_length = random.randint(0, length - scaled_image_length)
-                top_left = (top_left_depth, top_left_length)
-                self.add_height_map(top_left, scaled_image)
-            else:
-                pass
-
-            
-
-            # now write out the modification fo file
-            file_out = file_prefix + '--' + mod_type + '--' + str(i) + '.csp'
-            self.write(filename=file_out)
-            paths.append(file_out)
-
-
-        # make path names absolute
-        for i in range(len(paths)):
-            paths[i] = os.path.abspath(paths[i])
-            
-        return paths
             
 
     ###################################
@@ -726,157 +598,3 @@ class CellSpace:
         self.make_height_map()
         self.height_map.draw_fft_blur()
 
-
-
-    # point can be either length 3 or 1 or a scalar
-    # get a slice through the entire cell space at the given point and orientation
-    def _cut_1(self, point, orientation):
-        # deal with possible input types
-        D,H,L = 0,0,0
-        if type(point) == int:
-            D,H,L = point, point, point
-        elif len(point) == 1:
-            D,H,L = point[0], point[0], point[0]
-        elif len(point) == 3:
-            D,H,L = point
-
-        # verify slice is in range
-        bounds_check_point = (0,0,0)
-        if orientation == 'd':
-            bounds_check_point = (D,0,0)
-        elif orientation == 'h':
-            bounds_check_point = (0,H,0)
-        elif orientation == 'l':
-            bounds_check_point = (0,0,L)
-
-        # TODO handle the error or point out of bounds
-        if not self._in_cell_space(bounds_check_point):
-            return None
-
-        if orientation == 'd':
-            return self.cells[D,:,:].copy()
-        elif orientation == 'h':
-            return self.cells[:,H,:].copy()
-        elif orientation == 'l':
-            return self.cells[:, :,L].copy()
-        # TODO handle error or invalid orientation
-        else:
-            return None
-
-
-    # show cut from all 3 directions for a given point
-    def _cut_3(self, point, reorient=False):
-        d_cut = self._cut_1(point, 'd')
-        h_cut = self._cut_1(point, 'h')
-        l_cut = self._cut_1(point, 'l')
-
-        if reorient:
-            l_cut = np.transpose(l_cut)
-
-        return d_cut, h_cut, l_cut
-
-
-
-
-
-                    
-
-    # put image on axes
-    @staticmethod
-    def _draw_cross_section(cut, axes):
-        rescal_color_map = _ints_to_colors(_cell_colors_list)
-        n = colors.Normalize(vmin=0, vmax=11)
-        axes.pcolormesh(cut, cma=rescal_color_map, norm=n)
-        axes.invert_yaxis()
-        return
-
-    @staticmethod
-    def _draw_window(cut, center, axes, orientation='d',
-                     pad_horizontal=5, pad_vertical=5, reorient=False):
-        rescal_color_map = _ints_to_colors(_cell_colors_list)
-        n = colors.Normalize(vmin=0, vmax=11)
-        axes.pcolormesh(cut, cmap=rescal_color_map, norm=n)
-
-        D,H,L = center
-        pv = pad_vertical
-        ph = pad_horizontal
-        right_max, top_max = cut.shape
-        if orientation == 'd':
-            bottom, top = max(H-ph,0), min(H+ph+1,right_max)
-            left, right = max(L-pv,0), min(L+pv+1,top_max)
-            axes.set_xlim(left=left, right=right)
-            axes.set_ylim(bottom=bottom, top=top)
-            axes.invert_yaxis()
-        elif orientation == 'h':
-            bottom, top = max(D-ph,0), min(D+ph+1,right_max)
-            left, right = max(L-pv,0), min(L+pv+1,top_max)
-            axes.set_xlim(left=left, right=right)
-            axes.set_ylim(bottom=bottom, top=top)
-            axes.invert_yaxis()
-        elif orientation == 'l':
-            # D and H switched due to transpose
-            if reorient:
-                D, H = H, D
-            bottom, top = max(D-ph,0), min(D+ph+1,right_max)
-            left, right = max(H-pv,0), min(H+pv+1,top_max)
-            axes.set_xlim(left=left, right=right)
-            axes.set_ylim(bottom=bottom, top=top)
-            axes.invert_yaxis()
-
-
-    def edit_and_view(self, center, new_cell_type, pad_horizontal=5, pad_vertical=5):
-        '''show before and after editing of cell.
-        show entire view from by slicing at given depth, height, and length befre the edit.
-        also show a zoomed in view before and after the edit.
-        
-        arguments:
-            center -- a list-like object of 3 integers.
-                      the location at which the zoomed windows are centered.
-                      the depth, length, and height of the cuts are determined by center.
-
-            new_cell_type -- the cell type that is written to the cell space at the position given
-                             by center
-
-        keyword arguments:
-            pad_horizontal -- the padding on each side of center for the zoomed in windows
-                              the total window width is (2 * pad_horizontal + 1)
-
-            pad_vertical   -- the padding above and below center for the zoomed in windows
-                              the total window height is (2 * pad_vertical + 1)
-        
-        returns: None'''
-
-        fig, axs = plt.subplots(nrows=3, ncols=3)
-
-        # draw the whole space at the 3 perspectives
-        d_slice, h_slice, l_slice = self._cut_3(center, reorient=True)
-        self._draw_cross_section(d_slice, axs[0][0])
-        self._draw_cross_section(h_slice, axs[1][0])
-        self._draw_cross_section(l_slice, axs[2][0])
-
-
-        self._draw_window(d_slice, center, axs[0][1], orientation='d',
-                          pad_horizontal=pad_horizontal, pad_vertical=pad_vertical)
-        self._draw_window(h_slice, center, axs[1][1], orientation='h',
-                          pad_horizontal=pad_horizontal, pad_vertical=pad_vertical)
-        self._draw_window(l_slice, center, axs[2][1], orientation='l',
-                          pad_horizontal=pad_horizontal, pad_vertical=pad_vertical)
-
-        # do edit
-        if new_cell_type is not None:
-            self.cells[center] = new_cell_type
-
-        d_slice, h_slice, l_slice = self._cut_3(center, reorient=True)
-
-        self._draw_window(d_slice, center, axs[0][2], orientation='d',
-                    pad_horizontal=pad_horizontal, pad_vertical=pad_vertical)
-        self._draw_window(h_slice, center, axs[1][2], orientation='h',
-                    pad_horizontal=pad_horizontal, pad_vertical=pad_vertical)
-        self._draw_window(l_slice, center, axs[2][2], orientation='l',
-                    pad_horizontal=pad_horizontal, pad_vertical=pad_vertical)
-        plt.show()
-        return
-
-
-if __name__ == '__main__':
-    c = CellSpace('DUN.csp')
