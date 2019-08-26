@@ -28,6 +28,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stdint.h>
+#include <sys/time.h>
 
 #include "defs.h"
 #include "macros.h"
@@ -48,6 +49,13 @@ extern int32_t use_lgca;
 
 extern int32_t ava_norm;
 extern int32_t rot_mode;
+
+
+extern uint8_t uncompressed_csp_flag;
+extern int32_t id;
+extern uint8_t perf_print_flag; // defined in format.c, set in entry.c
+
+extern int32_t data_pipe; // from format.c, determines if data is piped or saved, if piped no need to compress
 
 int32_t L = 0, H = 0, D = 0, HL = 0, HLD = 0; // dimensions of the cellular space
 int32_t L_bounds = 1, D_bounds = 1; //thickness of lateral boundaries
@@ -74,6 +82,31 @@ float csp_angle = 0.0;        //angle resultant de toutes les rotations
 char *rot_map = NULL;        // periodic mapping of the rotating space
 Pos2 *rot_map_pos = NULL;        // periodic mapping of the rotating space
 Pos2 *rot_map_pos0 = NULL;        // old periodic mapping of the rotating space
+
+// for performance testing
+struct timeval time_start;
+
+// start and stop have been used to record a time using gettimeofday
+// find the difference (stop - start) in seconds
+double calculate_sec(struct timeval start, struct timeval stop) {
+    long s_elapsed = (long)(stop.tv_sec) - (long)(start.tv_sec);
+    long us_elapsed = (long)(stop.tv_usec) - (long)(start.tv_usec);
+    return ((double)s_elapsed) + ((double)us_elapsed) / 1000000.0;
+}
+
+// log the difference between current time and start
+// print out message with id and time to stdout
+// do nothing if output is not set to visible
+void log_time_delta(struct timeval start, char* message, int id, int visible) {
+  if (!visible) {
+    return;
+  }
+  struct timeval stop;
+  gettimeofday(&stop, NULL);
+  double delta_time = calculate_sec(start, stop);
+  LogPrintf("%d %s %e\n", id, message, delta_time);
+}
+
 
 void init_terre() {
 }
@@ -128,7 +161,7 @@ void cree_terre() {
     LogPrintf("L_bounds = %d\n", L_bounds);
     LogPrintf("D_bounds = %d\n", D_bounds);
   }
-#endif
+#endif // CYCLAGE_HOR
 
   H += 2;
   L += 2 * L_bounds;
@@ -1308,7 +1341,12 @@ void dump_terre(char dump_type, int32_t cpt, int32_t unit) {
   LogPrintf("write CSP: %s, csp_time = %f (t0)\n", filename, csp_time);
   write_csp(dump_type, filename);
 
-  compress(filename, 1);
+  // if uncompressed_csp_flag is 1, don't compress, 0 by default, if piping there is no file to compress 
+  if (!uncompressed_csp_flag && (dump_type == DUMP_CSP) && data_pipe == -1) {
+    gettimeofday(&time_start, NULL);
+    compress(filename, 1);
+    log_time_delta(time_start, "COMPRESS_TERRE_TIME", id, perf_print_flag);          
+  }
 }
 
 

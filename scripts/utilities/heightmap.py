@@ -1,66 +1,98 @@
-'''
-Rescal-snow: a cellular automaton model of self-organized snow
-Copyright (C) 2019 Kelly Kochanski
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+__doc__ = '''Utilities to read and visualize rescal-snow height maps.'''
+__author__ = 'Gian-Carlo DeFazio'
+__date__ = '16 August 2019'
 
-
-# deals with the heightmaps from ReSCAL
+import math
 import numpy as np
-import argparse
 import scipy.ndimage
+import matplotlib
+import sys
+import os
+# Matplotlib will fail if no display is available (e.g. many high-performance computing environments)
+if bool(os.environ.get('DISPLAY', None)) == False:
+	matplotlib.use('Agg')
+    
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
 
-can_plot = True
-try:
-    import matplotlib
-    import matplotlib.pyplot as plt
-    from matplotlib import cm
-    from matplotlib import colors
-    from mpl_toolkits.mplot3d import Axes3D
-except:
-    can_plot = False
-    pass
 
-# little example of making a height map and scaling it
+
 # space invader height map
-invader = np.array([[0,0,1,0,0,0,0,0,1,0,0],
-                    [0,0,0,1,0,0,0,1,0,0,0],
-                    [0,0,1,1,1,1,1,1,1,0,0],
-                    [0,1,1,0,1,1,1,0,1,1,0],
-                    [1,1,1,1,1,1,1,1,1,1,1],
-                    [1,0,1,1,1,1,1,1,1,0,1],
-                    [1,0,1,0,0,0,0,0,1,0,1],
-                    [0,0,0,1,1,0,1,1,0,0,0]], dtype=np.uint8)
-
-# make a lists of lists that can be used in np.kron
-# to scale up images by a factor of 'h' in the horizontal direction
-# and a factor of 'v' in the vertical direction
-def make_scaler(h,v):
-    return [[1 for j in range(v)] for i in range(h)]
-invaders = np.kron(invader, make_scaler(6,6)) * 6
+invader_template = np.array([[0,0,1,0,0,0,0,0,1,0,0],
+                             [0,0,0,1,0,0,0,1,0,0,0],
+                             [0,0,1,1,1,1,1,1,1,0,0],
+                             [0,1,1,0,1,1,1,0,1,1,0],
+                             [1,1,1,1,1,1,1,1,1,1,1],
+                             [1,0,1,1,1,1,1,1,1,0,1],
+                             [1,0,1,0,0,0,0,0,1,0,1],
+                             [0,0,0,1,1,0,1,1,0,0,0]], dtype=np.int32)
 
 
-# for finding height_map files
-# used with param_space_exploration_utilities.get_files_to_process
-path_glob = 'out/ALTI*'
-exclude_globs = []
+def gaussian_hill(amplitude, sigma, height_padding, width_padding):
+    '''Creates a guassian heightmap. The center of the guassian
+    will have a value of amplitude. sigma can be either a scaler 
+    or a 2-tuple. The padding determines the size of the array returned.
+    The size is (2*height_padding+1, 2*width_padding+1)'''
+    
+    # does it the cheap way:
+    # makes an impulse, meaning a 1 in the middle and 0 otherwise,
+    # then filters it
+    impulse = np.zeros([2 * height_padding + 1, 2 * width_padding + 1])
+    height, width = impulse.shape
+    impulse[height//2, width//2] = 1
+    gaussian = scipy.ndimage.gaussian_filter(impulse, sigma)
+    # scale so center has a height of amplitude
+    gaussian = gaussian * (amplitude / gaussian[height//2,width//2])
+    return np.round_(gaussian).astype(np.int32)
 
 
+def make_sinusoid(height, frequency, dims, phase=0, wind_direction=True, no_negative=False):
+    '''Create a sinusoid on a 2D plane that has dimensions dims. 
+    Does an inverse Fourier transform and discretizes. 
+    The wave is resized so that its height ranges from 0 to height. 
+    The frequency is relative to the space. If the frequency is x, wave will 
+    complete x cycles across the space. If wind_direction is True, then the wave
+    heights will vary in the horizontal direction, otherwise they will vary in the
+    vertical direction.'''
+    # create a 2D array of the same size as the dims
+    grid = np.zeros(dims, dtype=np.complex)
 
-#### This function should be imported from analysis ####
-# performs fft2d analysis on the data taken from input file
-# and returns single quadrant fft result.
-# data -> data to perform fft on
+    # convert phase to a complex number
+    complex_val = math.cos(phase) + (math.sin(phase) * 1.0j)
+    
+    # add the frequency to the grid
+    if wind_direction:
+        grid[0,frequency] = complex_val
+    else:
+        grid[frequency,0] = complex_val
+        
+    # make the sinusoid
+    height_map = np.fft.ifft2(grid).real
+
+    # scale to amplitude
+    if height_map.max() != 0.0:
+        height_map = height_map *  height / (2 * height_map.max())
+        
+    # now get rid of the negatives and round
+    if no_negative:
+        height_map = height_map - np.min(height_map)
+    return np.round_(height_map).astype(np.int32)
+
+
+def scale(height_map, amplitude=1, vertical=1, horizontal=1):
+    '''Scales a height map. The heigh map dimensions are scaled in the 
+    horizontal and vertical directions. The values are then scaled by a factor
+    of amplitude.'''
+    return np.kron(height_map, np.full((vertical, horizontal), amplitude))
+
+
 def fft2d_analyze(data):
+    '''This function should be imported from analysis
+    performs fft2d analysis on the data taken from input file
+    and returns single quadrant fft result.
+    data -> data to perform fft on'''
+
     #Data points for x and y axis
     dpx, dpy = data.shape
 
@@ -74,6 +106,7 @@ def fft2d_analyze(data):
     #Get fft2d and resize to single quadrant
     # PY3 Note: need indeces to be integers
     return np.fft.fft2(fft_data)[0:int(dpx/2),0:int(dpy/2)]*2/(dpx*dpy)
+
 
 def fft2d_analyze_map_pic(data):
     #Data points for x and y axis
@@ -91,26 +124,31 @@ def fft2d_analyze_map_pic(data):
     return np.fft.fftshift(np.fft.fft2(fft_data)/(dpx*dpy))
 
 
-# gets fft2d (which drops all but top left quadrant)
-# grabs a small piece on the top left
-# apply gaussian blur
 def fft2d_crop_blur(image):
+    '''gets fft2d (which drops all but top left quadrant)
+    grabs a small piece on the top left
+    apply gaussian blur'''
+
     # get just the magnitudes
-    fft2d = np.absolute(fft2d_analyze(image))
+    f_image = image.astype(np.float32)
+    fft2d = np.absolute(fft2d_analyze(f_image))
     x,y = fft2d.shape
-    fft2d = fft2d[:x//6, :y//6]
+    # need to avoid setting array dimensions to zero here
+    fft2d = fft2d[:max(x//6,1), :max(y//6,1)]
     fft2d = scipy.ndimage.gaussian_filter(fft2d, sigma=1)
     fft2d[0][0] = 0.0
     return fft2d
 
 
-# make pics with fft stuff in the middle
 def fft2d_center_blur(image):
+    '''make pics with fft stuff in the middle'''
+    
     # get just the magnitudes
     fft2d = np.absolute(fft2d_analyze_map_pic(image))
     x,y = fft2d.shape
     fft2d = fft2d[x//3:2*(x//3), y//3:2*(y//3)]
     return scipy.ndimage.gaussian_filter(fft2d, sigma=1)
+
 
 def make_surface(height_map):
     # get indices
@@ -121,10 +159,20 @@ def make_surface(height_map):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
+    ax.set_xticks([])
+    ax.set_yticks([])
     ax.view_init(45, 20)
-    surf = ax.plot_surface(xss, yss, np.transpose(height_map), cmap=cm.plasma,
+    return ax.plot_surface(xss, yss, np.transpose(height_map), cmap=cm.plasma,
                            linewidth=0, antialiased=False)
-    return surf
+
+
+def draw(height_map):
+    '''draw a simple color_map of height_map.
+    height_map is a 2d numpy.ndarray, not a HeightMap.'''        
+    plt.imshow(height_map)
+    plt.colorbar()
+    plt.show()
+
 
 # from the matplotlib tutorials
 def plot_3d(height_map):
@@ -133,10 +181,12 @@ def plot_3d(height_map):
 
 
 class HeightMap:
-    # expect the heightmap files from rescal
-    # to be 2D arrays of ints in text form
+
     # TODO should maybe do a try catch
     def __init__(self, height_input):
+        '''expect the heightmap files from rescal
+        to be 2D arrays of ints in text form'''
+        
         # case that a filename is given
         if type(height_input) == str:
             self.input_file = height_input
@@ -176,15 +226,16 @@ class HeightMap:
     # default should be in the same form as ReSCAL
     # can also write to .npy
     def write(self, filename=None, npy=False):
+        ''' write out the height_map
+        default should be in the same form as ReSCAL
+        can also write to .npy'''
+        
         if filename is None:
-            filename = self.output_file
-
-        # meaning self.output_file is None
-        # and this instance wasn't made constructed using a file
-        if filename is None:
-            # TODO maybe do some default filename
-            # or an error
-            return
+            if self.output_file is None:
+                sys.stderr.write('ERROR: No filename given and no default file name. Cannot write HeightMap to file.\n')
+                return
+            else:
+                filename = self.output_file
         else:
             if not npy:
                 np.savetxt(filename, self.height_map, fmt='%s')
@@ -193,8 +244,10 @@ class HeightMap:
 
 
     def save_as_pdf(self, filename, in_3d=False):
-        ''' '''
-        # make a figure
+        '''make a figure'''
+        plt.xticks([])
+        plt.yticks([])
+        
         if not in_3d:
             plt.imshow(self.height_map)
         else:
@@ -203,20 +256,20 @@ class HeightMap:
         plt.savefig(filename, transparent=True, bbox_inches='tight')
 
 
-
-    # draw a simple color_map of height_map
     def draw(self):
+        '''draw a simple color_map of height_map'''        
         plt.imshow(self.height_map)
         plt.colorbar()
         plt.show()
 
-    # makes a blurred 2D fft of the height_map
+    
     def make_fft_blur(self):
+        '''makes a blurred 2D fft of the height_map'''        
         return fft2d_crop_blur(self.height_map.astype(np.float32))
 
-
-    # draw simple color map of fft_blur
+    
     def draw_fft_blur(self, in_3d=False):
+        '''draw simple color map of fft_blur'''
         if not in_3d:
             plt.imshow(self.fft_blur)
             plt.colorbar()
@@ -224,7 +277,9 @@ class HeightMap:
         else:
             plot_3d(self.fft_blur)
 
+            
     def save_fft_blur(self, filename, in_3d=False):
+        '''save fftblur to file'''
         if not in_3d:
             plt.imshow(self.fft_blur)
         else:
@@ -232,8 +287,8 @@ class HeightMap:
         plt.savefig(filename, transparent=True, bbox_inches='tight')
 
 
-    # draw simple color map of fft_blur
     def draw_fft_center(self, in_3d=False):
+        '''draw simple color map of fft_blur'''
         if not in_3d:
             plt.imshow(self.fft_center)
             plt.colorbar()
@@ -241,43 +296,15 @@ class HeightMap:
         else:
             plot_3d(self.fft_center)
 
-
-
-    # get some basic metrics
+    
     def make_summary_data(self):
+        '''get some basic analysis metrics'''
         hm = self.height_map.astype(np.float32)
         self.average_height = hm.mean()
         self.min_height = hm.min()
         self.max_height = hm.max()
         self.var_height = hm.var()
-        self.fft_blur = fft2d_crop_blur(self.height_map.astype(np.float32))
-        self.fft_center = fft2d_center_blur(self.height_map.astype(np.float32))
-
-    # given a 2D list of file paths
-    # returns 2D list of HeightMap objects
-    def load_from_paths(paths):
-        return [[HeightMap(path) for path in local_paths] for local_paths in paths]
+        self.fft_blur = fft2d_crop_blur(hm)
+        self.fft_center = fft2d_center_blur(hm)
 
 
-def _process_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--height_map', action='store_true',
-                        help='draw height map of input file')
-    parser.add_argument('-f', '--input_file', required=True,
-                        help='input file path')
-    parser.add_argument('--fft_blur', action='store_true',
-                        help='draw colormap of part of low frequency values of 2Dfft magnitudes')
-    parser.add_argument('-s', '--summary', action='store_true',
-                        help='draw colormap and fft blur and summary data')
-    return parser.parse_args()
-
-# for running as shell command
-def main():
-    args = _process_args()
-    h = HeightMap(args.input_file)
-    if args.height_map:
-        h.draw()
-    if args.fft_blur:
-        h.draw_fft_blur()
-    if args.summary:
-        h.display_summary()
