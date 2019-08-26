@@ -1,5 +1,5 @@
 # Rescal-snow <a name="introduction"></a>
-A model dunes and snow waves
+A model of dunes and snow waves
 
 ![](docs/example_images/snowfall_example.gif)
 
