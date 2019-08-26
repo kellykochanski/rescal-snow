@@ -53,29 +53,50 @@ If you have never used bash, we recommend you stop and work through a short tuto
 (Our favorite is ['The Unix Shell' from Software Carpentry](http://swcarpentry.github.io/shell-novice/).)
 If you modify rescal-snow, you will need to modify and compile C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
 
-### 2.2 Dependencies
-Rescal-snow requires glib-2.0 and pthread, as well as a C compiler and the [lib](lib) directory, which contains compatible versions of zlib and libpng.
+### Dependencies
 
-Many of the auxiliary tools (see the [analysis](analysis) and [scripts/utilities](scripts/utilities) directories) are written in Python3. These were developed in an Anaconda environment and require os, sys, numpy, scipy, csv and pandas.
+ * C compiler (GCC and CLANG are known to work)
+ * cmake>=3.1 (used for compiling)
+ * make (used for compiling)
+ * Optional packages used for analysis (see the [analysis](analysis) and [scripts/utilities](scripts/utilities) directories):
+   * Python3 (used for analysis)
+   * numpy (used by Python3 for analysis)
+   * pandas (used by Python3 for analysis)
+   * scipy (used by Python3 for analysis)
+
+On a Debian-based/Ubuntu Linux machine, the dependencies can be acquired using: 
+
+```bash
+sudo apt install gcc cmake make python3 python3-numpy python3-pandas python3-scipy
+```
+
+On most machines, the Python packages can also be acquired using:
+
+```bash
+pip3 install numpy pandas scipy
+```
+
 
 ### 2.3 Download
 Download rescal-snow by cloning this repository with git:
+
 ```bash
 git clone https://github.com/kellykochanski/rescal-snow.git
 cd rescal-snow
 ```
-You may also download the repository manually from [https://github.com/kellykochanski/rescal-snow](https://github.com/kellykochanski/rescal-snow).
 
-**All further blocks of bash instructions start from this directory.**
+You may also download the repository manually from [Github](https://github.com/kellykochanski/rescal-snow).
 
 ### Installation
 
-These instructions will get rescal-snow running on most linux environments; for additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
+These instructions will get rescal-snow running on most Linux environments. For additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
 
 In a terminal, navigate into the main rescal-snow directory (shown above). Run:
 ```bash
-  ./configure
-  make
+mkdir build
+cd build
+cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release .. #Debug can be used instead of Release
+make -j 4                                    #Adjust to the number of cores you have for a speedy build
 ```
 
 ## 3. Features and examples <a name="examples"></a>
@@ -115,6 +136,8 @@ The following phase diagram shows images produced by ten parallel runs simulatin
 
 ![snowfall-wind phase diagram](docs/example_images/phase_space_exploration/phase_diagram1.png)
 
+
+
 ## 4. References and further reading <a name="references"></a>
 
 The [docs](docs) folder contains additional information on 
@@ -145,7 +168,7 @@ To learn the underlying principles of the lattice gas cellular automaton (LGCA) 
 We are excited to hear about your scientific work with ReSCAL.
 This section lists the best way to bring your project - and its successes, challenges, bugs, and developments - to our attention.
 
-We encourage you to interact with the project through github (see below). This will allow easy integration of your changes and prevent rescal-snow from fragmenting excessively.
+We encourage you to interact with the project through Github (see below). This will allow easy integration of your changes and prevent rescal-snow from fragmenting excessively.
 
 ### Citation
 
@@ -157,16 +180,19 @@ We are working on getting a doi for this repository through the Journal of Open 
 This software inherits many features from the Real-Space Cellular Automaton Laboratory, ReSCAL. Please credit those developers by citing:
  - ['A real-space cellular automaton laboratory', O Rozier and C Narteau, Earth Surface Processes and Landforms 39(1) 98-109, 2013, doi=10.1002/esp.3479](https://onlinelibrary.wiley.com/doi/abs/10.1002/esp.3479)
 
+
 ### Support
 
 If you have challenges or questions, look at the material under 'further information' or reach out to us.
 
-Primary contact:
-Kelly Kochanski
-kelly.kochanski@gmail.com
-www.github.com/kellykochanski
+Issues should be reported using Github's issue tracking function on this repository, [here](https://github.com/kellykochanski/rescal-snow/issues).
 
-Issues may be reported using github's issue tracking function on this repository, [www.github.com/kellykochanski/rescal-snow](www.github.com/kellykochanski/rescal-snow).
+Issues which cannot be handled via Github can be addressed to
+
+    Kelly Kochanski
+    kelly.kochanski@gmail.com
+    www.github.com/kellykochanski
+
 
 ### Contributing
 
@@ -177,9 +203,20 @@ guide](https://docs.lavasoftware.org/lava/contribution.html)
 
 Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
 
+<<<<<<< HEAD
+=======
+The [docs](docs) folder contains additional information on 
+
+ - [Alternate installations](docs/how_to_install.md), 
+ - [Performance and parallelization issues](docs/performance_and_parallelization.md), 
+ - [Model inputs and configuration](docs/rescal-snow-inputs.md),
+ - [Model calibration and validation](docs/calibration_and_validation.md),
+ - [Development history](docs/NEWS.md)
+>>>>>>> 7146374ec44adffb1ec72333ad82cd951241f843
 
 ## 6. Contributors <a name="authors"></a>
 See [AUTHORS.md](AUTHORS.md).
+<<<<<<< HEAD
 
 ## 7. License
 GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md).
@@ -187,3 +224,5 @@ GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md).
 SPDX-License-Identifier: GPL-3.0-or-later
 
 Release: LLNL-CODE-785837. See [NOTICE](NOTICE) for details.
+=======
+>>>>>>> 7146374ec44adffb1ec72333ad82cd951241f843

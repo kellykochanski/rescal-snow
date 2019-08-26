@@ -27,8 +27,8 @@ The details are beyond the scope of this document, but our attempts included
  - putting the lattice gas and cellular automaton on separate processors (developed in ReSCAL v1.6)
  - exporting random number generation to GPUs
  - slicing the domain into separate pieces controlled by separate processors
- 
-None of these efforts were particularly promising, and we did not develop them far enough to include in this release.
+
+None of these efforts led to particularly efficient parallel computation.
  
 We instead emphasise applications, such as parameter space explorations, that leverage many processors to perform many serial runs, rather than applications that require parallelizing rescal-snow.
 
