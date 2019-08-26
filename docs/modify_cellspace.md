@@ -98,7 +98,7 @@ you can view the height map.
 ```
 
 A window should pop up with this image
-![](example_images/cellspace/snow_cone_height_map.png)
+![](example_images/modify_cellspace/snow_cone_height_map.png)
 
 Let's increase the height of the entire surface by 10.
 ```python
@@ -106,7 +106,7 @@ Let's increase the height of the entire surface by 10.
 >>> c.draw_height_map()
 ```
 A window should pop up with this image
-![](example_images/cellspace/snow_cone_raised_10.png)
+![](example_images/modify_cellspace/snow_cone_raised_10.png)
 
 This looks about the same as the last one, but notice the scale on the right
 now ranges from 11 to 29, instead of 1 to 19.
@@ -118,7 +118,7 @@ Let's add a sine wave
 ```
 
 A window should pop up with this image
-![](example_images/cellspace/snow_cone_sine.png)
+![](example_images/modify_cellspace/snow_cone_sine.png)
 
 
 You can make your own custom edits. The most flexible way is to use the 
@@ -135,7 +135,7 @@ We can view it by creating a `HeightMap` object.
 ```
 
 A window should pop up with this image
-![](example_images/cellspace/invader_template.png)
+![](example_images/modify_cellspace/invader_template.png)
 
 The `cellspace` module uses the `heightmap` module to process
 and draw the 2D height maps made from the 3D cell space.  
@@ -152,7 +152,7 @@ This heighmap is pretty small. We can scale it up
 >>> heightmap.draw(big_invader)
 ```
 
-A window should pop up with this image ![](example_images/cellspace/big_invader.png)
+A window should pop up with this image ![](example_images/modify_cellspace/big_invader.png)
 
 Notice that the horizontal and vertical axes are scaled by a factor of 6 and
 the color bar ranges from 0 to 7 instead of 0 to 1.
@@ -165,7 +165,7 @@ To add the height map to `c.cells`
 ```
 
 A window should pop up with this image
-![](example_images/cellspace/invader_waves.png)
+![](example_images/modify_cellspace/invader_waves.png)
 
 We now have 3 modifications to the original cell space.
 To undo these modifications
@@ -187,7 +187,7 @@ Now lets add this to `c`.
 >>> c.add_height_map(gaussian_hill, top_left_corner=(25, 90))
 >>> c.draw_height_map()
 ```
-A window should pop up with this image ![](example_images/cellspace/snow_cone_and_gaussian.png)
+A window should pop up with this image ![](example_images/modify_cellspace/snow_cone_and_gaussian.png)
 
 You can now write this modification to a file. To do so, just use the `write` method.
 ```python
