@@ -1,5 +1,5 @@
-# rescal-snow <a name="introduction"></a>
-Simulating the evolution of dunes and snow waves
+# Rescal-snow <a name="introduction"></a>
+A model dunes and snow waves
 
 ![](docs/example_images/snowfall_example.gif)
 
