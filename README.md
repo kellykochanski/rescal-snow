@@ -7,8 +7,9 @@ A model of dunes and snow waves
 2. [Getting started](#starting)
     1. [Prerequisites](#Prerequisites)
     2. [Dependencies](#Dependencies)
-    3. [Installation](#Installation)
-3. [Features and examples](#examples)
+    3. [Download](#Download)
+    4. [Installation](#Installation)
+3. [Features](#examples)
     1. [Example 1: a snow cone](#test-cone)
     2. [Example 2: sintering snow](#test-sinter)
     3. [Example 3: dune growth by snowfall](#test-snowfall)
@@ -25,12 +26,13 @@ A model of dunes and snow waves
 
 When wind blows over snow, it self-organizes. This forms surface features, such as ripples and dunes, that alter the reflectivity and thermal conductivity of the snow.
 
+
 ![](docs/example_images/field_examples.png)
 
-These features have just begun to be studied by the snow and climate science communities
-(see [1](https://doi.org/10.1002/2015JF003529), [2](https://doi.org/10.5194/tc-13-1267-2019), [3](https://doi.org/10.5194/tc-2019-45) for recent work). 
+Studying these features in the field is cold and challenging ([we've tried](https://doi.org/10.5194/tc-2019-45)), so
+we created rescal-snow to enable snow scientists to study snow features in controlled numerical experiments.
+We hope that this model will be useful to researchers in snow science, geomorphology, and polar climate.
 
-We created rescal-snow to provide a highly capable snow dune modelling toolkit, to enable snow scientists to study snow features in controlled numerical experiments, and produce high-quality quantitative output. 
 Rescal-snow is able to simulate:
 
  - Snow/sand grain erosion and deposition by wind
@@ -38,11 +40,11 @@ Rescal-snow is able to simulate:
  - Time-dependent cohesion (snow sintering)
  - Avalanches of loose grains
 
-Rescal-snow also contains tools for data management and analysis, including:
- - Variable levels of run-time analysis
- - Workflow tools for generating and running many simulations in parallel
+Rescal-snow is also designed for robust, reproducible science, and contains tools for high-performance computing, data management, and data analysis, including:
 
-We hope that this model will be useful to researchers in snow science, geomorphology, and polar climate.
+ - Workflow tools for generating and running many simulations in parallel
+ - A python-based workflow that manages data and analysis at runtime
+
 
 ## 2. Getting started <a name="starting"></a>
 
@@ -53,7 +55,7 @@ If you have never used bash, we recommend you stop and work through a short tuto
 (Our favorite is ['The Unix Shell' from Software Carpentry](http://swcarpentry.github.io/shell-novice/).)
 If you modify rescal-snow, you will need to modify and compile C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
 
-### Dependencies
+### 2.2 Dependencies
 
  * C compiler (GCC and CLANG are known to work)
  * cmake>=3.1 (used for compiling)
@@ -87,7 +89,7 @@ cd rescal-snow
 
 You may also download the repository manually from [Github](https://github.com/kellykochanski/rescal-snow).
 
-### Installation
+### 2.4 Installation
 
 These instructions will get rescal-snow running on most Linux environments. For additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
 
@@ -99,14 +101,12 @@ cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release .. #Debug can be used instead of Relea
 make -j 4                                    #Adjust to the number of cores you have for a speedy build
 ```
 
-## 3. Use and features <a name="examples"></a>
+## 3. Features <a name="examples"></a>
 
-To start running, configuring and analyzing Rescal-snow simulations, go through the tutorial: [docs/rescal-snow-tutorial.md](docs/rescal-snow-tutorial.md).
+The examples below are fully described in the tutorial: [docs/rescal-snow-tutorial.md](docs/rescal-snow-tutorial.md).
+The [docs](docs) folder also contains descriptions of additional configuration and analysis options; check these if you're looking for functionality not found in the tutorial.
 
-The tutorial fully describes the examples below. The [docs](docs) folder also contains descriptions of additional configuration and analysis options; check these if you're looking for functionality not found in the tutorial.
-
-### Sand and snow dunes <a name="test-cone"></a>
-The following examples are described fully in [docs/rescal-snow-tutorial.md](docs/rescal-snow-tutorial.md).
+### 3.1 Sand and snow dunes <a name="test-cone"></a>
 
 The default configuration for Rescal-snow simulates snow (or sand) dune formation. This simulates processes including air flow; grain entrainment, saltation, suspension and deposition; and granular avalanches.
 
@@ -118,18 +118,18 @@ In these conditions, a pile of sand/snow (left) evolves into a dart-shaped barch
 
 Each of the three images above shows a shaded top-down view of a dune (top left), cross-sections through the dune, along the dashed lines (middle left, top right), and a cross-section showing the pressure intensity in the fluid (bottom left).
 
-### Sintering snow <a name="test-sinter"></a>
+### 3.2 Sintering snow <a name="test-sinter"></a>
 
 Snow cohesion increases over time: this is called sintering.
 Rescal-snow is able to simulate the transition of loose (beige) grains into sintered (light purple) grains within waves and dunes.
 
 ![](docs/example_images/sintering/sintering.gif)
 
-### Dune growth by snowfall <a name="test-snowfall"></a>
+### 3.3 Dune growth by snowfall <a name="test-snowfall"></a>
 
 Rescal-snow simulates snow by adding loose grains to the top of the simulation. The gif at the top of this page shows a height-map of a field of dunes and waves growing during snowfall.
 
-### Parallel instances and parameter space exploration <a name="test-parallel"></a>
+### 3.4 Parallel instances and parameter space exploration <a name="test-parallel"></a>
 We believe that building robust, trustworthy models is much simpler when it's easy to make many model runs.
 
 Rescal-snow contains a series of tools for running many simulation instances in parallel, and managing the associated flows of input and output data.
@@ -155,10 +155,7 @@ For more background on snow dunes, sintering, and self-organization, see:
  - ['Statistical classification of self-organized snow surfaces', Kochanski, Anderson and Tucker, 2018](https://doi.org/10.1029/2018GL077616)
  - ['Studies on interaction between wind and dry snow surface', Kobayashi, 1980](https://eprints.lib.hokudai.ac.jp/dspace/bitstream/2115/20242/1/A29_p1-64.pdf)
 
-For models of snow dunes based on ReSCAL, see:
- - ['Understanding snow bedform formation by adding sintering to a cellular automata model', Sharma, Braud and Lehning, preprint](https://doi.org/10.5194/tc-2019-45)
-
-For more information about the initial ReSCAL development and the backend function of the cellular automaton and lattice gas model, see:
+For more information about the backend function of the cellular automaton and lattice gas model, see:
  - ['Setting the length and timescales of a cellular automaton dune model', Narteau et al., 2009](https://doi.org/10.1029/2008JF001127)
  - ['A real-space cellular automaton laboratory', Rozier and Narteau, 2014](dx.doi.org/10.1002/esp.3479)
  - ['Transport capacity and saturation mechanism in a real-space cellular automaton dune model', Gao et al., 2014](dx.doi.org/10.5194/adgeo-37-47-2014)
@@ -167,10 +164,10 @@ To learn the underlying principles of the lattice gas cellular automaton (LGCA) 
 
 ## 5. Community guidelines <a name="community"></a>
 
-We are excited to hear about your scientific work with ReSCAL.
-This section lists the best way to bring your project - and its successes, challenges, bugs, and developments - to our attention.
-
 We encourage you to interact with the project through Github (see below). This will allow easy integration of your changes and prevent rescal-snow from fragmenting excessively.
+We use [this](https://nvie.com/posts/a-successful-git-branching-model/) git workflow,
+with the expectation that new changes will be tested on the examples in the README, docs, or tutorials.
+If you're not familiar with git, see [the software carpentry git tutorial](https://swcarpentry.github.io/git-novice/).
 
 ### Citation
 
@@ -217,5 +214,3 @@ See [AUTHORS.md](AUTHORS.md).
 
 ## 7. License
 GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md). SPDX-License-Identifier: GPL-3.0-or-later
-
-Release: LLNL-CODE-785837. See [NOTICE](NOTICE) for details.
