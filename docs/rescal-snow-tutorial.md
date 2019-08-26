@@ -1,7 +1,7 @@
 # rescal-snow <a name="introduction"></a>
 Simulating snow self-organization with cellular automata
 
-![](docs/example_images/snowfall_example.gif)
+![](example_images/snowfall_example.gif)
 
 1. [Tutorial aims and features](#introduction)
 2. [Getting started](#starting)
@@ -13,13 +13,6 @@ Simulating snow self-organization with cellular automata
     3. [Visualizing the output](#visualizing)
 3. [Setting up parallel runs](#parallel)
     1. [Example 4: parameter space exploration](#test-parallel)
-4. [Community guidelines](#community)
-    1. [Citation](#Citation)
-    2. [Support](#Support)
-    3. [Contributing](#contributing)
-5. [References and further reading](#references)
-6. [Contributors](#authors)
-7. [License](#License)
 
 ## 1. Tutorial aim and features <a name="introduction"></a>
 
@@ -28,11 +21,11 @@ This tutorial walks through a series of examples that demonstrate how to use Res
  - Snow/sand grain erosion and deposition by wind
  - Snow dune formation
  - Snowfall
- - Simple visualization of simulation output
+ - Visualization of simulation output
  - Time-dependent cohesion (snow sintering)
  - Parallel runs for phase space exploration
 
-## 2. Getting started
+## 2. Getting started <a name="starting"></a>
 
 Before starting this tutorial, download and install Rescal-snow according to the instructions in `README.md`.
 
@@ -41,20 +34,25 @@ Before starting this tutorial, download and install Rescal-snow according to the
 We assume you have reasonable familiarity with bash and terminal commands.
 If you have never used bash, we recommend you stop and work through a short tutorial.
 (Our favorite is ['The Unix Shell' from Software Carpentry](http://swcarpentry.github.io/shell-novice/).)
-If you modify rescal-snow, you will need to modify and compile C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
+
+If you wish to modify rescal-snow, you will need to work with C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
+
+If you wish to modify our configuration, set-up, and visualization tools, you will need to work with Python (numpy, scipy, pandas and matplotlib).
 
 **All blocks of bash instructions will start from the main rescal-snow directory:**
 
 ```bash
 ls
->> AUTHORS.md   	lib	   	scripts		src
->> LICENSE.md   	NOTICE	 	docs
+>> AUTHORS.md   	lib	   	        scripts		src
+>> LICENSE.md   	NOTICE	 	    docs
 >> README.md	  	analysis    	paper.md
 ```
 (You may see additional files not listed here.)
 
 
 ### Example 1: a snow cone <a name="test-cone"><a>
+
+**Running the example**
 
 The first test run simulates a conical dune shaped by a strong wind. To run the example:
 ```bash
@@ -70,7 +68,9 @@ This command will take a few minutes to run, and produces terminal output like:
 >
 > This is mostly a good sign - if something is wrong, rescal-snow almost always crashes in the first few seconds. The simulations, however, are computationally expensive, and may take an unreasonably long time to run on slower machines. 
 > If this is the case for you, we've put some tips for improving performance in [docs/performance_and_parallelization.md](performance_and_parallelization.md).
-> Fortunately, the substantive output from rescal-snow is saved at regular intervals. You can view intermediate output while the simulation is still running, and you can stop the simulation (usually `Ctrl-C`) without losing that output. 
+> The output from rescal-snow is saved at regular intervals. You can view intermediate output while the simulation is still running, and you can stop the simulation (usually `Ctrl-C`) without losing that output. 
+
+**Example 1 results**
 
 The easiest way to examine the output is to look at rescal-snow's natively generated png files:
 
@@ -79,7 +79,7 @@ eog scripts/*.png
 ```
 If `eog` is not available, use `open` (MacOS) or any image viewer.
 
-These files are numbered sequentially. The files are saved at regular intervals set by the `-dpng` flag in [scripts/snow_cone.run](../scripts/snow_cone.run). For this run, we used `-dpng 10t0`, so file 0 is saved at simulation time t0=0, file 1 (SNO00001\_t0.png) is saved at
+These files are numbered sequentially, and output at intervals set by the `-dpng` flag in [scripts/snow_cone.run](../scripts/snow_cone.run). For this run, we used `-dpng 10t0`, so file 0 is saved at simulation time t0=0, file 1 (SNO00001\_t0.png) is saved at
 simulation time t0=10, and so on.
 
 |Initial condition, SNO00000_t0.png 	|  SNO00003_t0.png   | SNO00009_t0.png  |
@@ -87,6 +87,8 @@ simulation time t0=10, and so on.
 | ![](example_images/snow_cone/00.png) | ![](example_images/snow_cone/03.png) | ![](example_images/snow_cone/09.png) |
 
 Each of the three images above shows a shaded top-down view of a dune (top left), cross-sections through the dune, along the dashed lines (middle left, top right), and a cross-section showing the pressure intensity in the fluid (bottom left).
+
+**Interpretation**
 
 The initial condition (t0=0) is a small cone of sand. As the simulation runs, the cone quickly self-organizes into an elongate dune, and moves downwind.
 As time progresses, the dune gradually loses grains. These are not replaced, and the dune dwindles away: this dune is not stable in these (high-wind, no resupply) conditions.
@@ -106,6 +108,8 @@ You can run an example snow feature with sintering with:
 cd scripts
 ./sintering.run
 ```
+
+**Example 2 results**
 
 This produces the following series of png images, with sintered grains shown in light purple and non-sintered grains shown in tan:
 
@@ -133,12 +137,13 @@ diff scripts/sintering.par scripts/snow_cone.par
 >> < Lambda_F = 0.05
 >> > Lambda_F = 0
 ```
-*What do these changes do?*
+**Interpretation**
+
  - Csp\_templeate selects one of several initial conditions defined in [src/genesis.c](src/genesis.c): the initial condition is now a 15 cell high triangular wave instead of a 20 cell high cone
  - Lambda\_S controls the rate of sintering: we increased it from 0 to 0.01/t0.
  - Lambda\_F controls the relative erodibility of the sintered grains: we set it to 0.05/t0, or 5% of the erodibility of the non-sintered grains
 
-**All rescal-snow parameters are all given brief descriptions in the .par file, and in [docs/rescal-snow-inputs.md](rescal-snow-inputs.md).**
+> All rescal-snow parameters are all given brief descriptions in the .par file, and in [docs/rescal-snow-inputs.md](rescal-snow-inputs.md).
 
 ### Example 3: dune growth by snowfall <a name="test-snowfall"></a>
 
@@ -168,12 +173,14 @@ diff snowfall.run snow_cone.run
  - The SNOWFALL template sets an initial condition to be a flat layer of cells of thickness 4, and creates a layer of injection cells to generate snowfall on the simulation ceiling.
  - Lambda\_I controls the rate of snow injection; its behavior depends on the type and location of the injection cells, and thus on the template.
 
-### Visualizing the simulation output <a name="visualizing"></a>
+**Example 3 results**
 
 The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface (left-most picture in image below; airborne
 grains are red).
 
 To see the output clearly, we will make custom images with matplotlib (Python). We will make topographic maps showing the dunes' elevation. This data is output in scripts/out/ALTIxxxxx.log files.
+
+### Visualizing the simulation output <a name="visualizing"></a>
 
 We have included a script to recolor three example output frames from the snowfall simulation:
 
@@ -269,6 +276,24 @@ ls test_parallel_runs/tauMin0_lambdaI0.01/out
 >> ALTI00003_t0.log  DENSITE.log              SIGN_HPP.log
 >> ALTI00004_t0.log  DOUBLETS.log             TIME.log
 ```
+
+> *Troubleshooting tips for parallel runs*
+>
+> - msub/sbatch commands not allowed by your computing cluster 
+>    -  seek support from someone familiar with the cluster, or use an example run script for your cluster as a template
+> - permissions errors 
+>    - run `chmod u+rwx \*` in test_parallel_runs; contact administrator if this is disallowed
+> - script could not find input (run.run or run.par or sealevel_snow.prop) 
+>    - rerun param_space_exploration_example.py and confirm that it produced the output above
+>    - check that you're running msub/sbatch from scripts directory
+>    - check relative directory references in msub/sbatch script and submit.sh
+> - runs time out before producing useful output 
+>   - increase walltime
+>   - reduce simulation domain size (parameters 'L' and 'D')
+>   - large simulations may run for many hours
+
+
+**Example 4 results**
 
 The following phase diagram shows the 100th images produced by each of these runs (t0 = 1000; snowfall rate = lambda\_I; wind strength = Tau\_min). 
 
