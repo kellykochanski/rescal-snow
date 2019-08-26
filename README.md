@@ -1,5 +1,5 @@
 # rescal-snow <a name="introduction"></a>
-Simulating snow self-organization with cellular automata
+Simulating the evolution of dunes and snow waves
 
 ![](docs/example_images/snowfall_example.gif)
 
