@@ -114,9 +114,12 @@ void trace_end_loop() {
 }
 
 void trace_test(int32_t ix) {
+  (void)ix; //SUPPRESS: unused warning
 }
 
 int32_t trace_point(int32_t x, int32_t z) {
+  (void)x; //SUPPRESS: unused warning
+  (void)z; //SUPPRESS: unused warning
   return 0;
 }
 
@@ -758,6 +761,7 @@ void params_trace() {
 /// Data outputs during current simulation
 
 void trace_dump(char flag_info) {
+  (void)flag_info; //SUPPRESS: unused warning
 #ifdef TRACE_TRANS
   if (flag_info) {
     trace_trans_dump();

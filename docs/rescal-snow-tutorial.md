@@ -284,3 +284,8 @@ The runs with high wind speed (low Tau\_min) have less even snow cover, with bet
 > - script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun param_space_exploration_example.py and confirm that it produced the output above; check that you're running msub/sbatch from scripts; check relative directory references in msub/sbatch script and submit.sh
 > - runs time out before producing useful output -> increase walltime; large simulations on slow machines may ultimately take a few hours
 
+### Run ReSCAL within python <a name="python"></a>
+
+There is an option to run ReSCAL in such a way that the `.csp` files are piped to a python process that processes them while ReSCAL is running. This can be useful for reducing the amount of disc space used and may have a siginific\
+ant speed increase for some configurations. There is an example of how to do this at [docs/rescal-in-python.md](rescal-in-python.md). 
+For more information on processing the `.csp` files within python, see [docs/modify-cellspace.md](modify-cellspace.md).

@@ -29,6 +29,7 @@ typedef struct _template {
   char *desc;
   int32_t nb_args;
   float *args;
+  char *file;
 } CSP_Template;
 
 #define MAX_TEMPLATES 20 //max number of templates
