@@ -12,9 +12,10 @@ Simulating snow self-organization with cellular automata
 2. [Controlling the simulations](#modifying)
     1. [Example 2: sintering snow](#test-sinter)
     2. [Example 3: dune growth by snowfall](#test-snowfall)
-    3. [Visualizing the output](#visualizing)
+    3. [Example 4: input elevation](#test-initial-elevation)
+    4. [Visualizing the output](#visualizing)
 3. [Setting up parallel runs](#parallel)
-    1. [Example 4: parameter space exploration](#test-parallel)
+    1. [Example 5: parameter space exploration](#test-parallel)
 4. [Community guidelines](#community)
     1. [Citation](#Citation)
     2. [Support](#Support)
@@ -226,6 +227,18 @@ diff snowfall.run snow_cone.run
  - The SNOWFALL template sets an initial condition to be a flat layer of cells of thickness 4, and creates a layer of injection cells to generate snowfall on the simulation ceiling.
  - `Lambda_I` controls the rate of snow injection; its behavior depends on the type and location of the injection cells, and thus on the template.
 
+### Example 4: input elevation <a name="test-initial-elevation"></a>
+
+For the purposes of working with real-world data, we have added this feature to read in an elevation map and create a simulation based on this starting state. 
+
+To run this example: 
+```bash
+cd scripts
+./initial_elevation.run
+```
+
+This script will generate an initially completely flat landscape using python and then run the simulation accordingly. 
+
 ### Visualizing the simulation output <a name="visualizing"></a>
 
 The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface (left-most picture in image below; airborne grains are red).
@@ -258,7 +271,7 @@ and a general ability to run the model often enough to trust that our results ar
 
 We have therefore added utilities to help you set up batches of many runs of rescal-snow.
 
-### Example 4: parameter space exploration <a name="test-parallel"></a>
+### Example 5: parameter space exploration <a name="test-parallel"></a>
 
 This example requires access to parallel computing resources, such as a university computing cluster. 
 
