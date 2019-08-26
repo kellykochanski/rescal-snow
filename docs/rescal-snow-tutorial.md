@@ -1,5 +1,4 @@
-# rescal-snow <a name="introduction"></a>
-Simulating snow self-organization with cellular automata
+# Rescal-snow tutorial<a name="introduction"></a>
 
 ![](example_images/snowfall_example.gif)
 
@@ -10,8 +9,8 @@ Simulating snow self-organization with cellular automata
 2. [Controlling the simulations](#modifying)
     1. [Example 2: sintering snow](#test-sinter)
     2. [Example 3: dune growth by snowfall](#test-snowfall)
-    3. [Visualizing the output](#visualizing)
-3. [Setting up parallel runs](#parallel)
+3. [Visualizing the output](#visualizing)
+4. [Setting up parallel runs](#parallel)
     1. [Example 4: parameter space exploration](#test-parallel)
 
 ## 1. Tutorial aim and features <a name="introduction"></a>
@@ -31,11 +30,14 @@ Before starting this tutorial, download and install Rescal-snow according to the
 
 ### Prerequisites
 
-We assume you have reasonable familiarity with bash and terminal commands.
+We assume you have some familiarity with bash and terminal commands.
 If you have never used bash, we recommend you stop and work through a short tutorial.
 (Our favorite is ['The Unix Shell' from Software Carpentry](http://swcarpentry.github.io/shell-novice/).)
 
-If you wish to modify rescal-snow, you will need to work with C code. We have also included some setup and analysis tools (used in Example 5) written in Python.
+Rescal-snow is designed to be run through a terminal, although we are working on a python workflow ([docs/rescal-in-python.md](rescal-in-python.md). 
+Many of our setup and analysis tools (used in Example 5) are written in Python.
+To modify the simulation source code, you will need to work in C.
+
 
 If you wish to modify our configuration, set-up, and visualization tools, you will need to work with Python (numpy, scipy, pandas and matplotlib).
 
@@ -43,11 +45,19 @@ If you wish to modify our configuration, set-up, and visualization tools, you wi
 
 ```bash
 ls
->> AUTHORS.md   	lib	   	        scripts		src
->> LICENSE.md   	NOTICE	 	    docs
->> README.md	  	analysis    	paper.md
+>> AUTHORS.md   	lib	        scripts		build
+>> LICENSE.md   	docs		paper.md
+>> README.md	  	analysis    	src
 ```
-(You may see additional files not listed here.)
+(You may see additional files)
+
+> To keep the directory references simple, we recommend you define:
+
+> ```bash
+> export RESCAL_SNOW_ROOT='<path to your Rescal-snow install>'
+> ```
+> where <path...> is the result of typing `pwd` in the directory above.
+> If you hit directory or file not found errors, return to the home directory with `cd $RESCAL_SNOW_ROOT`.
 
 
 ### Example 1: a snow cone <a name="test-cone"><a>
@@ -93,7 +103,7 @@ Each of the three images above shows a shaded top-down view of a dune (top left)
 The initial condition (t0=0) is a small cone of sand. As the simulation runs, the cone quickly self-organizes into an elongate dune, and moves downwind.
 As time progresses, the dune gradually loses grains. These are not replaced, and the dune dwindles away: this dune is not stable in these (high-wind, no resupply) conditions.
 
-## Controlling the simulation <a name="modifying"></a>
+## 2. Controlling the simulation <a name="modifying"></a>
 
 In the next two examples, we walk through the .run and .par scripts that control the behavior of the simulation, and present example simulations that show you how to modify two important snow parameters: sintering and snowfall.
 
@@ -180,7 +190,7 @@ grains are red).
 
 To see the output clearly, we will make custom images with matplotlib (Python). We will make topographic maps showing the dunes' elevation. This data is output in scripts/out/ALTIxxxxx.log files.
 
-### Visualizing the simulation output <a name="visualizing"></a>
+## 4. Visualizing the simulation output <a name="visualizing"></a>
 
 We have included a script to recolor three example output frames from the snowfall simulation:
 
@@ -198,7 +208,7 @@ The full evolution of this simulation is shown in the gif at the top of [README.
 
 > Additional scripts for analysing and visualizing the runs are available in the scripts/utilities and analysis directories.
 
-## Setting up parallel runs <a name="parallel"></a>
+## 5. Setting up parallel runs <a name="parallel"></a>
 
 We believe that building robust, trustworthy models is much simpler when it's easy to make many model runs. This enables:
  - Parameter space exploration
