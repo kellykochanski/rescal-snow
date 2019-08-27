@@ -40,8 +40,7 @@ Rescal-snow is designed to be run through a terminal, although we are working on
 Many of our setup and analysis tools (used in Example 5) are written in Python.
 To modify the simulation source code, you will need to work in C.
 
-
-If you wish to modify our configuration, set-up, and visualization tools, you will need to work with Python (numpy, scipy, pandas and matplotlib).
+Example 4 discusses parallel runs. This will require use of parallel computing resources, and may require support from someone familiar with your computing cluster (or supercomputer, AWS allocation, etc).
 
 **All blocks of bash instructions will start from the main rescal-snow directory:**
 
@@ -225,7 +224,10 @@ We have therefore added utilities to help you set up batches of many runs of res
 This example requires access to parallel computing resources, such as a university computing cluster. 
 
 > If you do not have access to a computing cluster, the Community Surface Dynamics Modelling System (CSDMS) organization provides free high-performance computing resources for Earth surfaces research.
-See [csdms.colorado.edu/wiki/HPC](https://csdms.colorado.edu/wiki/HPC) for details.
+> See [csdms.colorado.edu/wiki/HPC](https://csdms.colorado.edu/wiki/HPC) for details.
+
+> We assume this could also be done with a 10-processor allocation on a cloud computing platform, such as Google Cloud or AWS, though we have not tested this option.
+> Students, educators and researchers may be eligible for free computing resources from major cloud computing providers - look around for current information.
 
 
 In this example, we're going to run 10 instances of rescal. Begin by downloading and installing rescal-snow on your computing cluster, and running one of the above examples to test the installation.
@@ -261,11 +263,17 @@ The directory names list the run parameters. For example, test_paralle_runs/tauM
 The other nine subdirectories contain material for runs with different snowfall rates and wind strengths.
 
 We can submit all of these runs simultaneously using scripts/test_parallel_runs.msub (for Moab systems) or scripts/test_parallel_runs.sbatch (for slurm).
-These scripts contain #MSUB or #SBATCH commands describing the user's email, the queue, the resources in terms of nodes or processors, etc.
-You will need to modify these commands to match the structure of your computing cluster, or an example job script that works with your account on your computing cluster.
+These scripts contain #MSUB or #SBATCH commands describing the user's email, the queue, the resources in terms of nodes or processors, etc, e.g.:
+```bash
+#MSUB -q pbatch
+#MSUB -M yourname@yourserver.com
+#MSUB -l nodes=1
+#MSUB -l walltime=00:05:00
+```
+You will need to modify these commands to match an allowable job structure and allocation on your computing cluster.
+If this process is not familiar, look for an "example job script" released by your computing facility, or contact someone familiar with that facility.
 
 Once you have a working msub/sbatch script, run:
-
 ```bash
 cd scripts
 msub test_parallel_runs.msub
