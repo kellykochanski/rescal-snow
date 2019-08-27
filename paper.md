@@ -10,16 +10,16 @@ authors:
   - name: Kelly Kochanski
     orcid: 0000-0003-0754-0184
     affiliation: "1,2"
-  - name: Eric Green
-    affiliation: 2
   - name: Gian-Carlo Defazio
     affiliation: "2,3"
+  - name: Eric Green
+    affiliation: 2
   - name: Richard Barnes
     affiliation: "4"
   - name: Carlos Downie
     affiliation: 2
   - name: Adam Rubin
-    affiliation: 5
+    affiliation: "5"
   - name: Barry Rountree
     orcid: 0000-0002-0087-4301
     affiliation: 2
