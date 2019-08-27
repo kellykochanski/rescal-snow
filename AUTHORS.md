@@ -15,7 +15,6 @@ It was developed from version 1.6 of the Real-Space Cellular Automaton Laborator
  - Divya Mohan (misc debugging)
  - Jenna Horrall (misc debugging)
 
-
 ## IPGP contributors (2004-2016)
 Rescal-snow would not have been possible without the development of ReSCAL, which was written 2004-2014 at the Laboratoire de Dynamique des Fluides Geologiques, Institute de Physique du Globe de Paris.
 
