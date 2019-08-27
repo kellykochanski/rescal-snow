@@ -21,6 +21,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <inttypes.h>
 #include <stdint.h>
 
 #ifdef _MAIN_
@@ -87,7 +88,7 @@ extern FILE *log_file;
   if (taille_mem >= 1000000) \
     LogPrintf("%sallocation %s : %.2f Mo\n", str, var, (float)taille_mem/1000000) \
   else \
-    LogPrintf("%sallocation %s : %ld\n", str, var, taille_mem)
+    LogPrintf("%sallocation %s : %" PRId64 "\n", str, var, taille_mem)
 
 #define AllocMemoryPrint(var,adr,type,taille) \
 { \
@@ -108,7 +109,7 @@ extern FILE *log_file;
   else if (total_memory >= 1000000) \
     LogPrintf("total de la memoire allouee : %.2f Mo\n", (float)total_memory/1000000) \
   else \
-    LogPrintf("total de la memoire allouee : %ld\n", total_memory) \
+    LogPrintf("total de la memoire allouee : %" PRId64 "\n", total_memory) \
 }
 
 #define FreeMemory(adr,type,taille) \

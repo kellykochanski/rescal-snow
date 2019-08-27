@@ -121,17 +121,22 @@ void wait_lgca_thread() {
 }
 
 void push_status(char* str) {
+  (void)str; //SUPPRESS: unused warning
 }
 
 void pop_status() {
 }
 
 void lock_display(int32_t log_flag) {
+  (void)log_flag; //SUPPRESS: unused warning
 }
 
 void unlock_display(int32_t log_flag) {
+  (void)log_flag; //SUPPRESS: unused warning
 }
 
 int32_t elapsed(double *sec) {
+  (void)sec; //SUPPRESS: unused warning
+  return 0;
 }
 

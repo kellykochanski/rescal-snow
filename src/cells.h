@@ -23,7 +23,11 @@
 
 #include <stdint.h>
 
-#define CELL_DATA defined(CELL_COLOR)
+#if defined(CELL_COLOR)
+#define CELL_DATA 1
+#else
+#define CELL_DATA 0
+#endif
 
 #ifndef IN
 #define IN BORD
@@ -33,9 +37,10 @@
 #define OUT BORD
 #endif
 
+typedef uint8_t celltype_t;
 
 typedef struct cellule {
-  uint8_t celltype;
+  celltype_t celltype;
 #ifdef CELL_COLOR
   uint8_t color;
 #endif
@@ -43,12 +48,6 @@ typedef struct cellule {
   int32_t celltime; //date du dernier changement d'etat
 #endif
 } Cell;
-
-#define CELL_TYPE_SIZE sizeof(unsigned char)
-#define CELL_DATA_SIZE (sizeof(Cell) - CELL_TYPE_SIZE)
-
-//typedef int8_t CellData[CELL_DATA_SIZE];
-
 
 void init_Ncel();
 void init_cellule(Cell cel, int32_t index);

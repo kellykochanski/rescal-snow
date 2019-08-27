@@ -1,0 +1,108 @@
+## Parameter file for ReSCAL written from Parameters utility
+## Test from write_tests.py: Pile Height and Pile Width for Gaussian Terrain. 
+ 
+# Angle of repose, steeper slopes avalanche (degrees)
+Ava_angle = 35.0
+ 
+# Shear stress threshold for grain erosion, controls flow strength
+Tau_min = 100.0
+ 
+# Delay between flow cycles
+Lgca_delay = 1.0
+ 
+# Type of boundary conditions, e.g. OPEN, PERIODIC, REINJECTION
+Boundary = OPEN
+ 
+# Depth, transverse to flow, of model domain (cells)
+D = 80
+ 
+# Genesis template?
+Csp_file = DUN.csp
+ 
+# Ratio of vertical:horizontal transport of mobile grains
+Coef_A = 0.1
+ 
+# Ratio of deposition against an obstacle : deposition
+Coef_B = 10.0
+ 
+# Erosion rate (when threshold exceeded)
+Lambda_E = 1.0
+ 
+# Automatic re-centering of model domain on dune
+Centering_delay = 0
+ 
+# Mode of avalanching
+Ava_mode = TRANS
+ 
+# Template containing initial shape for run
+Csp_template = INPUT_ELEVATION(initial_elevation.tab, 1)
+ 
+# Speedup of the flow stabilization
+Lgca_speedup = 1000.0
+ 
+# Probability of the transition links
+Prob_link_TT = 1.0
+ 
+# Parameters for size, depth etc of template shape
+Csp_params = []
+ 
+# File containing important physical properties e.g. gravity
+Phys_prop_file = real_data/sealevel_snow.prop
+ 
+# Height of model domain (cells)
+H = 50
+ 
+# Length, longitudinal, of model domain (cells)
+L = 200
+ 
+# Higher mobility of grains
+High_mobility = 1.0
+ 
+# Initial time
+Time = 0.0
+ 
+# Height limit in avalanches (cells)
+Ava_h_lim = 1.0
+ 
+# Defines a set of transitions for grains in the cellular automaton e.g. DUN or SNO
+Model = SNO
+ 
+# Transition rate for mobile grains
+Lambda_T = 1.5
+ 
+# Max shear stress, used in grain erosion/flow speed relation
+Tau_max = 1100.0
+ 
+# Transition rate for sintering/cohesion
+Lambda_S = 0.0
+ 
+# Ratio of deposition behind an obstacle : deposition
+Coef_C = 10.0
+ 
+# Probability of the transition links
+Prob_link_ET = 0.5
+ 
+# Directory where output files go
+Output_directory = ./out
+ 
+# Transition rate for diffusion
+Lambda_D = 0.01
+ 
+# File containing relationship between saturated and threshold flux
+Qsat_file = real_data/PDF.data
+ 
+# Ratio of sintered:unsintered erosion thresholds
+Lambda_F = 1.0
+ 
+# Gravity - rate of fall of not-in-transport grains in air
+Lambda_G = 100000.0
+ 
+# ??
+Lambda_A = 1.0
+ 
+# Deposition rate for mobile grains on surface
+Lambda_C = 0.5
+ 
+# Injection rate
+Lambda_I = 0.0
+ 

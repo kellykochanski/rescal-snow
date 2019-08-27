@@ -25,12 +25,17 @@
  */
 
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <memory.h>
 #include <math.h>
 #include <stdint.h>
+
+// performance timing
+#include <sys/time.h>
+
 
 // For output
 #include <string.h>
@@ -51,6 +56,9 @@
 #include "lgca.h"
 #include "callbacks.h"
 #include "view.h"
+extern uint8_t perf_print_flag; // defined in format.c, set in entry.c
+extern int32_t data_pipe; // from format.c, determines if piping will happen, cencels ALTI file writing
+extern uint8_t csp_borders_flag; // keep border cells when writing .csp files to disc
 extern uint8_t opt_info, opt_nv;
 extern int32_t H, L, D, HL, HLD;       // les dimensions de la terre
 extern int32_t LN, LS, LNS, HLN;    //couloir est-ouest (limite nord, limite sud, largeur nord-sud, ...)
@@ -95,7 +103,7 @@ extern RefDoublets_Ind *RefDB_Ind;       // references des cellules de la terre 
 #endif //REFDB_PTR
 #ifdef CGV
 extern float cgv_coef;
-#endif
+#endif 
 extern int32_t vdir_mode; //display mode of the current orientation
 extern uint8_t reorient_flag;
 uint64_t iter = 0, md_iter = 0; // nombre d'iterations (unites, milliards d'unites)
@@ -137,6 +145,9 @@ float lambda_A_stable = 0.0;
 int32_t ava_upwind = 1;
 uint8_t simul_dump_flag = 0;
 uint8_t csphpp_flag = 0;
+uint8_t alti_only_flag = 0; // flag that causes heightmap (ALTI*) files to be written to a file, but not cellspace files (*.csp)
+uint8_t uncompressed_csp_flag = 0; // prevent .csp files from being compressed when writing them
+int32_t id = 0; // unique identifier for the run
 float dump_delay_png = 0.0;
 float dump_delay_csp = 0.0;
 float stop_delay_t0 = 0.0;
@@ -181,6 +192,11 @@ void simul_lien_trans(int32_t, int32_t, int32_t);
 #ifdef LGCA
 void flow_stabilization(int32_t);
 #endif
+
+// timers for performance testing
+struct timeval time_start;
+extern int32_t id;
+
 void simul_stop();
 void simul_dump();
 void params_simul() {
@@ -899,7 +915,7 @@ void simul_ava_sync() {
     time_threshold = ava_delay_sync * ceil(csp_time / ava_delay_sync);
     LogPrintf("seuil temps avalanches = %f\n", time_threshold);
     LogPrintf("delai avalanches = %f\n", ava_delay_sync);
-    LogPrintf("nb min iterations avant avalanches = %lu\n", inter_iter_ava);
+    LogPrintf("nb min iterations avant avalanches = %" PRIu64 "\n", inter_iter_ava);
     LogPrintf("ava_h_lim = %d\n", ava_h_lim);
     LogPrintf("ava_nb_cel_max = %d\n", ava_nb_cel_max);
     start = 0;
@@ -1517,7 +1533,7 @@ void simul_dump() {
   static double time_threshold_dpng = 0.0;
   static double time_threshold_dcsp = 0.0;
   static int32_t cpt_dump = 0;
-  static char name[100];
+  static char name[512];
   static char str[100];
   static double t0 = 0, t1 = 0;
   static char start = 1;
@@ -1567,9 +1583,18 @@ void simul_dump() {
         }
       }
       if (dump_delay_csp && (time_threshold == time_threshold_dcsp)) {
-        dump_terre(DUMP_CSP, cpt_dump, UNIT_T0);
+        // edited to allow dumping of ALTI files but not .csp files using the altionly flag
+        if (!alti_only_flag) {
+          gettimeofday(&time_start, NULL);
+          dump_terre(DUMP_CSP, cpt_dump, UNIT_T0);
+          log_time_delta(time_start, "DUMP_TERRE_TIME", id, perf_print_flag);
+        }
 #ifdef ALTI
-        dump_surface("ALTI", cpt_dump, UNIT_T0);
+        if (data_pipe == -1) {
+          gettimeofday(&time_start, NULL);
+          dump_surface("ALTI", cpt_dump, UNIT_T0);
+          log_time_delta(time_start, "DUMP_SURFACE_TIME", id, perf_print_flag);          
+        }
 #endif
 #ifdef LGCA
         if (use_lgca && csphpp_flag) {
@@ -1644,10 +1669,10 @@ void dump_time()
   }
 
   if (delta_md_iter){
-    sprintf(current_output,"\n%04d: %04lu%09lu %03lu%09lu       %e    %e     ", cpt++, md_iter, iter, delta_md_iter, delta_iter, csp_time, csp_time - csp_time_0);
+    sprintf(current_output,"\n%04d: %04" PRIu64 "%09" PRId64" %03" PRId64 "%09" PRId64 "       %e    %e     ", cpt++, md_iter, iter, delta_md_iter, delta_iter, csp_time, csp_time - csp_time_0);
   }
   else {
-    sprintf(current_output,"\n%04d: %04lu%09lu    %09lu       %e    %e     ", cpt++, md_iter, iter, delta_iter, csp_time, csp_time - csp_time_0);
+    sprintf(current_output,"\n%04d: %04" PRIu64 "%09" PRId64"    %09" PRId64 "       %e    %e     ", cpt++, md_iter, iter, delta_iter, csp_time, csp_time - csp_time_0);
   }
   output_write("TIME", current_output);
 #ifdef LGCA
@@ -1714,7 +1739,7 @@ void output_write(char *output_filename, char *output_content){
 	  ErrPrintf("ERROR: cannot open file: %s \n", path);
 	  exit(-1);
   }
-  fprintf(fp, output_content);
+  fprintf(fp, "%s", output_content);
   fclose(fp);
 }
 
@@ -1727,14 +1752,13 @@ void output_headers(){
   // Current headers are copied from previous output functions
   // TODO output_directory and output_filename will currently break in the face of typos
   
-  FILE *fp;
   void output_write(char *output_filename, char *output_content);
 
   // Check if output directory exists. If not, create it.
   // Uses #include <sys/types.h>, <sys/stat.h>, <unistd.h>
   struct stat st = {0};
   if (stat(output_directory, &st) == -1) mkdir(output_directory, 0777);
-  LogPrintf("\n Trying to write output to directory : %s", output_directory);
+  LogPrintf("\n Trying to write output to directory : %s\n", output_directory);
 
   // Cell states (adds additional output in dump_cell)
   output_write("CELL",     "\n# CELL STATES\n");
