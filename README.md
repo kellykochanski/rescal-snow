@@ -26,7 +26,6 @@ A model of dunes and snow waves
 
 When wind blows over snow, it self-organizes. This forms surface features, such as ripples and dunes, that alter the reflectivity and thermal conductivity of the snow.
 
-
 ![](docs/example_images/field_examples.png)
 
 Studying these features in the field is cold and challenging ([we've tried](https://doi.org/10.5194/tc-2019-45)), so
@@ -66,6 +65,7 @@ If you modify rescal-snow, you will need to modify and compile C code. We have a
    * pandas (used by Python3 for analysis)
    * scipy (used by Python3 for analysis)
 
+
 On a Debian-based/Ubuntu Linux machine, the dependencies can be acquired using: 
 
 ```bash
@@ -77,7 +77,6 @@ On most machines, the Python packages can also be acquired using:
 ```bash
 pip3 install numpy pandas scipy
 ```
-
 
 ### 2.3 Download
 Download rescal-snow by cloning this repository with git:
@@ -200,14 +199,6 @@ If you wish to contribute a new feature, we recommend you fork our repository, c
 guide](https://docs.lavasoftware.org/lava/contribution.html)
 
 Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
-
-The [docs](docs) folder contains additional information on 
-
- - [Alternate installations](docs/how_to_install.md), 
- - [Performance and parallelization issues](docs/performance_and_parallelization.md), 
- - [Model inputs and configuration](docs/rescal-snow-inputs.md),
- - [Model calibration and validation](docs/calibration_and_validation.md),
- - [Development history](docs/NEWS.md)
 
 ## 6. Contributors <a name="authors"></a>
 See [AUTHORS.md](AUTHORS.md).

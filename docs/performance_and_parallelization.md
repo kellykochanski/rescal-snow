@@ -28,9 +28,9 @@ The details are beyond the scope of this document, but our attempts included
  - exporting random number generation to GPUs
  - slicing the domain into separate pieces controlled by separate processors
 
-None of these efforts led to particularly efficient parallel computation.
- 
-We instead emphasise applications, such as parameter space explorations, that leverage many processors to perform many serial runs, rather than applications that require parallelizing rescal-snow.
+None of these efforts led to particularly efficient parallel computation. 
+Thus we emphasise applications, such as parameter space explorations, that leverage many processors to perform many serial runs, 
+rather than applications that require parallelizing rescal-snow.
 
 > *Why is parallelizing rescal-snow hard?*
 > 
