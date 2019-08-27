@@ -1,0 +1,10 @@
+build/
+*.png
+*.csp.gz
+*.log
+scripts/genesis
+scripts/rescal
+scripts/DUN.csp
+__pycache__/
+*.py[cod]
+*$py.class

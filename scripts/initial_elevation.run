@@ -1,0 +1,59 @@
+#Rescal-snow: a cellular automaton model of self-organized snow
+#Copyright (C) 2019 Kelly Kochanski
+
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License, or 
+#(at your option) any later version.
+#This program is distributed in the hope that it will be useful, 
+#but WITHOUT ANY WARRANTY; without even the implied warranty of 
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#!/bin/bash 
+ 
+##########################################
+ ## ReSCAL Initial Elevation Run Script ## 
+##########################################
+## de
+## scrip
+## tion
+ 
+# ----Organizational tasks---- 
+# Remove files from previous runs 
+./clean 
+
+if [ ! -e genesis ]; then
+  ln -s ../build/genesis .
+fi
+if [ ! -e rescal ]; then
+  ln -s ../build/rescal .
+fi
+
+# ----Parameter file----
+PAR_FILE="initial_elevation.par"
+echo PAR_FILE=$PAR_FILE
+
+# -----Physical properties----
+#cp -r ../../scripts/real_data . 
+
+# ----Log Files ----
+GENESIS_LOG_FILE="GENESIS.log"
+RESCAL_LOG_FILE="RESCAL.log"
+
+# ----Run options----
+export OMP_NUM_THREADS=1
+echo OMP_NUM_THREADS=$OMP_NUM_THREADS
+
+# ---- Generate Initial Elevation Array ----
+# (echo "import numpy as np" ; echo "np.savetxt('initial_elevation.tab',  np.random.randint(50 // 2, size=(200, 80)).T, fmt='%d')") | python
+(echo "import numpy as np" ; echo "np.savetxt('initial_elevation.tab',  np.full((200, 80), 50 // 4).T, fmt='%d')") | python
+
+# ----Genesis----
+./genesis -f $PAR_FILE -s 2000 > $GENESIS_LOG_FILE
+
+# ----Rescal----
+./rescal $PAR_FILE -hm -vss -nv -info -h -dpng 20t0 -vel -dcsp 20t0> $RESCAL_LOG_FILE
+ 

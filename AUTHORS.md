@@ -7,15 +7,19 @@ It was developed from version 1.6 of the Real-Space Cellular Automaton Laborator
  - Kelly Kochanski, <kelly.kochanski@gmail.com>, (designed rescal-snow features, added rescal_utilities, cleaned up I/O, wrote docs, misc debugging)
  - Eric Green (simplified configuration/dependencies, simplified and selectively modularized source code, optimized random number generator, misc debugging)
  - Barry Rountree, <rountree4@llnl.gov>, (configured software for parallel/Mac use, misc debugging)
+ - Gian-Carlo Defazio (added heightmap and cellspace utilities, measured effects of stochastic behavior in rescal-snow)
  - Carlos Downie (added fft utility and tests)
- - Adam Rubin (added snowfall feature)
+ - Richard Barnes (simplified build using cmake, misc review and debugging)
+ - Adam Rubin* (added snowfall feature)
  - Aaron Robeson (added xcorr utility)
  - Divya Mohan (misc debugging)
+ - Jenna Horrall (misc debugging)
 
 ## IPGP contributors (2004-2016)
-The original software, ReSCAL, was written (2004-2014) in the Laboratoire de Dynamique des Fluides Geologiques, Institut de Physique du Globe de Paris.
-Rescal-snow would not exist without this development, in code or in concept.
-However, these authors are not responsible for changes in rescal-snow after 2016; see docs/NEWS.md for details. For their continued and parallel work with ReSCAL, see http://www.ipgp.fr/~rozier/rescal/rescal.html .
+Rescal-snow would not have been possible without the development of ReSCAL, which was written 2004-2014 at the Laboratoire de Dynamique des Fluides Geologiques, Institute de Physique du Globe de Paris.
+
+We thank the authors of ReSCAL (listed below) for providing ReSCAL freely under the terms of the GNU General Public License. We do not, however, hold them in any way responsible for changes to the code after 2016. See [docs/NEWS.md](docs/NEWS.md) for details.
+For their ongoing work with ReSCAL, see [http://www.ipgp.fr/~rozier/rescal/rescal.html](http://www.ipgp.fr/~rozier/rescal/rescal.html)
 
 **ReSCAL development and maintenance at IPGP**
 
