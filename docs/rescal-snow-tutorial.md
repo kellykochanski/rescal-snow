@@ -28,6 +28,8 @@ This tutorial walks through a series of examples that demonstrate how to use Res
 
 Before starting this tutorial, download and install Rescal-snow according to the instructions in `README.md`.
 
+We build complexity gradually through the tutorial, and recommend you work through it linearly.
+
 ### Prerequisites
 
 We assume you have some familiarity with bash and terminal commands.
