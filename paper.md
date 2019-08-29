@@ -84,10 +84,6 @@ As a second example, we aim to make it easier for geoscientists to run robust nu
 We have therefore set up structures for configuring, running, and analyzing parallel simulation instances.
 We hope that the above practices will enable users to run high-quality numerical experiments with Rescal-snow.
 
-# Availability
-
-This software, distributed under the GNU General Public License v3.0, is available at [https://github.com/LLNL/Rescal-snow](https://github.com/LLNL/Rescal-snow) along with its installation guide and [tutorials](docs/rescal-snow-tutorials.md).
-
 # Acknowledgements
 
 This work was performed under the auspices of the U.S. Department of Energy by Lawrence Livermore National Laboratory under Contract DE-AC52-07NA27344. This paper is released under LLNL-JRNL-786878-DRAFT.
