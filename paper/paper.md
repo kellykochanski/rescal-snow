@@ -16,6 +16,7 @@ authors:
     affiliation: 2
   - name: Richard Barnes
     affiliation: "4"
+    orcid: 0000-0002-0204-6040
   - name: Carlos Downie
     affiliation: 2
   - name: Adam Rubin
