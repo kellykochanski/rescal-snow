@@ -46,7 +46,7 @@ These features, which include snow dunes, waves, snow-steps and sastrugi (figure
 They change the reflectivity and average thermal conductivity of snow, and may change the patterns of snow accumulation and transport.
 Despite these effects, however, they are poorly understood and their effects are not yet included in major snow or climate models.
 
-![Figure 1](../docs/example_images/field_examples.png)
+![](../docs/example_images/field_examples.png)
 
 ## Requirements of a snow bedform model
 Several recent field studies have identified new computational components needed for a good understanding of snow bedforms.
@@ -66,13 +66,13 @@ Thus, computational studies of snow bedforms will require a model that incorpora
 
 ## Features of Rescal-snow
 Rescal-snow is designed to enable the quantitative study of snow bedforms.
-The backbone of the simulation is a cellular automaton, an algorithm known for its ability to model self-organization, in which cells evolve by changing from one discrete state to another in nearest-neighbor pairs (figure below).
-Rescal-snow simulates 10-100 m domains at 0.05-0.20 m resolution, allowing it to capture all but the smallest snow bedforms.
+It simulates 10-100 m domains at 0.05-0.20 m resolution, allowing it to capture all but the smallest snow bedforms.
 The simulation is adapted from a cellular automaton sand dune model, ReSCAL [@Narteau2014], and inherits ReSCAL's granular transport capacities.
 We have added features to simulate processes unique to snow, including snowfall and time-dependent cohesion.
 Fluid processes are modelled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
+Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modelling self-organization.
 
-![Figure 2](../docs/example_images/rescal-snow_transitions.png =330x)
+![](../docs/example_images/rescal-snow_transitions.png)
 
 This simulation will allow snow scientists to translate field studies, which are location-specific, into general terms.
 It will also make it easier to investigate the effects of snow bedforms on (1) surface roughness, (2) snow cover fractions, and (3) accumulation rates. This will allow us to describe the effects of meter-scale bedforms in terms of variables that affect regional climates.
