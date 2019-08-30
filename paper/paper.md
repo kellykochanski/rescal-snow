@@ -72,6 +72,8 @@ We have added features to simulate processes unique to snow, including snowfall 
 Fluid processes are modelled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
 Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modelling self-organization.
 
+![](../docs/example_images/rescal-snow_transitions.png)
+
 This simulation will allow snow scientists to translate field studies, which are location-specific, into general terms.
 It will also make it easier to investigate the effects of snow bedforms on (1) surface roughness, (2) snow cover fractions, and (3) accumulation rates. This will allow us to describe the effects of meter-scale bedforms in terms of variables that affect regional climates.
 
