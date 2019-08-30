@@ -53,9 +53,9 @@ Existing models of wind-blown snow, however, are designed to model snow redistri
 (with grid sizes of 0.1-10 km)
 and are unable to resolve the processes that lead to the formation of snow bedforms.
 Second, snow bedforms are the result of a balance between sand-like granular motion and cohesive resistance [@Kochanski2019; @Filhol2015].
-Existing sand dune models (e.g. @Narteau2014, @Lammel2012 ) successfully model a wide range of granular processes, including sand avalanches and wind-driven saltation, suspension, and creep.
+Existing sand dune models (e.g. @Narteau2014, @Lammel2012) successfully model a wide range of granular processes, including sand avalanches and wind-driven saltation, suspension, and creep.
 These models, however, have not had reason to include the kinds of time-dependent cohesion that occur in snow.
-Similarly, the simulations that have advanced our understanding of cohesion and sintering in snow (e.g. @Colbeck1983 ) have focused on immobile snow, without considering the effects of interrupting metamorphosis with motion.
+Similarly, the simulations that have advanced our understanding of cohesion and sintering in snow (e.g. @Colbeck1983) have focused on immobile snow, without considering the effects of interrupting metamorphosis with motion.
 Third, snow bedforms tend to move during and immediately after snowfall events [@Kochanski2018], which are also not included in existing dune models.
 These features collectively indicate a need for a new computational model that maps snow processes, such as cohesion and snowfall, into a granular physics framework.
 
