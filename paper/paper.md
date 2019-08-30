@@ -41,27 +41,27 @@ bibliography: docs/paper.bib
 
 # Summary
 
-One of the most intriguing effects of wind on snow is the creation of mysterious and captivating shapes known as snow bedforms. These features ornament Antarctica, Arctic sea ice, tundra, and many mountain tops [@filhol:2015; @kochanski:2018; @kobayashi:1980].
+One of the most intriguing effects of wind on snow is the creation of mysterious and captivating shapes known as snow bedforms. These features ornament Antarctica, Arctic sea ice, tundra, and many mountain tops [@Filhol2015; @Kochanski2018; @Kobayashi1980].
 They change the reflectivity and average thermal conductivity of snow, and may well change the patterns of snow accumulation and transport.
 They also present a range of interesting self-organized shapes that might interest geomorphologists and Earth surface process scientists.
 Despite these effects, however, they are poorly understood and not yet included in major snow models.
 
 Several recent field studies have identified new computational components needed for a good understanding of snow bedforms.
 First, most snow bedforms (e.g ripples, barchan dunes, snow-steps and sastrugi) are between 0.1 and 2 m in length, with select bedforms (e.g. snow-waves, some whaleback dunes) extending from 5 to 30 m.
-These length scales are based on physical phenomena such as the hop length of blowing snow grains [@kobayashi:1980] and the length scales of turbulent structures in the wind [@kobayashi:1980, @kochanski:2019].
-Existing models of wind-blown snow, however, are designed to model snow redistribution over mountainous [@liston:2007; @lehning:2002; @marsh:2018] or continental [@gallee:2013] scales
+These length scales are based on physical phenomena such as the hop length of blowing snow grains [@Kobayashi1980] and the length scales of turbulent structures in the wind [@Kobayashi1980, @Kochanski2019].
+Existing models of wind-blown snow, however, are designed to model snow redistribution over mountainous [@Liston2007; @Lehning2002; @Marsh2018] or continental [@Gallee2012] scales
 (with grid sizes of 0.1-10 km)
 and are unable to resolve the processes that lead to the formation of snow bedforms.
-Second, snow bedforms are the result of a balance between sand-like granular motion and cohesive resistance [@kochanski:2019; @filhol:2015].
-Existing sand dune models (e.g. @narteau:2014, @lammel:2012 ) successfully model a wide range of granular processes, including sand avalanches and wind-driven saltation, suspension, and creep.
+Second, snow bedforms are the result of a balance between sand-like granular motion and cohesive resistance [@Kochanski2019; @Filhol2015].
+Existing sand dune models (e.g. @Narteau2014, @Lammel2012 ) successfully model a wide range of granular processes, including sand avalanches and wind-driven saltation, suspension, and creep.
 These models, however, have not had reason to include the kinds of time-dependent cohesion that occur in snow.
-Similarly, the simulations that have advanced our understanding of cohesion and sintering in snow (e.g. @herwignen:2013 , @colbeck:1983 ) have focused on immobile snow, without considering the effects of interrupting metamorphosis with motion.
-Third, snow bedforms tend to move during and immediately after snowfall events [@kochanski:2018], which are also not included in existing dune models.
+Similarly, the simulations that have advanced our understanding of cohesion and sintering in snow (e.g. @Colbeck1983 ) have focused on immobile snow, without considering the effects of interrupting metamorphosis with motion.
+Third, snow bedforms tend to move during and immediately after snowfall events [@Kochanski2018], which are also not included in existing dune models.
 These features collectively indicate a need for a new computational model that maps snow processes, such as cohesion and snowfall, into a granular physics framework.
 
 Rescal-snow is designed to enable the quantitative study of snow bedforms.
 It simulates 10-100 m domains at 0.05-0.20 m resolution, allowing it to capture all but the smallest snow bedforms.
-The simulation is adapted from a sand dune model, ReSCAL [@narteau:2014], and inherits ReSCAL's granular transport capacities.
+The simulation is adapted from a cellular automaton sand dune model, ReSCAL [@Narteau2014], and inherits ReSCAL's granular transport capacities.
 We have added features to simulate processes unique to snow, including snowfall and time-dependent cohesion.
 Fluid processes are modelled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
 Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modelling self-organization.
@@ -74,9 +74,9 @@ The present limitations of Rescal-snow mostly concern length scales, time scales
 The output of Rescal-snow is disretized in length, which limits its ability to resolve tiny (<0.05 m) features, and by cell type, which limits its ability to represent the full spectrum of gradual changes in the nature of snow, such as those that occur
 during sintering.
 The natural length and time scales of Rescal-snow are set by the configuration of the cellular automata.
-Although these can be related to real length and time scales, it requires careful calibration: this is described fully in @narteau:2009.
+Although these can be related to real length and time scales, it requires careful calibration: this is described fully in @Narteau2009.
 Moreover, we have not yet been able to model particularly sharp-edged snow features, such as snow-steps or sastrugi.
-We attribute this to Rescal-snow's relatively simple fluid dynamics algorithm and inability to resolve the flow detachments [@kochanski:2019] that likely form at the corners of snow-steps and sastrugi.
+We attribute this to Rescal-snow's relatively simple fluid dynamics algorithm and inability to resolve the flow detachments [@Kochanski2019] that likely form at the corners of snow-steps and sastrugi.
 
 We aim to demonstrate good practices that will encourage robust, reproducible science by releasing Rescal-snow through Journal of Open Source Science.
 For example, we expect that our work will be many users' first introduction to some subset of bash, C, Python or high-performance computing, and we endeavored to make this a positive learning experience. 
