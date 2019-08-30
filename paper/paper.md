@@ -36,7 +36,7 @@ affiliations:
  - name: Department of Civil Engineering, University of Colorado at Boulder, Boulder, CO, USA
    index: 5
 date: 21 July 2019
-bibliography: paper/paper.bib
+bibliography: paper.bib
 ---
 
 # Summary
@@ -94,3 +94,5 @@ Robert Anderson and Gregory Tucker (CU) for advice on the scientific direction o
 and Tapasya Patki, Divya Mohan, Jeff Booher-Kaeding and Aaron Robeson (LLNL) for minor contributions to Rescal-snow.
 
 The project was supported by a Department of Energy Computational Science Graduate Fellowship (DE-FG02-97ER25308), by support from the Data Science Summer Institute at Lawrence Livermore National Laboratory, and by a UROP award from the University of Colorado.
+
+# References
