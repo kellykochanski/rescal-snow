@@ -36,7 +36,7 @@ affiliations:
  - name: Department of Civil Engineering, University of Colorado at Boulder, Boulder, CO, USA
    index: 5
 date: 21 July 2019
-bibliography: docs/paper.bib
+bibliography: paper/paper.bib
 ---
 
 # Summary
