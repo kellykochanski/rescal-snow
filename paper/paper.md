@@ -42,10 +42,11 @@ bibliography: paper.bib
 # Summary
 
 When wind blows over dry snow, it creates captivating shapes known as snow bedforms. 
-These features ornament Antarctica, Arctic sea ice, tundra, and many mountain tops [@Filhol2015; @Kochanski2018; @Kobayashi1980].
-They change the reflectivity and average thermal conductivity of snow, and may well change the patterns of snow accumulation and transport.
-They also present a range of interesting self-organized shapes that might interest geomorphologists and Earth surface process scientists.
-Despite these effects, however, they are poorly understood and not yet included in major snow models.
+These features, which include snow dunes, waves, snow-steps and sastrugi (figure below), ornament Antarctica, Arctic sea ice, tundra, and mountain ridges [@Filhol2015; @Kochanski2018; @Kobayashi1980].
+They change the reflectivity and average thermal conductivity of snow, and may change the patterns of snow accumulation and transport.
+Despite these effects, however, they are poorly understood and their effects are not yet included in major snow or climate models.
+
+![](../docs/example_images/field_examples.png)
 
 ## Requirements of a snow bedform model
 Several recent field studies have identified new computational components needed for a good understanding of snow bedforms.
@@ -58,7 +59,7 @@ and are unable to resolve the processes that lead to the formation of snow bedfo
 Second, snow bedforms are the result of a balance between sand-like granular motion and cohesive resistance [@Kochanski2019; @Filhol2015].
 Existing sand dune models (e.g. @Narteau2014, @Lammel2012) successfully model a wide range of granular processes, including sand avalanches and wind-driven saltation, suspension, and creep.
 These models, however, have not had reason to include the kinds of time-dependent cohesion that occur in snow.
-Similarly, the simulations that have advanced our understanding of cohesion and sintering in snow (e.g. @Colbeck1983, @Lehning2002a) have focused on immobile snow, without considering the effects of interrupting metamorphosis with motion.
+Similarly, the simulations that have advanced our understanding of cohesion and sintering in snow (e.g. @Colbeck1983, @Lehning2002a) have focused on immobile snow.
 
 Third, snow bedforms tend to move during and immediately after snowfall events [@Kochanski2018], which are also not included in existing dune models.
 Thus, computational studies of snow bedforms will require a model that incorporates snow processes, such as cohesion and snowfall, into a granular physics framework at a relatively high (<0.1 m) resolution.
@@ -70,6 +71,9 @@ The simulation is adapted from a cellular automaton sand dune model, ReSCAL [@Na
 We have added features to simulate processes unique to snow, including snowfall and time-dependent cohesion.
 Fluid processes are modelled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
 Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modelling self-organization.
+
+This simulation will allow snow scientists to translate field studies, which are location-specific, into general terms.
+It will also make it easier to investigate the effects of snow bedforms on (1) surface roughness, (2) snow cover fractions, and (3) accumulation rates. This will allow us to describe the effects of meter-scale bedforms in terms of variables that affect regional climates.
 
 ### Example simulations
 We have been able to use Rescal-snow to simulate the formation and movement of snow dunes and snow-waves under a range of wind, snowfall, and sintering conditions.
@@ -90,7 +94,7 @@ We expect that our work will be many users' first introduction to some subset of
 Therefore, we designed our examples around scientific applications of all of these skills, and we punctuate them with references to relevant tutorials on git, bash, etc.
 
 We also believe that good computational science is easier when users are able to make large numbers of model runs. 
-This scalability allows users order to test the stability of the model, explore a wide range of physical parameters, and gain an accurate understanding of the model uncertainty.
+This allows users order to test the stability of the model, explore a wide range of physical parameters, and gain an accurate understanding of the model uncertainty.
 We have set up structures for configuring, running, and analyzing parallel simulation instances to enable users to run high-quality numerical experiments with Rescal-snow.
 
 # Acknowledgements
