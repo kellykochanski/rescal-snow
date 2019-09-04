@@ -1,8 +1,7 @@
 # Rescal-snow <a name="introduction"></a>
 A model of dunes and snow waves
 
-HTML: <a href="https://joss.theoj.org/papers/822d9380fa5ce6f89cbbdebf1605df14"><img src="https://joss.theoj.org/papers/822d9380fa5ce6f89cbbdebf1605df14/status.svg"></a>
-Markdown: [![status](https://joss.theoj.org/papers/822d9380fa5ce6f89cbbdebf1605df14/status.svg)](https://joss.theoj.org/papers/822d9380fa5ce6f89cbbdebf1605df14)
+[![status](https://joss.theoj.org/papers/822d9380fa5ce6f89cbbdebf1605df14/status.svg)](https://joss.theoj.org/papers/822d9380fa5ce6f89cbbdebf1605df14)
 
 ![](docs/example_images/snowfall_example.gif)
 
