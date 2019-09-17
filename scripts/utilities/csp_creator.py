@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from numpy import *
+import numpy as np
 
 ## DUN model
 MOD_NAME="DUN"
@@ -17,7 +17,7 @@ def create_simple_space(H,L,D):
   """creates a simple cellular space without sand"""
 
   ## create cellular space
-  cs=zeros((D,H,L),int8)
+  cs=np.zeros((D,H,L),np.int8)
 
   ## air volume
   cs[:,:,:]=EAUC
