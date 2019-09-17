@@ -2,7 +2,7 @@
 # Utilities to set up run scripts quickly and easily; these tools are designed to aid parameter space
 # explorations, sensitivity analyses, and large batches of runs.
 # Parameters : Class to hold, update, change, or write all the parameters that ReSCAL needs to run
-# Run_Script : Class to hold, update, change, or write a ReSCAL run script with appropriate flags
+# RunScript : Class to hold, update, change, or write a ReSCAL run script with appropriate flags
 # This includes almost all options and inputs, except those in the "real_data" file.
 
 import os
@@ -11,35 +11,38 @@ import itertools
 import subprocess
 import glob
 
-class Design_a_run():
-    # Design a ReSCAL run
-    # This interfaces with both the Parameters and Run_Script utilities
-    # in order to produce run script and parameter files simultaneously
-    # using a standardized input format
+class DesignRun():
+    """
+    Design a ReSCAL run
+    This interfaces with both the Parameters and RunScript utilities
+    in order to produce run script and parameter files simultaneously
+    using a standardized input format
+    """
 
     def __init__(self):
         self.name       = 'run'
         self.directory  = '.'
         self.parameters = Parameters()
-        self.run_script = Run_Script()
+        self.run_script = RunScript()
         self.parameters.set_header("Test from write_tests.py")
 
     def set_parameters(self, param_dict):
-        # Sets all parameters, given as {name : value} pairs
-        # Allows user to mix things that go in parameter file
-        # with things that go in the run script, etc
-        # TODO make it possible to do compiler flags too?
+        """
+        Sets all parameters, given as {name : value} pairs
+        Allows user to mix things that go in parameter file
+        with things that go in the run script, etc
+        """
 
         for name in param_dict.keys():
-            if self.__is_a_parameter(name):
+            if self._is_a_parameter(name):
                 self.parameters.set({name : param_dict[name]})
-            elif self.__is_a_run_script_option(name):
+            elif self._is_a_run_script_option(name):
                 self.run_script.set({name : param_dict[name]})
             else:
                 print("Warning : skipped nonexistent parameter " + name)
 
     def list_all(self):
-        # Lists all available options/parameters
+        """Lists all available options/parameters"""
         return self.run_script.list_all(), self.parameters.list_all()
 
     def get(self, param):
@@ -60,11 +63,11 @@ class Design_a_run():
     def set_directory(self, directory):
         self.directory = directory
 
-    def __is_a_parameter(self, name):
+    def _is_a_parameter(self, name):
         # Checks whether the parameters dictionary contains 'name'
         return ((name == 'Environment') or (name in self.parameters.list_all()))
 
-    def __is_a_run_script_option(self, name):
+    def _is_a_run_script_option(self, name):
         # Checks whether 'name' is an option in the run script
         return (name in self.run_script.list_all())
 
@@ -77,38 +80,44 @@ class Design_a_run():
 ##--------------------------------------------------------------------------------------
 
 class Parameters():
-        # Holds all the parameters that ReSCAL needs to run
+    """Holds all the parameters that ReSCAL needs to run"""
     def __init__(self):
         self.parameters                 = {}
         self.parameter_descriptions     = {}
-        self.__special_parameter_descriptions = {}
-        self.__set_special =                    {}
-        self.__default_header()
-        self.__default_parameters()
+        self._special_parameter_descriptions = {}
+        self._set_special =                    {}
+        self._default_header()
+        self._default_parameters()
 
     def new_parameter(self, name, description, default_value):
-        # New parameter
-        # Name should be a string (the parameter name expected by ReSCAL)
-        # Description should be a string describing its use or purpose etc
-        # Default value is the default value, generally a string or float
+        """
+        New parameter
+        Name should be a string (the parameter name expected by ReSCAL)
+        Description should be a string describing its use or purpose etc
+        Default value is the default value, generally a string or float
+        """
         self.parameters[name]             = default_value
         self.parameter_descriptions[name] = description
 
-    def __special_parameter(self, name, description, setting_function):
-        # Special parameters are not stored.
-        # When set, they modify one or more other parameters in a way described by the setting_function()
-        self.__special_parameter_descriptions[name]     = description
-        self.__set_special[name]                        = setting_function
+    def _special_parameter(self, name, description, setting_function):
+        """
+        Special parameters are not stored.
+        When set, they modify one or more other parameters in a way described by the setting_function()
+        """
+        self._special_parameter_descriptions[name]     = description
+        self._set_special[name]                        = setting_function
 
-    def __default_header(self):
-        # Provides a basic description of this parameter set in form of a string
+    def _default_header(self):
+        """Provides a basic description of this parameter set in form of a string"""
         self.header_start = "Parameter file for ReSCAL written from Parameters utility"
         self.header_body  = "Default parameters : sahara sand"
 
-    def __default_parameters(self):
-        # Default values for parameters
-        # Initialized here for sahara sand
-        # Basic model parameters and geometry of model run:
+    def _default_parameters(self):
+        """
+        Default values for parameters
+        Initialized here for sahara sand
+        Basic model parameters and geometry of model run:
+        """
         self.new_parameter('Model', 'Defines a set of transitions for grains in the cellular automaton e.g. DUN or SNO', 'SNO')
         self.new_parameter('Output_directory', 'Directory where output files go', './out')
 
@@ -154,13 +163,15 @@ class Parameters():
 
         # Special parameters - set by same interface as others,
         # But are actually tools which modify one or more other parameters
-        self.__special_parameter('Environment', 'Sets all defaults for an environment, e.g. sand or snow', self.__environment)
-        self.__special_parameter('Csp_params',  'Sets parameters for a Csp_template', self.__update_template)
+        self._special_parameter('Environment', 'Sets all defaults for an environment, e.g. sand or snow', self._environment)
+        self._special_parameter('Csp_params',  'Sets parameters for a Csp_template', self._update_template)
 
-    def __environment(self, keyword):
-        # Function to set special 'Environment' parameter
-        #Update defaults fora  different enviroment, e.g. snow
-        # (Could be added for subaqueous dunes, mars environment, etc)
+    def _environment(self, keyword):
+        """
+        Function to set special 'Environment' parameter
+        Update defaults fora  different enviroment, e.g. snow
+        (More environments could be added for subaqueous dunes, mars environment, etc)
+        """
         if keyword == "snow":
             self.header_body = "Default values - Niwot Ridge snow"
             self.set({'Model'               : 'SNO',
@@ -168,10 +179,12 @@ class Parameters():
                     'Ava_angle'             : 38,
                     'Lambda_S'              : 0.001})
 
-    def __update_template(self, template_parameters):
-        # Function to set special 'Csp_params' parameter
-        #  __update_template([20]) called on 'Csp_template = LAYER(10)' would change LAYER(10) to LAYER(20)
-        #  __update_template([5,7]) called on 'Csp_template = FORSTEP(1,2)' would set Csp_template = FORSTEP(5,7)
+    def _update_template(self, template_parameters):
+        """
+        Function to set special 'Csp_params' parameter
+         _update_template([20]) called on 'Csp_template = LAYER(10)' would change LAYER(10) to LAYER(20)
+         _update_template([5,7]) called on 'Csp_template = FORSTEP(1,2)' would set Csp_template = FORSTEP(5,7)
+         """
         initial_template = self.get('Csp_template')
         base             = initial_template.split('(',1)[0]
         new_template     = base + "("
@@ -184,13 +197,15 @@ class Parameters():
         self.set({'Csp_template' : new_template})
 
     def set(self, name_value_dict):
-        # Change the value of one or more parameters
-        # input as a dictionary {"Parameter name" : value}
+        """
+        Change the value of one or more parameters
+        input as a dictionary {"Parameter name" : value}
+        """
 
         for name in name_value_dict.keys():
             # Paramters that can be overwritten by other parameters must go first
-            if name in self.__special_parameter_descriptions.keys():
-                setting_function = self.__set_special[name]
+            if name in self._special_parameter_descriptions.keys():
+                setting_function = self._set_special[name]
                 setting_function(name_value_dict[name])
             # Non-special parameters are independent. Order doesn't matter.
             elif name in self.parameters.keys():
@@ -202,12 +217,10 @@ class Parameters():
 
     # TODO, deal with all parameters and verify none are real_data/*
     def set_real_data_path(self, real_data_directory):
-        # sets path for 'Phys_prop_file' and 'Q_sat_file'
+        """sets path for 'Phys_prop_file' and 'Q_sat_file"""
         keys = ['Phys_prop_file','Qsat_file']
         for key in keys:
             self.parameters[key] = os.path.join(real_data_directory, os.path.basename(self.parameters[key])) 
-
-        
                 
     def get(self, name):
         return self.parameters[name]
@@ -219,13 +232,15 @@ class Parameters():
         return self.parameter_descriptions[name]
 
     def set_header(self, new_header):
-        # Give parameter file a useful descriptive header
-        # Write function will append one comment (##) symbol; additional lines
-        # must be commented appropriately.
+        """
+        Give parameter file a useful descriptive header
+        Write function will append one comment (##) symbol; additional lines
+        must be commented appropriately.
+        """
         self.header_body = new_header
 
     def read(self, filename):
-        #Read a parameter file into all parameters
+        """Read a parameter file into all parameters"""
         with open(filename, "r") as f:
             prev_line = ""
             for i, line in enumerate(f):
@@ -261,7 +276,7 @@ class Parameters():
 
 
     def write(self, filename):
-        # Write all parameters to a parameter file
+        """Write all parameters to a parameter file"""
         with open(filename, "w") as f:
             f.write("## " + self.header_start + "\n")
             f.write("## " + self.header_body  + "\n \n")
@@ -274,22 +289,26 @@ class Parameters():
 ##----------------------------------------------------------------------------------------------------------
 ##----------------------------------------------------------------------------------------------------------
 
-class Run_Script():
-    # Creates a ReSCAL run script
-    # Yes, it's a python script that writes a bash script, and yes, that's a bit silly
+class RunScript():
+    """
+    Creates a ReSCAL run script
+    Yes, it's a python script that writes a bash script.
+    """
     def __init__(self):
         self.options = {}
-        self.__flag_options = {}
-        self.__default_options()
-        self.__default_header()
+        self._flag_options = {}
+        self._default_options()
+        self._default_header()
 
-    def __default_header(self):
-        self.header_start = "Script written with Run_Script utility (KK)"
+    def _default_header(self):
+        self.header_start = "Script written with RunScript utility (KK)"
         self.header_body  = "Default options"
 
-    def __default_options(self):
-        # set default options
-        # ReSCAL lists a lot of command-line options in entry.c, show_general_options()
+    def _default_options(self):
+        """
+        set default options
+        ReSCAL lists a lot of command-line options in entry.c, show_general_options()
+        """
         self.options['clean']           = True
         self.options['backup']          = False
         self.options['parfile']         = "sno_cone.par"
@@ -298,22 +317,22 @@ class Run_Script():
         self.options['rescallocation']  = "../src"
 
         # automatically handle command line options here
-        self.__set_flag_option('usage info',             'h',    True)
-        self.__set_flag_option('show params',            'hm',   True)
-        self.__set_flag_option('no video',               'nv',   True)
-        self.__set_flag_option('info interval',          'info', True)
-        self.__set_flag_option('output interval',        'dcsp', '10t0')
-        self.__set_flag_option('png interval',           'dpng', '10t0')
-        self.__set_flag_option('stop after',             'stop', False)
-        self.__set_flag_option('frame rate',             'fr',   False)
-        self.__set_flag_option('random seed',            's',    False)
-        self.__set_flag_option('vel',                    'vel',  True)
-        self.__set_flag_option('vss',                    'vss',  True)
-        self.__set_flag_option('quit',                   'q',   False)
-        self.__set_flag_option('alti only',              'altionly', False)
-        self.__set_flag_option('cellspace borders',      'csp_borders', False)
-        self.__set_flag_option('uncompressed cellspace', 'uncompressed_csp', False)
-        self.__set_flag_option('print performance',      'perf_print',  False)
+        self._set_flag_option('usage info',             'h',    True)
+        self._set_flag_option('show params',            'hm',   True)
+        self._set_flag_option('no video',               'nv',   True)
+        self._set_flag_option('info interval',          'info', True)
+        self._set_flag_option('output interval',        'dcsp', '10t0')
+        self._set_flag_option('png interval',           'dpng', '10t0')
+        self._set_flag_option('stop after',             'stop', False)
+        self._set_flag_option('frame rate',             'fr',   False)
+        self._set_flag_option('random seed',            's',    False)
+        self._set_flag_option('vel',                    'vel',  True)
+        self._set_flag_option('vss',                    'vss',  True)
+        self._set_flag_option('quit',                   'q',   False)
+        self._set_flag_option('alti only',              'altionly', False)
+        self._set_flag_option('cellspace borders',      'csp_borders', False)
+        self._set_flag_option('uncompressed cellspace', 'uncompressed_csp', False)
+        self._set_flag_option('print performance',      'perf_print',  False)
         
 
         self.options['nice']            = False
@@ -324,10 +343,12 @@ class Run_Script():
         # genesis make one, will still use 'Dun.csp' as the link
         self.options['premade_csp'] = False
 
-    def __set_flag_option(self, descriptive_name, flag, value):
-        # Some options are command line flags. Some are not.
-        # Try to hide this bit of extra complexity from the user.
-        self.__flag_options[descriptive_name]   = flag
+    def _set_flag_option(self, descriptive_name, flag, value):
+        """
+        Some options are command line flags. Some are not.
+        Try to hide this bit of extra complexity from the user.
+        """
+        self._flag_options[descriptive_name]   = flag
         self.options[descriptive_name]          = value
 
     def list_all(self):
@@ -340,50 +361,53 @@ class Run_Script():
         self.header_body = header
 
     def set(self, option_dict):
-        # Takes a dictionary of {"option name" : value} pairs
+        """Takes a dictionary of {"option name" : value} pairs"""
         for option in option_dict.keys():
             if option in self.options.keys():
                 self.options[option] = option_dict[option]
             else:
                 print("Skipping nonexistent option " + option)
 
-    def __write_run_rescal(self, f):
-        # Sub-function of write() that writes the call to rescal
-        # with appropriate flags
+    def _write_run_rescal(self, f):
+        """
+        Sub-function of write() that writes the call to rescal
+        with appropriate flags
+        """
 
         f.write('# ----Rescal----\n')
         if self.options['nice']:
             f.write('nice ')
         f.write("./rescal $PAR_FILE")
-        for option in self.__flag_options.keys():
+        for option in self._flag_options.keys():
             if (self.options[option] == True):
                 # -flag
-                f.write(" -" + self.__flag_options[option])
+                f.write(" -" + self._flag_options[option])
             elif self.options[option]: # == any value except False or True
                 # -flag VALUE
-                f.write(" -" + str(self.__flag_options[option]) + " " + str(self.options[option]))
+                f.write(" -" + str(self._flag_options[option]) + " " + str(self.options[option]))
         f.write("\n \n")
 
 
 
     def rescal_call_args(self):
-        # give a list of all the args for the actual call to rescal
+        """Give a list of all the args for the actual call to rescal"""
         args = []
         if self.options['nice']:
             nice_list.append('nice')
-        for option in self.__flag_options.keys():
+        for option in self._flag_options.keys():
             if (self.options[option] == True):
                 # -flag
-                args.append("-" + self.__flag_options[option])
+                args.append("-" + self._flag_options[option])
             elif self.options[option]: # == any value except False or True
                 # -flag VALUE
-                args.append("-" + str(self.__flag_options[option]))
+                args.append("-" + str(self._flag_options[option]))
                 args.append(str(self.options[option]))
         return args
         
         
 
     def write(self, filename):
+        """Write a rescal run script from a RunScript object"""
         with open(filename, "w") as f:
             f.write("#!/bin/bash \n \n")
             f.write("################## \n ## ReSCAL run script ## \n################")
@@ -430,16 +454,10 @@ class Run_Script():
 
 
             # Run rescal
-            self.__write_run_rescal(f)
+            self._write_run_rescal(f)
 
         # make file executable
         os.chmod(filename, 0o764)
-            # Automatic analysis
-
-
-
-
-
 
 
 ##--------------------------------------------------------------------------------------
@@ -452,12 +470,14 @@ class Run_Script():
 # not just lists
 # TODO allow passing of arguments in dicts, but with no guaranteed ordering
 def all_parameter_combos(named_parameter_lists):
-    '''Takes a parameter list of lists of lists such as:
+    """
+    Takes a parameter list of lists of lists such as:
        [['Coef_A', [0.1, 0.2, 0.3]], ['random seed', [1,2,3]]])
        so that each sublist has the variable name and set of parameters to vary over.
        Creates a generator that returns a dictionary with each possible parameter
        combination and a string that can be used to identify the varying parameters.
-       If variable names have spaces they are replaced with underscores.'''
+       If variable names have spaces they are replaced with underscores.
+    """
 
     # separate parameter names from values lists, cast all values to strings
     names = [x[0] for x in named_parameter_lists]
@@ -481,13 +501,14 @@ def all_parameter_combos(named_parameter_lists):
 
 #### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
 def make_run_directories(fixed_params, variable_params, experiment_name, run_header, run_name):
-    '''Create a set of directories that contain all needed files for separate rescal runs.
+    """
+    Create a set of directories that contain all needed files for separate rescal runs.
        The directories exist in a top level directory of experiment_name.
        Each directory is names based on its varying parameters.
        The paths to the run scripts are returned for easy execution on the
-       power-lab machines.'''
+       power-lab machines.
+    """
 
-    #breakpoint()
     # make the top level directory, but don't overwrite a directory that
     # already exists
     experiment_directory_name = experiment_name
@@ -505,7 +526,7 @@ def make_run_directories(fixed_params, variable_params, experiment_name, run_hea
     for current_variable_params in all_parameter_combos(variable_params):
         params_to_add, directory_suffix = current_variable_params
         parameters = {**fixed_params, **params_to_add}
-        this_run = Design_a_run()
+        this_run = DesignRun()
         #this_run.set_header(run_header)
         this_run.set_name(run_name)
         # create a directory for each run inside the experiment directory
@@ -525,10 +546,12 @@ def make_run_directories(fixed_params, variable_params, experiment_name, run_hea
 
 #### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
 def run_rescals(run_scripts):
-    '''Takes a list of paths to .run scripts that should already be in directories set up
+    """
+    Takes a list of paths to .run scripts that should already be in directories set up
     to run ReSCAL. An instance of ReSCAL is started using each run script and then
     the ReSCAL all run at the same time and asynchronously. This function waits for all the
-    child processes to complete.'''
+    child processes to complete.
+    """
 
     # if any spaces in path names, turns ' ' into '\ ' so the shell can understand them
     modded_scripts = []
@@ -544,10 +567,11 @@ def run_rescals(run_scripts):
         p.wait()
 
 
-            
-# given a .par file, returns a dictionary of parameters
-# TODO, could be more flexible, but works for the auto-generated ones
 def par_to_dict(filename):
+    """
+    given a .par file, returns a dictionary of parameters
+    TODO, could be more flexible, but works for the auto-generated ones
+    """
     with open(filename, 'r') as f:
         data = f.read()
     
@@ -555,8 +579,8 @@ def par_to_dict(filename):
         value_assignment = re.compile(r'([^#\n]*)[ ]*=[ ]*([^#\n]+)')
         return dict(re.findall(value_assignment, data))
         
-# given a rescal .run file, gets the command-line arguments for rescal
 def cmd_line_args(filename):
+    """given a rescal .run file, get the command-line arguments for rescal"""
     with open(filename, 'r') as f:
         data = f.read()
         # get the rescal line
@@ -567,16 +591,18 @@ def cmd_line_args(filename):
         flag_value_pairs = flag_arg.findall(rescal_line.group(0))
         return dict(flag_value_pairs)
 
-
-# given a top directory top_dir
-# all of its subdirectories will be checked for files
-# that match some the path_glob
-# so any file of name top_dir/"any subdirectory of top_dir"/path_glob
-# will match unless that file name matches some glob_exclude
-# examples:
-# for cellspace files path_glob='*.csp*' exclude_globs=['DUN.csp']
-# for ALTI files      path_glob='ALTI*'  exclude_globs=[]
 def get_files_to_process(top_dir, path_glob, exclude_globs):
+    """
+    given a top directory top_dir
+    all of its subdirectories will be checked for files
+    that match some the path_glob
+    so any file of name top_dir/"any subdirectory of top_dir"/path_glob
+    will match unless that file name matches some glob_exclude
+    examples:
+    for cellspace files path_glob='*.csp*' exclude_globs=['DUN.csp']
+    for ALTI files      path_glob='ALTI*'  exclude_globs=[]
+    """
+    
     
     # get all the directories in top_directory (from stack overflow 973473)
     # make them absolute paths
@@ -616,13 +642,8 @@ def get_files_to_process(top_dir, path_glob, exclude_globs):
         paths_truncated.append(p[:min_files_in_dir])
     return paths_truncated
 
-
-# makes randoms initial states
-# sets up runs directories to make initial states
-# runs the simulations to get the initial states
-# returns the file paths to the .csp files created
 def random_initial_states(num_states, parameters, top_dir, run_header='run', run_name='run'):
-    # create num_states random seeds
+    """create num_states random seeds"""
     seed_numbers = random.sample(range(1,1000000), num_states)
     seeds = [['random seed', seed_numbers]]
     
