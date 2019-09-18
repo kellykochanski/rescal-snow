@@ -9,8 +9,14 @@ project (rescal-snow
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(Sanitizers)
 
+set(PNG_BUILD_ZLIB ON CACHE BOOL "Custom zlib Location, else find_package is used")
+set(PNG_SHARED OFF CACHE BOOL "Build shared lib")
+set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/zlib-1.2.11")
+set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/lib/zlib-1.2.11/libz.a")
+# set(ZLIB_LIBRARY zlib)
 add_subdirectory(lib/libpng-1.6.37)
 add_subdirectory(lib/zlib-1.2.11)
+add_dependencies(png_static zlibstatic)
 
 #Ugly hack needed to fix a mysterious issue on Mac
 include_directories(lib/libpng-1.6.37)
@@ -81,11 +87,11 @@ function(setup_target target)
   add_sanitizers(${target})
 endfunction(setup_target)
 
-target_link_libraries(rescal    PRIVATE png pthread m)
-target_link_libraries(genesis   PRIVATE png m)  
-target_link_libraries(regenesis PRIVATE m)  
-target_link_libraries(bin2png   PRIVATE png m)  
-target_link_libraries(csp2png   PRIVATE png m)  
+target_link_libraries(rescal    PRIVATE png_static pthread m)
+target_link_libraries(genesis   PRIVATE png_static m)
+target_link_libraries(regenesis PRIVATE m)
+target_link_libraries(bin2png   PRIVATE png_static m)
+target_link_libraries(csp2png   PRIVATE png_static m)
 
 setup_target(rescal)
 setup_target(genesis)
