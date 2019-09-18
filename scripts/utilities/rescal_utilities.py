@@ -1,4 +1,4 @@
-___author__ = "Kelly Kochanski"
+
 __date__    = "Jun 25 2018"
 __doc__     = r"""Utilities to set up run scripts quickly and easily; these tools are designed to aid parameter space
  explorations, sensitivity analyses, and large batches of runs.
@@ -8,10 +8,6 @@ __doc__     = r"""Utilities to set up run scripts quickly and easily; these tool
 """
 
 import os
-import re
-import itertools
-import subprocess
-import glob
 
 class DesignRun():
     """
@@ -48,6 +44,7 @@ class DesignRun():
         return self.run_script.list_all(), self.parameters.list_all()
 
     def get(self, param):
+        """get a parameter value from Parameters() object"""
         if param in self.parameters.list_all():
             return self.parameters.get(param)
         elif param in self.run_script.list_all():
@@ -118,8 +115,8 @@ class Parameters():
     def _default_parameters(self):
         """
         Default values for parameters
-        Initialized here for sahara sand
-        Basic model parameters and geometry of model run:
+        Used by all runs setup with the DesignRun workflow unless overwritten with the set_parameters() function.
+        Default values are sahara sand.
         """
         self.new_parameter('Model', 'Defines a set of transitions for grains in the cellular automaton e.g. DUN or SNO', 'SNO')
         self.new_parameter('Output_directory', 'Directory where output files go', './out')
@@ -348,7 +345,7 @@ class RunScript():
 
     def _set_flag_option(self, descriptive_name, flag, value):
         """
-        Some options are command line flags. Some are not.
+        Some options are command line flags. Some are set elsewhere in the run script.
         Try to hide this bit of extra complexity from the user.
         """
         self._flag_options[descriptive_name]   = flag
@@ -462,196 +459,3 @@ class RunScript():
         # make file executable
         os.chmod(filename, 0o764)
 
-
-##--------------------------------------------------------------------------------------
-##--------------------------------------------------------------------------------------
-##--------------------------------------------------------------------------------------
-
-
-
-# TODO allow iteratables to be used
-# not just lists
-# TODO allow passing of arguments in dicts, but with no guaranteed ordering
-def all_parameter_combos(named_parameter_lists):
-    """
-    Takes a parameter list of lists of lists such as:
-       [['Coef_A', [0.1, 0.2, 0.3]], ['random seed', [1,2,3]]])
-       so that each sublist has the variable name and set of parameters to vary over.
-       Creates a generator that returns a dictionary with each possible parameter
-       combination and a string that can be used to identify the varying parameters.
-       If variable names have spaces they are replaced with underscores.
-    """
-
-    # separate parameter names from values lists, cast all values to strings
-    names = [x[0] for x in named_parameter_lists]
-    parameter_lists_original = [x[1] for x in named_parameter_lists]
-
-    # cast all values to strings
-    parameter_lists = [[str(i) for i in x] for x in parameter_lists_original]
-
-    # create a generator that makes all combination of parameters lists (the cartesian product)
-    # also creates a string for the file name
-    for parameter_combination in itertools.product(*parameter_lists):
-        # create a dict of the names and some value combination
-        params_dict_to_add = dict(zip(names, parameter_combination))
-        # creats a directory name based on the names and values
-        # if any of the values are file paths, only the base name of the file is used
-        directory_name_suffix = [name.replace(' ', '_') + '-' + \
-                                 os.path.basename(str(params_dict_to_add[name])) for name in names]
-        yield params_dict_to_add, '--'.join(directory_name_suffix)
-
-
-
-#### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
-def make_run_directories(fixed_params, variable_params, experiment_name, run_header, run_name):
-    """
-    Create a set of directories that contain all needed files for separate rescal runs.
-       The directories exist in a top level directory of experiment_name.
-       Each directory is names based on its varying parameters.
-       The paths to the run scripts are returned for easy execution on the
-       power-lab machines.
-    """
-
-    # make the top level directory, but don't overwrite a directory that
-    # already exists
-    experiment_directory_name = experiment_name
-    if not os.path.isdir(experiment_name):
-        os.mkdir(experiment_name)
-    # TODO deal with case that directory already exists
-    else:
-        return
-    
-    # save the paths to the run scipts for running them later
-    run_scripts = []
-
-    # create full parameter set for each run
-    # as well as the directory suffix for each run sub directory
-    for current_variable_params in all_parameter_combos(variable_params):
-        params_to_add, directory_suffix = current_variable_params
-        parameters = {**fixed_params, **params_to_add}
-        this_run = DesignRun()
-        #this_run.set_header(run_header)
-        this_run.set_name(run_name)
-        # create a directory for each run inside the experiment directory
-        run_directory = os.path.join(experiment_directory_name, directory_suffix)
-        if not os.path.isdir(run_directory):
-            os.mkdir(run_directory)
-
-        this_run.set_directory(run_directory)
-        this_run.set_parameters(parameters)
-        this_run.write()
-
-        # store all the run scripts for future use
-        run_scripts.append(os.path.join(run_directory, run_name + '.run'))
-
-    return run_scripts
-
-
-#### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
-def run_rescals(run_scripts):
-    """
-    Takes a list of paths to .run scripts that should already be in directories set up
-    to run ReSCAL. An instance of ReSCAL is started using each run script and then
-    the ReSCAL all run at the same time and asynchronously. This function waits for all the
-    child processes to complete.
-    """
-
-    # if any spaces in path names, turns ' ' into '\ ' so the shell can understand them
-    modded_scripts = []
-    for run_script in run_scripts:
-        modded_scripts.append(run_script.replace(' ', '\\ '))
-
-    processes = []
-    # move to the directory of each run_script and run it
-    for modded_script in modded_scripts:
-        processes.append(subprocess.Popen('cd ' + os.path.dirname(modded_script) + \
-                                          ' && ' +  modded_script, shell=True))
-    for p in processes:
-        p.wait()
-
-
-def par_to_dict(filename):
-    """
-    given a .par file, returns a dictionary of parameters
-    TODO, could be more flexible, but works for the auto-generated ones
-    """
-    with open(filename, 'r') as f:
-        data = f.read()
-    
-        # get all the assignment strings
-        value_assignment = re.compile(r'([^#\n]*)[ ]*=[ ]*([^#\n]+)')
-        return dict(re.findall(value_assignment, data))
-        
-def cmd_line_args(filename):
-    """given a rescal .run file, get the command-line arguments for rescal"""
-    with open(filename, 'r') as f:
-        data = f.read()
-        # get the rescal line
-        
-        rescal_line = re.search(r'(\./rescal.*)\n', data)
-        # now get the args out
-        flag_arg = re.compile(r'(-[^\s]*)+(?:[ \t]+|\n)([^-\s]*)')
-        flag_value_pairs = flag_arg.findall(rescal_line.group(0))
-        return dict(flag_value_pairs)
-
-def get_files_to_process(top_dir, path_glob, exclude_globs):
-    """
-    given a top directory top_dir
-    all of its subdirectories will be checked for files
-    that match some the path_glob
-    so any file of name top_dir/"any subdirectory of top_dir"/path_glob
-    will match unless that file name matches some glob_exclude
-    examples:
-    for cellspace files path_glob='*.csp*' exclude_globs=['DUN.csp']
-    for ALTI files      path_glob='ALTI*'  exclude_globs=[]
-    """
-    
-    
-    # get all the directories in top_directory (from stack overflow 973473)
-    # make them absolute paths
-    output_dirs = sorted([f.path for f in os.scandir(top_dir) if f.is_dir()])
-    for i in range(len(output_dirs)):
-        output_dirs[i] = os.path.abspath(output_dirs[i])
-
-    # make 2D array or absolute paths to all the .csp* files
-    paths = []
-    for output_dir in output_dirs:
-        # get all possible matches
-        local_paths = glob.glob(output_dir + '/' + path_glob)
-        # find the ones to exclude
-        exclude_paths = []
-        for exclude_glob in exclude_globs:
-            exclude_paths += glob.glob(output_dir + '/' + exclude_glob)
-
-        # now remove the bad paths from the good ones
-        local_paths = sorted(list(set(local_paths) - set(exclude_paths)))
-        
-        # if this sub_dir has files to add, add them
-        if local_paths:
-            paths.append(local_paths)
-    # if no files were added, paths will not have changed
-    # however, always returs a 2D list
-    if paths == []:
-        return [[]]
-    
-    # truncate paths so that each row has the same number
-    # it's possible that the output_dirs won't all have the
-    # same number of .csp files if the simulation doesn't finish
-    # so just limit row size to minimum of any output directory
-    # there shouldn't be any empty lists in paths
-    paths_truncated = []
-    min_files_in_dir = min([len(p) for p in paths])
-    for p in paths:
-        paths_truncated.append(p[:min_files_in_dir])
-    return paths_truncated
-
-def random_initial_states(num_states, parameters, top_dir, run_header='run', run_name='run'):
-    """create num_states random seeds"""
-    seed_numbers = random.sample(range(1,1000000), num_states)
-    seeds = [['random seed', seed_numbers]]
-    
-    run_files = make_run_directories(parameters, seeds, top_dir, run_header, run_name)
-
-    run_rescals(run_files)
-
-    paths = get_files_to_process(top_dir, )

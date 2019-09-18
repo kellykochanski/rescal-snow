@@ -5,7 +5,8 @@ parameters and meta-parameters required to run Rescal-snow. The DataRun can rece
 the output of Rescal-snow while Rescal-snow is running.
 To run Rescal-snow using a DataRun instance, the environment variable RESCAL_SNOW_ROOT
 should be defined and be the path of a Rescal-snow installation. Also, a directory
-for the output should be created. The default is RESCAL_SNOW_ROOT/data_runs."""
+for the output should be created. The default is RESCAL_SNOW_ROOT/data_runs.
+"""
 
 import os
 import sys
