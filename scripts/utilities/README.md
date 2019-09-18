@@ -30,7 +30,7 @@ my_run.write()
 ```
 See also the usage in [scripts/utilities/param_space_exploration_example.py](scripts/utilities/param_space_exploration_example.py)
 
-## Example: [param_space_exploration_example.py](param_space_exploration_example.py)
+### Example: [param_space_exploration_example.py](param_space_exploration_example.py)
 This is an example file showing how to run a parameter space exploration. In this example, most simulation parameters are set to fixed values, then 30 runs are created to vary:
   five snowfall rates, controlled by parameter Lambda_I,
   six wind speeds, controlled by parameter Tau_min,
@@ -38,7 +38,9 @@ This is an example file showing how to run a parameter space exploration. In thi
  The script creates 30 new directories, one for each run. Each directory is seeded with a run script, a parameter file, and rescal and genesis executables. This allows all 30 simulations to run in parallel withou
 t interferance.
 
-## [dataruns.py](dataruns.py)
+Usage is described in example 4 of [../../docs/rescal-snow-tutorial.md](../../docs/rescal-snow-tutorial.md).
+
+## [datarun.py](datarun.py)
 A python interface to Rescal-snow. This sets Rescal-snow parameters for one or more runs, runs the simulation, and keeps the results in pythonic arrays for ongoing processing.
 A DataRun object takes in the parameters and meta-parameters required to run Rescal-snow. The DataRun can receive and processthe output of Rescal-snow while Rescal-snow is running.
 To run Rescal-snow using a DataRun instance, the environment variable RESCAL_SNOW_ROOT should be defined and be the path of a Rescal-snow installation. Also, a directory for the output should be created. The default is RESCAL_SNOW_ROOT/data_runs.
@@ -56,9 +58,8 @@ thisrun.run()
 
 Example usage is shown in [example_pyrescal.py](example_pyrescal.py)
 
-## Example: [example_pyrescal.py](example_pyrescal.py)
-This example tests the functionality of [datarun.py](datarun.py) in a high-performance computing environment. 
-The script is called using [pyrescal.sbatch](pyrescal.sbatch).
+### Example: [example_pyrescal.py](example_pyrescal.py)
+This example tests the functionality of [datarun.py](datarun.py) in a high-performance computing environment. Usage is described in [../../docs/rescal-in-python.md](../../docs/rescal-in-python.md)
 
 ## [heightmap.py](heightmap.py)
 Utilities to create, read and visualize Rescal-snow height maps, a 2D surface height map which is standard Rescal output. These are managed through a HeightMap class.
