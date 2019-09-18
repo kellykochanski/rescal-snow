@@ -2,17 +2,17 @@ from rescal_utilities import *
 import os
 import shutil
 
-# Kelly Kochanski and Adam Rubin, 2018
+__author__ = "Kelly Kochanski and Adam Rubin"
+__date__   = "2018"
+__doc__    = r"""This is an example file showing how to run a parameter space exploration on multiple cores
+ The exploration fixes most simluations parameters (the `parameters' dictionary')
+  then explores five snowfall rates, controlled by parameter Lambda_I,
+  six wind speeds, controlled by parameter Tau_min,
+  and all combinations thereof.
 
-# This is an example file showing how to run a parameter space exploration
-# The exploration fixes most simluations parameters (the `parameters' dictionary')
-#  then explores five snowfall rates, controlled by parameter Lambda_I,
-#  six wind speeds, controlled by parameter Tau_min,
-#  and all combinations thereof.
-
-# The script creates new directories and manages the locations of input, output and executable files
-#  so that all 30 simulations can be run in parallel.
-
+ The script creates new directories and manages the locations of input, output and executable files
+  so that all 30 simulations can be run in parallel.
+"""
 
 executable_location = ".." # location of the compiled rescal executable
 experiment_name = "test_scaling" # header directory which all generated input goes into
@@ -65,7 +65,7 @@ for Lambda_I in [0.001] :
 	for sz in [(100, 300, 100), (50, 300, 100), (200, 300, 100),
 			(50, 300, 50), (50, 300, 200), (50, 300, 400), (50, 150, 100), (50, 600, 100), (50, 1200, 100), (50, 2400, 100)]:
 		(H,L,D) = sz
-		this_run = Design_a_run()
+		this_run = DesignRun()
 		this_run.set_header("Baseline Lambda_I values at a specified tau_min")
 		this_run.set_name("run")
 		# Where should the input for this single run go?

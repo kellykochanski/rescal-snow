@@ -1,34 +1,40 @@
-# KK July 03 2018
+__author__ = "K Kochanski"
 
-# This is a shell script designed to start organizing ReSCAL to perform a parameter space exploration;
-#  it could be adapted to perform any set of runs with variable parameters
+__date__ = "July 03 2018"
 
-# The "explore_parameter_space" function creates an array of subdirectories, each containing:
-#   - a run script (bash), generally called run.run
-#   - a parameter file (txt), generally caled run.par
-# Note that the multi-directory structure is useful for several reasons:
-#   1. The output for each run stays in its own subdirectory, attached to the appropriate input files
-#   2. If multiple processors are available, they may simultaneously run separate instances of rescal-snow, one per directory,
-#       without any communication, race conditions, or other problems
+__doc__ = r"""This is a shell script designed to start organizing ReSCAL to perform a parameter space exploration;
+  it could be adapted to perform any set of runs with variable parameters
+
+ The "explore_parameter_space" function creates an array of subdirectories, each containing:
+   - a run script (bash), generally called run.run
+   - a parameter file (txt), generally caled run.par
+ Note that the multi-directory structure is useful for several reasons:
+   1. The output for each run stays in its own subdirectory, attached to the appropriate input files
+   2. If multiple processors are available, they may simultaneously run separate instances of rescal-snow, one per directory,
+       without any communication, race conditions, or other problems
+"""
 
 # Set up a bunch of runs to go in parallel
 
+import os
 import numpy as np
 import datetime
-import os
 import itertools
 import subprocess
 import glob
+
 import rescal_utilities
 
 
 def explore_parameter_space(output_root, executable_location, parameter_ranges, fixed_parameters, n_runs):
-    # Take in a dictionary of parameter ranges to explore,
-    #   e.g. { 'Lambda_S' : [0.001, 0.2],
-    #          'Lambda_F' : [3, 10] }
+    """
+     Take in a dictionary of parameter ranges to explore,
+       e.g. { 'Lambda_S' : [0.001, 0.2],
+              'Lambda_F' : [3, 10] }
 
-    # Setup n_runs runs to explore those, under directory output_ro
-    # Rescal and genesis executables are located in directory executable_location
+     Setup n_runs runs to explore those, under directory output_ro
+     Rescal and genesis executables are located in directory executable_location
+     """
 
     if ( os.path.isdir(output_root) == False):
         os.mkdir(output_root)
@@ -49,7 +55,7 @@ def explore_parameter_space(output_root, executable_location, parameter_ranges, 
         while os.path.isdir(run_output_dir):
             run_output_dir += "A"
 
-        this_run = rescal_utilities.Design_a_run()
+        this_run = rescal_utilities.DesignRun()
         this_run.set_parameters(parameter_combos[run])
         this_run.set_parameters({'rescallocation' : executable_location,
                 'parfile': 'run.par'})
@@ -60,7 +66,7 @@ def explore_parameter_space(output_root, executable_location, parameter_ranges, 
         this_run.write()
 
 def _uniform_random_search(parameter_ranges, n_runs):
-    # For each run, each parameter takes a value drawn from a uniform distribution
+    """For each run, each parameter takes a value drawn from a uniform distribution"""
 
     parameter_combinations = []
 
@@ -84,12 +90,13 @@ def _uniform_random_search(parameter_ranges, n_runs):
 # not just lists
 # TODO allow passing of arguments in dicts, but with no guaranteed ordering
 def all_parameter_combos(named_parameter_lists):
-    '''Takes a parameter list of lists of lists such as:
+    """Takes a parameter list of lists of lists such as:
        [['Coef_A', [0.1, 0.2, 0.3]], ['random seed', [1,2,3]]])
        so that each sublist has the variable name and set of parameters to vary over.
        Creates a generator that returns a dictionary with each possible parameter
        combination and a string that can be used to identify the varying parameters.
-       If variable names have spaces they are replaced with underscores.'''
+       If variable names have spaces they are replaced with underscores.
+    """
 
     # separate parameter names from values lists, cast all values to strings
     names = [x[0] for x in named_parameter_lists]
@@ -115,11 +122,13 @@ def all_parameter_combos(named_parameter_lists):
 
 #### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
 def make_run_directories(fixed_params, variable_params, experiment_name, run_header, run_name):
-    '''Create a set of directories that contain all needed files for separate rescal runs.
+    """
+    Create a set of directories that contain all needed files for separate rescal runs.
        The directories exist in a top level directory of experiment_name.
        Each directory is names based on its varying parameters.
        The paths to the run scripts are returned for easy execution on the
-       power-lab machines.'''
+       power-lab machines.
+    """
 
     # make the top level directory, but don't overwrite a directory that
     # already exists
@@ -160,8 +169,10 @@ def make_run_directories(fixed_params, variable_params, experiment_name, run_hea
 
 #### NOTE: set up for power-lab machine usage, meaning on a single PC, not a cluster
 def run_rescals(run_scripts):
-    '''Takes path to a set of run_scripts that should be in the proper locations
-       to run rescal and runs each of them. Runs should be asynchronous.'''
+    """
+    Takes path to a set of run_scripts that should be in the proper locations
+       to run rescal and runs each of them. Runs should be asynchronous.
+    """
 
     # if any spaces in path names, turns ' ' into '\ ' so the shell can understand them
     modded_scripts = []
@@ -177,16 +188,18 @@ def run_rescals(run_scripts):
         p.wait()
 
 
-# given a top directory top_dir
-# all of its subdirectories will be checked for files
-# that match some the path_glob
-# so any file of name top_dir/"any subdirectory of top_dir"/path_glob
-# will match unless that file name matches some glob_exclude
-# examples:
-# for cellspace files path_glob='*.csp*' exclude_globs=['DUN.csp']
-# for ALTI files      path_glob='ALTI*'  exclude_globs=[]
 # TODO, 2 copies of this function, the other in param_space_exploration_utilities.py
 def get_files_to_process(top_dir, path_glob, exclude_globs):
+    """
+    given a top directory top_dir
+    all of its subdirectories will be checked for files
+    that match some the path_glob
+    so any file of name top_dir/"any subdirectory of top_dir"/path_glob
+    will match unless that file name matches some glob_exclude
+    examples:
+    for cellspace files path_glob='*.csp*' exclude_globs=['DUN.csp']
+    for ALTI files      path_glob='ALTI*'  exclude_globs=[]
+    """
     
     # get all the directories in top_directory (from stack overflow 973473)
     # make them absolute paths
