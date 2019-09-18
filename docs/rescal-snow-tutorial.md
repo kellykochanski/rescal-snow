@@ -76,10 +76,11 @@ This command will take a few minutes to run, and produces terminal output like:
 >> OMP_NUM_THREADS=1
 ```
 > *Nothing happening?*
+> This is a good sign - if something is wrong, Rescal-snow almost always crashes in the first few seconds. This simulation may take several minutes to run, depending on the speed of your machine.
 >
-> This is mostly a good sign - if something is wrong, rescal-snow almost always crashes in the first few seconds. The simulations, however, are computationally expensive, and may take an unreasonably long time to run on slower machines. 
-> If this is the case for you, we've put some tips for improving performance in [docs/performance_and_parallelization.md](performance_and_parallelization.md).
-> The output from rescal-snow is saved at regular intervals. You can view intermediate output while the simulation is still running, and you can stop the simulation (usually `Ctrl-C`) without losing that output. 
+> *Still nothing happening?*
+> In a separate terminal, look at the scripts directory (`ls scripts`). If the simulation has initiated successfully, you should see one or more files named `SNO0000X_t0.csp`, `genesis.log` and `rescal.log`. If you see these, the simulation is likely proceeding - slowly. You can stop the simulation whenever you see enough output for your purposes.
+> We've put some tips for improving performance in [docs/performance_and_parallelization.md](performance_and_parallelization.md).
 
 **Example 1 results**
 

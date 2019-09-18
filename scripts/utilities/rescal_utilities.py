@@ -1,9 +1,11 @@
-# KK Jun 25 20180
-# Utilities to set up run scripts quickly and easily; these tools are designed to aid parameter space
-# explorations, sensitivity analyses, and large batches of runs.
-# Parameters : Class to hold, update, change, or write all the parameters that ReSCAL needs to run
-# RunScript : Class to hold, update, change, or write a ReSCAL run script with appropriate flags
-# This includes almost all options and inputs, except those in the "real_data" file.
+___author__ = "Kelly Kochanski"
+__date__    = "Jun 25 2018"
+__doc__     = r"""Utilities to set up run scripts quickly and easily; these tools are designed to aid parameter space
+ explorations, sensitivity analyses, and large batches of runs.
+  Parameters : Class to hold, update, change, or write all the parameters that ReSCAL needs to run
+  RunScript : Class to hold, update, change, or write a ReSCAL run script with appropriate flags
+ This includes almost all options and inputs, except those in the "real_data" file.
+"""
 
 import os
 import re
@@ -64,14 +66,15 @@ class DesignRun():
         self.directory = directory
 
     def _is_a_parameter(self, name):
-        # Checks whether the parameters dictionary contains 'name'
+        """Checks whether the parameters dictionary contains 'name'"""
         return ((name == 'Environment') or (name in self.parameters.list_all()))
 
     def _is_a_run_script_option(self, name):
-        # Checks whether 'name' is an option in the run script
+        """Checks whether 'name' is an option in the run script"""
         return (name in self.run_script.list_all())
 
     def write(self):
+        """Write a .run run script and a .par parameter file"""
         self.run_script.write(self.directory + "/" + self.name + ".run")
         self.parameters.write(self.directory + "/" + self.name + ".par")
 

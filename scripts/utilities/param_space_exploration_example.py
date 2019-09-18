@@ -1,17 +1,20 @@
-from rescal_utilities import *
+import rescal_utilities
 import os
 import shutil
 
-# Kelly Kochanski and Adam Rubin, 2018
 
-# This is an example file showing how to run a parameter space exploration
-# The exploration fixes most simluations parameters (the `parameters' dictionary')
-#  then explores five snowfall rates, controlled by parameter Lambda_I,
-#  six wind speeds, controlled by parameter Tau_min,
-#  and all combinations thereof.
+__author__ = "Kelly Kochanski and Adam Rubin"
 
-# The script creates new directories and manages the locations of input, output and executable files
-#  so that all 30 simulations can be run in parallel.
+__date__ = "2018"
+
+__doc__ = r"""This is an example file showing how to run a parameter space exploration
+ The exploration fixes most simluations parameters (the `parameters' dictionary')
+  then explores five snowfall rates, controlled by parameter Lambda_I,
+  six wind speeds, controlled by parameter Tau_min,
+  and all combinations thereof.
+ The script creates new directories and manages the locations of input, output and executable files
+  so that all 30 simulations can be run in parallel.
+"""
 
 
 executable_location = ".." # location of the compiled rescal executable
@@ -60,7 +63,7 @@ parameters = {
 # These for loops vary the parameters for snowfall rate and wind speed
 for Lambda_I in [0.001, 0.01] :
 	for Tau_min in [0, 100, 200, 300, 1000] :
-		this_run = Design_a_run()
+		this_run = rescal_utilities.DesignRun()
 		this_run.set_header("Baseline Lambda_I values at a specified tau_min")
 		this_run.set_name("run")
 		# Where should the input for this single run go?

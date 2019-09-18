@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-__author__ = '''Gian-Carlo DeFazio'''
-__doc__ = '''This example is meant to test functionality 
-on slurm. This script can be called indirectly using sbatch.''' 
+__author__ = """Gian-Carlo DeFazio"""
+__doc__ = """This example is meant to test functionality of datarun.py
+on slurm. This script can be called indirectly using sbatch.""" 
 
 
 import datarun
