@@ -7,11 +7,11 @@ Utilities to set up Rescal-snow runs quickly and easily.
 These tools are designed to aid parameter space explorations, sensitivity analyses, and large batches of runs.
 The following classes manage most Rescal-snow options and inputs (excepting those in the "real_data" file):
 
-  Parameters : Class to hold, update, change, read, or write all the parameters that ReSCAL needs to run
+  *Parameters* : Class to hold, update, change, read, or write all the parameters that ReSCAL needs to run
   
-  RunScript  : Class to hold, update, change, read, or write a ReSCAL run script with appropriate flags
+  *RunScript*  : Class to hold, update, change, read, or write a ReSCAL run script with appropriate flags
   
-  DesignRun  : Umbrella class to hold, update, change, read or write all parameters, sorting them into Parameters and RunScript
+  *DesignRun*  : Umbrella class to hold, update, change, read or write all parameters, sorting them into Parameters and RunScript
 
 Example usage (python3):
 ```python
@@ -21,8 +21,6 @@ my_run.set_name("my_run")
 my_run.set_header("An example run varying L, D and Lambda_S, and looking for the rescal executable in build")
 
 # Describe values for some subset of Rescal-snow parameterescal.sbatch
-(base) kelly@Beauty:~/Downloads/rescal-snow/scripts/utilities$ vim example_pyrescal
-(base) kelly@Beauty:~/Downloads/rescal-snow/scripts/utilities$ vim examples
 # Others will take defaults from rescal_utilities.Parameters._default_parameters() and rescal_utilities.RunScript._default_options()
 parameters = {'L':500, 'D':50, 'Lambda_S':0.01, 'rescallocation':'../../build'}
 my_run.set_parameters(parameters)
@@ -46,8 +44,6 @@ A DataRun object takes in the parameters and meta-parameters required to run Res
 To run Rescal-snow using a DataRun instance, the environment variable RESCAL_SNOW_ROOT should be defined and be the path of a Rescal-snow installation. Also, a directory for the output should be created. The default is RESCAL_SNOW_ROOT/data_runs.
 
 ```python
-#
-
 # Describe some subset of Rescal-snow parameters and a directory for this run
 parameters = {'L':500, 'D':50, 'stop after':'200_t0', 'output interval':'50_t0'}
 dirname    = 'myrundirectory'
