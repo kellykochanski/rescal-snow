@@ -13,15 +13,11 @@ The following classes manage most Rescal-snow options and inputs (excepting thos
   
   DesignRun  : Umbrella class to hold, update, change, read or write all parameters, sorting them into Parameters and RunScript
 
-Example usage:
+Example usage (python3):
 ```python
-$python
-
 # Create the DesignRun object and (optional but advised) a basic description
 my_run     = rescal_utilities.DesignRun()
-my_run.set_name("my_run")escal.sbatch
-(base) kelly@Beauty:~/Downloads/rescal-snow/scripts/utilities$ vim example_pyrescal
-(base) kelly@Beauty:~/Downloads/rescal-snow/scripts/utilities$ vim example
+my_run.set_name("my_run")
 my_run.set_header("An example run varying L, D and Lambda_S, and looking for the rescal executable in build")
 
 # Describe values for some subset of Rescal-snow parameterescal.sbatch
