@@ -1,6 +1,23 @@
-__doc__ = """Utilities to read and visualize rescal-snow height maps."""
 __author__ = 'Gian-Carlo DeFazio'
 __date__ = '16 August 2019'
+__doc__ = r"""
+Utilities to create, read and visualize Rescal-snow height maps. These are managed through a HeightMap class.
+
+Utilities for creating Rescal-snow heightmaps (these may be used as initial conditions for the Rescal-snow simulation; see the INPUT_ELEVATION CSP_TEMPLATE in `src/genesis.c`).
+- invader_template
+ - gaussian_hill
+ - make_sinusoid
+ - scale
+
+Utilities for analyzing Rescal-snow heightmaps (most of these use fourier transforms, as snow/sand self-organization has strong emergent wavelengths):
+ - fft2d_analyze
+ - fft2d_analyze_map_pic
+ - fft2d_crop_blur
+ - fft2d_center_blur
+
+ Utilities for visualizing height maps:
+  - make_surface
+"""
 
 import sys
 import os
@@ -133,6 +150,9 @@ def fft2d_analyze(data):
 
 
 def fft2d_analyze_map_pic(data):
+    """
+    May be redundant with fft2d_analyze?
+    """
     #Data points for x and y axis
     dpx, dpy = data.shape
 

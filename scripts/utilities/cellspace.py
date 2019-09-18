@@ -1,6 +1,6 @@
-__doc__ = """Utilities to read, write, modify, and visualize rescal-snow cell spaces."""
 __author__ = 'Gian-Carlo DeFazio'
 __date__ = 'August 16 2019'
+__doc__ = r"""Utilities to read, write, modify and visualize Rescal-snow cell spaces, the full state of the cellular automaton. Managed through CellSpace class. Used by datarun.py. May be used for visualizing and modifying internal sand/snow structures that are not adequately represented by 2D HeightMaps."""
 
 import sys
 import os
@@ -101,6 +101,9 @@ def surface_position(a):
 
 
 def find_air_or_mobile(column):
+    """Find the height of solid cells (not air, EAU/EAUC, or mobile grains, GRJ) above one point (column) in the cellspace.
+    This is found by counting down from the upper boundary until a non-air/mobile grain is hit.
+    """
     air_indices = np.nonzero(column == 3)[0]
     mobile_sand_indices = np.nonzero(column == 1)[0]
 

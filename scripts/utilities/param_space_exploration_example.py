@@ -7,16 +7,16 @@ __author__ = "Kelly Kochanski and Adam Rubin"
 
 __date__ = "2018"
 
-__doc__ = r"""This is an example file showing how to run a parameter space exploration
- The exploration fixes most simluations parameters (the `parameters' dictionary')
-  then explores five snowfall rates, controlled by parameter Lambda_I,
+__doc__ = r"""
+This is an example file showing how to run a parameter space exploration. In this example, most simulation parameters are set to fixed values, then 30 runs are created to vary:
+  five snowfall rates, controlled by parameter Lambda_I,
   six wind speeds, controlled by parameter Tau_min,
-  and all combinations thereof.
- The script creates new directories and manages the locations of input, output and executable files
-  so that all 30 simulations can be run in parallel.
+  and all 30 combinations thereof.
+ The script creates 30 new directories, one for each run. Each directory is seeded with a run script, a parameter file, and rescal and genesis executables. This allows all 30 simulations to run in parallel withou
+t interferance.
 """
 
-
+# Assemble all the pieces for this run - the executables and the output directory
 executable_location = ".." # location of the compiled rescal executable
 experiment_name = "test_parallel_runs" # header directory which all generated input goes into
 experiment_directory = os.path.join("../../", experiment_name)
@@ -66,6 +66,7 @@ for Lambda_I in [0.001, 0.01] :
 		this_run = rescal_utilities.DesignRun()
 		this_run.set_header("Baseline Lambda_I values at a specified tau_min")
 		this_run.set_name("run")
+
 		# Where should the input for this single run go?
 		this_directory = os.path.join(experiment_directory, "tauMin" + str(Tau_min) + "_lambdaI" + str(Lambda_I))
 		if not os.path.isdir(this_directory):
@@ -76,6 +77,7 @@ for Lambda_I in [0.001, 0.01] :
 		parameters['Tau_max'] = Tau_min + 1000
 		this_run.set_parameters(parameters)
 		this_run.write()
+
 		# copy executables for this run into this run directory
 		shutil.copyfile(executable_location + "/rescal", this_directory+'/rescal')
 		shutil.copyfile(executable_location + "/genesis", this_directory+'/genesis')
@@ -83,6 +85,7 @@ for Lambda_I in [0.001, 0.01] :
 			os.mkdir(this_directory+'/real_data')
 		shutil.copyfile('../real_data/sealevel_snow.prop', this_directory+'/real_data/sealevel_snow.prop')
 		shutil.copyfile('../real_data/PDF.data', this_directory+'/real_data/PDF.data')
+
 		# while we're at it, make sure there's a place for output
 		output_dir = parameters['Output_directory']
 		if output_dir[0:1] == "./":
