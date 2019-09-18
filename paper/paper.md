@@ -28,7 +28,7 @@ affiliations:
  - name: Department of Geological Sciences, University of Colorado at Boulder, Boulder, CO, USA
    index: 1
  - name: Computing Division, Lawrence Livermore National Laboratory, Livermore, CA, USA
- - index: 2
+   index: 2
  - name: Department of Computer Science, Western Washington University, Bellingham, WA, USA
    index: 3
  - name: Department of Electrical Engineering and Computer Sciences, University of California Berkeley, Berkeley, CA, USA
