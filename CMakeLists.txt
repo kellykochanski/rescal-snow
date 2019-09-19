@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.9)
 
+include(ExternalProject)
+
 project (rescal-snow
   DESCRIPTION "Simulating snow self-organization with cellular automata"
   HOMEPAGE_URL "https://github.com/kellykochanski/rescal-snow"
@@ -11,16 +13,18 @@ find_package(Sanitizers)
 
 set(PNG_BUILD_ZLIB ON CACHE BOOL "Custom zlib Location, else find_package is used")
 set(PNG_SHARED OFF CACHE BOOL "Build shared lib")
-set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/zlib-1.2.11")
-set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/lib/zlib-1.2.11/libz.a")
-# set(ZLIB_LIBRARY zlib)
-add_subdirectory(lib/libpng-1.6.37)
-add_subdirectory(lib/zlib-1.2.11)
-add_dependencies(png_static zlibstatic)
+set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/zlib-1.2.11" "${CMAKE_BINARY_DIR}/lib/zlib-1.2.11")
+set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/lib/zlib-1.2.11/libz.a")
 
 #Ugly hack needed to fix a mysterious issue on Mac
 include_directories(lib/libpng-1.6.37)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/lib/libpng-1.6.37)
+include_directories(lib/zlib-1.2.11)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/lib/zlib-1.2.11)
+
+add_subdirectory(lib/libpng-1.6.37)
+add_subdirectory(lib/zlib-1.2.11)
+add_dependencies(png_static zlibstatic)
 
 set(COMMON_SOURCES
   src/cells.c
