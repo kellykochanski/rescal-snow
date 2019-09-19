@@ -9,32 +9,36 @@ tags:
 authors:
   - name: Kelly Kochanski
     orcid: 0000-0003-0754-0184
-    affiliation: "1,2"
+    affiliation: "1,2,3"
   - name: Gian-Carlo Defazio
-    affiliation: "2,3"
+    affiliation: "1,4"
   - name: Eric Green
-    affiliation: 2
+    affiliation: 1
   - name: Richard Barnes
-    affiliation: "4"
+    affiliation: "5,6"
     orcid: 0000-0002-0204-6040
   - name: Carlos Downie
-    affiliation: 2
+    affiliation: 1
   - name: Adam Rubin
-    affiliation: "5"
+    affiliation: "7"
   - name: Barry Rountree
     orcid: 0000-0002-0087-4301
-    affiliation: 2
+    affiliation: 1
 affiliations:
- - name: Department of Geological Sciences, University of Colorado at Boulder, Boulder, CO, USA
-   index: 1
  - name: Computing Division, Lawrence Livermore National Laboratory, Livermore, CA, USA
+   index: 1
+ - name: Department of Geological Sciences, University of Colorado at Boulder, Boulder, CO, USA
    index: 2
- - name: Department of Computer Science, Western Washington University, Bellingham, WA, USA
+ - name: Institute for Arctic and Alpine Research, University of Colorado at Boulder, Boulder, CO, USA
    index: 3
- - name: Department of Electrical Engineering and Computer Sciences, University of California Berkeley, Berkeley, CA, USA
+ - name: Department of Computer Science, Western Washington University, Bellingham, WA, USA
    index: 4
- - name: Department of Civil Engineering, University of Colorado at Boulder, Boulder, CO, USA
+ - name: Energy and Resources Group, University of California Berkeley, Berkeley, CA, USA
    index: 5
+ - name: Department of Electrical Engineering and Computer Sciences, University of California Berkeley, Berkeley, CA, USA
+   index: 6
+ - name: Department of Environmental Engineering, University of Colorado at Boulder, Boulder, CO, USA
+   index: 7
 date: 21 July 2019
 bibliography: paper.bib
 ---
