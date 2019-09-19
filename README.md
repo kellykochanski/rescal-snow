@@ -94,8 +94,6 @@ You may also download the repository manually from [Github](https://github.com/k
 
 ### 2.4 Installation
 
-These instructions will get rescal-snow running on most Linux environments. For additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
-
 In a terminal, navigate into the main rescal-snow directory (shown above). Run:
 ```bash
 mkdir build
@@ -146,7 +144,6 @@ The following phase diagram shows images produced by ten parallel runs simulatin
 ## 4. References and further reading <a name="references"></a>
 
 The [docs](docs) folder contains additional information on 
-[alternate installations](docs/how_to_install.md), 
 [performance and parallelization issues](docs/performance_and_parallelization.md), 
 [model inputs and configuration](docs/rescal-snow-inputs.md),
 [model calibration and validation](docs/calibration_and_validation.md),
