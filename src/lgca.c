@@ -566,7 +566,7 @@ void lecture_mvt() {
     exit(-4);
   }
 
-  if (fread(CelMvt, sizeof(MvtField), CHLD, fp) != sizeof(MvtField) * CHLD) {
+  if (fread(CelMvt, sizeof(MvtField), CHLD, fp) != CHLD) {
     ErrPrintf("Read error\n");
     exit(-1);
   }
