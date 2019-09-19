@@ -666,7 +666,10 @@ float* load_surface(char *nom, int32_t lx, int32_t ly) {
   pt_al = altimap;
   for (j = 0; j < ly; j++)
     for (i = 0; i < lx; i++, pt_al++) {
-      fscanf(f, "%f \n", pt_al);
+      if (fscanf(f, "%f \n", pt_al) != 1) {
+        ErrPrintf("Read error\n");
+        exit(-1);
+      }
     }
 
   fclose(f);
