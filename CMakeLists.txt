@@ -1,10 +1,7 @@
 cmake_minimum_required (VERSION 3.9)
 
-include(ExternalProject)
-
 project (rescal-snow
   DESCRIPTION "Simulating snow self-organization with cellular automata"
-  HOMEPAGE_URL "https://github.com/kellykochanski/rescal-snow"
   LANGUAGES C
 )
 
