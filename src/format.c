@@ -257,7 +257,7 @@ void read_csp(char *filename) {
   LogPrintf("csp_cell_size = %d\n", csp_cell_size);
 
   for (k = csp_y_bounds; k < D - csp_y_bounds; k++) { // profondeur
-    if ((int32_t)fread(buf, csp_cell_size, csp_H * csp_L, fp) != (csp_cell_size * csp_H * csp_L)) {
+    if ((int32_t)fread(buf, csp_cell_size, csp_H * csp_L, fp) != csp_H * csp_L) {
       ErrPrintf("Read error\n");
       exit(-1);
     }
