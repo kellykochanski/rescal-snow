@@ -2,19 +2,14 @@ cmake_minimum_required (VERSION 3.9)
 
 project (rescal-snow
   DESCRIPTION "Simulating snow self-organization with cellular automata"
-  HOMEPAGE_URL "https://github.com/kellykochanski/rescal-snow"
   LANGUAGES C
 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(Sanitizers)
 
-add_subdirectory(lib/libpng-1.6.37)
-add_subdirectory(lib/zlib-1.2.11)
-
-#Ugly hack needed to fix a mysterious issue on Mac
-include_directories(lib/libpng-1.6.37)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/lib/libpng-1.6.37)
+find_package(ZLIB 1.2 REQUIRED)
+find_package(PNG 1.6 REQUIRED)
 
 set(COMMON_SOURCES
   src/cells.c
