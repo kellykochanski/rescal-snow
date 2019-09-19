@@ -61,6 +61,8 @@ If you modify rescal-snow, you will need to modify and compile C code. We have a
  * C compiler (GCC and CLANG are known to work)
  * cmake>=3.1 (used for compiling)
  * make (used for compiling)
+ * [libpng](http://www.libpng.org/pub/png/libpng.html) (known to work with v1.6.37)
+ * [zlib](https://www.zlib.net) (known to work with 1.2.11)
  * Optional packages used for analysis (see the [analysis](analysis) and [scripts/utilities](scripts/utilities) directories):
    * Python3 (used for analysis)
    * numpy (used by Python3 for analysis)
@@ -71,7 +73,7 @@ If you modify rescal-snow, you will need to modify and compile C code. We have a
 On a Debian-based/Ubuntu Linux machine, the dependencies can be acquired using: 
 
 ```bash
-sudo apt install gcc cmake make python3 python3-numpy python3-pandas python3-scipy
+sudo apt install gcc cmake make libpng-dev zlib1g-dev python3 python3-numpy python3-pandas python3-scipy
 ```
 
 On most machines, the Python packages can also be acquired using:
