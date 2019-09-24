@@ -190,7 +190,7 @@ diff snowfall.run snow_cone.run
 The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface (left-most picture in image below; airborne
 grains are red).
 
-To see the output clearly, we will make custom images with matplotlib (Python). We will make topographic maps showing the dunes' elevation. This data is output in scripts/out/ALTIxxxxx.log files.
+To see the output clearly, we will make custom images with matplotlib (Python). We will make topographic maps showing the dunes' elevation. This data is output in scripts/out/ALTIxxxxx.log files; their output frequency is controlled by the `-dcsp` flag in the run script.
 
 ## 4. Visualizing the simulation output <a name="visualizing"></a>
 
