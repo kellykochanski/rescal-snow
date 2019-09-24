@@ -45,10 +45,11 @@ Parallelizing cellular automata is an interesting HPC problem. We're still worki
 In order of ease and likely effectiveness:
 
  - Turn off any background applications that compete for proessing power. 
- - Remove the 'nice' command in the .run file, if applicable.
+ - Remove the `nice` command in the `.run` file, if applicable.
  - Decrease the horizontal domain size, L and D
       - For some applications, the effect of a long domain can be approximated with periodic boundaries
  - Decrease output frequency using the `-dcsp` and `-dpng` options in the run script
+ - Suppress the largest output (`.csp` files) using the `-altionly` file in the run script
  - Find a faster processor (more RAM or a better hard drive may help, depending on your machine)
  - Identify and turn off unnecessary transitions
       - Set the transition rate to 0 in the parameter file, or
