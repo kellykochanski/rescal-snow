@@ -45,15 +45,17 @@ bibliography: paper.bib
 
 # Summary
 
-When wind blows over dry snow, it creates captivating shapes known as snow bedforms. 
+When wind blows over dry snow, it creates shapes known as snow bedforms.
 These features, which include snow dunes, waves, snow-steps and sastrugi (figure below), ornament Antarctica, Arctic sea ice, tundra, and mountain ridges [@Filhol2015; @Kochanski2018; @Kobayashi1980].
 They change the reflectivity and average thermal conductivity of snow, and may change the patterns of snow accumulation and transport.
 Despite these effects, however, they are poorly understood and their effects are not yet included in major snow or climate models.
 
 ![](../docs/example_images/field_examples.png)
 
+_Snow bedforms on Niwot Ridge, Colorado. From left to right, small dunes and sastrugi (looking upwind), snow dunes (looking downwind), snow-waves (looking upwind)._
+
 ## Requirements of a snow bedform model
-Several recent field studies have identified new computational components needed for a good understanding of snow bedforms.
+Recent field studies have identified three new computational components needed for a good understanding of snow bedforms [@Kochanski2018; @Kochanski2019; @Filhol2015].
 First, most snow bedforms (e.g ripples, barchan dunes, snow-steps and sastrugi) are between 0.1 and 2 m in length, with select bedforms (e.g. snow-waves, some whaleback dunes) extending from 5 to 30 m.
 These length scales are based on physical phenomena such as the hop length of blowing snow grains [@Kobayashi1980] and the length scales of turbulent structures in the wind [@Kobayashi1980, @Kochanski2019].
 Existing models of wind-blown snow, however, are designed to model snow redistribution over mountainous [@Liston2007; @Lehning2002; @Marsh2018] or continental [@Gallee2012] scales
@@ -73,8 +75,8 @@ Rescal-snow is designed to enable the quantitative study of snow bedforms.
 It simulates 10-100 m domains at 0.05-0.20 m resolution, allowing it to capture all but the smallest snow bedforms.
 The simulation is adapted from a cellular automaton sand dune model, ReSCAL [@Narteau2014], and inherits ReSCAL's granular transport capacities.
 We have added features to simulate processes unique to snow, including snowfall and time-dependent cohesion.
-Fluid processes are modelled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
-Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modelling self-organization.
+Fluid processes are modeled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
+Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modeling self-organization.
 
 ![](../docs/example_images/rescal-snow_transitions.png)
 
@@ -83,10 +85,10 @@ It will also make it easier to investigate the effects of snow bedforms on (1) s
 
 ### Example simulations
 We have been able to use Rescal-snow to simulate the formation and movement of snow dunes and snow-waves under a range of wind, snowfall, and sintering conditions.
-We illustrate these results through the example simulations in our `README` file, 
-and in the [associated tutorial](docs/rescal-snow-tutorial.md), which also leads readers through a previously-unmodelled scientific question: how do bedforms affect the accumulation of snow?
+We illustrate these results through the example simulations in our `README` file,
+and in the [associated tutorial](../docs/rescal-snow-tutorial.md), which also leads readers through a previously-unmodeled scientific question: how do bedforms affect the accumulation of snow?
 
-### Limitations 
+### Limitations
 The natural length and time scales of Rescal-snow are set by the configuration of the cellular automata.
 Although these can be related to real length and time scales, it requires careful calibration, as described fully in @Narteau2009.
 The length scale of Rescal-snow cells, for reasonable model configurations, is 0.05-0.15 m. This limits the model's ability to resolve centimeter-scale snow features, such as snow-steps [@Kochanski2019], and to successfully model sharp-edged features, such as sastrugi.
@@ -95,15 +97,15 @@ As a cellular automata, Rescal-snow cells also have discrete states. Our sinteri
 
 ### Good practices in computational snow science
 We aim to demonstrate good practices that will encourage robust, reproducible science by releasing Rescal-snow through Journal of Open Source Science.
-Our work is aimed at gemorphologists and snow scientists, and we use this model frequently while working with students.
-We expect that our work will be many users' first introduction to some subset of bash, git, C, Python or high-performance computing, and we aim to make this a positive learning experience. 
+Our work is aimed at geomorphologists and snow scientists, and we use this model frequently while working with students.
+We expect that our work will be many users' first introduction to some subset of bash, git, C, Python or high-performance computing, and we aim to make this a positive learning experience.
 Therefore, we designed our examples around scientific applications of all of these skills, and we punctuate them with references to relevant tutorials on git, bash, etc.
 
-We also believe that good computational science is easier when users are able to make large numbers of model runs. 
+We also believe that good computational science is easier when users are able to make large numbers of model runs.
 This allows users order to test the stability of the model, explore a wide range of physical parameters, and gain an accurate understanding of the model uncertainty.
 We have set up structures for configuring, running, and analyzing parallel simulation instances to enable users to run high-quality numerical experiments with Rescal-snow.
 
-# Acknowledgements
+# Acknowledgments
 
 This work was performed under the auspices of the U.S. Department of Energy by Lawrence Livermore National Laboratory under Contract DE-AC52-07NA27344. This paper is released under LLNL-JRNL-786878-DRAFT.
 
