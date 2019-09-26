@@ -52,6 +52,8 @@ Despite these effects, however, they are poorly understood and their effects are
 
 ![](../docs/example_images/field_examples.png)
 
+__This figure needs a caption and should be referenced from the text. How does it relate to the surrounding text? What is it illustrating? Why is it here?__
+
 ## Requirements of a snow bedform model
 Several recent field studies have identified new computational components needed for a good understanding of snow bedforms [@something; @something_else].
 First, most snow bedforms (e.g ripples, barchan dunes, snow-steps and sastrugi) are between 0.1 and 2 m in length, with select bedforms (e.g. snow-waves, some whaleback dunes) extending from 5 to 30 m.
