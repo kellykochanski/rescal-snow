@@ -53,7 +53,7 @@ Despite these effects, however, they are poorly understood and their effects are
 ![](../docs/example_images/field_examples.png)
 
 ## Requirements of a snow bedform model
-Several recent field studies have identified new computational components needed for a good understanding of snow bedforms.
+Several recent field studies have identified new computational components needed for a good understanding of snow bedforms [@something; @something_else].
 First, most snow bedforms (e.g ripples, barchan dunes, snow-steps and sastrugi) are between 0.1 and 2 m in length, with select bedforms (e.g. snow-waves, some whaleback dunes) extending from 5 to 30 m.
 These length scales are based on physical phenomena such as the hop length of blowing snow grains [@Kobayashi1980] and the length scales of turbulent structures in the wind [@Kobayashi1980, @Kochanski2019].
 Existing models of wind-blown snow, however, are designed to model snow redistribution over mountainous [@Liston2007; @Lehning2002; @Marsh2018] or continental [@Gallee2012] scales
