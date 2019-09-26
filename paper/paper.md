@@ -75,8 +75,8 @@ Rescal-snow is designed to enable the quantitative study of snow bedforms.
 It simulates 10-100 m domains at 0.05-0.20 m resolution, allowing it to capture all but the smallest snow bedforms.
 The simulation is adapted from a cellular automaton sand dune model, ReSCAL [@Narteau2014], and inherits ReSCAL's granular transport capacities.
 We have added features to simulate processes unique to snow, including snowfall and time-dependent cohesion.
-Fluid processes are modelled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
-Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modelling self-organization.
+Fluid processes are modeled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
+Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modeling self-organization.
 
 ![](../docs/example_images/rescal-snow_transitions.png)
 
@@ -86,7 +86,7 @@ It will also make it easier to investigate the effects of snow bedforms on (1) s
 ### Example simulations
 We have been able to use Rescal-snow to simulate the formation and movement of snow dunes and snow-waves under a range of wind, snowfall, and sintering conditions.
 We illustrate these results through the example simulations in our `README` file, 
-and in the [associated tutorial](docs/rescal-snow-tutorial.md), which also leads readers through a previously-unmodelled scientific question: how do bedforms affect the accumulation of snow?
+and in the [associated tutorial](docs/rescal-snow-tutorial.md), which also leads readers through a previously-unmodeled scientific question: how do bedforms affect the accumulation of snow?
 
 __Does this link to the tutorial need to be an absolute link? Clicking it from the PDF does not work.__
 
@@ -99,7 +99,7 @@ As a cellular automata, Rescal-snow cells also have discrete states. Our sinteri
 
 ### Good practices in computational snow science
 We aim to demonstrate good practices that will encourage robust, reproducible science by releasing Rescal-snow through Journal of Open Source Science.
-Our work is aimed at gemorphologists and snow scientists, and we use this model frequently while working with students.
+Our work is aimed at geomorphologists and snow scientists, and we use this model frequently while working with students.
 We expect that our work will be many users' first introduction to some subset of bash, git, C, Python or high-performance computing, and we aim to make this a positive learning experience. 
 Therefore, we designed our examples around scientific applications of all of these skills, and we punctuate them with references to relevant tutorials on git, bash, etc.
 
@@ -107,7 +107,7 @@ We also believe that good computational science is easier when users are able to
 This allows users order to test the stability of the model, explore a wide range of physical parameters, and gain an accurate understanding of the model uncertainty.
 We have set up structures for configuring, running, and analyzing parallel simulation instances to enable users to run high-quality numerical experiments with Rescal-snow.
 
-# Acknowledgements
+# Acknowledgments
 
 This work was performed under the auspices of the U.S. Department of Energy by Lawrence Livermore National Laboratory under Contract DE-AC52-07NA27344. This paper is released under LLNL-JRNL-786878-DRAFT.
 
