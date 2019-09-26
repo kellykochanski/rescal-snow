@@ -205,5 +205,5 @@ Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must
 See [AUTHORS.md](AUTHORS.md).
 
 ## 7. License
-GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md). SPDX-License-Identifier: GPL-3.0-or-later.
+GNU GPL 3.0 or any later version. See [LICENSE](LICENSE). SPDX-License-Identifier: GPL-3.0-or-later.
 This document was released from Lawrence Livermore National Laboratory under open source software release LLNL-CODE-785837; see [NOTICE](NOTICE) for details.
