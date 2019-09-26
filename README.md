@@ -202,6 +202,8 @@ guide](https://docs.lavasoftware.org/lava/contribution.html)
 Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
 
 ## 6. Contributors
+Rescal-snow branched off of ReSCAL (v1.6) in 2016, and continues to use the ReSCAL backend for the cellular automaton and lattice gas models. This history is described in [NEWS.md](NEWS.md) and the original code is available on branch `rescal-1.6`. Ongoing ReSCAL development is described at [http://www.ipgp.fr/~rozier/rescal/rescal.html](http://www.ipgp.fr/~rozier/rescal/rescal-fr.html) (the English version of this website is updated less regularly than the French). Our code is no longer easily compatible with ReSCAL, as we have removed features, unused code, and dependencies that were not related to wind-blown snow and reduced performance on high-performance computing systems. We are adopting a small fraction of new ReSCAL features on a case-by-case basis depending on their relevance to wind blown snow.
+
 See [AUTHORS.md](AUTHORS.md).
 
 ## 7. License
