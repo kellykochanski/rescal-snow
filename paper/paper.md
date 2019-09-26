@@ -45,17 +45,17 @@ bibliography: paper.bib
 
 # Summary
 
-When wind blows over dry snow, it creates a range of unique shapes known as snow bedforms.
+When wind blows over dry snow, it creates shapes known as snow bedforms.
 These features, which include snow dunes, waves, snow-steps and sastrugi (figure below), ornament Antarctica, Arctic sea ice, tundra, and mountain ridges [@Filhol2015; @Kochanski2018; @Kobayashi1980].
 They change the reflectivity and average thermal conductivity of snow, and may change the patterns of snow accumulation and transport.
 Despite these effects, however, they are poorly understood and their effects are not yet included in major snow or climate models.
 
 ![](../docs/example_images/field_examples.png)
 
-__This figure needs a caption and should be referenced from the text. How does it relate to the surrounding text? What is it illustrating? Why is it here?__
+_Snow bedforms on Niwot Ridge, Colorado. From left to right, small dunes and sastrugi (looking upwind), snow dunes (looking downwind), snow-waves (looking upwind)._
 
 ## Requirements of a snow bedform model
-Several recent field studies have identified new computational components needed for a good understanding of snow bedforms [@something; @something_else].
+Recent field studies have identified three new computational components needed for a good understanding of snow bedforms [@Kochanski2018; @Kochanski2019; @Filhol2015].
 First, most snow bedforms (e.g ripples, barchan dunes, snow-steps and sastrugi) are between 0.1 and 2 m in length, with select bedforms (e.g. snow-waves, some whaleback dunes) extending from 5 to 30 m.
 These length scales are based on physical phenomena such as the hop length of blowing snow grains [@Kobayashi1980] and the length scales of turbulent structures in the wind [@Kobayashi1980, @Kochanski2019].
 Existing models of wind-blown snow, however, are designed to model snow redistribution over mountainous [@Liston2007; @Lehning2002; @Marsh2018] or continental [@Gallee2012] scales
@@ -86,9 +86,7 @@ It will also make it easier to investigate the effects of snow bedforms on (1) s
 ### Example simulations
 We have been able to use Rescal-snow to simulate the formation and movement of snow dunes and snow-waves under a range of wind, snowfall, and sintering conditions.
 We illustrate these results through the example simulations in our `README` file,
-and in the [associated tutorial](docs/rescal-snow-tutorial.md), which also leads readers through a previously-unmodeled scientific question: how do bedforms affect the accumulation of snow?
-
-__Does this link to the tutorial need to be an absolute link? Clicking it from the PDF does not work.__
+and in the [associated tutorial](../docs/rescal-snow-tutorial.md), which also leads readers through a previously-unmodeled scientific question: how do bedforms affect the accumulation of snow?
 
 ### Limitations
 The natural length and time scales of Rescal-snow are set by the configuration of the cellular automata.
