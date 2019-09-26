@@ -1,5 +1,5 @@
 # Rescal-snow utilites
-This folder contains scripts for configuring, running and analyzing Rescal-snow simulations. These are run through Python3 and bash. 
+This folder contains scripts for configuring, running and analyzing Rescal-snow simulations. These are run through Python3 and bash.
 They make the Rescal-snow workflow more consistent and reproducible by making it possible to do most of the work in Python and store both input and output in Python classes.
 
 ## [rescal_utilities.py](rescal_utilities.py)
@@ -8,9 +8,9 @@ These tools are designed to aid parameter space explorations, sensitivity analys
 The following classes manage most Rescal-snow options and inputs (excepting those in the "real_data" file):
 
   *Parameters* : Class to hold, update, change, read, or write all the parameters that ReSCAL needs to run
-  
+
   *RunScript*  : Class to hold, update, change, read, or write a ReSCAL run script with appropriate flags
-  
+
   *DesignRun*  : Umbrella class to hold, update, change, read or write all parameters, sorting them into Parameters and RunScript
 
 Example usage (python3):
@@ -28,14 +28,16 @@ for the output should be created. The default is RESCAL_SNOW_ROOT/data_runs.
 # Create a run script named my_run.run and a parameter script named my_run.par
 my_run.write()
 ```
-See also the usage in [scripts/utilities/param_space_exploration_example.py](scripts/utilities/param_space_exploration_example.py)
+See also the usage in [scripts/utilities/param_space_exploration_example.py](param_space_exploration_example.py)
 
 ### Example: [param_space_exploration_example.py](param_space_exploration_example.py)
 This is an example file showing how to run a parameter space exploration. In this example, most simulation parameters are set to fixed values, then 30 runs are created to vary:
-  five snowfall rates, controlled by parameter Lambda_I,
-  six wind speeds, controlled by parameter Tau_min,
-  and all 30 combinations thereof.
- The script creates 30 new directories, one for each run. Each directory is seeded with a run script, a parameter file, and rescal and genesis executables. This allows all 30 simulations to run in parallel withou
+
+- five snowfall rates, controlled by parameter Lambda_I
+- six wind speeds, controlled by parameter Tau_min,
+- and all 30 combinations
+
+The script creates 30 new directories, one for each run. Each directory is seeded with a run script, a parameter file, and rescal and genesis executables. This allows all 30 simulations to run in parallel withou
 t interferance.
 
 Usage is described in example 4 of [../../docs/rescal-snow-tutorial.md](../../docs/rescal-snow-tutorial.md).
@@ -64,29 +66,24 @@ This example tests the functionality of [datarun.py](datarun.py) in a high-perfo
 ## [heightmap.py](heightmap.py)
 Utilities to create, read and visualize Rescal-snow height maps, a 2D surface height map which is standard Rescal output. These are managed through a HeightMap class.
 
-Utilities for creating Rescal-snow heightmaps (these may be used as initial conditions for the Rescal-snow simulation; see the INPUT_ELEVATION CSP_TEMPLATE in `src/genesis.c`).
+Utilities for creating Rescal-snow heightmaps (these may be used as initial conditions for the Rescal-snow simulation; see the `INPUT_ELEVATION CSP_TEMPLATE` in `src/genesis.c`).
 
-- invader_template
- - gaussian_hill
- - make_sinusoid
- - scale
- 
+- `invader_template`
+ - `gaussian_hill`
+ - `make_sinusoid`
+ - `scale`
+
 Utilities for analyzing Rescal-snow heightmaps (most of these use fourier transforms, as snow/sand self-organization has strong emergent wavelengths):
 
- - fft2d_analyze
- - fft2d_analyze_map_pic
- - fft2d_crop_blur
- - fft2d_center_blur
- 
+ - `fft2d_analyze`
+ - `fft2d_analyze_map_pic`
+ - `fft2d_crop_blur`
+ - `fft2d_center_blur`
+
  Utilities for visualizing height maps:
- 
-  - make_surface
+
+  - `make_surface`
 
 ## [cellspace.py](cellspace.py)
-Utilities to read, write, modify and visualize Rescal-snow cell spaces, the full state of the cellular automaton. Managed through CellSpace class. Used by [datarun.py](datarun.py).
+Utilities to read, write, modify and visualize Rescal-snow cell spaces, the full state of the cellular automaton. Managed through `CellSpace` class. Used by [datarun.py](datarun.py).
 May be used for visualizing and modifying internal sand/snow structures that are not adequately represented by 2D HeightMaps.
-
-
-
-
-
