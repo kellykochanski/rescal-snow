@@ -77,8 +77,10 @@ The simulation is adapted from a cellular automaton sand dune model, ReSCAL [@Na
 We have added features to simulate processes unique to snow, including snowfall and time-dependent cohesion.
 Fluid processes are modeled with a lattice gas cellular automaton, a method chosen to provide a good approximation to the Navier-Stokes equation at reasonable computational cost.
 Finally, the backbone of the simulation is a cellular automaton, an algorithm known to be particularly good for modeling self-organization.
+This cellular automaton contains a grid of cells of discrete types (Fig. 2, top), which evolve in nearest-neighbor pairs (doublets) as shown in Fig. 2. Each doublet transition occurs stochastically, as a poisson process with the average rates Lambda_X specified in Fig. 2.
 
 ![](../docs/example_images/rescal-snow_transitions.png)
+_Figure 2. Cellular automaton transitions in rescal-snow._
 
 This simulation will allow snow scientists to translate field studies, which are location-specific, into general terms.
 It will also make it easier to investigate the effects of snow bedforms on (1) surface roughness, (2) snow cover fractions, and (3) accumulation rates. This will allow us to describe the effects of meter-scale bedforms in terms of variables that affect regional climates.
