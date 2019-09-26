@@ -46,13 +46,13 @@ bibliography: paper.bib
 # Summary
 
 When wind blows over dry snow, it creates shapes known as snow bedforms.
-These features, which include snow dunes, waves, snow-steps and sastrugi (figure below), ornament Antarctica, Arctic sea ice, tundra, and mountain ridges [@Filhol2015; @Kochanski2018; @Kobayashi1980].
+These features, which include snow dunes, waves, snow-steps and sastrugi (Fig. 1), ornament Antarctica, Arctic sea ice, tundra, and mountain ridges [@Filhol2015; @Kochanski2018; @Kobayashi1980].
 They change the reflectivity and average thermal conductivity of snow, and may change the patterns of snow accumulation and transport.
 Despite these effects, however, they are poorly understood and their effects are not yet included in major snow or climate models.
 
 ![](../docs/example_images/field_examples.png)
 
-_Snow bedforms on Niwot Ridge, Colorado. From left to right, small dunes and sastrugi (looking upwind), snow dunes (looking downwind), snow-waves (looking upwind)._
+_Figure 1. Snow bedforms on Niwot Ridge, Colorado. From left to right, small dunes and sastrugi (looking upwind), snow dunes (looking downwind), snow-waves (looking upwind)._
 
 ## Requirements of a snow bedform model
 Recent field studies have identified three new computational components needed for a good understanding of snow bedforms [@Kochanski2018; @Kochanski2019; @Filhol2015].
