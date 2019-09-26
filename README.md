@@ -59,7 +59,7 @@ If you modify rescal-snow, you will need to modify and compile C code. We have a
 ### 2.2 Dependencies
 
  * C compiler (GCC and CLANG are known to work)
- * cmake>=3.1 (used for compiling)
+ * [CMake] >= 3.9 (used for compiling)
  * make (used for compiling)
  * [libpng](http://www.libpng.org/pub/png/libpng.html) (known to work with v1.6.37)
  * [zlib](https://www.zlib.net) (known to work with 1.2.11)
@@ -207,3 +207,7 @@ See [AUTHORS.md](AUTHORS.md).
 ## 7. License
 GNU GPL 3.0 or any later version. See [LICENSE](LICENSE). SPDX-License-Identifier: GPL-3.0-or-later.
 This document was released from Lawrence Livermore National Laboratory under open source software release LLNL-CODE-785837; see [NOTICE](NOTICE) for details.
+
+<!-- Links -->
+
+[CMake]: https://cmake.org
