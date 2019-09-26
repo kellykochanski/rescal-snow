@@ -85,12 +85,12 @@ It will also make it easier to investigate the effects of snow bedforms on (1) s
 
 ### Example simulations
 We have been able to use Rescal-snow to simulate the formation and movement of snow dunes and snow-waves under a range of wind, snowfall, and sintering conditions.
-We illustrate these results through the example simulations in our `README` file, 
+We illustrate these results through the example simulations in our `README` file,
 and in the [associated tutorial](docs/rescal-snow-tutorial.md), which also leads readers through a previously-unmodeled scientific question: how do bedforms affect the accumulation of snow?
 
 __Does this link to the tutorial need to be an absolute link? Clicking it from the PDF does not work.__
 
-### Limitations 
+### Limitations
 The natural length and time scales of Rescal-snow are set by the configuration of the cellular automata.
 Although these can be related to real length and time scales, it requires careful calibration, as described fully in @Narteau2009.
 The length scale of Rescal-snow cells, for reasonable model configurations, is 0.05-0.15 m. This limits the model's ability to resolve centimeter-scale snow features, such as snow-steps [@Kochanski2019], and to successfully model sharp-edged features, such as sastrugi.
@@ -100,10 +100,10 @@ As a cellular automata, Rescal-snow cells also have discrete states. Our sinteri
 ### Good practices in computational snow science
 We aim to demonstrate good practices that will encourage robust, reproducible science by releasing Rescal-snow through Journal of Open Source Science.
 Our work is aimed at geomorphologists and snow scientists, and we use this model frequently while working with students.
-We expect that our work will be many users' first introduction to some subset of bash, git, C, Python or high-performance computing, and we aim to make this a positive learning experience. 
+We expect that our work will be many users' first introduction to some subset of bash, git, C, Python or high-performance computing, and we aim to make this a positive learning experience.
 Therefore, we designed our examples around scientific applications of all of these skills, and we punctuate them with references to relevant tutorials on git, bash, etc.
 
-We also believe that good computational science is easier when users are able to make large numbers of model runs. 
+We also believe that good computational science is easier when users are able to make large numbers of model runs.
 This allows users order to test the stability of the model, explore a wide range of physical parameters, and gain an accurate understanding of the model uncertainty.
 We have set up structures for configuring, running, and analyzing parallel simulation instances to enable users to run high-quality numerical experiments with Rescal-snow.
 
