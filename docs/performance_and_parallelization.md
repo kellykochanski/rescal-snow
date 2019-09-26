@@ -55,7 +55,6 @@ In order of ease and likely effectiveness:
       - Set the transition rate to 0 in the parameter file, or
       - Disable the transition in [src/models.c](../src/models.c)
       - This will modify the model's behavior and may not be suitable for some studies. Also, the model will have to be re-calibrated with the new set of transitions.
- - Try using AVX optimizations (see [docs/how_to_install.md](how_to_install.md) )
  - Try compiling with intel compiler vs gcc
 
  We suspect that the largest performance gain would be obtained by replacing some stochastic cellular automaton transitions with deterministic transitions.
