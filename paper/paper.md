@@ -88,6 +88,8 @@ We have been able to use Rescal-snow to simulate the formation and movement of s
 We illustrate these results through the example simulations in our `README` file, 
 and in the [associated tutorial](docs/rescal-snow-tutorial.md), which also leads readers through a previously-unmodelled scientific question: how do bedforms affect the accumulation of snow?
 
+__Does this link to the tutorial need to be an absolute link? Clicking it from the PDF does not work.__
+
 ### Limitations 
 The natural length and time scales of Rescal-snow are set by the configuration of the cellular automata.
 Although these can be related to real length and time scales, it requires careful calibration, as described fully in @Narteau2009.
