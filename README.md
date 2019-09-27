@@ -194,11 +194,8 @@ Issues which cannot be handled via Github can be addressed to
 
 ### 5.3 Contributing
 
-We have built a model of the basic growth and function of snow dunes, but expect that many users may want more detailed features.
-
-If you wish to contribute a new feature, we recommend you fork our repository, commit your changes to a new feature or development branch, and create a pull request. An example contribution workflow, with git instructions, is outlined by the [LAVA software community project contribution
-guide](https://docs.lavasoftware.org/lava/contribution.html)
-
+If you wish to contribute a new feature or report a bug, welcome!
+See how to do this in [CONTRIBUTING.md](CONTRIBUTING.md).
 Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
 
 ## 6. Contributors
