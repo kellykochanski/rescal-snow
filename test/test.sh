@@ -11,53 +11,31 @@
 #    and rescal_utilities to set up some potential runs
 # Success at each stage is confirmed by the user.
 
+set -e          #Exit if any command fails
+set -o pipefail #Exit if any pipe fails
 
 echo "Attempting to build Rescal-snow..."
 cd ..
+rm -rf build
 mkdir build
 cd build
 cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release ..
 make -j 16
 cd ..
-while true; do
-	read -p "Did Rescal-snow build successfully? [y/n]" yn
-	case $yn in
-		[Yy]* ) echo "Good! Continuing."; break;;
-		[Nn]* ) exit;;
-		* ) echo "Please input [y/n] to continue.";;
-	esac
-done
 
 # Test that Rescal-snow runs
 echo "Attempting to run Rescal-snow using the snow_cone test case..."
 echo "(This may take a few minutes)"
 cd scripts
 ./snow_cone.run
-eog *.png
-while true; do
-	read -p "Does the output look good? [y/n]" yn
-	case $yn in
-		[Yy]* ) echo "Good! Continuing."; break;;
-		[Nn]* ) exit;;
-		* ) echo "Please input [y/n] to continue.";;
-	esac
-done
-
+diff SNO00003_t0.png ../test/SNO00003_t0.png
 
 # Test the visualization example
-echo "Attempting visualization example..."
-cp ../test/viz_example_test.py .
-python3 viz_example_test.py
-rm viz_example_test.py
-eog out/*image.png
-while true; do
-	read -p "Does the output look good? [y/n]" yn
-	case $yn in
-		[Yy]* ) echo "Good! Continuing."; break;;
-		[Nn]* ) exit;;
-		* ) echo "Please input [y/n] to continue.";;
-	esac
-done
+# echo "Attempting visualization example..."
+# cp ../test/viz_example_test.py .
+# python3 viz_example_test.py
+# rm viz_example_test.py
+# diff out/ALTI00030_t0_image.png ../test/ALTI00030_t0_image.png
 
 # Test rescal_utilities for setting up parallel runs
 echo "Attempting rescal_utilities example..."
@@ -66,17 +44,18 @@ python3 param_space_exploration_example.py
 cd ../..
 echo "Printing parallel directories:"
 ls test_parallel_runs
-echo "Printing contents of one directory:"
+echo "Printing directory contents:"
 ls test_parallel_runs/tauMin0_lambdaI0.001
+ls test_parallel_runs/tauMin0_lambdaI0.01
+ls test_parallel_runs/tauMin1000_lambdaI0.001
+ls test_parallel_runs/tauMin1000_lambdaI0.01
+ls test_parallel_runs/tauMin100_lambdaI0.001
+ls test_parallel_runs/tauMin100_lambdaI0.01
+ls test_parallel_runs/tauMin200_lambdaI0.001
+ls test_parallel_runs/tauMin200_lambdaI0.01
+ls test_parallel_runs/tauMin300_lambdaI0.001
+ls test_parallel_runs/tauMin300_lambdaI0.01
 rm -rf test_parallel_runs
-while true; do
-	read -p "Did Rescal-snow set up 10 parallel directories, each with rescal, genesis, real_data, run.run and run.par? [y/n]" yn
-	case $yn in
-		[Yy]* ) echo "Good! Continuing."; break;;
-		[Nn]* ) exit;;
-		* ) echo "Please input [y/n] to continue.";;
-	esac
-done
 
 # Remove results of test
 cd scripts
