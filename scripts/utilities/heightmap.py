@@ -304,6 +304,12 @@ class HeightMap:
         # save with transparent background and a small bounding box
         plt.savefig(filename, transparent=True, bbox_inches='tight')
 
+    def save_color_map(self, filename):
+        """Draw a color map and save as png"""
+        plt.imshow(self.height_map)
+        plt.colorbar()
+        plt.savefig(filename, bbox_inches='tight', transparent=True)
+        plt.close()
 
     def draw(self):
         """draw a simple color_map of height_map""" 
