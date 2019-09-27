@@ -5,11 +5,7 @@
 # This script:
 # - builds Rescal-snow
 # - Runs one example (scripts/snow_cone.run)
-# - Imports all the utilities scripts
-# - Uses the heightmap utility to visualize some files
-# - Uses the parameter space exploration utility
-#    and rescal_utilities to set up some potential runs
-# Success at each stage is confirmed by the user.
+# - Compares one output png to test data
 
 set -e          #Exit if any command fails
 set -o pipefail #Exit if any pipe fails
