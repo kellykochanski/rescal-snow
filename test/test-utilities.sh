@@ -42,25 +42,6 @@ while true; do
 	esac
 done
 
-# Test rescal_utilities for setting up parallel runs
-echo "Attempting rescal_utilities example..."
-cd utilities
-python3 param_space_exploration_example.py
-cd ../..
-echo "Printing parallel directories:"
-ls test_parallel_runs
-echo "Printing contents of one directory:"
-ls test_parallel_runs/tauMin0_lambdaI0.001
-rm -rf test_parallel_runs
-while true; do
-	read -p "Did Rescal-snow set up 10 parallel directories, each with rescal, genesis, real_data, run.run and run.par? [y/n]" yn
-	case $yn in
-		[Yy]* ) echo "Good! Continuing."; break;;
-		[Nn]* ) exit;;
-		* ) echo "Please input [y/n] to continue.";;
-	esac
-done
-
 # Remove results of test
 cd scripts
 ./clean -f
