@@ -62,7 +62,6 @@ If you modify rescal-snow, you will need to modify and compile C code. We have a
  * [CMake] >= 3.9 (used for compiling)
  * make (used for compiling)
  * [libpng](http://www.libpng.org/pub/png/libpng.html) (known to work with v1.6.37)
- * [zlib](https://www.zlib.net) (known to work with 1.2.11)
  * Optional packages used for analysis (see the [analysis](analysis) and [scripts/utilities](scripts/utilities) directories):
    * Python3 (used for analysis)
    * numpy (used by Python3 for analysis)
