@@ -196,17 +196,39 @@ To see the output clearly, we will make custom images with matplotlib (Python). 
 
 We have included a script to recolor three example output frames from the snowfall simulation:
 
-```bash
-cd docs/example_images/snowfall
-python recolor.py
+```python
+$ cd scripts
+$ python3
+import sys
+sys.path.append('utilities')    # Add utilities to Python path
+import os
+import matplotlib.pyplot as plt # Plotting
+import heightmap                # utilities/heightmap.py contains tools for reading and visualizing height maps (ALTI files)
+
+# Find the heightmap files to visualize. In this tutorial, they are named out/ALTIxxxxx.log.
+filenames = ['out/'+f for f in os.listdir('out') if f[:4]=='ALTI']
+filenames = [f for f in filenames if f[-4:]=='.log']
+filenames.sort()
+print(filenames)
+>> ['ALTI00000_t0.log', 'ALTI00001_t0.log', 'ALTI00002_t0.log', 'ALTI00003_t0.log', 'ALTI00004_t0.log', 'ALTI00005_t0.log', 'ALTI00006_t0.log', 'ALTI00007_t0.log', 'ALTI00008_t0.log', 'ALTI00009_t0.log', 'ALTI00010_t0.log', 'ALTI00011_t0.log', 'ALTI00012_t0.log', 'ALTI00013_t0.log', 'ALTI00014_t0.log', 'ALTI00015_t0.log', 'ALTI00016_t0.log', 'ALTI00017_t0.log', 'ALTI00018_t0.log', 'ALTI00019_t0.log', 'ALTI00020_t0.log', 'ALTI00021_t0.log', 'ALTI00022_t0.log', 'ALTI00023_t0.log', 'ALTI00024_t0.log', 'ALTI00025_t0.log', 'ALTI00026_t0.log', 'ALTI00027_t0.log', 'ALTI00028_t0.log', 'ALTI00029_t0.log', 'ALTI00030_t0.log']
+
+# Visualize the files. This may take a few seconds.
+for name in filenames:
+    # Read the file as a HeightMap object
+    hm  = heightmap.HeightMap(name)
+    # hm.draw                   # Uncomment to view each image as it is produced
+    hm.save_color_map(name[:-4] + '_image.png')
+    
+ exit()
+ $ eog out/*image.png           # View images 
 ```
-This produces the following images:
+This produces images like the following:
 
-| Default image, SNO00050_t0.png | ALTI00050_recolored.png | ALTI00100_recolored.png | ALTI00150_recolored.png |
+| Default image, SNO00050_t0.png | ALTI00005_t0_image.png | ALTI00015_t0_image.png | ALTI00025_t0_image.png |
 |-----------|----------------|------------|---------------|
-| ![](example_images/snowfall/SNO00050_t0.png) | ![](example_images/snowfall/ALTI00050_t0_recolored.png) | ![](example_images/snowfall/ALTI00100_t0_recolored.png) | ![](example_images/snowfall/ALTI00150_t0_recolored.png) |
+| ![](example_images/snowfall/SNO00005_t0.png) | ![](example_images/snowfall/ALTI00005_t0_image.png) | ![](example_images/snowfall/ALTI00015_t0_image.png) | ![](example_images/snowfall/ALTI00025_t0_image.png) |
 
-The full evolution of this simulation is shown in the gif at the top of [README.md](../README.md).
+The full evolution of this simulation, running for a longer time, is shown in the gif at the top of [README.md](../README.md).
 
 > Additional scripts for analysing and visualizing the runs are available in the scripts/utilities and analysis directories.
 
