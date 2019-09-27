@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Kelly Kochanski Sept 27 2019
+# Test script for Rescal-snow
+# This script:
+# - builds Rescal-snow
+# - Runs one example (scripts/snow_cone.run)
+# - Imports all the utilities scripts
+# - Uses the heightmap utility to visualize some files
+# - Uses the parameter space exploration utility
+#    and rescal_utilities to set up some potential runs
+# Success at each stage is confirmed by the user.
+
 
 echo "Attempting to build Rescal-snow..."
 cd ..

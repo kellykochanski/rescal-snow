@@ -1,3 +1,8 @@
+__author__="Kelly Kochanski"
+__date__="Sept 27 2019"
+__doc__="Test script for Rescal-snow python utilities. Called by test.sh."
+
+
 import sys
 import os
 

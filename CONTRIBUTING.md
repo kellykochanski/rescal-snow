@@ -51,4 +51,5 @@ $ git checkout -b name/purpose develop
 and commit your changes.
 
 When the feature or bugfix is ready to be incorporated into Rescal-snow, open a [pull request](https://help.github.com/en/articles/creating-a-pull-request) against `develop`.
+The feature should pass the tests in [test/test.sh](test/test.sh).
  
