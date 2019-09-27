@@ -8,8 +8,9 @@ project (rescal-snow
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(Sanitizers)
 
-find_package(ZLIB 1.2 REQUIRED)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(PNG 1.6 REQUIRED)
+find_package(Threads REQUIRED)
 
 set(COMMON_SOURCES
   src/cells.c
@@ -76,11 +77,11 @@ function(setup_target target)
   add_sanitizers(${target})
 endfunction(setup_target)
 
-target_link_libraries(rescal    PRIVATE png pthread m)
-target_link_libraries(genesis   PRIVATE png m)  
-target_link_libraries(regenesis PRIVATE m)  
-target_link_libraries(bin2png   PRIVATE png m)  
-target_link_libraries(csp2png   PRIVATE png m)  
+target_link_libraries(rescal    PRIVATE PNG::PNG Threads::Threads m)
+target_link_libraries(genesis   PRIVATE PNG::PNG m)
+target_link_libraries(regenesis PRIVATE m)
+target_link_libraries(bin2png   PRIVATE PNG::PNG m)
+target_link_libraries(csp2png   PRIVATE PNG::PNG m)
 
 setup_target(rescal)
 setup_target(genesis)
