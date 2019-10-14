@@ -33,6 +33,7 @@ cp ../test/viz_example_test.py .
 python3 viz_example_test.py
 rm viz_example_test.py
 eog out/*image.png
+echo "(Close image to continue)"
 while true; do
 	read -p "Does the output look good? [y/n]" yn
 	case $yn in
@@ -42,10 +43,5 @@ while true; do
 	esac
 done
 
-# Remove results of test
-cd scripts
-./clean -f
-rm -rf out
-cd ..
 
 echo "----Testing complete.----"
