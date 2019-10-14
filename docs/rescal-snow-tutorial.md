@@ -119,7 +119,11 @@ You can run an example snow feature with sintering with:
 ```bash
 cd scripts
 ./sintering.run
+>> Deleting files of types *.(png|bin|csp|log|gz|data|vel|car) in current directory [n|y] and out directory ?
+y
 ```
+
+As we are running all the tutorials in the same `scripts` directory, it's important to delete old output (`./clean`) to avoid mixing the output from two runs.
 
 **Example 2 results**
 
@@ -165,6 +169,8 @@ We have set up a snowfall simulation in the scripts directory that you can run w
 ```bash
 cd scripts
 ./snowfall.run
+>> Deleting files of types *.(png|bin|csp|log|gz|data|vel|car) in current directory [n|y] and out directory ? 
+y
 ```
 Again, this run script calls a new parameter file:
 ```bash
