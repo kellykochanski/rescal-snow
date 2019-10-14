@@ -239,7 +239,11 @@ class HeightMap:
         if type(height_input) == str:
             self.input_file = height_input
             self.output_file = height_input
-            self.height_map = np.loadtxt(height_input).astype(np.uint8)
+            try:
+                self.height_map = np.loadtxt(height_input).astype(np.uint8)
+            except:
+                print("HeightMap couldn't read file " + height_input + ".")
+                print("This probably happened because the input file is an irregular shape.")
 
         # otehrwise is should be a numpy array
         else:
