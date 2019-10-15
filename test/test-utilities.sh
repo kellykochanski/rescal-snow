@@ -56,10 +56,10 @@ cp ../test/viz_example_test.py .
 python3 viz_example_test.py
 rm viz_example_test.py
 
-# Create a gif of the PNGs if we have imagemagick
-if command -v convert >/dev/null 2>&1 ; then
-    "${test_dir%/}/../scripts/visualization/png_to_gif.sh" out/ALTI_cone.gif out/*image.png
-fi
+# # Create a gif of the PNGs if we have imagemagick
+# if command -v convert >/dev/null 2>&1 ; then
+#     "${test_dir%/}/../scripts/visualization/png_to_gif.sh" out/ALTI_cone.gif out/*image.png
+# fi
 
 # Portably look for image viewing program, using system default application when possible
 if command -v xdg-open > /dev/null 2>&1 ; then
