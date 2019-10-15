@@ -203,7 +203,7 @@ To see the output clearly, we will make custom images with matplotlib (Python). 
 
 ## 4. Visualizing the simulation output <a name="visualizing"></a>
 
-We have included a script to recolor three example output frames from the snowfall simulation:
+The following python commands may be run (interactively, or as a script) to recolor three example output frames from the snowfall simulation:
 
 ```python
 $ cd scripts
