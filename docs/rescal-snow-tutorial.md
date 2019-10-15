@@ -2,38 +2,6 @@
 
 ![](example_images/snowfall_example.gif)
 
-snowfall-wind phase diagram
-
-The runs with the higher snowfall rate have a much deeper average snow depth than the runs with lower snowfall rate. The runs with high wind speed (low Tau_min) have less even snow cover, with better-defined ripples and dunes.
-
-    Parallel run errors?
-
-        msub/sbatch commands not allowed by your computing cluster -> seek support from someone familiar with the cluster
-        permissions errors -> run chmod u+rwx \* in test_parallel_runs; contact administrator if this is disallowed
-        script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun param_space_exploration_example.py and confirm that it produced the output above; check that you're running msub/sbatch from scripts; check relative directory references in msub/sbatch script and submit.sh
-        runs time out before producing useful output -> increase walltime; large simulations on slow machines may ultimately take a few hours
-
-Run ReSCAL within python
-
-There is an option to run ReSCAL in such a way that the .csp files are piped to a python process that processes them while ReSCAL is running. This can be useful for reducing the amount of disc space used and may have a siginific
-ant speed increase for some configurations. There is an example of how to do this at docs/rescal-in-python.md. For more information on processing the .csp files within python, see docs/modify-cellspace.md.
-
-    © 2019 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Status
-    Help
-
-    Contact GitHub
-    Pricing
-    API
-    Training
-    Blog
-    About
-
-
-
 1. [Tutorial aims and features](#introduction)
 2. [Getting started](#starting)
     1. [Prerequisites](#Prerequisites)
