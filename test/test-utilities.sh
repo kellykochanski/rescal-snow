@@ -87,10 +87,5 @@ while true; do
 	* ) echo "Please input [y/n] to continue.";;
     esac
 done
-# Remove results of test
-
-cd "${test_dir%/}/../scripts"
-./clean -f
-rm -rf out
 
 echo "----Testing complete.----"
