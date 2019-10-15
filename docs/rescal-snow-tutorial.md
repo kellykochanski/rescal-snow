@@ -329,19 +329,21 @@ ls test_parallel_runs/tauMin0_lambdaI0.01/out
 >> ALTI00004_t0.log  DOUBLETS.log             TIME.log
 ```
 
-> *Troubleshooting tips for parallel runs*
+> *Troubleshooting for parallel runs*
 >
 > - msub/sbatch commands not allowed by your computing cluster 
->    -  seek support from someone familiar with the cluster, or use an example run script for your cluster as a template
+>    -  use an example run script for your cluster as a template, if available
+>    -  seek support from someone familiar with the cluster
 > - permissions errors 
->    - run `chmod u+rwx \*` in test_parallel_runs; contact administrator if this is disallowed
+>    - run `chmod u+rwx \*` in test_parallel_runs
+>    - contact administrator if this is disallowed
 > - script could not find input (run.run or run.par or sealevel_snow.prop) 
 >    - rerun param_space_exploration_example.py and confirm that it produced the output above
 >    - check that you're running msub/sbatch from scripts directory
 >    - check relative directory references in msub/sbatch script and submit.sh
 > - runs time out before producing useful output 
 >   - increase walltime
->   - reduce simulation domain size (parameters 'L' and 'D')
+>   - reduce simulation domain size (parameters 'L' and 'D' in `.par` file)
 >   - large simulations may run for many hours
 
 
@@ -353,20 +355,6 @@ The following phase diagram shows the 100th images produced by each of these run
 
 The runs with the higher snowfall rate have a much deeper average snow depth than the runs with lower snowfall rate.
 The runs with high wind speed (low Tau\_min) have less even snow cover, with better-defined ripples and dunes.
-
->*Parallel run errors?*
->
-> - msub/sbatch commands not allowed by your computing cluster 
->      * seek support from someone familiar with the cluster
-> - permissions errors 
->      * run `chmod u+rwx \*` in test_parallel_runs directory 
->      * contact administrator if this is disallowed
-> - script could not find input (run.run or run.par or sealevel_snow.prop)
->      * rerun param_space_exploration_example.py and confirm that it produced the output above
->      * check that you're running msub/sbatch from scripts
->      * check relative directory references in msub/sbatch script and submit.sh
-> - runs time out before producing useful output
->      * increase walltime; large simulations on slow machines may ultimately take a few hours
 
 ### Run ReSCAL within python <a name="python"></a>
 
