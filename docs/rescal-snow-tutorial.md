@@ -294,8 +294,8 @@ Running `./run.run` in this test_parallel_runs/tauMin0_lambdaI0.001 directory wo
 The directory names list the run parameters. For example, test_paralle_runs/tauMin0\_lambdaI0.001 uses a snowfall rate of 0.001/t0, and has the highest possible wind strength (tauMin=0).
 The other nine subdirectories contain material for runs with different snowfall rates and wind strengths.
 
-We can submit all of these runs simultaneously using scripts/run_parallel_rescal.msub (for Moab systems) or scripts/run_parallel_rescal.sbatch (for slurm).
-These scripts contain #MSUB or #SBATCH commands describing the user's email, the queue, the resources in terms of nodes or processors, etc, e.g.:
+We can submit all of these runs simultaneously using scripts/run_parallel_rescal.msub (for Moab systems).
+These scripts contain `#MSUB` commands describing the user's email, the queue, the resources in terms of nodes or processors, etc, e.g.:
 ```bash
 #MSUB -q pbatch
 #MSUB -M yourname@yourserver.com
