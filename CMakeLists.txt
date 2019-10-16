@@ -1,5 +1,15 @@
 cmake_minimum_required (VERSION 3.9)
 
+# Use new policies on versions of CMake that have been tested
+cmake_policy(VERSION 3.9.3...3.15.4)
+
+# Let us use, e.g., PNG_ROOT=/path/to/libpng, in the environment to
+# tell find_package() where to look. Usefull on clusters.
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
+
 project (rescal-snow
   DESCRIPTION "Simulating snow self-organization with cellular automata"
   LANGUAGES C
