@@ -13,6 +13,10 @@ H = 50
 L = 200
 D = 80
 
+##Random seed 
+#Warning: test/test.sh relies on this being fixed.
+Seed = 1
+
 ## CSP template (genesis)
 Csp_template = CONE(20,40,50)
 

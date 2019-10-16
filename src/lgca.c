@@ -22,6 +22,7 @@
  */
 
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -199,12 +200,12 @@ void init_collisions() {
   ResetMemory(CelMvt2, MvtField, CHLD);
 
   //allocation tableau NbMvt[]
-  AllocMemory(NbMvt, long, CLNS);
-  ResetMemory(NbMvt, long, CLNS);
+  AllocMemory(NbMvt, int64_t, CLNS);
+  ResetMemory(NbMvt, int64_t, CLNS);
 
 #ifdef MVT_REGUL
-  AllocMemory(NbMvt0, long, CLNS);
-  ResetMemory(NbMvt0, long, CLNS);
+  AllocMemory(NbMvt0, int64_t, CLNS);
+  ResetMemory(NbMvt0, int64_t, CLNS);
 #endif
   PrintTotalMemory();
 
@@ -258,7 +259,7 @@ void init_collisions() {
   }
 #endif
 
-  LogPrintf("nb_mvt_in = %ld\n", nb_mvt_in);
+  LogPrintf("nb_mvt_in = %" PRId64 "\n", nb_mvt_in);
 
   // initialisation of Collisions[]
   for (i = 0; i < SIZE_MVT_FIELD; i++) {
@@ -565,7 +566,10 @@ void lecture_mvt() {
     exit(-4);
   }
 
-  fread(CelMvt, sizeof(MvtField), CHLD, fp);
+  if ((int32_t)fread(CelMvt, sizeof(MvtField), CHLD, fp) != CHLD) {
+    ErrPrintf("Read error\n");
+    exit(-1);
+  }
 
   fclose(fp);
 
@@ -1455,7 +1459,7 @@ void dump_mvt_in_out() {
   }
 
   if (step >= VSTEP_TIME){
-    sprintf(current_output, "MTV_IO","%04d: \t%09ld \t%09ld \t%f\n", cpt, nb_mvt_in, nb_mvt_out, (nb_mvt_in) ? ((float)nb_mvt_out/nb_mvt_in) : 0);
+    sprintf(current_output, "%04d: \t%09" PRId64" \t%09" PRId64 " \t%f\n", cpt, nb_mvt_in, nb_mvt_out, (nb_mvt_in) ? ((float)nb_mvt_out/nb_mvt_in) : 0);
     output_write("MVT_IO", current_output);
     step = nb_mvt_in = nb_mvt_out = 0;	//reset
     cpt++;
@@ -1484,7 +1488,7 @@ void dump_densite(){
   // Calculate density
   densite = (float)(nb_mvt - nb_mvt_sol) / nb_cel_fluide;
 
-  sprintf(output, "%04d: \t%09ld \t%09ld \t%f \t%09ld\n", cpt++, (long)nb_mvt, nb_cel_fluide, densite, (long)nb_mvt_sol);
+  sprintf(output, "%04d: \t%09d \t%09" PRId64 " \t%f \t%09ld\n", cpt++, nb_mvt, nb_cel_fluide, densite, (long)nb_mvt_sol);
   output_write("DENSITE", output);
 }
 
@@ -1628,7 +1632,7 @@ void dump_collisions()
 void dump_signature_mvt()
 {
   char current_output[128];
-  int32_t i;
+  size_t i;
   uint32_t sig, *aux;
 
   //calcul de la signature

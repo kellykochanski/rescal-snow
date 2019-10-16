@@ -22,6 +22,7 @@
  */
 
 #include <stdint.h>
+#include <sys/time.h>
 
 typedef struct vector_3d {
   float x;
@@ -48,6 +49,8 @@ enum SUR_MODES {SUR_MODE_UNIFORM, SUR_MODE_CONE, SUR_MODE_TECTO};
 #define RotMapPosX(_x,_y) rot_map_pos[_x + L*(_y)].x
 #define RotMapPosY(_x,_y) rot_map_pos[_x + L*(_y)].y
 
+double calculate_msec(struct timeval start, struct timeval stop);
+void log_time_delta(struct timeval start, char* message, int id, int visible);
 void init_terre();
 //void wait_csp_ready();
 void lock_csp(int32_t log_flag);

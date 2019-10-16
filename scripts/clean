@@ -2,7 +2,7 @@
 
 ## Delete files from previous simulation before running a new simulation
 
-to_be_deleted=$(ls *.png *.bin *.csp *.log *.gz *.data *.vel *.car 2>/dev/null )
+to_be_deleted=$(ls *.png *.bin *.csp *.log *.gz *.data *.vel *.car out/*.log out/*.png 2>/dev/null )
 
 if [ "$to_be_deleted" == "" ] ; then
   #echo "no file to delete"
@@ -12,7 +12,7 @@ fi
 if [ "$1" == "-f" ] || [ -e ".clean_yes" ] ; then
   ans="yes"
 else
-  echo -n 'Deleting files of types *.(png|bin|csp|log|gz|data|vel|car) in current directory [n|y] ? '
+  echo -n 'Deleting files of types *.(png|bin|csp|log|gz|data|vel|car) in current directory [n|y] and out directory ? '
   read ans
 fi
 

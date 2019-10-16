@@ -139,5 +139,6 @@ void dump_mvt(int32_t cpt, int32_t unit);
 void dump_densite();
 void dump_vel();
 void dump_signature_mvt();
+void dump_collisions();
 
 #endif //LGCA
