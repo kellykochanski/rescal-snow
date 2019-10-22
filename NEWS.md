@@ -1,5 +1,20 @@
 # News and development history
 
+## rescal-snow 1.1
+
+Created in response to Journal of Open Source Software review.
+
+ - docs updated
+ 
+ - paper.md and paper.bib created and reviewed
+ 
+ - test folder added with bash testing scripts
+ 
+ - tutorials tested and refined
+ 
+ - visualization examples refined to use cellspace/heightmap tools
+ 
+
 ## rescal-snow 1.0
 
 Split from ReSCAL. Code slimmed down to focus on DUN and SNO models, rather than RIV, CMB, etc.
