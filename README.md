@@ -1,26 +1,28 @@
-# Rescal-snow <a name="introduction"></a>
+# Rescal-snow
 A model of dunes and snow waves
+
+[![status](https://joss.theoj.org/papers/822d9380fa5ce6f89cbbdebf1605df14/status.svg)](https://joss.theoj.org/papers/822d9380fa5ce6f89cbbdebf1605df14)
 
 ![](docs/example_images/snowfall_example.gif)
 
-1. [Motivation](#introduction)
-2. [Getting started](#starting)
-    1. [Prerequisites](#Prerequisites)
-    2. [Dependencies](#Dependencies)
-    3. [Download](#Download)
-    4. [Installation](#Installation)
-3. [Features](#examples)
-    1. [Example 1: a snow cone](#test-cone)
-    2. [Example 2: sintering snow](#test-sinter)
-    3. [Example 3: dune growth by snowfall](#test-snowfall)
-    4. [Example 4: parameter space exploration](#test-parallel)
-4. [References and further reading](#references)
-5. [Community guidelines](#community)
-    1. [Citation](#Citation)
-    2. [Support](#Support)
-    3. [Contributing](#contributing)
-6. [Contributors](#authors)
-7. [License](#License)
+1. [Motivation](#1-motivation)
+2. [Getting started](#2-getting-started)
+    1. [Prerequisites](#21-prerequisites)
+    2. [Dependencies](#22-dependencies)
+    3. [Download](#23-download)
+    4. [Installation](#24-installation)
+3. [Features](#3-features)
+    1. [Example 1: a snow cone](#31-sand-and-snow-dunes)
+    2. [Example 2: sintering snow](#32-sintering-snow)
+    3. [Example 3: dune growth by snowfall](#33-dune-growth-by-snowfall)
+    4. [Example 4: parameter space exploration](#34-parallel-instances-and-parameter-space-exploration)
+4. [References and further reading](#4-references-and-further-reading)
+5. [Community guidelines](#5-community-guidelines)
+    1. [Citation](#51-citation)
+    2. [Support](#52-support)
+    3. [Contributing](#53-contributing)
+6. [Contributors](#6-contributors)
+7. [License](#7-license)
 
 ### 1. Motivation
 
@@ -45,7 +47,7 @@ Rescal-snow is also designed for robust, reproducible science, and contains tool
  - A python-based workflow that manages data and analysis at runtime
 
 
-## 2. Getting started <a name="starting"></a>
+## 2. Getting started
 
 ### 2.1 Prerequisites
 
@@ -57,8 +59,9 @@ If you modify rescal-snow, you will need to modify and compile C code. We have a
 ### 2.2 Dependencies
 
  * C compiler (GCC and CLANG are known to work)
- * cmake>=3.1 (used for compiling)
+ * [CMake] >= 3.9 (used for compiling)
  * make (used for compiling)
+ * [libpng](http://www.libpng.org/pub/png/libpng.html) (known to work with v1.6.37)
  * Optional packages used for analysis (see the [analysis](analysis) and [scripts/utilities](scripts/utilities) directories):
    * Python3 (used for analysis)
    * numpy (used by Python3 for analysis)
@@ -69,7 +72,7 @@ If you modify rescal-snow, you will need to modify and compile C code. We have a
 On a Debian-based/Ubuntu Linux machine, the dependencies can be acquired using: 
 
 ```bash
-sudo apt install gcc cmake make python3 python3-numpy python3-pandas python3-scipy
+sudo apt install gcc cmake make libpng-dev zlib1g-dev python3 python3-numpy python3-pandas python3-scipy
 ```
 
 On most machines, the Python packages can also be acquired using:
@@ -90,8 +93,6 @@ You may also download the repository manually from [Github](https://github.com/k
 
 ### 2.4 Installation
 
-These instructions will get rescal-snow running on most Linux environments. For additional installation options, tips on avoiding/installing missing dependencies, and MacOS installation instructions see [docs/how_to_install.md](how_to_install.md).
-
 In a terminal, navigate into the main rescal-snow directory (shown above). Run:
 ```bash
 mkdir build
@@ -100,12 +101,12 @@ cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release .. #Debug can be used instead of Relea
 make -j 4                                    #Adjust to the number of cores you have for a speedy build
 ```
 
-## 3. Features <a name="examples"></a>
+## 3. Features
 
 The examples below are fully described in the tutorial: [docs/rescal-snow-tutorial.md](docs/rescal-snow-tutorial.md).
 The [docs](docs) folder also contains descriptions of additional configuration and analysis options; check these if you're looking for functionality not found in the tutorial.
 
-### 3.1 Sand and snow dunes <a name="test-cone"></a>
+### 3.1 Sand and snow dunes
 
 The default configuration for Rescal-snow simulates snow (or sand) dune formation. This simulates processes including air flow; grain entrainment, saltation, suspension and deposition; and granular avalanches.
 
@@ -117,18 +118,18 @@ In these conditions, a pile of sand/snow (left) evolves into a dart-shaped barch
 
 Each of the three images above shows a shaded top-down view of a dune (top left), cross-sections through the dune, along the dashed lines (middle left, top right), and a cross-section showing the pressure intensity in the fluid (bottom left).
 
-### 3.2 Sintering snow <a name="test-sinter"></a>
+### 3.2 Sintering snow
 
 Snow cohesion increases over time: this is called sintering.
 Rescal-snow is able to simulate the transition of loose (beige) grains into sintered (light purple) grains within waves and dunes.
 
 ![](docs/example_images/sintering/sintering.gif)
 
-### 3.3 Dune growth by snowfall <a name="test-snowfall"></a>
+### 3.3 Dune growth by snowfall
 
 Rescal-snow simulates snow by adding loose grains to the top of the simulation. The gif at the top of this page shows a height-map of a field of dunes and waves growing during snowfall.
 
-### 3.4 Parallel instances and parameter space exploration <a name="test-parallel"></a>
+### 3.4 Parallel instances and parameter space exploration
 We believe that building robust, trustworthy models is much simpler when it's easy to make many model runs.
 
 Rescal-snow contains a series of tools for running many simulation instances in parallel, and managing the associated flows of input and output data.
@@ -139,10 +140,9 @@ The following phase diagram shows images produced by ten parallel runs simulatin
 
 
 
-## 4. References and further reading <a name="references"></a>
+## 4. References and further reading
 
 The [docs](docs) folder contains additional information on 
-[alternate installations](docs/how_to_install.md), 
 [performance and parallelization issues](docs/performance_and_parallelization.md), 
 [model inputs and configuration](docs/rescal-snow-inputs.md),
 [model calibration and validation](docs/calibration_and_validation.md),
@@ -161,14 +161,14 @@ For more information about the backend function of the cellular automaton and la
 To learn the underlying principles of the lattice gas cellular automaton (LGCA)  model (recommended before modifying the LGCA, the boundary conditions, or the aspect ratio of the simulation) see:
  - ['Lattice-gas automata for the Navier-Stokes equation', Frisch, Hasslacher and Pomeau, 1986'](https://doi.org/10.1103/PhysRevLett.56.1505)
 
-## 5. Community guidelines <a name="community"></a>
+## 5. Community guidelines
 
 We encourage you to interact with the project through Github (see below). This will allow easy integration of your changes and prevent rescal-snow from fragmenting excessively.
 We use [this](https://nvie.com/posts/a-successful-git-branching-model/) git workflow,
 with the expectation that new changes will be tested on the examples in the README, docs, or tutorials.
 If you're not familiar with git, see [the software carpentry git tutorial](https://swcarpentry.github.io/git-novice/).
 
-### Citation
+### 5.1 Citation
 
 Do you want to incentivize developers to build and maintain the software you need?
 Cite us!
@@ -178,7 +178,7 @@ This software inherits many features from the Real-Space Cellular Automaton Labo
  - ['A real-space cellular automaton laboratory', O Rozier and C Narteau, Earth Surface Processes and Landforms 39(1) 98-109, 2013, doi=10.1002/esp.3479](https://onlinelibrary.wiley.com/doi/abs/10.1002/esp.3479)
 
 
-### Support
+### 5.2 Support
 
 If you have challenges or questions, look at the material under 'further information' or reach out to us.
 
@@ -191,18 +191,21 @@ Issues which cannot be handled via Github can be addressed to
     www.github.com/kellykochanski
 
 
-### Contributing
+### 5.3 Contributing
 
-We have built a model of the basic growth and function of snow dunes, but expect that many users may want more detailed features.
-
-If you wish to contribute a new feature, we recommend you fork our repository, commit your changes to a new feature or development branch, and create a pull request. An example contribution workflow, with git instructions, is outlined by the [LAVA software community project contribution
-guide](https://docs.lavasoftware.org/lava/contribution.html)
-
+If you wish to contribute a new feature or report a bug, welcome!
+See how to do this in [CONTRIBUTING.md](CONTRIBUTING.md).
 Rescal-snow is distributed under the GNU GPL 3.0 license; all contributions must be made under this license or a later version.
 
-## 6. Contributors <a name="authors"></a>
+## 6. Contributors
+Rescal-snow branched off of ReSCAL (v1.6) in 2016, and continues to use the ReSCAL backend for the cellular automaton and lattice gas models. This history is described in [NEWS.md](NEWS.md) and the original code is available on branch `rescal-1.6`. Ongoing ReSCAL development is described at [http://www.ipgp.fr/~rozier/rescal/rescal.html](http://www.ipgp.fr/~rozier/rescal/rescal-fr.html) (the English version of this website is updated less regularly than the French). Our code is no longer easily compatible with ReSCAL, as we have removed features, unused code, and dependencies that were not related to wind-blown snow and reduced performance on high-performance computing systems. We are adopting a small fraction of new ReSCAL features on a case-by-case basis depending on their relevance to wind blown snow.
+
 See [AUTHORS.md](AUTHORS.md).
 
 ## 7. License
-GNU GPL 3.0 or any later version. See [docs/LICENSE.md](docs/LICENSE.md). SPDX-License-Identifier: GPL-3.0-or-later.
+GNU GPL 3.0 or any later version. See [LICENSE](LICENSE). SPDX-License-Identifier: GPL-3.0-or-later.
 This document was released from Lawrence Livermore National Laboratory under open source software release LLNL-CODE-785837; see [NOTICE](NOTICE) for details.
+
+<!-- Links -->
+
+[CMake]: https://cmake.org

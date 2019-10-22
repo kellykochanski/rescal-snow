@@ -15,11 +15,11 @@ The simulation speed decreases as the number of available grain transitions incr
  - many transition types are enabled
  - the horizontal domain (set by L and D) is large
  - the surface is completely covered by grains
- 
- The simulation is not highly sensitive to changes in the lattice gas. 
+
+ The simulation is not highly sensitive to changes in the lattice gas.
  Changes to the fluid depth (set by height H) has negligible effect on run time.
  Parallelizing the lattice gas component is also largely ineffective.
- 
+
 ### Rescal-snow is highly resistant to parallelization
 
 During the course of this development, we attempted many parallelizations for rescal-snow.
@@ -28,14 +28,14 @@ The details are beyond the scope of this document, but our attempts included
  - exporting random number generation to GPUs
  - slicing the domain into separate pieces controlled by separate processors
 
-None of these efforts led to particularly efficient parallel computation. 
-Thus we emphasise applications, such as parameter space explorations, that leverage many processors to perform many serial runs, 
+None of these efforts led to particularly efficient parallel computation.
+Thus we emphasise applications, such as parameter space explorations, that leverage many processors to perform many serial runs,
 rather than applications that require parallelizing rescal-snow.
 
 > *Why is parallelizing rescal-snow hard?*
-> 
+>
 > In algorithmic terms, rescal-snow looks a lot like a [discrete event simulation](https://en.wikipedia.org/wiki/Discrete-event_simulation). These are a notoriously hard class of simulations to parallelize.
-> 
+>
 > In rescal-snow terms, the simulation is very hard to parallelize because it has no 'maximum speed'. Some events, like avalanches, cover large distances nearly instantaneously. It is not easy to identify parts of the simulation that are independent over a given time scale.
 
 Parallelizing cellular automata is an interesting HPC problem. We're still working on it.
@@ -44,34 +44,34 @@ Parallelizing cellular automata is an interesting HPC problem. We're still worki
 
 In order of ease and likely effectiveness:
 
- - Turn off any background applications that compete for proessing power. 
- - Remove the 'nice' command in the .run file, if applicable.
+ - Turn off any background applications that compete for proessing power.
+ - Remove the `nice` command in the `.run` file, if applicable.
  - Decrease the horizontal domain size, L and D
       - For some applications, the effect of a long domain can be approximated with periodic boundaries
  - Decrease output frequency using the `-dcsp` and `-dpng` options in the run script
+ - Suppress the largest output (`.csp` files) using the `-altionly` file in the run script
  - Find a faster processor (more RAM or a better hard drive may help, depending on your machine)
  - Identify and turn off unnecessary transitions
       - Set the transition rate to 0 in the parameter file, or
-      - Disable the transition in [src/models.c](src/models.c)
+      - Disable the transition in [src/models.c](../src/models.c)
       - This will modify the model's behavior and may not be suitable for some studies. Also, the model will have to be re-calibrated with the new set of transitions.
- - Try using AVX optimizations (see [docs/how_to_install.md](how_to_install.md) )
  - Try compiling with intel compiler vs gcc
- 
+
  We suspect that the largest performance gain would be obtained by replacing some stochastic cellular automaton transitions with deterministic transitions.
  This would reduce the frequency with which random numbers must be generated and random doublets must be selected.
 
- Such changes could be implemented in [src/models.c](src/models.c), though they would change the structure of rescal-snow significantly, and might introduce systematic biases in the grain motion.
- 
+ Such changes could be implemented in [src/models.c](../src/models.c), though they would change the structure of rescal-snow significantly, and might introduce systematic biases in the grain motion.
+
  ## Scaling experiments
- 
+
  Below are select scaling experiments. These are run with the configuration from the [snowfall example](../scripts/snowfall.run).
  'Wall time' is the time taken to reach t0=400. Each result is the average of 3 runs on a Intel Xeon E5-2695 v4 (full specs at [https://hpc.llnl.gov/hardware/platforms/Quartz](https://hpc.llnl.gov/hardware/platforms/Quartz)).
 
- 
+
  ### Effects of domain size on run time
- 
+
  The run-time of rescal-snow increases roughly linearly with both horizontal dimensions, D and L:
- 
+
  | L    | walltime (MM:SS) |
 |------|----------|
 | 150  | 06:29    |
@@ -85,9 +85,9 @@ In order of ease and likely effectiveness:
 | 100 | 12:30           |
 | 200 | 22:01           |
 | 400 | 47:20           |
- 
+
  The run-time is not very sensitive to changes in the vertical dimension H:
- 
+
  | H   | walltime |
 |-----|----------|
 | 50  | 12:30    |
@@ -112,4 +112,3 @@ For these experiments, H=100, L=300, D=100.
 | 2 (again)  | 12:47    |
 
 This shows that adding a second core creates only a 13% speedup, for a parallel efficiency of 54%.
- 

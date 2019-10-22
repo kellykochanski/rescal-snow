@@ -566,7 +566,10 @@ void lecture_mvt() {
     exit(-4);
   }
 
-  fread(CelMvt, sizeof(MvtField), CHLD, fp);
+  if ((int32_t)fread(CelMvt, sizeof(MvtField), CHLD, fp) != CHLD) {
+    ErrPrintf("Read error\n");
+    exit(-1);
+  }
 
   fclose(fp);
 

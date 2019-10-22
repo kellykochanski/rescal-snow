@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-__author__ = '''Gian-Carlo DeFazio'''
-__doc__ = '''This example is meant to test functionality 
-on slurm. This script can be called indirectly using sbatch.''' 
+__author__ = """Gian-Carlo DeFazio"""
+__doc__ = """This example is meant to test functionality of datarun.py
+on slurm. This script can be called indirectly using sbatch.
+More information is provided in the datarun tutorial in docs."""
 
 
 import datarun
@@ -67,9 +68,12 @@ if __name__ == '__main__':
     # will do a bunch of rescal runs with different random seeds
 
     # find the pmi_rank
+    # (This is the unique identifier of each run on a parallel cluster.
+    # It may have different names on different architectures.)
     if bool(os.environ.get('PMI_RANK', None)): 
     	pmi_rank = os.environ['PMI_RANK']
     else:
+        print("Warning: process identifier PMI_RANK not found. If this run is parallel, collisions may occur.")
         pmi_rank = 0
         # safe to make sure data_runs directory exists
         rescal_root = os.environ['RESCAL_SNOW_ROOT']

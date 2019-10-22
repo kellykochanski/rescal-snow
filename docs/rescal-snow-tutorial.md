@@ -76,10 +76,11 @@ This command will take a few minutes to run, and produces terminal output like:
 >> OMP_NUM_THREADS=1
 ```
 > *Nothing happening?*
+> This is a good sign - if something is wrong, Rescal-snow almost always crashes in the first few seconds. This simulation may take several minutes to run, depending on the speed of your machine.
 >
-> This is mostly a good sign - if something is wrong, rescal-snow almost always crashes in the first few seconds. The simulations, however, are computationally expensive, and may take an unreasonably long time to run on slower machines. 
-> If this is the case for you, we've put some tips for improving performance in [docs/performance_and_parallelization.md](performance_and_parallelization.md).
-> The output from rescal-snow is saved at regular intervals. You can view intermediate output while the simulation is still running, and you can stop the simulation (usually `Ctrl-C`) without losing that output. 
+> *Still nothing happening?*
+> In a separate terminal, look at the scripts directory (`ls scripts`). If the simulation has initiated successfully, you should see one or more files named `SNO0000X_t0.csp`, `genesis.log` and `rescal.log`. If you see these, the simulation is likely proceeding - slowly. You can stop the simulation whenever you see enough output for your purposes.
+> We've put some tips for improving performance in [docs/performance_and_parallelization.md](performance_and_parallelization.md).
 
 **Example 1 results**
 
@@ -119,6 +120,13 @@ You can run an example snow feature with sintering with:
 cd scripts
 ./sintering.run
 ```
+
+As we are running all the tutorials in the same `scripts` directory, it's important to delete old output to avoid mixing the output from two runs. The `sintering.run` command should prompt you to do this:
+```bash
+Deleting files of types *.(png|bin|csp|log|gz|data|vel|car) in current directory [n|y] and out directory ?
+y
+```
+Or you can do it manually with `./clean`.
 
 **Example 2 results**
 
@@ -164,6 +172,8 @@ We have set up a snowfall simulation in the scripts directory that you can run w
 ```bash
 cd scripts
 ./snowfall.run
+>> Deleting files of types *.(png|bin|csp|log|gz|data|vel|car) in current directory [n|y] and out directory ? 
+y
 ```
 Again, this run script calls a new parameter file:
 ```bash
@@ -189,23 +199,45 @@ diff snowfall.run snow_cone.run
 The snowfall example, above, produces png files among its outputs. Unfortunately, the default rescal-snow rendering does not capture the behavior of these dunes as well as it captured the cone; the falling snow obscures the surface (left-most picture in image below; airborne
 grains are red).
 
-To see the output clearly, we will make custom images with matplotlib (Python). We will make topographic maps showing the dunes' elevation. This data is output in scripts/out/ALTIxxxxx.log files.
+To see the output clearly, we will make custom images with matplotlib (Python). We will make topographic maps showing the dunes' elevation. This data is output in scripts/out/ALTIxxxxx.log files; their output frequency is controlled by the `-dcsp` flag in the run script.
 
 ## 4. Visualizing the simulation output <a name="visualizing"></a>
 
-We have included a script to recolor three example output frames from the snowfall simulation:
+The following python commands may be run (interactively, or as a script) to recolor three example output frames from the snowfall simulation:
 
-```bash
-cd docs/example_images/snowfall
-python recolor.py
+```python
+$ cd scripts
+$ python3
+import sys
+sys.path.append('utilities')    # Add utilities to Python path
+import os
+import matplotlib.pyplot as plt # Plotting
+import heightmap                # utilities/heightmap.py contains tools for reading and visualizing height maps (ALTI files)
+
+# Find the heightmap files to visualize. In this tutorial, they are named out/ALTIxxxxx.log.
+filenames = ['out/'+f for f in os.listdir('out') if f[:4]=='ALTI']
+filenames = [f for f in filenames if f[-4:]=='.log']
+filenames.sort()
+print(filenames)
+>> ['ALTI00000_t0.log', 'ALTI00001_t0.log', 'ALTI00002_t0.log', 'ALTI00003_t0.log', 'ALTI00004_t0.log', 'ALTI00005_t0.log', 'ALTI00006_t0.log', 'ALTI00007_t0.log', 'ALTI00008_t0.log', 'ALTI00009_t0.log', 'ALTI00010_t0.log', 'ALTI00011_t0.log', 'ALTI00012_t0.log', 'ALTI00013_t0.log', 'ALTI00014_t0.log', 'ALTI00015_t0.log', 'ALTI00016_t0.log', 'ALTI00017_t0.log', 'ALTI00018_t0.log', 'ALTI00019_t0.log', 'ALTI00020_t0.log', 'ALTI00021_t0.log', 'ALTI00022_t0.log', 'ALTI00023_t0.log', 'ALTI00024_t0.log', 'ALTI00025_t0.log', 'ALTI00026_t0.log', 'ALTI00027_t0.log', 'ALTI00028_t0.log', 'ALTI00029_t0.log', 'ALTI00030_t0.log']
+
+# Visualize the files. This may take a few seconds.
+for name in filenames:
+    # Read the file as a HeightMap object
+    hm  = heightmap.HeightMap(name)
+    # hm.draw                   # Uncomment to view each image as it is produced
+    hm.save_color_map(name[:-4] + '_image.png')
+    
+ exit()
+ $ eog out/*image.png           # View images 
 ```
-This produces the following images:
+This produces images like the following:
 
-| Default image, SNO00050_t0.png | ALTI00050_recolored.png | ALTI00100_recolored.png | ALTI00150_recolored.png |
+| Default image, SNO00050_t0.png | ALTI00005_t0_image.png | ALTI00015_t0_image.png | ALTI00025_t0_image.png |
 |-----------|----------------|------------|---------------|
-| ![](example_images/snowfall/SNO00050_t0.png) | ![](example_images/snowfall/ALTI00050_t0_recolored.png) | ![](example_images/snowfall/ALTI00100_t0_recolored.png) | ![](example_images/snowfall/ALTI00150_t0_recolored.png) |
+| ![](example_images/snowfall/SNO00005_t0.png) | ![](example_images/snowfall/ALTI00005_t0_image.png) | ![](example_images/snowfall/ALTI00015_t0_image.png) | ![](example_images/snowfall/ALTI00025_t0_image.png) |
 
-The full evolution of this simulation is shown in the gif at the top of [README.md](../README.md).
+The full evolution of this simulation, running for a longer time, is shown in the gif at the top of [README.md](../README.md).
 
 > Additional scripts for analysing and visualizing the runs are available in the scripts/utilities and analysis directories.
 
@@ -257,13 +289,13 @@ Each subdirectory contains the executables and input needed for a rescal-snow ru
 ls test_parallel_runs/tauMin0_lambdaI0.001
 >> genesis  real_data  rescal  run.par  run.run
 ```
-Running `./run.run` in this test_parallel_runs/tauMin0_lambdaI0.001 directory would begin a rescal-snow run (you may wish to test this now).
+Running `./run.run` in this test_parallel_runs/tauMin0_lambdaI0.001 directory would begin a rescal-snow run (you may wish to test this now; if you encounter permissions errors, run `chmod u+x *` in the same directory).
 
 The directory names list the run parameters. For example, test_paralle_runs/tauMin0\_lambdaI0.001 uses a snowfall rate of 0.001/t0, and has the highest possible wind strength (tauMin=0).
 The other nine subdirectories contain material for runs with different snowfall rates and wind strengths.
 
-We can submit all of these runs simultaneously using scripts/test_parallel_runs.msub (for Moab systems) or scripts/test_parallel_runs.sbatch (for slurm).
-These scripts contain #MSUB or #SBATCH commands describing the user's email, the queue, the resources in terms of nodes or processors, etc, e.g.:
+We can submit all of these runs simultaneously using scripts/run_parallel_rescal.msub (for Moab systems).
+These scripts contain `#MSUB` commands describing the user's email, the queue, the resources in terms of nodes or processors, etc, e.g.:
 ```bash
 #MSUB -q pbatch
 #MSUB -M yourname@yourserver.com
@@ -297,19 +329,21 @@ ls test_parallel_runs/tauMin0_lambdaI0.01/out
 >> ALTI00004_t0.log  DOUBLETS.log             TIME.log
 ```
 
-> *Troubleshooting tips for parallel runs*
+> *Troubleshooting for parallel runs*
 >
 > - msub/sbatch commands not allowed by your computing cluster 
->    -  seek support from someone familiar with the cluster, or use an example run script for your cluster as a template
+>    -  use an example run script for your cluster as a template, if available
+>    -  seek support from someone familiar with the cluster
 > - permissions errors 
->    - run `chmod u+rwx \*` in test_parallel_runs; contact administrator if this is disallowed
+>    - run `chmod u+rwx \*` in test_parallel_runs
+>    - contact administrator if this is disallowed
 > - script could not find input (run.run or run.par or sealevel_snow.prop) 
 >    - rerun param_space_exploration_example.py and confirm that it produced the output above
 >    - check that you're running msub/sbatch from scripts directory
 >    - check relative directory references in msub/sbatch script and submit.sh
 > - runs time out before producing useful output 
 >   - increase walltime
->   - reduce simulation domain size (parameters 'L' and 'D')
+>   - reduce simulation domain size (parameters 'L' and 'D' in `.par` file)
 >   - large simulations may run for many hours
 
 
@@ -321,13 +355,6 @@ The following phase diagram shows the 100th images produced by each of these run
 
 The runs with the higher snowfall rate have a much deeper average snow depth than the runs with lower snowfall rate.
 The runs with high wind speed (low Tau\_min) have less even snow cover, with better-defined ripples and dunes.
-
->*Parallel run errors?*
->
-> - msub/sbatch commands not allowed by your computing cluster -> seek support from someone familiar with the cluster
-> - permissions errors -> run `chmod u+rwx \*` in test_parallel_runs; contact administrator if this is disallowed
-> - script could not find input (run.run or run.par or sealevel_snow.prop) -> rerun param_space_exploration_example.py and confirm that it produced the output above; check that you're running msub/sbatch from scripts; check relative directory references in msub/sbatch script and submit.sh
-> - runs time out before producing useful output -> increase walltime; large simulations on slow machines may ultimately take a few hours
 
 ### Run ReSCAL within python <a name="python"></a>
 

@@ -1,11 +1,12 @@
-__author__ = '''Gian-Carlo DeFazio'''
+__author__ = """Gian-Carlo DeFazio"""
 
-__doc__ = r'''A python interface to ReSCAL. A DataRun object takes in the 
-parameters and meta-parameters required to run ReSCAL. The DataRun can receive and process
-the output of ReSCAL while ReSCAL is running.
-To run ReSCAL using a DataRun instance, the environment variable RESCAL_SNOW_ROOT
-should be defined and be the path of a ReSCAL installation. Also, a directory
-for the output should be created. The default is RESCAL_SNOW_ROOT/data_runs.'''
+__doc__ = r"""A python interface to Rescal-snow. A DataRun object takes in the 
+parameters and meta-parameters required to run Rescal-snow. The DataRun can receive and process
+the output of Rescal-snow while Rescal-snow is running.
+To run Rescal-snow using a DataRun instance, the environment variable RESCAL_SNOW_ROOT
+should be defined and be the path of a Rescal-snow installation. Also, a directory
+for the output should be created. The default is RESCAL_SNOW_ROOT/data_runs.
+"""
 
 import os
 import sys
@@ -18,8 +19,10 @@ import rescal_utilities
 
 
 def find_rescal_root(filename=None):
-    '''Tries to find RESCAL_SNOW_ROOT in the environment
-    and make it into an absolute path.'''
+    """
+    Tries to find RESCAL_SNOW_ROOT in the environment
+    and make it into an absolute path.
+    """
     if filename is None:
         if 'RESCAL_SNOW_ROOT' in os.environ:
             return os.path.expanduser(os.environ['RESCAL_SNOW_ROOT'])
@@ -35,13 +38,16 @@ def find_rescal_root(filename=None):
 
 
 class DataRun:
-    '''Run ReSCAL with the option to receive and process the output 
-    while ReSCAL is running. Save the processed output to a file.'''
+    """
+    Run ReSCAL with the option to receive and process the output 
+    while ReSCAL is running. Save the processed output to a file.
+    """
 
     def __init__(self, parameters, experiment_directory,
                  experiment_parent_directory='data_runs', rescal_root=None,
                  keep_height_maps=True, keep_ffts=True):
-        '''Collect and process the parameters for running ReSCAL and 
+        """
+        Collect and process the parameters for running ReSCAL and 
         processing its output. Set up the data structures to store ReSCAL outout.
         Determine where the executables and configuration files are or should be.
         For this initialization to work, the environment variable RESCAL_SNOW_ROOT 
@@ -79,7 +85,8 @@ class DataRun:
 
             keep_ffts -- will keep and write out the fft blur data created by 
             processing cell space outputs from ReSCAL.
-            (default True)'''
+            (default True)
+        """
 
         # set self.rescal_root using the environment or rescal_root argument
         # should be the parent directory of the ReSCAL src and scripts directories
@@ -138,8 +145,10 @@ class DataRun:
 
 
     def check_paths(self):
-        '''Verify that the files and directories that should already exist 
-        actually do exist.'''
+        """
+        Verify that the files and directories that should already exist 
+        actually do exist.
+        """
 
         dirs =  [self.rescal_root, self.scripts_directory,
                  self.real_data_directory, self.experiment_parent_directory,
@@ -157,8 +166,10 @@ class DataRun:
         
 
     def __str__(self):
-        '''A very generic __str__ that just gets everythiing that's not a built-in
-        or a method.'''
+        """
+        A very generic __str__ that just gets everythiing that's not a built-in
+        or a method.
+        """
         # get the attributes that matter
         # from stack-exchange
         # https://stackoverflow.com/questions/11637293/iterate-over-object-attributes-in-python
@@ -170,9 +181,11 @@ class DataRun:
     
     
     def setup(self):
-        '''Create the experiment directory and the .par file. Create the .csp input 
+        """
+        Create the experiment directory and the .par file. Create the .csp input 
         using genesis if neccesary. Deal with the file path to real_data.
-        Get the args for the call to rescal.'''
+        Get the args for the call to rescal.
+        """
 
         # some files and directories should alreay exist
         self.check_paths()
@@ -203,7 +216,7 @@ class DataRun:
         self.parameters['Output_directory'] = os.path.join(self.experiment_directory, 'out')
                 
         # create a run with the given parameters
-        design = rescal_utilities.Design_a_run()
+        design = rescal_utilities.DesignRun()
         design.set_parameters(self.parameters)
 
         # find file paths that are in the real data folder and fix them
@@ -233,10 +246,12 @@ class DataRun:
         
             
     def receive_process_data(self):
-        '''Get the data size, which will be in a 4 byte integer.
+        """
+        Get the data size, which will be in a 4 byte integer.
         Get the data itself. Create a cellspace.CellSpace to
         process the data and keep the height_maps and ffts 
-        based on flags.'''
+        based on flags.
+        """
 
         # either block because there's nothing to read,
         # read the next .csp,
@@ -257,19 +272,23 @@ class DataRun:
 
         
     def write_meta_data(self):
-        '''Write the rescal parameters and execuation call to a file
-        in the experiment directory.'''
+        """
+        Write the rescal parameters and execuation call to a file
+        in the experiment directory.
+        """
         with open(self.meta_data, 'w+') as f:
             f.write('parameters = ' + str(self.parameters) + '\n')
             f.write('exec = ' + str(self.rescal_args) + '\n')
 
 
     def run_simulation(self):
-        '''Run ReSCAL and get the cellspace data
+        """
+        Run ReSCAL and get the cellspace data
         that would otherwise be written to a file. Process and save the data
         to files and write out the meta-data. A new file descriptor is used,
         as opposed to just redirecting the stdot of ReSCAL, because the stdout
-        of ReSCAL is full of text output that this function doesn't deal with.'''
+        of ReSCAL is full of text output that this function doesn't deal with.
+        """
 
         # setup pipe to rescal
         r,w = os.pipe()
@@ -316,7 +335,7 @@ class DataRun:
         
 
     def run_without_piping(self):
-        '''Do a rescal run that saves data to files like normal.'''
+        """Do a rescal run that saves data to files like normal."""
         rescal = subprocess.Popen(self.rescal_args,
                                   cwd=self.experiment_directory,
                                   stdout=subprocess.DEVNULL)

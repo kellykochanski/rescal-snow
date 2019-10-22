@@ -1,11 +1,11 @@
-__doc__ = '''Utilities to read, write, modify, and visualize rescal-snow cell spaces.'''
 __author__ = 'Gian-Carlo DeFazio'
 __date__ = 'August 16 2019'
+__doc__ = r"""Utilities to read, write, modify and visualize Rescal-snow cell spaces, the full state of the cellular automaton. Managed through CellSpace class. Used by datarun.py. May be used for visualizing and modifying internal sand/snow structures that are not adequately represented by 2D HeightMaps."""
 
-import matplotlib
 import sys
 import os
-# Matplotlib will fail if no display is available (e.g. many high-performance computing environments)
+import matplotlib
+# Matplotlib will fail if no display is available (as in many high-performance computing environments)
 if bool(os.environ.get('DISPLAY', None)) == False:
 	matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -14,7 +14,6 @@ import numpy as np
 import random
 import gzip
 import scipy.ndimage
-import random
 
 import heightmap
 
@@ -52,9 +51,11 @@ cell_types = {
 
 
 def in_bounds(base, overlay, position):
-    '''Evaluates if overlay can be placed onto base at 
+    """
+    Evaluates if overlay can be placed onto base at 
     position. position is the coordinates of base on which the top left 
-    corner of overlay is placed.'''
+    corner of overlay is placed.
+    """
     # verify that the dimensions match
     if base.ndim != len(position):
         return False
@@ -81,7 +82,9 @@ def in_bounds(base, overlay, position):
 
 
 def non_border(a):
-    '''Get a slice of a that excludes border cells.'''
+    """
+    Get a slice of a 1D array that excludes border cells.
+    """
     # the stuff we care about has states 0,1,2,3
     valid = np.nonzero(a < 4)[0]
     return a[valid[0]: valid[-1]+1]
@@ -89,7 +92,7 @@ def non_border(a):
 
 # replaced with find_air_or_mobile
 def surface_position(a):
-    '''find index of first solid sand starting from the top.'''
+    """find index of first solid sand starting from the top."""
     sand_indices = np.nonzero(a == 0)[0]
     if sand_indices.size > 0:
         return sand_indices[0]
@@ -98,6 +101,9 @@ def surface_position(a):
 
 
 def find_air_or_mobile(column):
+    """Find the height of solid cells (not air, EAU/EAUC, or mobile grains, GRJ) above one point (column) in the cellspace.
+    This is found by counting down from the upper boundary until a non-air/mobile grain is hit.
+    """
     air_indices = np.nonzero(column == 3)[0]
     mobile_sand_indices = np.nonzero(column == 1)[0]
 
@@ -112,8 +118,10 @@ def find_air_or_mobile(column):
 
 
 def shift_fill(a, shift, fill=0):
-    '''Shift an array to the right by shift and fill in with fill value.
-    If shift value is negative, the shift will be to the left.'''
+    """
+    Shift an array to the right by shift and fill in with fill value.
+    If shift value is negative, the shift will be to the left.
+    """
     # nothing to do
     if shift == 0:
         pass
@@ -130,9 +138,11 @@ def shift_fill(a, shift, fill=0):
     
 
 def change_surface_level(column, delta):
-    '''Given a column in the 3D cellspace, modify the sand height by delta.
+    """
+    Given a column in the 3D cellspace, modify the sand height by delta.
     Clip at the boundaries of the space. Try to keep mobile sand by moving it with
-    the surface.'''
+    the surface.
+    """
 
     # if nothing to do, do nothing
     if delta == 0:
@@ -164,13 +174,15 @@ def change_surface_level(column, delta):
 
 
 class CellSpace:
-    '''A snow-rescal cell space representation. This class deals with the .csp files
+    """
+    A snow-rescal cell space representation. This class deals with the .csp files
     made by rescal and genesis. The .csp files contain a header followed by the 3D space
-    of cells as a 1D array.'''
+    of cells as a 1D array.
+    """
 
-    
     def __init__(self, filename):
-        '''read in a .csp or .csp.gz file and create a CellSpace instance
+        """
+        read in a .csp or .csp.gz file and create a CellSpace instance
         to represent the file contents. filename can also be a bytearray object
         that contains the contents of a .csp file.
 
@@ -193,7 +205,8 @@ class CellSpace:
 
         output_file: the default output file name to write to
         height_map: a heightmap.HeightMap instance with the height data
-        dims_2d: the dimensions of the corresponding height map'''
+        dims_2d: the dimensions of the corresponding height map
+        """
             
         # determine if data is in a file or is already bytes
         if isinstance(filename, bytes):
@@ -214,7 +227,7 @@ class CellSpace:
 
 
     def _get_cell_data_type(self):
-        '''get correct data type depending on cell size'''
+        """get correct data type depending on cell size"""
         data_type = None
         if self.cell_size == 8:
             data_type = np.uint64
@@ -230,15 +243,17 @@ class CellSpace:
 
 
     def dims_2d(self):
-        '''Get the dimensions of a height map for cell.'''
+        """Get the dimensions of a height map for cell."""
         d, _, l = self.cells.shape
         return d,l
     
 
     def _read(self, bs=None):
-        '''read in the file contents and store the data in a ndarray.
+        """
+        read in the file contents and store the data in a ndarray.
         store the header both as python variables, but also in the original binary
-        form from the input file.'''
+        form from the input file.
+        """
 
         if bs is None:
             f = None
@@ -279,7 +294,8 @@ class CellSpace:
     # TODO deal with 'TIME'
     # TODO should all the chunk size checks be 12? I think not.
     def _read_header(self, bs):
-        '''Read the .csp header and store the pertinent values
+        """
+        Read the .csp header and store the pertinent values
 
         The parts of the header that are used are organized as follows:
 
@@ -328,7 +344,8 @@ class CellSpace:
             [8-11]    i  the height H <<some_number>>
             [12-15]   i  the length L <<some_number>>
             [16-19]   i  the depth  D <<some_number>>
-            [20-23]   i  flag to say if thses values should be used. 1 if yes, 0 if no.'''
+            [20-23]   i  flag to say if thses values should be used. 1 if yes, 0 if no.
+        """
 
         b0_19 = 'B3s2scci4si'
         model_chunk = 'i4s3sB'
@@ -401,8 +418,10 @@ class CellSpace:
 
 
     def _overwrite_lsbs(self):
-        '''creates cells that are identical to those read in (self.cells_original) except
-        for the lsb which is rewritten with the values in self.cells.'''
+        """
+        creates cells that are identical to those read in (self.cells_original) except
+        for the lsb which is rewritten with the values in self.cells.
+        """
         # expand bytes to type read in from the input file
         bytes_expanded = self.cells.astype(self.cells_original.dtype)
         mask = np.array([0xffffffffffffff00]).astype(self.cells_original.dtype)
@@ -411,14 +430,15 @@ class CellSpace:
 
 
     def restore_original_cells(self):
-        '''restore self.cells to its orginal value.'''
+        """restore self.cells to its orginal value."""
         self.cells = self.cells_original.astype(np.uint8)
     
 
     # writes a .csp file
     # if no filename is given, the input file name is used
     def write(self, filename=None, compressed=False):
-        ''' write the CellSpace to a file in the .csp format
+        """
+        write the CellSpace to a file in the .csp format
 
         keyword arguments:
             filename --   the name of the file to write to.
@@ -447,7 +467,8 @@ class CellSpace:
             compressed=True will write to a file that has the same
             name as the input but with '.gz' added. 'input.csp' is not overwritten
             and 'input.csp.gz' is written or overwritten.
-                c.write(compressed=True)'''
+                c.write(compressed=True)
+        """
 
         if filename is None:
             if self.output_file is None:
@@ -470,8 +491,8 @@ class CellSpace:
                self._overwrite_lsbs().tofile(f)
 
 
-    # checks if a point is in the cell space
     def _in_cell_space(self, point):
+        """checks if a point is in the cell space"""
         if len(point) != self.cells.ndim:
             return False
         for i, dim in zip(point, self.cells.shape):
@@ -480,17 +501,19 @@ class CellSpace:
         return True
 
 
-    # takes in csp column and makes a height map
-    # find the first location of an air cell
     def _find_air(self, column):
+        """
+        takes in csp column and makes a height map
+        find the first location of an air cell
+        """
         air_indices = np.where(column == 3)[0]
         if air_indices.size > 0:
             return air_indices[-1]
         else:
             return np.array([0])
 
-    # takes in csp column and makes a height map
     def _find_air_or_mobile(self, column):
+        """takes in csp column and makes a height map"""
         air_indices = np.nonzero(column == 3)[0]
         mobile_sand_indices = np.nonzero(column == 1)[0]
 
@@ -504,17 +527,19 @@ class CellSpace:
             return 0
 
         
-    # creates a surface map
-    # like an inverted and offset heightmap, gives the positions
-    # of the air cells at the surface of the sand
-    # really it is just the air cell in each column with the highest
-    # index (and idices start at the physical top)
     def make_surface_map(self):
+        """
+        creates a surface map
+        like an inverted and offset heightmap, gives the positions
+        of the air cells at the surface of the sand
+        really it is just the air cell in each column with the highest
+         index (and idices start at the physical top)
+         """
         self.surface_map = np.apply_along_axis(self._find_air_or_mobile, 1, self.cells)
 
 
-    # make a HeightMap object
     def make_height_map(self):
+        """make a HeightMap object"""
         self.make_surface_map()
         height_map = self.cells.shape[1] - 1 - self.surface_map
         self.height_map = heightmap.HeightMap(height_map)
@@ -525,15 +550,15 @@ class CellSpace:
     ########################################
 
 
-    # add sand grain at (depth, surface_map[depth, length], length)]
     def add_sand(self, depth, length):
+        """add sand grain at (depth, surface_map[depth, length], length)]"""
         # get surface map or immobile sand
         sm = self.surface_map
         height = sm[depth, length]
         self.cells[depth, height, length] = cell_types['grain']
 
-    # adds a randomly placed grain of sand to the surface
     def add_sand_random(self):
+        """adds a randomly placed grain of sand to the surface"""
         d, _, l = self.cells.shape
         depth = random.randint(0,d)
         length = random.randint(0,l)
@@ -541,7 +566,7 @@ class CellSpace:
 
 
     def add_height_map(self, height_map, top_left_corner=(0,0)):
-        # verify that the height_map can be placed at top_left
+        """verify that the height_map can be placed at top_left"""
         if not in_bounds(self.cells[:,0,:], height_map, top_left_corner):
             # TODO raise an exception, bad input
             return
@@ -559,15 +584,17 @@ class CellSpace:
                 
 
     def add_height(self, height):
-        '''Raise the entire surface level by height.
-        If height is negative surface level will lower.'''
+        """
+        Raise the entire surface level by height.
+        If height is negative surface level will lower.
+        """
         # create heightmap of height
         h = np.full(self.dims_2d, height)
         self.add_height_map(h)
                 
                         
     def add_sinusoid(self, amplitude=5, frequency=10, phase=0, wind_direction=True):
-        '''Superimposes a sinusoidal wave onto the surface of the cell space.'''
+        """Superimposes a sinusoidal wave onto the surface of the cell space."""
         # create a 2D heightmap that will be superimposed onto the surface
         sinusoid_height_map = heightmap.make_sinusoid(amplitude, frequency, self.dims_2d, phase=phase)
         self.add_height_map(sinusoid_height_map)
@@ -581,20 +608,20 @@ class CellSpace:
 
 
     def draw_height_map(self):
-        '''updates and draws height_map'''
+        """updates and draws height_map"""
         self.make_height_map()
         self.height_map.draw()
 
 
     def draw_surface_map(self):
-        '''updates and draws surface_map'''
+        """updates and draws surface_map"""
         self.make_surface_map()
         plt.imshow(self.surface_map.astype(np.float32))
         plt.colorbar()
         plt.show()
 
     def draw_fft_blur(self):
-        '''updates and draws the fft of the height_map'''
+        """updates and draws the fft of the height_map"""
         self.make_height_map()
         self.height_map.draw_fft_blur()
 
